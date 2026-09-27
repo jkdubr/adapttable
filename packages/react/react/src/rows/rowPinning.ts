@@ -12,11 +12,12 @@
  * first and bottom pins last.
  */
 import {
-  applyRowPin,
-  type ControllableStoreOptions,
+  commitRowPin,
+  ROW_PIN_STORE_OPTIONS,
   type RowAction,
+  rowPinActions,
+  type RowPinLabels,
   rowPinSideOf,
-  sameRowPins,
 } from "@adapttable/core";
 import { useCallback, useMemo } from "react";
 
@@ -24,6 +25,12 @@ import { useControllableStore } from "../hooks/useControllableStore";
 import { useEventCallback } from "../hooks/useEventCallback";
 
 export { applyRowPin, partitionPinnedRows } from "@adapttable/core";
+export {
+  PIN_BOTTOM_ACTION_KEY,
+  PIN_TOP_ACTION_KEY,
+  type RowPinLabels,
+  UNPIN_ROW_ACTION_KEY,
+} from "@adapttable/core";
 export { rowPinSignature } from "@adapttable/core/binding";
 
 /**
@@ -53,39 +60,6 @@ export interface RowPinState {
 export const EMPTY_ROW_PIN_STATE: RowPinState = { top: [], bottom: [] };
 
 /**
- * Synthesized "Pin to top" action.
- *
- * @public
- */
-export const PIN_TOP_ACTION_KEY = "adapttable:pin-row-top";
-/**
- * Synthesized "Pin to bottom" action.
- *
- * @public
- */
-export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
-/**
- * Synthesized "Unpin" action.
- *
- * @public
- */
-export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
-
-/**
- * Labels the pin actions and the live region need.
- *
- * @public
- */
-export interface RowPinLabels {
-  /** Pin the row to the top. */
-  pinToTop: string;
-  /** Pin the row to the bottom. */
-  pinToBottom: string;
-  /** Return the row to the scroll area. */
-  unpinRow: string;
-}
-
-/**
  * Headless pin state adapters read.
  *
  * @public
@@ -102,11 +76,6 @@ export interface RowPinningState<TRow> {
   /** Pin actions, hidden per row so a top-pinned row does not offer Pin to top. */
   actions: readonly RowAction<TRow>[];
 }
-
-/** A commit that leaves the lists as they are changes nothing. */
-const PIN_STORE_OPTIONS: ControllableStoreOptions<RowPinState> = {
-  equals: sameRowPins,
-};
 
 /**
  * Headless row pinning. Inert until the host passes `enabled`;
@@ -125,16 +94,14 @@ export function useRowPinning<TRow>(options: {
   const [state, store] = useControllableStore<RowPinState>(
     () => EMPTY_ROW_PIN_STATE,
     { value: options.pinnedRowIds, onChange: options.onPinnedRowIdsChange },
-    PIN_STORE_OPTIONS
+    ROW_PIN_STORE_OPTIONS
   );
 
   const pin = useEventCallback((rowId: string, side: RowPinSide) => {
-    if (enabled) store.update((current) => applyRowPin(current, rowId, side));
+    commitRowPin(store, enabled, rowId, side);
   });
   const unpin = useEventCallback((rowId: string) => {
-    if (enabled) {
-      store.update((current) => applyRowPin(current, rowId, undefined));
-    }
+    commitRowPin(store, enabled, rowId, undefined);
   });
 
   const sideOf = useCallback(
@@ -144,35 +111,11 @@ export function useRowPinning<TRow>(options: {
 
   const getRowId = useEventCallback(options.getRowId);
 
-  const actions = useMemo<readonly RowAction<TRow>[]>(() => {
-    if (!enabled) return [];
-    return [
-      {
-        key: PIN_TOP_ACTION_KEY,
-        label: labels.pinToTop,
-        isHidden: (row) => sideOf(getRowId(row)) === "top",
-        onClick: (row) => {
-          pin(getRowId(row), "top");
-        },
-      },
-      {
-        key: PIN_BOTTOM_ACTION_KEY,
-        label: labels.pinToBottom,
-        isHidden: (row) => sideOf(getRowId(row)) === "bottom",
-        onClick: (row) => {
-          pin(getRowId(row), "bottom");
-        },
-      },
-      {
-        key: UNPIN_ROW_ACTION_KEY,
-        label: labels.unpinRow,
-        isHidden: (row) => sideOf(getRowId(row)) === undefined,
-        onClick: (row) => {
-          unpin(getRowId(row));
-        },
-      },
-    ];
-  }, [enabled, getRowId, labels, pin, sideOf, unpin]);
+  const actions = useMemo<readonly RowAction<TRow>[]>(
+    () =>
+      enabled ? rowPinActions({ labels, getRowId, sideOf, pin, unpin }) : [],
+    [enabled, getRowId, labels, pin, sideOf, unpin]
+  );
 
   return useMemo(
     () => ({ state, sideOf, pin, unpin, actions }),

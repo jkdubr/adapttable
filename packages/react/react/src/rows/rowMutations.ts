@@ -14,7 +14,11 @@
  * hideable and end-pinnable with the actions column, and confirmable through
  * the same dialog a host's own destructive action uses.
  */
-import type { RowAction, TableLabels } from "@adapttable/core";
+import {
+  type RowAction,
+  rowMutationActions,
+  type TableLabels,
+} from "@adapttable/core";
 import { useMemo } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
@@ -81,18 +85,10 @@ export interface UseRowMutationsOptions<
   labels: Required<TableLabels>;
 }
 
-/**
- * The key of the synthesized duplicate action.
- *
- * @public
- */
-export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
-/**
- * The key of the synthesized delete action.
- *
- * @public
- */
-export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
+export {
+  DELETE_ROW_ACTION_KEY,
+  DUPLICATE_ROW_ACTION_KEY,
+} from "@adapttable/core";
 
 /**
  * Headless add / duplicate / delete wiring.
@@ -126,43 +122,25 @@ export function useRowMutations<TRow>(
   const confirmDelete = confirmDeleteRow !== false;
   const { duplicateRow, deleteRow, deleteRowConfirm } = labels;
 
-  const actions = useMemo<readonly RowAction<TRow>[]>(() => {
-    const built: RowAction<TRow>[] = [];
-    if (canDuplicate) {
-      built.push({
-        key: DUPLICATE_ROW_ACTION_KEY,
-        label: duplicateRow,
-        onClick: duplicate,
-      });
-    }
-    if (canDelete) {
-      built.push({
-        key: DELETE_ROW_ACTION_KEY,
-        label: deleteRow,
-        // The kits' destructive token — the same one a host's own delete uses.
-        color: "red",
-        onClick: remove,
-        confirm: confirmDelete
-          ? {
-              title: deleteRow,
-              message: () => deleteRowConfirm,
-              confirmLabel: deleteRow,
-              danger: true,
-            }
-          : undefined,
-      });
-    }
-    return built;
-  }, [
-    canDuplicate,
-    canDelete,
-    confirmDelete,
-    duplicate,
-    remove,
-    duplicateRow,
-    deleteRow,
-    deleteRowConfirm,
-  ]);
+  const actions = useMemo<readonly RowAction<TRow>[]>(
+    () =>
+      rowMutationActions({
+        duplicate: canDuplicate ? duplicate : undefined,
+        remove: canDelete ? remove : undefined,
+        confirmDelete,
+        labels: { duplicateRow, deleteRow, deleteRowConfirm },
+      }),
+    [
+      canDuplicate,
+      canDelete,
+      confirmDelete,
+      duplicate,
+      remove,
+      duplicateRow,
+      deleteRow,
+      deleteRowConfirm,
+    ]
+  );
 
   return useMemo(
     () => ({ canAdd, addRow, actions }),

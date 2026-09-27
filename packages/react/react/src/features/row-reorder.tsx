@@ -7,14 +7,9 @@
  * this module.
  */
 import {
-  resolveRowMove,
-  rowMoveMenu,
-  type RowMoveRequest,
-  type RowMoveView,
-  rowReorderAnnouncements,
   type RowReorderOptions,
+  rowReorderRuntimeOptions,
 } from "@adapttable/core";
-import type { TableRuntimeView } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { type RowReorderHandler, useRowReorder } from "../rows/rowReorder";
@@ -32,17 +27,6 @@ interface RowReorderFeature<TRow> extends TableFeature<TRow> {
   readonly options?: RowReorderOptions<TRow>;
 }
 
-/** The runtime view, narrowed to the grouped and tree shapes a move reads. */
-function moveView(view: TableRuntimeView<unknown>): RowMoveView<unknown> {
-  return {
-    getRowId: view.getRowId,
-    rowLabel: view.rowLabel,
-    sortBy: view.sortBy,
-    grouping: view.grouping as RowMoveView<unknown>["grouping"],
-    tree: view.tree as RowMoveView<unknown>["tree"],
-  };
-}
-
 /**
  * One stable component for every `rowReorder(fn)` call — the handler arrives
  * on the feature, so calling the factory inline never remounts a drag.
@@ -53,48 +37,9 @@ function RowReorderProvider({
 }: Readonly<FeatureProviderProps>): ReactNode {
   const { onRowReorder, options } = feature as RowReorderFeature<unknown>;
   const runtime = useTableRuntime();
-  const labels = rowReorderAnnouncements(() => runtime.labels());
-  const state = useRowReorder<unknown>({
-    enabled: true,
-    onRowReorder,
-    movePolicy: options?.movePolicy,
-    confirmMove: options?.confirmMove,
-    onRowMove: (request: RowMoveRequest<unknown>) => {
-      if (request.kind === "group") {
-        options?.onGroupMove?.(
-          request.row,
-          request.fromGroup,
-          request.toGroup,
-          request.position
-        );
-      } else {
-        options?.onTreeMove?.(
-          request.row,
-          request.fromParent,
-          request.toParent,
-          request.position
-        );
-      }
-    },
-    getMoveMenu: (row) => {
-      const view = runtime.view();
-      if (!view) return undefined;
-      return rowMoveMenu(moveView(view), row, options, labels);
-    },
-    resolveMove: (row, target, position) => {
-      const view = runtime.view();
-      if (!view) return undefined;
-      return resolveRowMove(
-        moveView(view),
-        { row, target, position },
-        options,
-        labels
-      );
-    },
-    labels,
-    rowAt: (localIndex) => runtime.rowAt(localIndex),
-    getRowId: (row) => runtime.view()?.getRowId(row) ?? "",
-  });
+  const state = useRowReorder<unknown>(
+    rowReorderRuntimeOptions(runtime, onRowReorder, options)
+  );
   return (
     <FeatureStateScope stateKey={ROW_REORDER} value={state}>
       {children}

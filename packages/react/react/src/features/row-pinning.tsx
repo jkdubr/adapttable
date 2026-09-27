@@ -5,7 +5,15 @@
  * that never imports it never carries those hooks. They mount in-tree
  * through {@link PINNING_LIVE}.
  */
-import { ACTIONS_COLUMN_KEY, devWarn } from "@adapttable/core";
+import {
+  ACTIONS_COLUMN_KEY,
+  devWarn,
+  rowPinningBlockedWarning,
+  rowPinningControl,
+  rowPinningRequested,
+  rowPinningUrlSync,
+  withRowPinActions,
+} from "@adapttable/core";
 import { type ReactNode, useEffect } from "react";
 
 import {
@@ -28,12 +36,10 @@ function useLiveRowPinning<TRow>(options: {
   labels: RowPinLabels;
 }): RowPinningState<TRow> | undefined {
   const { requested, blocked, labels } = options;
+  const warning = rowPinningBlockedWarning(requested, blocked);
   useEffect(() => {
-    if (!requested || !blocked) return;
-    devWarn(
-      "row pinning is ignored while grouping or a tree is armed — pin a flat list, not a nested one."
-    );
-  }, [blocked, requested]);
+    if (warning !== undefined) devWarn(warning);
+  }, [warning]);
   const enabled = requested && !blocked;
   const state = useRowPinning<TRow>({
     enabled,
@@ -50,27 +56,23 @@ function LivePinning({
   props,
   children,
 }: ChromeExtraSlotProps<never>): ReactNode {
-  const requested =
-    props.rowPinningArmed === true ||
-    props.pinnedRowIds !== undefined ||
-    props.onPinnedRowIdsChange !== undefined;
+  const requested = rowPinningRequested(props);
   const pinUrl = useRowPinningUrlState({
     urlAdapter: props.urlAdapter,
-    urlSync:
-      props.urlSync !== false && requested && props.pinnedRowIds === undefined,
+    urlSync: rowPinningUrlSync({
+      urlSync: props.urlSync,
+      requested,
+      pinnedRowIds: props.pinnedRowIds,
+    }),
     urlKey: props.urlKey,
   });
-  const pinnedRowIds = requested
-    ? (props.pinnedRowIds ?? pinUrl.pinnedRowIds)
-    : undefined;
-  const onPinnedRowIdsChange = requested
-    ? (next: RowPinState) => {
-        if (props.pinnedRowIds === undefined) {
-          pinUrl.onPinnedRowIdsChange(next);
-        }
-        props.onPinnedRowIdsChange?.(next);
-      }
-    : undefined;
+  const { pinnedRowIds, onPinnedRowIdsChange } = rowPinningControl({
+    requested,
+    pinnedRowIds: props.pinnedRowIds,
+    onPinnedRowIdsChange: props.onPinnedRowIdsChange,
+    urlPinnedRowIds: pinUrl.pinnedRowIds,
+    writeUrl: pinUrl.onPinnedRowIdsChange,
+  });
   const rowPinning = useLiveRowPinning({
     requested,
     blocked: chrome.groupingArmed || chrome.treeShaped,
@@ -83,21 +85,20 @@ function LivePinning({
       unpinRow: chrome.table.labels.unpinRow,
     },
   });
-  const hasAnyActions = chrome.hasRowActions || rowPinning !== undefined;
-  const actionsHidden = chrome.columnLayout.isHidden(ACTIONS_COLUMN_KEY);
-  const pins = rowPinning?.actions ?? [];
   // Pin entries ride the same trailing column as the host's row actions, so
   // they are appended rather than given a column of their own.
-  const withPins =
-    pins.length === 0
-      ? chrome.rowActions
-      : [...(chrome.rowActions ?? []), ...pins];
-  const rowActions = actionsHidden || !hasAnyActions ? undefined : withPins;
+  const { rowActions, hasRowActions } = withRowPinActions({
+    rowActions: chrome.rowActions,
+    hasRowActions: chrome.hasRowActions,
+    pinning: rowPinning !== undefined,
+    pins: rowPinning?.actions ?? [],
+    actionsHidden: chrome.columnLayout.isHidden(ACTIONS_COLUMN_KEY),
+  });
   return children({
     ...chrome,
     rowPinning,
     rowActions,
-    hasRowActions: hasAnyActions,
+    hasRowActions,
   });
 }
 

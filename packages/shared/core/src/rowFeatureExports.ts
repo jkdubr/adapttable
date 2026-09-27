@@ -51,6 +51,29 @@ export {
   advanceGroupPaging,
   createGroupPagingController,
 } from "./grouping/groupPaging";
+export type { MergedRowActions, RowPinLabels } from "./rows/rowActionsRuntime";
+export {
+  commitRowPin,
+  DELETE_ROW_ACTION_KEY,
+  DUPLICATE_ROW_ACTION_KEY,
+  PIN_BOTTOM_ACTION_KEY,
+  PIN_TOP_ACTION_KEY,
+  ROW_PIN_STORE_OPTIONS,
+  rowMutationActions,
+  rowPinActions,
+  rowPinningBlockedWarning,
+  rowPinningControl,
+  rowPinningRequested,
+  rowPinningUrlSync,
+  UNPIN_ROW_ACTION_KEY,
+  withRowMutationActions,
+  withRowPinActions,
+} from "./rows/rowActionsRuntime";
+export {
+  dispatchRowMove,
+  rowMoveView,
+  rowReorderRuntimeOptions,
+} from "./rows/rowReorderRuntime";
 export type {
   LazyChildrenController,
   LazyChildrenOptions,
