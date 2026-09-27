@@ -69,6 +69,7 @@ import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FetchAllExport } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
+import { FilterFormSource } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
 import { FilterType } from '@adapttable/core';
@@ -447,8 +448,7 @@ export { FetchAllExport }
 
 export { FilterDef }
 
-// @public
-export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
+export { FilterFormSource }
 
 export { FilterOption }
 

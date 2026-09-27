@@ -34,6 +34,16 @@ export interface ActiveFilterChip {
 }
 
 // @public
+export function activeFilterChips(input: ActiveFilterChipsOptions): ActiveFilterChip[];
+
+// @public
+export interface ActiveFilterChipsOptions {
+    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
+    readonly onChange: (key: string, next: FilterValue) => void;
+    readonly values: Readonly<Record<string, FilterValue>>;
+}
+
+// @public
 export function addAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, operationId: string): Readonly<Partial<Record<string, string>>>;
 
 // @public
@@ -372,7 +382,20 @@ export interface BodyRowEntry<TRow> {
 }
 
 // @public
+export type BooleanChoice = "" | "true" | "false";
+
+// @public
 export function booleanDraft(checked: boolean): string;
+
+// @public
+export interface BooleanFieldWidget {
+    choice: BooleanChoice;
+    label: string;
+    write: (next: BooleanChoice) => void;
+}
+
+// @public
+export function booleanFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">): BooleanFieldWidget;
 
 // @public
 export function buildBodyCells<TRow>(options: {
@@ -712,6 +735,46 @@ export type CellValidator<TRow> = (value: unknown, row: TRow) => string | undefi
 export function cellValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, locale?: string): unknown;
 
 // @public
+export const CHECKLIST_ITEM_HEIGHT = 28;
+
+// @public
+export const CHECKLIST_ITEM_WIDTH = 200;
+
+// @public
+export const CHECKLIST_LIST_HEIGHT = 240;
+
+// @public
+export const CHECKLIST_OPTION_GAP = 8;
+
+// @public
+export const CHECKLIST_VIRTUALIZE_AT = 40;
+
+// @public
+export interface ChecklistActions {
+    readonly clear: () => void;
+    readonly selectAllVisible: () => void;
+    readonly toggle: (value: string, on: boolean) => void;
+}
+
+// @public
+export function checklistActions<TRow>(def: FilterDef<TRow>, source: Pick<ChecklistSource<TRow>, "extra" | "setExtra">, visible: readonly ChecklistValue[]): ChecklistActions;
+
+// @public
+export function checklistColumnsAcross(width: number): number;
+
+// @public
+export interface ChecklistItems {
+    readonly available: boolean;
+    readonly items: readonly ChecklistValue[];
+}
+
+// @public
+export function checklistItems<TRow>(def: FilterDef<TRow>, source: Pick<ChecklistSource<TRow>, "allFilteredRows" | "extra" | "facets">): ChecklistItems;
+
+// @public
+export type ChecklistSource<TRow> = Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">;
+
+// @public
 export interface ChecklistValue {
     count: number;
     label: string;
@@ -719,7 +782,21 @@ export interface ChecklistValue {
 }
 
 // @public
+export interface ChecklistWindow {
+    end: number;
+    padBottom: number;
+    padTop: number;
+    start: number;
+}
+
+// @public
+export function checklistWindow(count: number, scrollTop: number, width: number): ChecklistWindow;
+
+// @public
 export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
+
+// @public
+export function chipValuesOf(extra: ExtraFilters, labels: Readonly<Record<string, ChipLabelResolver>>): Record<string, FilterValue>;
 
 // @public
 export function clampedPage(page: number, limit: number, total: number): number | undefined;
@@ -779,6 +856,9 @@ export interface CollectFeatureNoticesInput<TRow = unknown> {
 // @public
 export type ColorScheme = "light" | "dark" | "auto";
 
+// @public
+export const COLUMN_DND_MIME = "application/x-adapttable-column";
+
 // @public @deprecated
 export const COLUMN_GROUP_ID_SEP: typeof COLUMN_GROUP_ID_SEP_2;
 
@@ -792,6 +872,9 @@ export const COLUMN_GROUP_STUB_PREFIX: typeof COLUMN_GROUP_STUB_PREFIX_2;
 export const COLUMN_GROUP_STUB_WIDTH: typeof COLUMN_GROUP_STUB_WIDTH_2;
 
 // @public
+export const COLUMN_LAYOUT_STORE_OPTIONS: ControllableStoreOptions<ColumnLayoutState>;
+
+// @public
 export function columnAggregationSignature<TRow>(column: ColumnMetadata<TRow>): string;
 
 // @public
@@ -799,6 +882,29 @@ export interface ColumnAiOptions {
     description?: string;
     examples?: readonly unknown[];
     sample?: boolean;
+}
+
+// @public
+export function columnDragAllowed(target: ColumnDragTarget | null): boolean;
+
+// @public
+export interface ColumnDragRowAttrs {
+    "data-dragging"?: "";
+    "data-drop"?: "before" | "after";
+}
+
+// @public
+export function columnDragRowAttrs(drag: ColumnDragSource | null, overIndex: number | null, key: string, index: number): ColumnDragRowAttrs;
+
+// @public
+export interface ColumnDragSource {
+    readonly from: number;
+    readonly key: string;
+}
+
+// @public
+export interface ColumnDragTarget {
+    closest: (selector: string) => unknown;
 }
 
 // @public
@@ -876,6 +982,30 @@ export function columnHeaderLabel<TRow>(column: ColumnMetadata<TRow>): string;
 export type ColumnInput<TRow> = ColumnModel<TRow> | ColumnGroupDef<TRow>;
 
 // @public
+export interface ColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
+    readonly configure: (options: ColumnLayoutControllerOptions<TRow, TColumn>) => void;
+    readonly move: (key: string, toIndex: number) => void;
+    readonly reset: () => void;
+    readonly resetName: (key: string) => void;
+    readonly setHidden: (key: string, hidden: boolean) => void;
+    readonly setName: (key: string, name: string) => void;
+    readonly setOrder: (order: readonly string[]) => void;
+    readonly setPinned: (key: string, side: PinSide | undefined) => void;
+    readonly setWidth: (key: string, width: number | undefined) => void;
+    readonly store: ControllableStore<ColumnLayoutState>;
+    readonly toggleColumnGroup: (id: string) => void;
+    readonly toggleVisible: (key: string) => void;
+}
+
+// @public
+export interface ColumnLayoutControllerOptions<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
+    readonly collapsibleColumnGroups?: boolean;
+    readonly columnGroups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
+    readonly columns: readonly TColumn[];
+    readonly onColumnRename?: (key: string, name: string) => void;
+}
+
+// @public
 export const columnLayoutSlice: UrlSliceSpec<ColumnLayoutState, {
     readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
 }>;
@@ -889,6 +1019,9 @@ export interface ColumnLayoutState {
     pinned: Readonly<Record<string, PinSide>>;
     widths: Readonly<Record<string, number>>;
 }
+
+// @public
+export function columnLayoutVisibleColumns<TColumn extends ColumnMetadata<never>>(columns: readonly TColumn[], state: Pick<ColumnLayoutState, "names" | "order" | "hidden" | "collapsedGroups">, options?: Pick<ColumnLayoutControllerOptions<never>, "collapsibleColumnGroups" | "columnGroups">): TColumn[];
 
 // @public
 export function columnLetter(index: number): string;
@@ -1087,6 +1220,47 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 
 // @public
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
+
+// @public
+export function columnPinInsets(visibleColumns: readonly ColumnMetadata<never>[], state: Pick<ColumnLayoutState, "pinned" | "widths">): ReadonlyMap<string, PinOffset>;
+
+// @public
+export interface ColumnRenameEditor {
+    readonly begin: () => void;
+    readonly blur: () => void;
+    readonly cancel: () => void;
+    readonly configure: (options: ColumnRenameEditorOptions) => void;
+    readonly getSnapshot: () => ColumnRenameEditorSnapshot;
+    readonly setDraft: (value: string) => void;
+    readonly submit: () => ColumnRenameSubmit;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface ColumnRenameEditorOptions {
+    readonly key: string;
+    readonly name: string;
+    readonly onRename: (key: string, name: string) => void;
+    readonly renamedMessage: (info: {
+        previous: string;
+        name: string;
+    }) => string;
+    readonly requiredMessage: string;
+}
+
+// @public
+export interface ColumnRenameEditorSnapshot {
+    readonly announcement: string;
+    readonly draft: string;
+    readonly editing: boolean;
+    readonly error?: string;
+}
+
+// @public
+export type ColumnRenameSubmit = "invalid" | "unchanged" | "renamed";
+
+// @public
+export function columnReorderKeyStep(key: string, rtl: boolean): -1 | 1 | undefined;
 
 // @public
 export interface ColumnResizeHandleProps {
@@ -1469,6 +1643,12 @@ export function createCellEditSession<TRow = unknown>(options?: CellEditSessionO
 
 // @public
 export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>): CellSaveStore<TRow>;
+
+// @public
+export function createColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(defaultColumnLayout?: Partial<ColumnLayoutState>): ColumnLayoutController<TRow, TColumn>;
+
+// @public
+export function createColumnRenameEditor(options: ColumnRenameEditorOptions): ColumnRenameEditor;
 
 // @public
 export function createCommandList(): CommandListController;
@@ -2454,6 +2634,9 @@ export type FilterOp = TextOp | NumberOp | DateOp;
 export function filterOpKey(key: string): string;
 
 // @public
+export function filterOpLabel(labels: Required<TableLabels>, key: keyof TableLabels): string;
+
+// @public
 export interface FilterOption {
     label: string;
     value: string;
@@ -2484,7 +2667,48 @@ export interface FilterRuntime<TRow> {
 export function filterStateKeys(def: Pick<FilterDef, "key" | "type">, registry?: FilterTypeRegistry): string[];
 
 // @public
+export function filterTreeChipLabel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], labels: Required<TableLabels>, registry?: FilterTypeRegistry): string;
+
+// @public
+export function filterTreeCombinatorOptions(labels: Required<TableLabels>): readonly FilterTreeOption[];
+
+// @public
+export interface FilterTreeConditionModel<TRow> {
+    readonly def: FilterDef<TRow>;
+    readonly fieldOptions: readonly FilterTreeOption[];
+    readonly opOptions: readonly FilterTreeOption[];
+    readonly value: FilterTreeValueEditor;
+    readonly withField: (key: string) => QueryCondition | undefined;
+    readonly withOp: (op: string) => QueryCondition;
+    readonly withValue: (value: unknown) => QueryCondition;
+}
+
+// @public
+export function filterTreeConditionModel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry, labels: Required<TableLabels>): FilterTreeConditionModel<TRow> | undefined;
+
+// @public
+export interface FilterTreeEditorActions {
+    readonly addCondition: (path: readonly number[]) => void;
+    readonly addGroup: (path: readonly number[]) => void;
+    readonly remove: (path: readonly number[]) => void;
+    readonly replace: (path: readonly number[], next: QueryCondition) => void;
+    readonly setCombinator: (path: readonly number[], next: string) => void;
+}
+
+// @public
+export function filterTreeEditorActions<TRow>(tree: QueryFilterGroup | undefined, commit: (tree: QueryFilterGroup | undefined) => void, first: FilterDef<TRow>, registry: FilterTypeRegistry): FilterTreeEditorActions;
+
+// @public
 export type FilterTreeNode = QueryCondition | QueryFilterGroup;
+
+// @public
+export function filterTreeOpLabel(widget: string | undefined, op: string, labels: Required<TableLabels>): string;
+
+// @public
+export interface FilterTreeOption {
+    readonly label: string;
+    readonly value: string;
+}
 
 // @public
 export function filterTreeRows<TRow>(options: {
@@ -2493,6 +2717,39 @@ export function filterTreeRows<TRow>(options: {
     withChildren: (row: TRow, children: readonly TRow[]) => TRow;
     match: (row: TRow) => boolean;
 }): TRow[];
+
+// @public
+export type FilterTreeValueEditor = {
+    readonly kind: "none";
+} | {
+    readonly kind: "boolean";
+    readonly choice: "true" | "false";
+    readonly options: readonly FilterTreeOption[];
+    readonly write: (choice: string) => unknown;
+} | {
+    readonly kind: "relative";
+    readonly preset: RelativePreset;
+    readonly n: number;
+    readonly counted: boolean;
+    readonly options: readonly FilterTreeOption[];
+    readonly writePreset: (preset: string) => unknown;
+    readonly writeCount: (n: string) => unknown;
+} | {
+    readonly kind: "between";
+    readonly type: "text" | "number" | "date";
+    readonly a: string;
+    readonly b: string;
+    readonly writeA: (a: string) => unknown;
+    readonly writeB: (b: string) => unknown;
+} | {
+    readonly kind: "single";
+    readonly type: "text" | "number" | "date";
+    readonly text: string;
+    readonly write: (text: string) => unknown;
+};
+
+// @public
+export function filterTreeValueEditor<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry: FilterTypeRegistry, labels: Required<TableLabels>): FilterTreeValueEditor;
 
 // @public
 export type FilterType = (typeof FILTER_TYPES)[number];
@@ -3232,6 +3489,13 @@ export type GroupSort<TRow> = "label" | "label-desc" | "count" | "count-desc" | 
 export function groupValueKey(value: unknown): string;
 
 // @public
+export function hasActiveHeaderFilter<TRow>(props: Readonly<{
+    def: FilterDef<TRow>;
+    source: FilterFormSource<TRow>;
+    registry?: FilterTypeRegistry;
+}>): boolean;
+
+// @public
 export function hasEditableColumns(columns: readonly EditableColumnLike[]): boolean;
 
 // @public
@@ -3239,6 +3503,15 @@ export function hasGroupingColumnDrag(event: Pick<DragEvent, "dataTransfer">): b
 
 // @public
 export const HEADER_FILTER_SESSION_ATTR = "data-adapttable-header-filter";
+
+// @public
+export function headerFilterBooleanOptions(labels: Required<TableLabels>): readonly HeaderFilterOption[];
+
+// @public
+export type HeaderFilterCellKind = "text" | "select" | "multi" | "boolean" | "range";
+
+// @public
+export function headerFilterCellKind<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): HeaderFilterCellKind | undefined;
 
 // @public
 export function headerFilterFieldIsComplete<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, registry?: FilterTypeRegistry): boolean;
@@ -3251,9 +3524,27 @@ export function headerFilterInsideSelector(input: {
 }): string;
 
 // @public
+export interface HeaderFilterMultiModel {
+    readonly label: string;
+    readonly options: readonly HeaderFilterOption[];
+    readonly selected: readonly string[];
+    readonly summary: string;
+    readonly toggle: (value: string, checked: boolean) => void;
+}
+
+// @public
+export function headerFilterMultiModel<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">, options: readonly HeaderFilterOption[], labels: Required<TableLabels>): HeaderFilterMultiModel;
+
+// @public
 export interface HeaderFilterOpenHost {
     readonly openKey: string | null;
     readonly setOpenKey: (key: string | null) => void;
+}
+
+// @public
+export interface HeaderFilterOption {
+    readonly label: string;
+    readonly value: string;
 }
 
 // @public
@@ -3276,6 +3567,27 @@ export interface HeaderFilterOverlaySnapshot {
     readonly localOpen: boolean;
     readonly resetKey: number;
 }
+
+// @public
+export interface HeaderFilterRangeModel {
+    readonly showUpper: boolean;
+    readonly writeLower: (value: string) => void;
+    readonly writeUpper: (value: string) => void;
+}
+
+// @public
+export function headerFilterRangeModel(widget: Pick<RangeFieldWidget, "op" | "a" | "b" | "arity" | "write">): HeaderFilterRangeModel;
+
+// @public
+export interface HeaderFilterSelectModel {
+    readonly label: string;
+    readonly options: readonly HeaderFilterOption[];
+    readonly value: string;
+    readonly write: (value: string) => void;
+}
+
+// @public
+export function headerFilterSelectModel<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">, options: readonly HeaderFilterOption[], labels: Required<TableLabels>): HeaderFilterSelectModel;
 
 // @public
 export type HeaderFilterWrites<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras">;
@@ -3387,6 +3699,12 @@ export function initialColumnLayout(defaultColumnLayout: Partial<ColumnLayoutSta
 
 // @public
 export function initialOperation(resolved: ResolvedAggregatable, source?: AggregationSourceSupport): string;
+
+// @public
+export function initialRangeFilterOp<TRow>(def: FilterDef<TRow>, extra: FilterFormSource<TRow>["extra"]): RangeOp | undefined;
+
+// @public
+export function initialTextFilterOp<TRow>(def: FilterDef<TRow>, extra: FilterFormSource<TRow>["extra"]): TextOp;
 
 // @public @deprecated
 export const insertExtraRows: typeof insertExtraRows_2;
@@ -3598,6 +3916,9 @@ export function measureColumnWidth(root: Element | null, key: string): number | 
 // @public
 export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[]): string;
 
+// @public
+export function mergeFilterChips(filterChips: readonly ActiveFilterChip[], extraChips: readonly ActiveFilterChip[] | undefined): readonly ActiveFilterChip[];
+
 // @internal
 export function mergeProps<T extends Props>(base: T, overrides?: Props): T;
 
@@ -3680,6 +4001,9 @@ export interface NeutralTableBinding<TRow = unknown> {
     readonly operations?: () => Readonly<Record<string, boolean>>;
     readonly visibleRows?: () => readonly TRow[];
 }
+
+// @public
+export function newFilterTreeCondition<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): QueryCondition;
 
 // @public
 export function nextCommandIndex(key: string, at: number, count: number): number | undefined;
@@ -3837,6 +4161,9 @@ export const PARAM_SORT_BY = "sortBy";
 
 // @public (undocumented)
 export const PARAM_SORT_DIR = "sortDir";
+
+// @public
+export function parseBooleanChoice(value: FilterValue): BooleanChoice;
 
 // @public
 export function parseCellEditValue(editor: CellEditor, draft: string): unknown;
@@ -4243,7 +4570,32 @@ export const RANGE_SUFFIXES: {
 };
 
 // @public
+export interface RangeFieldWidget {
+    a: string;
+    arity: RangeOpArity;
+    b: string;
+    inputType: "date" | "number" | "text";
+    label: string;
+    op: RangeOp | undefined;
+    opLabelKeys: RangeOpLabelKeys;
+    ops: readonly RangeOp[];
+    setOp: (op: RangeOp | undefined) => void;
+    write: (nextOp: RangeOp | undefined, nextA: string, nextB: string) => void;
+}
+
+// @public
+export function rangeFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, op: RangeOp | undefined): Omit<RangeFieldWidget, "setOp">;
+
+// @public
 export type RangeOp = NumberOp | DateOp;
+
+// @public
+export type RangeOpArity = "none" | "one" | "two" | "list";
+
+// @public
+export type RangeOpLabelKeys = typeof NUMBER_OP_LABEL_KEYS | (typeof DATE_OP_LABEL_KEYS & {
+    readonly eq: "opOn";
+});
 
 // @public
 export interface RangeWidgetState {
@@ -4402,6 +4754,9 @@ export function resetDevWarnings(): void;
 
 // @internal
 export function resetHistoryAdapter(): void;
+
+// @public
+export function resolveActiveFilterCount(override: number | undefined, chipCount: number): number;
 
 // @public
 export function resolveAggregatable<TRow>(column: ColumnMetadata<TRow>): ResolvedAggregatable | undefined;
@@ -5099,7 +5454,13 @@ export interface SavedViewsStore {
 export type SavedViewVisibility = "private" | "team";
 
 // @public
+export function scalarFilterText(value: FilterValue): string;
+
+// @public
 export const SEARCH_DEBOUNCE_MS = 300;
+
+// @public
+export function searchChecklistItems(items: readonly ChecklistValue[], query: string): readonly ChecklistValue[];
 
 // @public
 export interface SelectionStats {
@@ -6086,6 +6447,21 @@ export const TEXT_OP_LABEL_KEYS: {
 export const TEXT_OPS: readonly ["eq", "neq", "contains", "notContains", "startsWith", "endsWith", "empty", "notEmpty"];
 
 // @public
+export interface TextFieldWidget {
+    label: string;
+    needsValue: boolean;
+    op: TextOp;
+    opLabelKeys: typeof TEXT_OP_LABEL_KEYS;
+    ops: readonly TextOp[];
+    setOp: (op: TextOp) => void;
+    value: string;
+    write: (nextOp: TextOp, nextValue: string) => void;
+}
+
+// @public
+export function textFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, localOp: TextOp, setLocalOp: (op: TextOp) => void): TextFieldWidget;
+
+// @public
 export type TextOp = (typeof TEXT_OPS)[number];
 
 // @public
@@ -6370,6 +6746,9 @@ export function writeSortLevels(params: URLSearchParams, levels: readonly {
     key: string;
     dir: SortDirection;
 }[], prefix?: string): void;
+
+// @public
+export function writeStoredColumnLayout(storage: LayoutStorage | undefined, storageKey: string, next: ColumnLayoutState, fallback: ColumnLayoutState): void;
 
 // @public @deprecated
 export const xlsxWriter: typeof xlsxWriter_2;

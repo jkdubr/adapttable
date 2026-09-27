@@ -14,6 +14,8 @@ import { applyRowReorder } from '@adapttable/core';
 import { asBatchGesture } from '@adapttable/core';
 import { asGesture } from '@adapttable/core';
 import { BatchRowEdit } from '@adapttable/core';
+import { BooleanChoice } from '@adapttable/core';
+import { BooleanFieldWidget } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
@@ -27,10 +29,14 @@ import { CellRange } from '@adapttable/core';
 import { CellSaveStatus } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
 import { CellValidator } from '@adapttable/core';
+import { CHECKLIST_ITEM_HEIGHT } from '@adapttable/core';
+import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
+import { CHECKLIST_VIRTUALIZE_AT } from '@adapttable/core';
 import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
 import { collectChecklistValues } from '@adapttable/core';
 import { ColorScheme } from '@adapttable/core';
+import { ColumnDragRowAttrs } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
 import { ColumnGroupDef } from '@adapttable/core';
 import { ColumnGroupRecord } from '@adapttable/core';
@@ -52,7 +58,6 @@ import { CreateTableEngineOptions } from '@adapttable/core';
 import { CSSProperties } from 'react';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { datasetIndex } from '@adapttable/core';
-import { DATE_OP_LABEL_KEYS } from '@adapttable/core';
 import { DateOp } from '@adapttable/core';
 import { defaultFrontendRowId } from '@adapttable/core';
 import { defaultSearchText } from '@adapttable/core';
@@ -84,8 +89,12 @@ import { FeatureRegistration } from '@adapttable/core';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
+import { filterDefForColumn } from '@adapttable/core';
+import { FilterFormSource } from '@adapttable/core';
+import { filterOpLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterRuntime } from '@adapttable/core';
+import { filterTreeChipLabel } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
@@ -108,16 +117,17 @@ import { InfiniteQueryLike } from '@adapttable/core';
 import { isDeclarativeFilters } from '@adapttable/core';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
 import { LayoutStorage } from '@adapttable/core';
+import { listFilterValues } from '@adapttable/core';
 import { MobileCardField } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
 import { normalizeEditorOptions } from '@adapttable/core';
-import { NUMBER_OP_LABEL_KEYS } from '@adapttable/core';
 import { NumberOp } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
+import { parseBooleanChoice } from '@adapttable/core';
 import { partitionPinnedRows } from '@adapttable/core';
 import { PIN_Z } from '@adapttable/core';
 import { PinLeads } from '@adapttable/core';
@@ -128,10 +138,11 @@ import { PinOffset } from '@adapttable/core';
 import { PinSide } from '@adapttable/core';
 import { Props } from '@adapttable/core';
 import { QueryAggregate } from '@adapttable/core';
-import { QueryCondition } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
-import { RangeOp } from '@adapttable/core';
+import { RangeFieldWidget } from '@adapttable/core';
+import { RangeOpArity } from '@adapttable/core';
+import { RangeOpLabelKeys } from '@adapttable/core';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefCallback } from 'react';
@@ -155,6 +166,7 @@ import { SavedViewMigration } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
+import { scalarFilterText } from '@adapttable/core';
 import { HEADER_FILTER_SESSION_ATTR as SESSION_ATTR } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
@@ -171,7 +183,7 @@ import { TableSource } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
 import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
-import { TEXT_OP_LABEL_KEYS } from '@adapttable/core';
+import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
 import { TreeEntry } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
@@ -232,15 +244,9 @@ export function bindHeaderFilterDismiss<TRow>(source: FilterFormSource<TRow>, op
     registry?: FilterTypeRegistry;
 }): FilterFormSource<TRow>;
 
-// @public
-export type BooleanChoice = "" | "true" | "false";
+export { BooleanChoice }
 
-// @public
-export interface BooleanFieldWidget {
-    choice: BooleanChoice;
-    label: string;
-    write: (next: BooleanChoice) => void;
-}
+export { BooleanFieldWidget }
 
 // @public
 export type BulkActionOutcome = {
@@ -319,14 +325,11 @@ export { CellSaveStatus }
 
 export { CellValidator }
 
-// @public
-export const CHECKLIST_ITEM_HEIGHT = 28;
+export { CHECKLIST_ITEM_HEIGHT }
 
-// @public
-export const CHECKLIST_LIST_HEIGHT = 240;
+export { CHECKLIST_LIST_HEIGHT }
 
-// @public
-export const CHECKLIST_VIRTUALIZE_AT = 40;
+export { CHECKLIST_VIRTUALIZE_AT }
 
 // @public
 export interface ChecklistFilterState {
@@ -376,11 +379,7 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
     renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
 }
 
-// @public
-export interface ColumnDragRowAttrs {
-    "data-dragging"?: "";
-    "data-drop"?: "before" | "after";
-}
+export { ColumnDragRowAttrs }
 
 // @public
 export interface ColumnDragState {
@@ -876,17 +875,13 @@ export type FeatureRender<TProps> = FeatureRender_2<TProps, ReactNode>;
 
 export { FeatureSlotKey }
 
-// @public
-export function filterDefForColumn<TRow>(defs: readonly FilterDef<TRow>[], key: string): FilterDef<TRow> | undefined;
+export { filterDefForColumn }
 
-// @public
-export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
+export { FilterFormSource }
 
-// @public
-export function filterOpLabel(labels: Required<TableLabels>, key: keyof TableLabels): string;
+export { filterOpLabel }
 
-// @public
-export function filterTreeChipLabel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], labels: Required<TableLabels>): string;
+export { filterTreeChipLabel }
 
 // @public
 export interface FilterTriggerToggle {
@@ -1023,8 +1018,7 @@ export interface LazyChildrenState<TRow> {
     loadingIds: ReadonlySet<string>;
 }
 
-// @public
-export function listFilterValues(value: FilterValue): string[];
+export { listFilterValues }
 
 // @public
 export function liveRowChanged<TRow>(input: {
@@ -1087,8 +1081,7 @@ export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" 
 
 export { PageSelector }
 
-// @public
-export function parseBooleanChoice(value: FilterValue): BooleanChoice;
+export { parseBooleanChoice }
 
 export { partitionPinnedRows }
 
@@ -1110,27 +1103,11 @@ export { PinOffset }
 
 export { PinSide }
 
-// @public
-export interface RangeFieldWidget {
-    a: string;
-    arity: RangeOpArity;
-    b: string;
-    inputType: "date" | "number" | "text";
-    label: string;
-    op: RangeOp | undefined;
-    opLabelKeys: RangeOpLabelKeys;
-    ops: readonly RangeOp[];
-    setOp: (op: RangeOp | undefined) => void;
-    write: (nextOp: RangeOp | undefined, nextA: string, nextB: string) => void;
-}
+export { RangeFieldWidget }
 
-// @public
-export type RangeOpArity = "none" | "one" | "two" | "list";
+export { RangeOpArity }
 
-// @public
-export type RangeOpLabelKeys = typeof NUMBER_OP_LABEL_KEYS | (typeof DATE_OP_LABEL_KEYS & {
-    readonly eq: "opOn";
-});
+export { RangeOpLabelKeys }
 
 // @public
 export interface ReactColumnGroupDef<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
@@ -1339,8 +1316,7 @@ export { SavedViewsStore }
 
 export { SavedViewVisibility }
 
-// @public
-export function scalarFilterText(value: FilterValue): string;
+export { scalarFilterText }
 
 // @public
 export interface SearchInputElementProps extends Props {
@@ -1575,17 +1551,7 @@ export interface TableRowReorderState<TRow> {
     selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
 }
 
-// @public
-export interface TextFieldWidget {
-    label: string;
-    needsValue: boolean;
-    op: TextOp;
-    opLabelKeys: typeof TEXT_OP_LABEL_KEYS;
-    ops: readonly TextOp[];
-    setOp: (op: TextOp) => void;
-    value: string;
-    write: (nextOp: TextOp, nextValue: string) => void;
-}
+export { TextFieldWidget }
 
 export { TextOp }
 
@@ -1842,6 +1808,7 @@ export function useFilterTreeChips<TRow>(options: UseFilterTreeChipsOptions<TRow
 export interface UseFilterTreeChipsOptions<TRow> {
     readonly defs: readonly FilterDef<TRow>[];
     readonly labels: Required<TableLabels>;
+    readonly registry?: FilterTypeRegistry;
     readonly setFilterTree?: (tree: QueryFilterGroup | undefined) => void;
     readonly tree: QueryFilterGroup | undefined;
 }

@@ -740,7 +740,14 @@
       "core/src/utils/stableKey.ts",
       "core/src/virtual/mobileCardList.ts",
       "core/src/virtual/rowPairModel.ts",
-      "core/src/xlsx.ts"
+      "core/src/xlsx.ts",
+      "core/src/columns/columnLayoutController.ts",
+      "core/src/columns/columnReorderModel.ts",
+      "core/src/columns/columnRenameEditor.ts",
+      "core/src/filters/filterWidgets.ts",
+      "core/src/filters/filterTreeEditor.ts",
+      "core/src/filters/checklistModel.ts",
+      "core/src/filters/headerFilterCells.ts"
     ]
   },
   "v3Removals": {

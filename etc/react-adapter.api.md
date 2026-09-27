@@ -53,11 +53,13 @@ import { ChromeGroupEntry } from '@adapttable/core/binding';
 import { ChromeGroupSlot } from '@adapttable/core/binding';
 import { ChromeRowSlot } from '@adapttable/core/binding';
 import { ChromeVirtualPadSlot } from '@adapttable/core/binding';
+import { COLUMN_DND_MIME } from '@adapttable/core';
 import { COLUMN_GROUP_ID_SEP } from '@adapttable/core/binding';
 import { COLUMN_GROUP_RENDER_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_WIDTH } from '@adapttable/core/binding';
 import { COLUMN_MENU } from '@adapttable/core/binding';
+import { ColumnDragRowAttrs } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
 import { columnFlexShares } from '@adapttable/core';
 import { ColumnFooterContext } from '@adapttable/core';
@@ -174,10 +176,12 @@ import { featureStateKey } from '@adapttable/core/binding';
 import { FetchAllExport } from '@adapttable/core';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
+import { FilterFormSource } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
 import { FilterOverlaySlotProps as FilterOverlaySlotProps_2 } from '@adapttable/core/binding';
 import { FilterRuntime } from '@adapttable/core';
+import { FilterTreeOption } from '@adapttable/core';
 import { FilterType } from '@adapttable/core';
 import { FilterTypeExtend } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
@@ -213,6 +217,7 @@ import { GroupingPanelInteractions } from '@adapttable/core';
 import { GroupingPanelState } from '@adapttable/core';
 import { GroupNode } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
+import { hasActiveHeaderFilter } from '@adapttable/core';
 import { HeaderGroupCell } from '@adapttable/core/binding';
 import { headerGroupRow } from '@adapttable/core/binding';
 import { headerGroupRows } from '@adapttable/core/binding';
@@ -1003,8 +1008,7 @@ export interface ChromeExtraSlotProps<TRow = never> {
     };
 }
 
-// @public
-export const COLUMN_DND_MIME = "application/x-adapttable-column";
+export { COLUMN_DND_MIME }
 
 export { COLUMN_GROUP_ID_SEP }
 
@@ -1041,11 +1045,7 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
     renderHeader?: (ctx: ColumnHeaderContext_2<TRow>) => ReactNode;
 }
 
-// @public
-export interface ColumnDragRowAttrs {
-    "data-dragging"?: "";
-    "data-drop"?: "before" | "after";
-}
+export { ColumnDragRowAttrs }
 
 // @public
 export interface ColumnDragState {
@@ -2458,8 +2458,7 @@ export { filterColumnMenuRows }
 
 export { FilterDef }
 
-// @public
-export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
+export { FilterFormSource }
 
 // @public
 export function FilterHeaderChrome<TRow>(input: Readonly<FilterHeaderChromeProps<TRow>>): ReactElement | null;
@@ -2662,11 +2661,7 @@ export interface FilterTreeInputProps {
     readonly value: string;
 }
 
-// @public
-export interface FilterTreeOption {
-    readonly label: string;
-    readonly value: string;
-}
+export { FilterTreeOption }
 
 // @public
 export interface FilterTreeSelectProps {
@@ -3174,8 +3169,7 @@ export { GroupSort }
 // @public
 export function GroupToggleSpacer(): ReactElement;
 
-// @public
-export function hasActiveHeaderFilter<TRow>(props: Readonly<Pick<FilterHeaderControlProps<TRow>, "def" | "source" | "registry">>): boolean;
+export { hasActiveHeaderFilter }
 
 export { HeaderGroupCell }
 
