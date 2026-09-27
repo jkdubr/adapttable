@@ -711,6 +711,8 @@
       "core/src/source/frontendSource.ts",
       "core/src/source/queryContract.ts",
       "core/src/source/queryKey.ts",
+      "core/src/source/responseAggregateOps.ts",
+      "core/src/source/serverSource.ts",
       "core/src/source/tableQuery.ts",
       "core/src/state/controllableStore.ts",
       "core/src/state/featureNotices.ts",

@@ -664,6 +664,22 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
   on it. `resolvePaginationMode(mode, isMobile)` turns `"auto"` into
   `"infinite"` on mobile and `"paged"` elsewhere; `defaultSearchText` and
   `defaultFrontendRowId` are the defaults a source uses.
+- `createServerSource()` — the server tier as a `ServerSource`: call
+  `update(config, view)` with the host's last answer and request settings
+  (`ServerSourceConfig`) and the view-state store's snapshot and `setPage`
+  (`ServerSourceViewState`) to read a `ServerSourceFrame` — the query and its
+  key, the rows to show (appended pages included), `isLoading`,
+  `isFetchingNextPage`, `hasNextPage` and the aggregate operations on screen.
+  `commit()` once the frame is on screen sends a changed query (aborting the
+  one it supersedes), latches the first load, clamps a page past the end and
+  records the cursor the host returned; `setPage`, `fetchNextPage` and
+  `refetch` are the source's own actions, `subscribe` / `revision` report when
+  its state moved, and `dispose()` aborts the request in flight.
+  `useServerData` runs on it.
+- `ResponseAggregateOps` / `ResponseAggregateOpsInput` /
+  `createResponseAggregateOps` — which aggregate
+  operations the rows on screen were computed with: `remember` each request's
+  operations, `settle` from the response's provenance, read `current()`.
 
 ### Controllable stores
 
