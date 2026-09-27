@@ -1504,6 +1504,9 @@ export function createFindController(initial: FindControllerOptions): FindContro
 export function createFirstLoadLatch(): FirstLoadLatch;
 
 // @public
+export function createFrontendSource<TRow>(): FrontendSource<TRow>;
+
+// @public
 export function createGridFocusController<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
 
 // @public
@@ -1678,6 +1681,9 @@ export const defaultConfirm: ConfirmHandler;
 export const defaultFilterRegistry: FilterTypeRegistry;
 
 // @public
+export function defaultFrontendRowId<TRow>(row: TRow): string;
+
+// @public
 export const defaultLabels: Required<TableLabels>;
 
 // @public
@@ -1685,6 +1691,9 @@ export const defaultRowReorderAnnouncements: RowReorderAnnouncements;
 
 // @public
 export function defaultSaveErrorMessage(error: unknown): string;
+
+// @public
+export function defaultSearchText<TRow>(row: TRow): string;
 
 // @public
 export const densitySlice: UrlSliceSpec<TableDensity, {
@@ -2716,6 +2725,49 @@ export type FormulaValue = {
     readonly kind: "error";
     readonly code: FormulaErrorCode;
 };
+
+// @public
+export interface FrontendSource<TRow> {
+    readonly commit: () => void;
+    readonly engine: TableEngine<TRow>;
+    readonly update: (config: FrontendSourceConfig<TRow>, view: FrontendSourceViewState) => FrontendSourceFrame<TRow>;
+}
+
+// @public
+export interface FrontendSourceConfig<TRow> {
+    readonly columns?: readonly ColumnMetadata<TRow>[];
+    readonly data: readonly TRow[];
+    readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
+    readonly getRowId?: (row: TRow) => string;
+    readonly getSearchText?: (row: TRow) => string;
+    readonly getSortValue?: (row: TRow, columnKey: string) => SortableValue;
+    readonly locale?: string;
+    readonly paginationMode: ResolvedPaginationMode;
+}
+
+// @public
+export interface FrontendSourceFrame<TRow> {
+    readonly allFilteredRows: readonly TRow[];
+    readonly allSearchedRows: readonly TRow[];
+    readonly hasNextPage: boolean;
+    readonly page: number;
+    readonly rows: readonly TRow[];
+    readonly total: number;
+}
+
+// @public
+export interface FrontendSourceViewState {
+    readonly extra: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+    readonly groupBy: string | undefined;
+    readonly limit: number;
+    readonly page: number;
+    readonly search: string;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+}
 
 // @public
 export type GetCellSpan<TRow> = (args: GetCellSpanArgs<TRow>) => CellSpanRequest | undefined;
@@ -4464,6 +4516,9 @@ export function resolveLabels(overrides: TableLabels | undefined): Required<Tabl
 
 // @public
 export function resolveLocaleTag(available: Iterable<string>, locale: string): string | undefined;
+
+// @public
+export function resolvePaginationMode(mode: PaginationMode, isMobile: boolean): ResolvedPaginationMode;
 
 // @public
 export function resolvePinnedRows<TRow>(pinnedRows: PinnedRows<TRow> | undefined): {

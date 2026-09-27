@@ -1,0 +1,357 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import type { ColumnMetadata } from "../columnModel";
+import { applyRowPatches, insertRow, updateRow } from "../rows/patch";
+import { resetDevWarnings } from "../utils/devWarn";
+import {
+  createFrontendSource,
+  defaultFrontendRowId,
+  defaultSearchText,
+  type FrontendSourceConfig,
+  type FrontendSourceViewState,
+  resolvePaginationMode,
+} from "./frontendSource";
+
+interface Row {
+  id: string;
+  name: string;
+  count: number;
+}
+
+const ROWS: Row[] = [
+  { id: "a", name: "Alice", count: 3 },
+  { id: "b", name: "Bob", count: 7 },
+  { id: "c", name: "Charlie", count: 1 },
+];
+
+const COLUMNS: ColumnMetadata<Row>[] = [
+  { key: "name", accessor: (row) => row.name },
+  { key: "count", sortValue: (row) => row.count },
+];
+
+const VIEW: FrontendSourceViewState = {
+  page: 1,
+  limit: 25,
+  search: "",
+  sortBy: undefined,
+  sortDir: undefined,
+  sortLevels: [],
+  groupBy: undefined,
+  extra: {},
+  filterTree: undefined,
+};
+
+function config(
+  overrides: Partial<FrontendSourceConfig<Row>> = {}
+): FrontendSourceConfig<Row> {
+  return {
+    data: ROWS,
+    columns: COLUMNS,
+    paginationMode: "paged",
+    ...overrides,
+  };
+}
+
+const ids = (rows: readonly Row[]) => rows.map((row) => row.id);
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  resetDevWarnings();
+});
+
+describe("resolvePaginationMode", () => {
+  it("returns a non-auto mode unchanged", () => {
+    expect(resolvePaginationMode("paged", true)).toBe("paged");
+    expect(resolvePaginationMode("infinite", false)).toBe("infinite");
+  });
+
+  it("resolves auto to infinite on mobile and paged on desktop", () => {
+    expect(resolvePaginationMode("auto", true)).toBe("infinite");
+    expect(resolvePaginationMode("auto", false)).toBe("paged");
+  });
+});
+
+describe("frontend row defaults", () => {
+  it("reads a string or number id, or the row itself", () => {
+    expect(defaultFrontendRowId({ id: "x" })).toBe("x");
+    expect(defaultFrontendRowId({ id: 4 })).toBe("4");
+    expect(defaultFrontendRowId("row")).toBe("row");
+    expect(defaultFrontendRowId(9)).toBe("9");
+    expect(defaultFrontendRowId({ id: {} })).toBe("");
+    expect(defaultFrontendRowId(null)).toBe("");
+  });
+
+  it("flattens a row's own values into search text", () => {
+    expect(defaultSearchText({ name: "Alice", count: 3 })).toContain("Alice");
+  });
+});
+
+describe("createFrontendSource", () => {
+  it("has no engine before its first update", () => {
+    expect(() => createFrontendSource<Row>().engine).toThrow(/update\(\)/);
+  });
+
+  it("commits nothing before its first update", () => {
+    expect(() => {
+      createFrontendSource<Row>().commit();
+    }).not.toThrow();
+  });
+
+  it("shows every row with no search, sort or filter", () => {
+    const frame = createFrontendSource<Row>().update(config(), VIEW);
+    expect(ids(frame.rows)).toEqual(["a", "b", "c"]);
+    expect(frame.total).toBe(3);
+    expect(frame.page).toBe(1);
+    expect(frame.hasNextPage).toBe(false);
+  });
+
+  it("searches, sorts and pages from the view state", () => {
+    const source = createFrontendSource<Row>();
+    const searched = source.update(config(), { ...VIEW, search: "bob" });
+    expect(ids(searched.rows)).toEqual(["b"]);
+    source.commit();
+
+    const sorted = source.update(config(), {
+      ...VIEW,
+      sortBy: "count",
+      sortDir: "asc",
+    });
+    expect(ids(sorted.rows)).toEqual(["c", "a", "b"]);
+    expect(ids(sorted.allFilteredRows)).toEqual(["c", "a", "b"]);
+    source.commit();
+
+    const paged = source.update(config(), { ...VIEW, page: 2, limit: 2 });
+    expect(ids(paged.rows)).toEqual(["c"]);
+    expect(paged.page).toBe(2);
+  });
+
+  it("reads each stage when several land before a commit", () => {
+    const source = createFrontendSource<Row>();
+    source.update(config(), VIEW);
+    source.commit();
+    source.update(config(), { ...VIEW, sortBy: "count", sortDir: "asc" });
+    const paged = source.update(config(), { ...VIEW, page: 2, limit: 2 });
+    expect(ids(paged.rows)).toEqual(["c"]);
+    const patched = source.update(config({ data: ROWS.slice(0, 1) }), {
+      ...VIEW,
+      page: 2,
+      limit: 2,
+    });
+    expect(ids(patched.rows)).toEqual(["a"]);
+  });
+
+  it("sorts by a multi-column chain", () => {
+    const frame = createFrontendSource<Row>().update(config(), {
+      ...VIEW,
+      sortLevels: [{ key: "count", dir: "desc" }],
+    });
+    expect(ids(frame.rows)).toEqual(["b", "a", "c"]);
+  });
+
+  it("runs with no columns declared", () => {
+    const frame = createFrontendSource<Row>().update(
+      config({ columns: undefined }),
+      { ...VIEW, search: "ali" }
+    );
+    expect(ids(frame.rows)).toEqual(["a"]);
+  });
+
+  it("clamps a page past the end to the last real one", () => {
+    const frame = createFrontendSource<Row>().update(config(), {
+      ...VIEW,
+      page: 9,
+      limit: 2,
+    });
+    expect(frame.page).toBe(2);
+  });
+
+  it("reports more rows beyond an infinite window", () => {
+    const source = createFrontendSource<Row>();
+    const first = source.update(config({ paginationMode: "infinite" }), {
+      ...VIEW,
+      limit: 2,
+    });
+    expect(first.hasNextPage).toBe(true);
+    const grown = source.update(config({ paginationMode: "infinite" }), {
+      ...VIEW,
+      page: 2,
+      limit: 2,
+    });
+    expect(ids(grown.rows)).toEqual(["a", "b", "c"]);
+    expect(grown.hasNextPage).toBe(false);
+  });
+
+  it("never reports a next page when paged", () => {
+    const frame = createFrontendSource<Row>().update(config(), {
+      ...VIEW,
+      limit: 1,
+    });
+    expect(frame.hasNextPage).toBe(false);
+  });
+
+  it("counts facets after search but before extra filters", () => {
+    const frame = createFrontendSource<Row>().update(
+      config({ filterFn: (row, extra) => row.name === extra.name }),
+      { ...VIEW, search: "o", extra: { name: "Bob" } }
+    );
+    expect(ids(frame.rows)).toEqual(["b"]);
+    expect(ids(frame.allSearchedRows)).toEqual(["b"]);
+    const unsearched = createFrontendSource<Row>().update(
+      config({ filterFn: (row, extra) => row.name === extra.name }),
+      { ...VIEW, extra: { name: "Bob" } }
+    );
+    expect(unsearched.allSearchedRows).toBe(ROWS);
+  });
+
+  it("keeps the facet rows while data and search stay the same", () => {
+    const source = createFrontendSource<Row>();
+    const first = source.update(config(), { ...VIEW, search: "a" });
+    const second = source.update(config(), { ...VIEW, search: "a" });
+    expect(second.allSearchedRows).toBe(first.allSearchedRows);
+  });
+
+  it("applies the filter tree through filterTreeFn", () => {
+    const frame = createFrontendSource<Row>().update(
+      config({ filterTreeFn: (row) => row.count > 2 }),
+      {
+        ...VIEW,
+        filterTree: { combinator: "and", conditions: [] },
+      }
+    );
+    expect(ids(frame.rows)).toEqual(["a", "b"]);
+  });
+
+  it("keeps the page slice when only callback identities change", () => {
+    const source = createFrontendSource<Row>();
+    const first = source.update(
+      config({ getSearchText: (row) => row.name, columns: [...COLUMNS] }),
+      VIEW
+    );
+    const second = source.update(
+      config({ getSearchText: (row) => row.name, columns: [...COLUMNS] }),
+      VIEW
+    );
+    expect(second.rows).toBe(first.rows);
+  });
+
+  it("reads the newest callbacks without restaging", () => {
+    const source = createFrontendSource<Row>();
+    source.update(config({ getSearchText: () => "" }), VIEW);
+    const frame = source.update(config({ getSearchText: (row) => row.name }), {
+      ...VIEW,
+      search: "char",
+    });
+    expect(ids(frame.rows)).toEqual(["c"]);
+  });
+
+  it("caches search text per row until the data changes", () => {
+    const getSearchText = vi.fn((row: Row) => row.name);
+    const source = createFrontendSource<Row>();
+    source.update(config({ getSearchText }), { ...VIEW, search: "a" });
+    const calls = getSearchText.mock.calls.length;
+    source.update(config({ getSearchText }), { ...VIEW, search: "b" });
+    expect(getSearchText.mock.calls).toHaveLength(calls);
+
+    source.update(config({ getSearchText, data: [...ROWS] }), {
+      ...VIEW,
+      search: "b",
+    });
+    expect(getSearchText.mock.calls.length).toBeGreaterThan(calls);
+  });
+
+  it("forgets only the patched rows' search text on a row patch", () => {
+    const getSearchText = vi.fn((row: Row) => row.name);
+    const source = createFrontendSource<Row>();
+    source.update(config({ getSearchText }), { ...VIEW, search: "a" });
+    getSearchText.mockClear();
+
+    const patched = applyRowPatches<Row>(
+      ROWS,
+      [updateRow("b", { name: "Bea" })],
+      (row) => row.id
+    );
+    const frame = source.update(config({ getSearchText, data: patched }), {
+      ...VIEW,
+      search: "bea",
+    });
+    expect(ids(frame.rows)).toEqual(["b"]);
+    expect(getSearchText.mock.calls.map(([row]) => row.id)).toEqual(["b"]);
+  });
+
+  it("keeps cached search text when a row patch only inserts", () => {
+    const getSearchText = vi.fn((row: Row) => row.name);
+    const source = createFrontendSource<Row>();
+    source.update(config({ getSearchText }), { ...VIEW, search: "a" });
+    getSearchText.mockClear();
+
+    const patched = applyRowPatches<Row>(
+      ROWS,
+      [insertRow({ id: "d", name: "Dana", count: 2 })],
+      (row) => row.id
+    );
+    const frame = source.update(config({ getSearchText, data: patched }), {
+      ...VIEW,
+      search: "a",
+    });
+    expect(ids(frame.rows)).toEqual(["a", "c", "d"]);
+    expect(getSearchText.mock.calls.map(([row]) => row.id)).toEqual(["d"]);
+  });
+
+  it("publishes the staged view only on commit", () => {
+    const source = createFrontendSource<Row>();
+    source.update(config(), VIEW);
+    source.commit();
+    const listener = vi.fn();
+    source.engine.subscribe("all", listener);
+
+    source.update(config(), { ...VIEW, search: "bob" });
+    expect(source.engine.snapshot().total).toBe(3);
+    expect(listener).not.toHaveBeenCalled();
+
+    source.commit();
+    expect(source.engine.snapshot().total).toBe(1);
+    expect(listener).toHaveBeenCalled();
+  });
+
+  it("warns when the sort column is not declared", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    createFrontendSource<Row>().update(config({ columns: [] }), {
+      ...VIEW,
+      sortBy: "missing",
+      sortDir: "asc",
+    });
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('sortBy "missing" matches no column')
+    );
+  });
+
+  it("warns when the sort column has no sortable value", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    createFrontendSource<Row>().update(
+      config({ columns: [{ key: "name", accessor: () => ({}) }] }),
+      { ...VIEW, sortBy: "name", sortDir: "asc" }
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('column "name" has no sortable value')
+    );
+  });
+
+  it("does not warn when getSortValue resolves the sort", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    createFrontendSource<Row>().update(
+      config({ columns: [], getSortValue: (row) => row.name }),
+      { ...VIEW, sortBy: "missing", sortDir: "asc" }
+    );
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("does not warn when the sort column resolves a primitive", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    createFrontendSource<Row>().update(config(), {
+      ...VIEW,
+      sortBy: "name",
+      sortDir: "asc",
+    });
+    expect(warn).not.toHaveBeenCalled();
+  });
+});

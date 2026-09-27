@@ -1,8 +1,4 @@
-import {
-  MOBILE_BREAKPOINT_PX,
-  type PaginationMode,
-  type ResolvedPaginationMode,
-} from "@adapttable/core";
+import { MOBILE_BREAKPOINT_PX } from "@adapttable/core";
 
 import { useMediaQuery } from "./useMediaQuery";
 
@@ -36,20 +32,4 @@ export function mobileMediaQuery(px: number): string {
  */
 export function useIsMobile(px: number = MOBILE_BREAKPOINT_PX): boolean {
   return useMediaQuery(mobileMediaQuery(px));
-}
-
-/**
- * Resolve `"auto"` to a concrete pagination mode (mobile → infinite,
- * desktop → paged). A non-auto mode is returned unchanged.
- *
- * @param mode - The requested pagination mode.
- * @param isMobile - Whether the table is in its mobile layout.
- * @returns The resolved mode.
- */
-export function resolvePaginationMode(
-  mode: PaginationMode,
-  isMobile: boolean
-): ResolvedPaginationMode {
-  if (mode !== "auto") return mode;
-  return isMobile ? "infinite" : "paged";
 }

@@ -19099,6 +19099,14 @@
       "behavior": ""
     },
     {
+      "export": "createFrontendSource",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "createGridFocusController",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -19411,6 +19419,14 @@
       "behavior": ""
     },
     {
+      "export": "defaultFrontendRowId",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "defaultLabels",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -19428,6 +19444,14 @@
     },
     {
       "export": "defaultSaveErrorMessage",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "defaultSearchText",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -20836,6 +20860,38 @@
     },
     {
       "export": "FormulaValue",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "FrontendSource",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "FrontendSourceConfig",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "FrontendSourceFrame",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "FrontendSourceViewState",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
@@ -23596,6 +23652,14 @@
     },
     {
       "export": "resolveLocaleTag",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "resolvePaginationMode",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",

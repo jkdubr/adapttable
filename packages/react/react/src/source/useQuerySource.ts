@@ -15,13 +15,14 @@ import {
   queryGroupBy,
   type QuerySupport,
   recordCursor,
+  resolvePaginationMode,
   stableKey,
   type TableQueryParams,
   type TableSource,
 } from "@adapttable/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
+import { useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,

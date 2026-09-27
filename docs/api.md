@@ -653,6 +653,17 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
   infinite paging's accumulated rows and when they reset.
 - `LoadedFilterOption` / `FilterOptionsLoader` / `createFilterOptionsLoader` —
   async filter options, loaded once per key and aborted when superseded.
+- `createFrontendSource()` — the frontend tier as a `FrontendSource`: call
+  `update(config, view)` with the host's rows and callbacks
+  (`FrontendSourceConfig`) and the view-state store's snapshot
+  (`FrontendSourceViewState`) to read a `FrontendSourceFrame` — the page's
+  rows, the filtered and searched rows, `total`, the clamped `page` and
+  `hasNextPage` — from the engine's candidate, then `commit()` once the frame
+  is on screen. It caches each row's search text, restages only when a value
+  moved, and keeps one page slice per engine revision. `useFrontendData` runs
+  on it. `resolvePaginationMode(mode, isMobile)` turns `"auto"` into
+  `"infinite"` on mobile and `"paged"` elsewhere; `defaultSearchText` and
+  `defaultFrontendRowId` are the defaults a source uses.
 
 ### Controllable stores
 

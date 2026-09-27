@@ -20,6 +20,7 @@ import {
   queryGroupBy,
   type QuerySupport,
   recordCursor,
+  resolvePaginationMode,
   stableKey,
   staleAppendStash,
   type TableQuery,
@@ -28,7 +29,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
-import { resolvePaginationMode, useIsMobile } from "../hooks/useIsMobile";
+import { useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,

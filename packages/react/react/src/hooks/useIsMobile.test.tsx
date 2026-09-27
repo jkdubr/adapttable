@@ -4,23 +4,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   MOBILE_MEDIA_QUERY,
   mobileMediaQuery,
-  resolvePaginationMode,
   useIsMobile,
 } from "./useIsMobile";
 
 afterEach(() => vi.unstubAllGlobals());
-
-describe("resolvePaginationMode", () => {
-  it("returns a non-auto mode unchanged", () => {
-    expect(resolvePaginationMode("paged", true)).toBe("paged");
-    expect(resolvePaginationMode("infinite", false)).toBe("infinite");
-  });
-
-  it("resolves auto to infinite on mobile and paged on desktop", () => {
-    expect(resolvePaginationMode("auto", true)).toBe("infinite");
-    expect(resolvePaginationMode("auto", false)).toBe("paged");
-  });
-});
 
 describe("mobileMediaQuery", () => {
   it("reuses the default query so the cache stays warm", () => {
