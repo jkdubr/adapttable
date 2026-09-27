@@ -1,0 +1,184 @@
+/**
+ * Cell and header content: a column's template or component when it has
+ * one, its text otherwise. Structure only — the element the content lands in
+ * is the host's own `<td>` or `<th>`.
+ */
+import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  Directive,
+  inject,
+  input,
+  reflectComponentType,
+  TemplateRef,
+  type Type,
+} from "@angular/core";
+
+import {
+  type CellContext,
+  type ColumnDef,
+  type HeaderContext,
+  primitiveText,
+  type Renderer,
+} from "./columnDef";
+
+/**
+ * A cell template declared in a component's own template:
+ * `<ng-template adaptCellTemplate="status" let-row>…</ng-template>`. Collect
+ * them with `viewChildren(AdaptCellTemplate)` and pass them to
+ * `injectDataTable` as `cellTemplates`.
+ *
+ * @public
+ */
+@Directive({ selector: "ng-template[adaptCellTemplate]" })
+export class AdaptCellTemplate {
+  /** The key of the column this template renders. */
+  readonly key = input.required<string>({ alias: "adaptCellTemplate" });
+  /** The template. */
+  readonly template = inject<TemplateRef<CellContext<unknown>>>(TemplateRef);
+
+  /** Type the template's `let-` variables. */
+  static ngTemplateContextGuard(
+    _directive: AdaptCellTemplate,
+    _context: unknown
+  ): _context is CellContext<unknown> {
+    return true;
+  }
+}
+
+/**
+ * A column renderer split by kind: the template to stamp, or the component
+ * to create with the inputs it declares.
+ *
+ * @public
+ */
+export interface ResolvedRenderer<TContext> {
+  /** The template, when the renderer is one. */
+  readonly template: TemplateRef<TContext> | null;
+  /** The component, when the renderer is one. */
+  readonly component: Type<unknown> | null;
+  /** The context fields the component declares as inputs. */
+  readonly inputs: Record<string, unknown>;
+}
+
+function resolveRenderer<TContext extends object>(
+  renderer: Renderer<TContext> | undefined,
+  context: TContext
+): ResolvedRenderer<TContext> | null {
+  if (!renderer) return null;
+  if (renderer instanceof TemplateRef) {
+    return { template: renderer, component: null, inputs: {} };
+  }
+  // A component is handed only the inputs it declares.
+  const declared = new Set(
+    (reflectComponentType(renderer)?.inputs ?? []).map(
+      (entry) => entry.templateName
+    )
+  );
+  const inputs: Record<string, unknown> = {};
+  for (const [name, value] of Object.entries(context)) {
+    if (declared.has(name)) inputs[name] = value;
+  }
+  return { template: null, component: renderer, inputs };
+}
+
+/**
+ * Renders a body cell's content into the element it sits on:
+ * `<td [adaptCell]="column" [adaptCellRow]="row" [adaptCellIndex]="i">`.
+ *
+ * @public
+ */
+@Component({
+  selector: "[adaptCell]",
+  imports: [NgTemplateOutlet, NgComponentOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `@let content = renderer();
+    @if (content?.template; as template) {
+      <ng-container
+        [ngTemplateOutlet]="template"
+        [ngTemplateOutletContext]="context()"
+      />
+    } @else if (content?.component; as component) {
+      <ng-container
+        [ngComponentOutlet]="component"
+        [ngComponentOutletInputs]="content?.inputs"
+      />
+    } @else {
+      {{ text() }}
+    }`,
+})
+export class AdaptCell<TRow> {
+  /** The column. */
+  readonly column = input.required<ColumnDef<TRow>>({ alias: "adaptCell" });
+  /** The row. */
+  readonly row = input.required<TRow>({ alias: "adaptCellRow" });
+  /** The row's position in the rendered window. */
+  readonly rowIndex = input(0, { alias: "adaptCellIndex" });
+
+  /** What the renderer receives. */
+  protected readonly context = computed<CellContext<TRow>>(() => {
+    const row = this.row();
+    const column = this.column();
+    return {
+      $implicit: row,
+      row,
+      rowIndex: this.rowIndex(),
+      column,
+      value: column.accessor?.(row) ?? null,
+    };
+  });
+
+  /** The column's cell renderer, resolved. */
+  protected readonly renderer = computed(() =>
+    resolveRenderer(this.column().cell, this.context())
+  );
+
+  /** The cell's text when the column has no renderer. */
+  protected readonly text = computed(() => {
+    return primitiveText(this.context().value) ?? "";
+  });
+}
+
+/**
+ * Renders a header cell's content into the element it sits on:
+ * `<th [adaptHeader]="column">`. The column's `headerCell` when it has one,
+ * its `header` text otherwise.
+ *
+ * @public
+ */
+@Component({
+  selector: "[adaptHeader]",
+  imports: [NgTemplateOutlet, NgComponentOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `@let content = renderer();
+    @if (content?.template; as template) {
+      <ng-container
+        [ngTemplateOutlet]="template"
+        [ngTemplateOutletContext]="context()"
+      />
+    } @else if (content?.component; as component) {
+      <ng-container
+        [ngComponentOutlet]="component"
+        [ngComponentOutletInputs]="content?.inputs"
+      />
+    } @else {
+      {{ column().header ?? "" }}
+    }`,
+})
+export class AdaptHeader<TRow> {
+  /** The column. */
+  readonly column = input.required<ColumnDef<TRow>>({ alias: "adaptHeader" });
+
+  /** What the renderer receives. */
+  protected readonly context = computed<HeaderContext<TRow>>(() => ({
+    $implicit: this.column(),
+    column: this.column(),
+  }));
+
+  /** The column's header renderer, resolved. */
+  protected readonly renderer = computed(() =>
+    resolveRenderer(this.column().headerCell, this.context())
+  );
+}

@@ -2590,6 +2590,45 @@ itself, for a binding projecting them into `@adapttable/ai`'s
 `agentObservation`. It reports what the runtime does; what that means for a
 capability is decided there, once, rather than per binding.
 
+## The Angular binding
+
+`@adapttable/angular` is the headless binding for Angular 20 and newer. It
+adapts the same core stores as `@adapttable/react`, as signals, and draws no
+controls: the host writes its own markup.
+
+- `injectFrontendData(options)` is the in-memory tier: it takes
+  `FrontendDataOptions` (the rows, as a value or a signal, plus the URL-state
+  options) and returns a signal of the core `TableSource`.
+- `injectTableUrlState(options)` is the URL-synced view state: a
+  `TableUrlState` with a `state` signal and the store's setters, configured by
+  `TableUrlStateOptions`. `ADAPTTABLE_URL_ADAPTER` is the injection token that
+  sets the URL adapter every table under an injector uses, such as one over the
+  Angular Router.
+- `injectDataTable(options)` is the headless table, configured by
+  `DataTableOptions` and returning `DataTable`: rows, visible columns,
+  pagination, sort, search, labels and direction as signals, plus the core
+  prop getters (`tableAttrs`, `headerCellAttrs`, `sortButtonAttrs`,
+  `rowAttrs`, `cellAttrs`, `searchInputAttrs`), each an `Attrs` record.
+  `injectIsMobile` (with `IsMobileOptions`) is the viewport breakpoint as a
+  signal.
+- `ColumnDef` is the Angular column. Its `cell`, `headerCell` and `footer`
+  are a `Renderer`: an `ng-template` or a standalone component, which receives
+  a `CellContext` or a `HeaderContext`. `resolveColumns` fills the defaults a
+  column leaves out, and `ResolvedRenderer` is a renderer split into its
+  template or component.
+- `AdaptCell` and `AdaptHeader` render a column's content into the host's own
+  `<td>` and `<th>`, `AdaptCellTemplate` declares a cell template beside the
+  table (`<ng-template adaptCellTemplate="status" let-row>`), and
+  `AdaptAttrs` applies an `Attrs` record to an element.
+- `provideAdaptTableFeatures(...features)` composes features through
+  dependency injection into the `ADAPTTABLE_FEATURES` multi-provider; an
+  `AdaptTableFeature` is anything with a `setup` that registers against the
+  table.
+- `fromStore(store, options)` turns any core store, an `ExternalStore`, into a
+  read-only signal that ends with its injector (`FromStoreOptions`).
+  `MaybeSignal` and `MaybeSignalOptional` are the option types that take a
+  value or a signal of one.
+
 ## Other packages
 
 - `@adapttable/i18n` — `getLabels(locale)`, `getDirection(locale)`,
