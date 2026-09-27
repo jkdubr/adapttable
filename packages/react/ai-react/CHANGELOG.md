@@ -1,5 +1,14 @@
 # @adapttable/ai-react
 
+## 0.2.8
+
+### Patch Changes
+
+- Updated dependencies [e5615bd]
+  - @adapttable/core@3.5.0
+  - @adapttable/react@1.3.5
+  - @adapttable/ai@0.3.2
+
 ## 0.2.7
 
 ### Patch Changes

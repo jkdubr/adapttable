@@ -1,5 +1,12 @@
 # @adapttable/i18n
 
+## 3.2.6
+
+### Patch Changes
+
+- Updated dependencies [e5615bd]
+  - @adapttable/core@3.5.0
+
 ## 3.2.5
 
 ### Patch Changes
