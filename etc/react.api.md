@@ -54,6 +54,8 @@ import { CustomCellEditorRender } from '@adapttable/core';
 import { datasetIndex } from '@adapttable/core';
 import { DATE_OP_LABEL_KEYS } from '@adapttable/core';
 import { DateOp } from '@adapttable/core';
+import { defaultFrontendRowId } from '@adapttable/core';
+import { defaultSearchText } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
@@ -499,11 +501,9 @@ export { DateOp }
 // @public
 export const DEFAULT_SHORTCUTS: readonly Shortcut[];
 
-// @public
-export function defaultFrontendRowId<TRow>(row: TRow): string;
+export { defaultFrontendRowId }
 
-// @public
-export function defaultSearchText<TRow>(row: TRow): string;
+export { defaultSearchText }
 
 // @public
 export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";

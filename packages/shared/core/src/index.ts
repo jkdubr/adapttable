@@ -626,6 +626,16 @@ export {
   type TableQueryListener,
   warnDataTierMisuse,
 } from "./source/dataTier";
+export {
+  createFrontendSource,
+  defaultFrontendRowId,
+  defaultSearchText,
+  type FrontendSource,
+  type FrontendSourceConfig,
+  type FrontendSourceFrame,
+  type FrontendSourceViewState,
+  resolvePaginationMode,
+} from "./source/frontendSource";
 export type { TableSource } from "./source/TableSource";
 export type {
   SummaryRowFn,
