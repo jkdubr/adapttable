@@ -12,6 +12,7 @@ import {
   partitionPinnedRows,
   type TableVirtualization,
   type TreeEntry,
+  treeHasLoadedChildren,
 } from "@adapttable/core";
 import { type RefCallback, type RefObject, useCallback, useMemo } from "react";
 
@@ -75,12 +76,7 @@ export function hasLoadedChildren<TRow>(
   rows: readonly TRow[],
   props: ComposedTableProps<TRow>
 ): boolean {
-  const nested = props.getChildren?.(row);
-  if (nested !== undefined) return nested.length > 0;
-  const { getParentId, rowKey } = props;
-  if (!getParentId) return false;
-  const id = rowKey(row);
-  return rows.some((candidate) => getParentId(candidate) === id);
+  return treeHasLoadedChildren(row, rows, props);
 }
 
 /**

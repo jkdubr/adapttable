@@ -4,7 +4,13 @@
  * Expansion, lazy children and the walked hierarchy live on this entry.
  * The hooks mount in-tree through {@link TREE_LIVE}.
  */
-import { buildTreeEntries, treeColumnKey } from "@adapttable/core";
+import {
+  buildTreeEntries,
+  closeFailedTreeNode,
+  toggleTreeNode,
+  treeColumnKey,
+  treeExportExpandedIds,
+} from "@adapttable/core";
 import { type ReactNode, useMemo } from "react";
 
 import { useLazyChildren } from "../tree/useLazyChildren";
@@ -34,7 +40,7 @@ function LiveTree({
     // A node whose children failed to arrive closes, so the next click is a
     // retry rather than a close followed by an open.
     onLoadFailed: (_row, id) => {
-      if (treeExpansion.isExpanded(id)) treeExpansion.toggle(id);
+      closeFailedTreeNode(treeExpansion, id);
     },
   });
   const treeEntries = useMemo(
@@ -67,12 +73,7 @@ function LiveTree({
         ? buildTreeEntries({
             rows: chrome.source.rows,
             getRowId,
-            expandedIds: new Set(
-              treeEntries.flatMap((entry) => [
-                entry.key,
-                ...entry.descendantIds,
-              ])
-            ),
+            expandedIds: treeExportExpandedIds(treeEntries),
             getChildren: props.getChildren,
             getParentId: props.getParentId,
             hasChildren: props.hasChildren,
@@ -95,9 +96,10 @@ function LiveTree({
       expansion: {
         ...treeExpansion,
         toggle: (id: string) => {
-          const entry = treeEntries.find((candidate) => candidate.key === id);
-          if (entry && !entry.expanded) lazyChildren.loadIfNeeded(entry.row);
-          treeExpansion.toggle(id);
+          toggleTreeNode(treeEntries, id, {
+            loadIfNeeded: lazyChildren.loadIfNeeded,
+            toggle: treeExpansion.toggle,
+          });
         },
       },
       loadingIds: lazyChildren.loadingIds,

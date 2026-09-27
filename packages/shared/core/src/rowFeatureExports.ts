@@ -51,3 +51,17 @@ export {
   advanceGroupPaging,
   createGroupPagingController,
 } from "./grouping/groupPaging";
+export type {
+  LazyChildrenController,
+  LazyChildrenOptions,
+  LazyChildrenSnapshot,
+} from "./tree/lazyChildren";
+export { createLazyChildrenController } from "./tree/lazyChildren";
+export type { TreeExpansionActions } from "./tree/treeRuntime";
+export {
+  closeFailedTreeNode,
+  toggleTreeNode,
+  treeExpansionActions,
+  treeExportExpandedIds,
+  treeHasLoadedChildren,
+} from "./tree/treeRuntime";
