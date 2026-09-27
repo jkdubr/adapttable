@@ -93,6 +93,31 @@ export {
 export { isElementShowing, shouldEscapeClose } from "./overlays/escapeClose";
 export { focusWasDropped, restoreFocusSoon } from "./overlays/restoreFocus";
 export type {
+  ChangedCellFlashOptions,
+  ChangedCellFlashStore,
+} from "./rows/changedCellFlash";
+export {
+  CHANGED_CELL_FLASH_MS,
+  changedRowFields,
+  createChangedCellFlashStore,
+  patchTouchedKeys,
+} from "./rows/changedCellFlash";
+export type {
+  HighlightedCell,
+  HighlightSnapshot,
+  HighlightStore,
+  HighlightStoreOptions,
+} from "./rows/highlightStore";
+export {
+  createHighlightStore,
+  HIGHLIGHT_FADE_MS,
+  HIGHLIGHT_STEADY_MS,
+  highlightCellKey,
+  highlightDuration,
+} from "./rows/highlightStore";
+export type { AllMatchingScope } from "./selection/allMatchingScope";
+export { createAllMatchingScope } from "./selection/allMatchingScope";
+export type {
   SavedViewControlKey,
   SavedViewGlyph,
   SavedViewRenameController,
