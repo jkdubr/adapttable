@@ -19163,6 +19163,14 @@
       "behavior": ""
     },
     {
+      "export": "createQuerySource",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "createResponseAggregateOps",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -19188,6 +19196,14 @@
     },
     {
       "export": "createServerSource",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "createTableData",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -19263,6 +19279,14 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "cursorTrailKey",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -23115,6 +23139,38 @@
       "behavior": ""
     },
     {
+      "export": "QuerySource",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "QuerySourceAnswer",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "QuerySourceConfig",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "QuerySourceFrame",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "QuerySupport",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -24839,6 +24895,30 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "TableData",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "TableDataConfig",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "TableDataPlan",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
