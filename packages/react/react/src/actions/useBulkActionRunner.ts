@@ -1,40 +1,16 @@
 import {
   type BulkAction,
   type BulkActionContext,
+  type BulkActionOutcome,
   type ConfirmHandler,
+  createBulkActionRunner,
 } from "@adapttable/core";
-import { useCallback, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
-/**
- * A bulk-action rejection as display text, or `null` when there is none.
- *
- * @public
- */
-export function bulkActionErrorMessage(error: unknown): string | null {
-  if (error == null) return null;
-  if (error instanceof Error) return error.message;
-  if (typeof error === "string") return error;
-  if (
-    typeof error === "number" ||
-    typeof error === "boolean" ||
-    typeof error === "bigint"
-  ) {
-    return String(error);
-  }
-  try {
-    return JSON.stringify(error) ?? "Unknown error";
-  } catch {
-    return "Unknown error";
-  }
-}
-
-/**
- * How a bulk-action run ended — passed to `onComplete` on every run.
- *
- * @public
- */
-export type BulkActionOutcome =
-  { status: "success" } | { status: "error"; error: unknown };
+export {
+  bulkActionErrorMessage,
+  type BulkActionOutcome,
+} from "@adapttable/core";
 
 /**
  * Options for {@link useBulkActionRunner}.
@@ -90,46 +66,13 @@ export function useBulkActionRunner({
   cancelLabel,
   onComplete,
 }: UseBulkActionRunnerOptions): BulkActionRunner {
-  const [pending, setPending] = useState<string | null>(null);
-  const [error, setError] = useState<unknown>(null);
-
-  const run = useCallback(
-    (action: BulkAction, ids: string[], context?: BulkActionContext) => {
-      if (ids.length === 0) return;
-      const scope: BulkActionContext = context ?? {
-        allMatching: false,
-        total: ids.length,
-      };
-      const fire = async () => {
-        try {
-          setPending(action.key);
-          setError(null);
-          await action.onClick(ids, scope);
-          onComplete?.({ status: "success" });
-        } catch (error_) {
-          setError(error_);
-          onComplete?.({ status: "error", error: error_ });
-        } finally {
-          setPending(null);
-        }
-      };
-      if (action.confirm) {
-        confirm({
-          title: action.confirm.title,
-          // The confirm count reflects the SCOPE: the whole matching set
-          // when "select all matching" is active, the page ids otherwise.
-          message: action.confirm.message(scope.total),
-          confirmLabel: action.confirm.confirmLabel,
-          cancelLabel,
-          danger: action.confirm.danger,
-          onConfirm: () => void fire(),
-        });
-      } else {
-        void fire();
-      }
-    },
-    [confirm, cancelLabel, onComplete]
+  const options = { confirm, cancelLabel, onComplete };
+  const [runner] = useState(() => createBulkActionRunner(options));
+  runner.configure(options);
+  const { pending, error } = useSyncExternalStore(
+    runner.subscribe,
+    runner.getSnapshot,
+    runner.getSnapshot
   );
-
-  return { pending, error, run };
+  return { pending, error, run: runner.run };
 }

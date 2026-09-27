@@ -6,6 +6,19 @@
  */
 
 export type {
+  BulkActionOutcome,
+  BulkActionRunnerController,
+  BulkActionRunnerOptions,
+  BulkActionRunnerSnapshot,
+  BulkBarModel,
+  BulkBarSelection,
+} from "./actions/bulkActionRunner";
+export {
+  bulkActionErrorMessage,
+  bulkBarModel,
+  createBulkActionRunner,
+} from "./actions/bulkActionRunner";
+export type {
   ParsedChord,
   Shortcut,
   ShortcutKeyEvent,
@@ -18,6 +31,16 @@ export {
   isTextEntryTarget,
   parseChord,
 } from "./actions/shortcuts";
+export type {
+  ExportProgressAction,
+  ExportProgressDownload,
+  ExportProgressView,
+} from "./export/exportProgressView";
+export {
+  exportProgressHeading,
+  exportProgressView,
+  focusExportTrigger,
+} from "./export/exportProgressView";
 export type {
   ChordKeyEvent,
   FindBarKeyEvent,
@@ -35,3 +58,50 @@ export {
   isFindShortcut,
   scrollCurrentMatchIntoView,
 } from "./find/findBar";
+export type {
+  SelectionStatPart,
+  StatusBarItem,
+  StatusBarItemsInput,
+} from "./focus/statusBar";
+export { selectionStatParts, statusBarItems } from "./focus/statusBar";
+export {
+  DEFAULT_DENSITY,
+  requestDensityChange,
+  resolveDensity,
+} from "./layout/density";
+export type {
+  SidePanelKeyEvent,
+  SidePanelModel,
+  SidePanelModelPanel,
+  SidePanelTabModel,
+} from "./layout/sidePanelModel";
+export {
+  DEFAULT_SIDE_PANEL_ID_PREFIX,
+  handleSidePanelBodyKey,
+  handleSidePanelTabKey,
+  sidePanelModel,
+  sidePanelTabId,
+  sidePanelTabIndex,
+} from "./layout/sidePanelModel";
+export type { StickyToolbarStyle } from "./layout/stickyToolbar";
+export {
+  measuredToolbarHeight,
+  resolveStickyToolbar,
+  stickyHeaderOffset,
+  stickyToolbarStyle,
+} from "./layout/stickyToolbar";
+export { isElementShowing, shouldEscapeClose } from "./overlays/escapeClose";
+export { focusWasDropped, restoreFocusSoon } from "./overlays/restoreFocus";
+export type {
+  SavedViewControlKey,
+  SavedViewGlyph,
+  SavedViewRenameController,
+  SavedViewRenameSnapshot,
+  SavedViewRowControlModel,
+  SavedViewRowControlsInput,
+} from "./url/savedViewsPanelModel";
+export {
+  createSavedViewRenameController,
+  SAVED_VIEW_GLYPH_PATHS,
+  savedViewRowControls,
+} from "./url/savedViewsPanelModel";

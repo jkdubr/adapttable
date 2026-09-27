@@ -4,6 +4,7 @@
  * The key lives outside the feature implementation so the shell can read a
  * composed chooser without importing its provider or state hook.
  */
+import { requestDensityChange, resolveDensity } from "@adapttable/core";
 import { useCallback } from "react";
 
 import type { Density } from "../url/useDensityUrlState";
@@ -53,13 +54,16 @@ export function useResolvedDensity(input: {
   const notify = input.onDensityChange;
   const onDensityChange = useCallback(
     (next: Density) => {
-      if (!controlled) setFeatureDensity?.(next);
-      notify?.(next);
+      requestDensityChange(next, {
+        controlled,
+        setFeatureDensity,
+        onDensityChange: notify,
+      });
     },
     [controlled, notify, setFeatureDensity]
   );
   return {
-    density: controlledDensity ?? featureDensity ?? "comfortable",
+    density: resolveDensity(controlledDensity, featureDensity),
     onDensityChange,
   };
 }

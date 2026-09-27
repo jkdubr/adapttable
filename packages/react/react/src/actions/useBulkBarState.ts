@@ -1,19 +1,15 @@
 import {
   type BulkAction,
   type BulkActionContext,
+  bulkActionErrorMessage,
+  type BulkActionOutcome,
+  bulkBarModel,
   type ConfirmHandler,
   type TableLabels,
 } from "@adapttable/core";
 
-import {
-  offersAllMatching,
-  type SelectionState,
-} from "../selection/useSelection";
-import {
-  bulkActionErrorMessage,
-  type BulkActionOutcome,
-  useBulkActionRunner,
-} from "./useBulkActionRunner";
+import type { SelectionState } from "../selection/useSelection";
+import { useBulkActionRunner } from "./useBulkActionRunner";
 
 export type { BulkActionContext };
 
@@ -91,26 +87,16 @@ export function useBulkBarState({
   });
   const errorMessage = bulkActionErrorMessage(error);
   const ids = [...selectedIds];
-  // A full page is selected, more rows match elsewhere, and the source can
-  // speak for them → the two-state "select all N matching" banner rather than
-  // the plain count.
-  const expandable = offersAllMatching(selection, total);
-  // When "all matching" is active, bulk actions act on the WHOLE filtered
-  // set: the context tells the handler (and the confirm count) so.
-  const scope = selection.allMatching
-    ? { allMatching: true, total }
-    : undefined;
-  const banner = selection.allMatching
-    ? {
-        text: labels.allMatchingSelected(total),
-        action: labels.clearAll,
-        onClick: clear,
-      }
-    : {
-        text: labels.pageSelected(selection.visibleIds.length),
-        action: labels.selectAllMatching(total),
-        onClick: selection.selectAllMatching,
-      };
+  const {
+    expandable,
+    scope,
+    banner: model,
+  } = bulkBarModel(selection, total, labels);
+  const banner = {
+    text: model.text,
+    action: model.action,
+    onClick: model.command === "clear" ? clear : selection.selectAllMatching,
+  };
   return {
     selectedCount,
     ids,
