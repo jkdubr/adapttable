@@ -32,11 +32,14 @@
  * grand-total captions are structure, which is core's.
  */
 import {
-  measureLabel,
-  type PivotColumnLeaf,
+  PIVOT_ROW_COLUMN_KEY,
+  PIVOT_ROW_INDENT,
   type PivotField,
   type PivotResult,
   type PivotRow,
+  pivotRowCaption,
+  pivotRowIndentStyle,
+  pivotTableLayout,
   resolveLabels,
   type TableLabels,
 } from "@adapttable/core";
@@ -46,18 +49,7 @@ import type { ColumnDef } from "../columnDef";
 
 export type { TableLabels };
 
-/**
- * The key of the row-header column — the one down the side, holding each
- * line's label. Stable, so a host can style or address it.
- *
- * @public
- */
-export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
-
-/** The key of the column rendering `columnLeaves[index]`. */
-function leafColumnKey(index: number): string {
-  return `pivot-${String(index)}`;
-}
+export { PIVOT_ROW_COLUMN_KEY } from "@adapttable/core";
 
 /**
  * Options for {@link pivotTableModel}.
@@ -120,27 +112,6 @@ export interface PivotTableModel {
   ) => Partial<Record<string, ReactNode>>;
 }
 
-/**
- * The header group a leaf column sits under: its column path, or the
- * grand-total caption for the total column.
- *
- * A total column has no path — it stands for all of them — so it would
- * otherwise land in the gap over ungrouped columns and read as belonging to
- * whatever precedes it.
- */
-function groupOf(
-  leaf: PivotColumnLeaf,
-  totalLabel: string
-): readonly string[] | undefined {
-  if (leaf.total) return [totalLabel];
-  return leaf.path.length > 0 ? leaf.path : undefined;
-}
-
-/** A line's own caption, as text: its label, or the grand-total wording. */
-function textCaptionOf(row: PivotRow, labels: Required<TableLabels>): string {
-  return row.kind === "grandTotal" ? labels.pivotGrandTotal : row.label;
-}
-
 /** One line's row-header cell: the indent, the part name, and the content. */
 function rowHeaderCell(
   row: PivotRow,
@@ -151,11 +122,7 @@ function rowHeaderCell(
     <span
       data-adapttable-part="pivot-row-header"
       data-pivot-kind={row.kind}
-      style={
-        row.depth > 0 && indent > 0
-          ? { paddingInlineStart: `${String(row.depth * indent)}px` }
-          : undefined
-      }
+      style={pivotRowIndentStyle(row, indent)}
     >
       {content}
     </span>
@@ -182,25 +149,31 @@ export function pivotTableModel(
   result: PivotResult,
   options: PivotTableModelOptions = {}
 ): PivotTableModel {
-  const { fields = [], renderRowHeader, indent = 16, rowHeader } = options;
+  const {
+    fields,
+    renderRowHeader,
+    indent = PIVOT_ROW_INDENT,
+    rowHeader,
+  } = options;
   const labels = resolveLabels(options.labels);
+  const layout = pivotTableLayout(result, { fields, labels });
   // The host's row-header renderer, or the line's own caption when it has none.
   const caption =
-    renderRowHeader ?? ((row: PivotRow) => textCaptionOf(row, labels));
+    renderRowHeader ?? ((row: PivotRow) => pivotRowCaption(row, labels));
 
   const columns: ColumnDef<PivotRow>[] = [
     {
       key: PIVOT_ROW_COLUMN_KEY,
-      header: rowHeader ?? labels.pivotRows,
+      header: rowHeader ?? layout.rowHeaderLabel,
       accessor: (row) => rowHeaderCell(row, indent, caption(row)),
       // The label as text, for every context that cannot render an element:
       // an export, an announcement, the clipboard.
-      formatValue: (row) => textCaptionOf(row, labels),
+      formatValue: (row) => pivotRowCaption(row, labels),
     },
-    ...result.columnLeaves.map((leaf, index) => ({
-      key: leafColumnKey(index),
-      header: measureLabel(leaf.measure, fields),
-      group: groupOf(leaf, labels.pivotTotal),
+    ...layout.leafColumns.map(({ key, index, header, group, leaf }) => ({
+      key,
+      header,
+      group,
       align: "end" as const,
       accessor: (row: PivotRow) => row.cells[index] as ReactNode,
       // The leaf a column renders, for a host that needs to know which
@@ -209,26 +182,13 @@ export function pivotTableModel(
     })),
   ];
 
-  const total = result.rows.find((row) => row.kind === "grandTotal");
-  const rows = total
-    ? result.rows.filter((row) => row.kind !== "grandTotal")
-    : result.rows;
-
+  // Pivot cells are display values, rendered as nodes like every accessor's.
+  const summaryCells = layout.summaryCells as
+    Partial<Record<string, ReactNode>> | undefined;
   return {
     columns,
-    rows,
+    rows: layout.rows,
     rowKey: (row) => row.key,
-    summaryRow: total
-      ? () => ({
-          // The footer's caption is the label, never the host's row-header
-          // renderer: that renderer exists for the body's lines, where the
-          // fold control lives, and a fold control on the grand total would be
-          // a button with nothing to fold.
-          [PIVOT_ROW_COLUMN_KEY]: textCaptionOf(total, labels),
-          ...Object.fromEntries(
-            total.cells.map((cell, index) => [leafColumnKey(index), cell])
-          ),
-        })
-      : undefined,
+    summaryRow: summaryCells ? () => summaryCells : undefined,
   };
 }

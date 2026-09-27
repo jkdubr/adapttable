@@ -39,6 +39,25 @@ export {
   type PivotRowKind,
 } from "./pivot/pivotModel";
 export {
+  PIVOT_AGGREGATIONS,
+  pivotMeasureAggName,
+  pivotPanelZones,
+  type PivotZoneEntry,
+  pivotZoneLabel,
+  type PivotZoneModel,
+} from "./pivot/pivotPanelModel";
+export {
+  PIVOT_ROW_COLUMN_KEY,
+  PIVOT_ROW_INDENT,
+  pivotLeafColumnKey,
+  type PivotLeafColumnLayout,
+  pivotLeafGroup,
+  pivotRowCaption,
+  pivotRowIndentStyle,
+  type PivotTableLayout,
+  pivotTableLayout,
+} from "./pivot/pivotTableLayout";
+export {
   deserializePivot,
   deserializePivotState,
   type PivotUrlState,
