@@ -36,6 +36,7 @@ import {
   createQueryEmitter,
   cursorHasMore,
   type CursorTrail,
+  cursorTrailKey,
   effectiveQueryAggregates,
   EMPTY_CURSOR_TRAIL,
   queryGroupBy,
@@ -190,6 +191,7 @@ interface Latest<TRow> {
   readonly frame: ServerSourceFrame<TRow>;
   readonly requested: GroupAggregateOps | undefined;
   readonly baseKey: string;
+  readonly trailKey: string;
   readonly cursorMode: boolean;
   readonly appendPending: boolean;
 }
@@ -302,7 +304,18 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
       sortLevels,
       filters: extra,
     });
-    cursorBase ??= baseKey;
+    const trailKey = cursorTrailKey({
+      limit,
+      search,
+      sortBy,
+      sortDir,
+      sortLevels,
+      groupBy: view.groupBy,
+      groupAggregateOverrides: view.groupAggregateOverrides,
+      filters: extra,
+      filterTree: view.filterTree,
+    });
+    cursorBase ??= trailKey;
     const appended = appendedRows(stash, baseKey, page, rows);
 
     // Offset mode knows the end from the count; cursor mode only knows there
@@ -326,6 +339,7 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
       frame,
       requested,
       baseKey,
+      trailKey,
       cursorMode,
       appendPending: appended.pending,
     };
@@ -377,17 +391,17 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
   }
 
   /**
-   * A new sort, filter, search or page size makes every token the server
-   * issued meaningless. Drop the trail and start again from page 1. Returns
-   * whether the trail was dropped.
+   * A new sort, filter, search, grouping or page size makes every token the
+   * server issued meaningless. Drop the trail and start again from page 1.
+   * Returns whether the trail was dropped.
    */
   function restartCursors({
     view,
-    baseKey,
+    trailKey,
     cursorMode,
   }: Latest<TRow>): boolean {
-    if (!cursorMode || cursorBase === baseKey) return false;
-    cursorBase = baseKey;
+    if (!cursorMode || cursorBase === trailKey) return false;
+    cursorBase = trailKey;
     cursors = EMPTY_CURSOR_TRAIL;
     view.setPage(1);
     return true;

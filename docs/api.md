@@ -676,6 +676,28 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
   `refetch` are the source's own actions, `subscribe` / `revision` report when
   its state moved, and `dispose()` aborts the request in flight.
   `useServerData` runs on it.
+- `createQuerySource()` — the query-library tier as a `QuerySource`: call
+  `params(config, view)` with the host's `QuerySourceConfig` and the
+  view-state store's snapshot for the params to hand the library (the same
+  inputs give the same object), then `update(answer)` with the library's
+  result (`QuerySourceAnswer`) to read a `QuerySourceFrame` — the rows (the
+  last page when paged, every page so far when infinite), `total`, `facets`,
+  the append flags and the aggregate operations on screen. `commit()` once the
+  frame is on screen records the cursor, restarts a stale trail from page 1,
+  and clamps a page past the end; `fetchNextPage` and `refetch` drive the
+  library. `useQuerySource` runs on it.
+- `cursorTrailKey(query)` — what a cursor token's position depends on: limit,
+  search, sort, grouping, aggregate overrides, filters and the filter tree. A
+  change to any of it restarts the trail in both server tiers.
+- `createTableData()` — the table data controller as a `TableData`: `plan`
+  a `TableDataConfig` (the data props plus the filter engine, when composed)
+  into a `TableDataPlan` — the tier, the merged filter runtime, the combined
+  predicate, the tree predicate and the facet keys a server query asks for;
+  `finish({ resolved, frontend })` adds facet counts computed from the
+  searched rows when nothing answered them; `commit()` tells a
+  `mode="frontend"` table's `onQueryChange` about each change (never the
+  mount), `loadOptions()` loads each filter's own option list once, and
+  `dispose()` aborts a notification in flight. `useTableData` runs on it.
 - `ResponseAggregateOps` / `ResponseAggregateOpsInput` /
   `createResponseAggregateOps` — which aggregate
   operations the rows on screen were computed with: `remember` each request's

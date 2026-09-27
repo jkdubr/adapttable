@@ -1,32 +1,27 @@
 import {
-  createFilterOptionsLoader,
-  createQueryEmitter,
+  createTableData,
   type ExtraFilters,
   type FacetMap,
   type FeatureHostState,
   type FilterDef,
   type FilterEngine,
   type FilterRuntime,
-  type FilterTypeRegistry,
   type FilterTypeSpec,
   isDeclarativeFilters,
-  type LoadedFilterOption,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
-  resolveDataTier,
   type SortableValue,
-  stableKey,
+  type TableData,
+  type TableDataPlan,
   type TableSource,
-  warnDataTierMisuse,
 } from "@adapttable/core";
 import {
   type ReactNode,
-  useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 
 import type { ColumnDef } from "../columnDef";
@@ -41,23 +36,8 @@ import {
 
 export type { UseServerDataOptions };
 
-const EMPTY_REGISTRY: FilterTypeRegistry = {
-  get: () => undefined,
-  has: () => false,
-  types: () => [],
-};
-
 /** The inactive server hook's columns: none, so it asks for nothing. */
 const NO_COLUMNS: readonly never[] = [];
-
-const EMPTY_RUNTIME: FilterRuntime<never> = {
-  defs: [],
-  arrayExtraKeys: [],
-  numberExtraKeys: [],
-  filterLabels: {},
-  filterFn: () => true,
-  registry: EMPTY_REGISTRY,
-};
 
 /**
  * Options for {@link useTableData}.
@@ -203,91 +183,6 @@ export type DataModeProps<_TRow = unknown> = {
     }
 );
 
-function useQueryNotification<TRow>(
-  source: TableSource<TRow>,
-  handler: TableQueryHandler | undefined
-): void {
-  const { page, limit, search, sortBy, sortDir, sortLevels, extra } = source;
-  const query = useMemo<TableQuery>(
-    () => ({
-      page,
-      limit,
-      search,
-      sortBy,
-      sortDir,
-      sortLevels: sortLevels ?? [],
-      filters: extra,
-    }),
-    [page, limit, search, sortBy, sortDir, sortLevels, extra]
-  );
-  const queryKey = stableKey(query);
-  const handlerRef = useRef(handler);
-  handlerRef.current = handler;
-  const queryRef = useRef(query);
-  queryRef.current = query;
-  // The key the table mounted with is already seen: a notification is a
-  // CHANGE, and the mount is not one.
-  const [emitter] = useState(() => createQueryEmitter(queryKey));
-  useEffect(
-    () => emitter.emitIfChanged(handlerRef.current, queryRef.current, queryKey),
-    [emitter, queryKey]
-  );
-}
-
-/**
- * Resolve every option list a filter def loads on its own, once each, for
- * the life of the table — `@adapttable/core`'s filter-options loader.
- */
-function useAsyncFilterOptions(
-  enabled: boolean,
-  defs: readonly FilterDef<never>[],
-  onLoaded: (key: string, options: readonly LoadedFilterOption[]) => void
-): void {
-  const [loader] = useState(createFilterOptionsLoader);
-  useEffect(() => {
-    if (!enabled) return;
-    return loader.load(defs, onLoaded);
-  }, [loader, enabled, defs, onLoaded]);
-}
-
-/**
- * Facet counts for the checklist filters, computed here when nothing else did.
- *
- * A server tier answers with its own counts; a frontend one has the rows in
- * hand, so the counts come from the same predicate the table filters with —
- * every filter EXCEPT the one being counted, which is what makes a checklist
- * show what each remaining choice would yield.
- */
-function useComputedFacets<TRow>(
-  engine: FilterEngine | undefined,
-  resolved: TableSource<TRow>,
-  runtime: FilterRuntime<TRow>,
-  filterFn: (row: TRow, extra: ExtraFilters) => boolean
-): FacetMap | undefined {
-  return useMemo(() => {
-    if (!engine || resolved.facets) return resolved.facets;
-    const rows = resolved.allSearchedRows;
-    if (!rows) return undefined;
-    const keep = (row: TRow, extra: ExtraFilters) => {
-      if (!filterFn(row, extra)) return false;
-      if (!resolved.filterTree) return true;
-      return engine.evaluateTree(
-        resolved.filterTree,
-        row,
-        runtime.defs,
-        runtime.registry
-      );
-    };
-    return engine.computeFacets(
-      runtime.defs,
-      rows,
-      resolved.extra,
-      keep,
-      runtime.registry
-    );
-  }, [engine, resolved, runtime.defs, runtime.registry, filterFn]);
-}
-
 /**
  * The tier a table is NOT on still has its hook called — that is the rule of
  * hooks — so it is handed inert input instead: no rows, no URL, no query
@@ -303,19 +198,16 @@ function frontendTierInput<TRow>(input: {
   active: boolean;
   urlSync: boolean | undefined;
   data: readonly TRow[] | undefined;
-  engine: FilterEngine | undefined;
   runtime: FilterRuntime<TRow>;
+  filterTreeFn: TableDataPlan<TRow>["filterTreeFn"];
   isFrontendMode: boolean;
   loading: boolean | undefined;
 }) {
-  const { engine, runtime } = input;
+  const { runtime } = input;
   return {
     urlSync: activeOnly(input.active, input.urlSync, false),
     data: activeOnly(input.active, input.data ?? [], [] as readonly TRow[]),
-    filterTreeFn: engine
-      ? (row: TRow, tree: Parameters<FilterEngine["evaluateTree"]>[0]) =>
-          engine.evaluateTree(tree, row, runtime.defs, runtime.registry)
-      : undefined,
+    filterTreeFn: input.filterTreeFn,
     arrayExtraKeys: runtime.arrayExtraKeys,
     numberExtraKeys: runtime.numberExtraKeys,
     isLoading: activeOnly(input.isFrontendMode, input.loading, undefined),
@@ -354,6 +246,9 @@ export function useTableDataWithEngine<TRow>(
   options: UseTableDataOptions<TRow>,
   engine: FilterEngine | undefined
 ): UseTableDataResult<TRow> {
+  // The controller is mutable and must see every render's inputs; its pieces
+  // are memoized inside it, so the compiler's cache would only skip updates.
+  "use no memo";
   const {
     source,
     data,
@@ -381,59 +276,30 @@ export function useTableDataWithEngine<TRow>(
     ...urlOptions
   } = options;
 
-  const declaredFilters = isDeclarativeFilters(filters) ? filters : undefined;
-  const loaderCacheRef = useRef(
-    new Map<
-      string,
-      () => Promise<readonly { value: string; label: string }[]>
-    >()
+  const [controller] = useState<TableData<TRow>>(createTableData);
+  // A filter's own option list landing re-renders through here.
+  useSyncExternalStore(
+    controller.subscribe,
+    controller.revision,
+    controller.revision
   );
-  const [loadedOptions, setLoadedOptions] = useState<
-    Record<string, readonly LoadedFilterOption[]>
-  >({});
-  const onOptionsLoaded = useCallback(
-    (key: string, next: readonly LoadedFilterOption[]) => {
-      setLoadedOptions((prev) => ({ ...prev, [key]: next }));
-    },
-    []
-  );
-
-  const runtime = useMemo(() => {
-    if (!engine) return EMPTY_RUNTIME as FilterRuntime<TRow>;
-    return engine.buildRuntime({
-      columns,
-      declaredFilters,
-      locale,
-      data: data ?? [],
-      loadedOptions,
-      filterTypes,
-      featureHost,
-      optionCache: loaderCacheRef.current,
-    });
-  }, [
+  const plan = controller.plan({
     engine,
-    columns,
-    declaredFilters,
-    locale,
+    source,
     data,
-    loadedOptions,
+    mode,
+    onQueryChange,
+    columns,
+    declaredFilters: isDeclarativeFilters(filters) ? filters : undefined,
     filterTypes,
     featureHost,
-  ]);
+    locale,
+    filterFn,
+    facetKeys,
+  });
+  const { tier, runtime, filterFn: combinedFilterFn } = plan;
 
-  useAsyncFilterOptions(engine !== undefined, runtime.defs, onOptionsLoaded);
-
-  const tier = resolveDataTier(source, mode, onQueryChange);
-  warnDataTierMisuse(source, mode, data, onQueryChange);
-
-  const combinedFilterFn = useMemo(
-    () =>
-      filterFn
-        ? (row: TRow, extra: ExtraFilters) =>
-            runtime.filterFn(row, extra) && filterFn(row, extra)
-        : runtime.filterFn,
-    [runtime, filterFn]
-  );
+  useEffect(() => controller.loadOptions(), [controller, runtime.defs]);
 
   const resolvedColumns = useMemo(
     () => resolveColumns(columns, locale),
@@ -445,8 +311,8 @@ export function useTableDataWithEngine<TRow>(
       active: tier === "frontend",
       urlSync: urlOptions.urlSync,
       data,
-      engine,
       runtime,
+      filterTreeFn: plan.filterTreeFn,
       isFrontendMode: mode === "frontend",
       loading,
     }),
@@ -460,17 +326,6 @@ export function useTableDataWithEngine<TRow>(
     getSortValue,
     error,
   });
-  const derivedFacetKeys = useMemo(() => {
-    if (facetKeys) return facetKeys;
-    if (!engine) return undefined;
-    return runtime.defs
-      .filter(
-        (def) =>
-          (runtime.registry.get(def.type)?.widget ?? def.type) === "checklist"
-      )
-      .map((def) => def.key);
-  }, [engine, facetKeys, runtime.defs, runtime.registry]);
-
   const server = useServerData<TRow>({
     ...urlOptions,
     ...serverTierInput<TRow>({
@@ -482,7 +337,7 @@ export function useTableDataWithEngine<TRow>(
       aggregates,
       responseKey,
       supports,
-      facetKeys: derivedFacetKeys,
+      facetKeys: plan.facetKeys,
       facets: serverFacets,
     }),
     // A column's default aggregate is a request to the server; the hook that
@@ -496,22 +351,18 @@ export function useTableDataWithEngine<TRow>(
     mobileBreakpoint,
   });
 
-  useQueryNotification(
-    frontend,
-    tier === "frontend" && mode === "frontend" ? onQueryChange : undefined
-  );
-
   let resolved: TableSource<TRow>;
   if (source) resolved = source;
   else if (tier === "server") resolved = server;
   else resolved = frontend;
 
-  const facets = useComputedFacets(engine, resolved, runtime, combinedFilterFn);
-
-  const sourced = useMemo(
-    () => (facets ? { ...resolved, facets } : resolved),
-    [resolved, facets]
-  );
+  const sourced = controller.finish({ resolved, frontend });
+  // Once React accepts the render: tell a frontend table's `onQueryChange`
+  // about a change.
+  useEffect(() => {
+    controller.commit();
+  });
+  useEffect(() => controller.dispose, [controller]);
 
   return { source: sourced, runtime };
 }

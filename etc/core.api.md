@@ -1528,6 +1528,9 @@ export function createNeutralTable<TRow>(engine: TableEngine<TRow>, tableId: str
 export function createQueryEmitter(seenKey?: string): QueryEmitter;
 
 // @public
+export function createQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(): QuerySource<TRow, TParams, TPage>;
+
+// @public
 export function createResponseAggregateOps(): ResponseAggregateOps;
 
 // @public
@@ -1538,6 +1541,9 @@ export function createSavedViewsController(initial: SavedViewsControllerOptions)
 
 // @public
 export function createServerSource<TRow>(): ServerSource<TRow>;
+
+// @public
+export function createTableData<TRow>(): TableData<TRow>;
 
 // @public
 export function createTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
@@ -1583,6 +1589,19 @@ export function cursorHasMore(trail: CursorTrail, page: number): boolean;
 
 // @public
 export type CursorTrail = readonly (string | undefined)[];
+
+// @public
+export function cursorTrailKey(query: {
+    readonly limit: number;
+    readonly search: string;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+    readonly groupBy: string | undefined;
+    readonly groupAggregateOverrides: GroupAggregateOverrides;
+    readonly filters: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+}): string;
 
 // @public
 export const CUSTOM_AGGREGATE = "custom";
@@ -4197,6 +4216,47 @@ export interface QueryPivotRow {
 }
 
 // @public
+export interface QuerySource<TRow, TParams extends TableQueryParams, TPage> {
+    readonly commit: () => void;
+    readonly fetchNextPage: () => void;
+    readonly params: (config: QuerySourceConfig<TRow, TParams, TPage>, view: ServerSourceViewState) => Partial<TParams>;
+    readonly refetch: () => Promise<unknown> | void;
+    readonly revision: () => number;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly update: (answer: QuerySourceAnswer<TRow, TPage>) => QuerySourceFrame<TRow>;
+}
+
+// @public
+export interface QuerySourceAnswer<TRow, TPage> {
+    readonly query: InfiniteQueryLike<TPage>;
+    readonly selectorKey?: string | number;
+    readonly selectPage?: PageSelector<TRow, TPage>;
+}
+
+// @public
+export interface QuerySourceConfig<TRow, TParams extends TableQueryParams, TPage> {
+    readonly aggregates?: readonly QueryAggregate[];
+    readonly baseParams?: Partial<TParams>;
+    readonly columns?: readonly ColumnMetadata<TRow>[];
+    readonly expandedIds?: readonly string[];
+    readonly facetKeys?: readonly string[];
+    readonly nextCursor?: (page: TPage) => string | null | undefined;
+    readonly paginationMode: ResolvedPaginationMode;
+    readonly sanitizeParams?: (params: Partial<TParams>) => Partial<TParams>;
+    readonly supports?: QuerySupport;
+}
+
+// @public
+export interface QuerySourceFrame<TRow> {
+    readonly facets: FacetMap | undefined;
+    readonly groupAggregations: GroupAggregateOps | undefined;
+    readonly hasNextPage: boolean;
+    readonly isFetchingNextPage: boolean;
+    readonly rows: readonly TRow[];
+    readonly total: number;
+}
+
+// @public
 export interface QuerySupport {
     aggregateOperations?: readonly string[];
     aggregates?: boolean;
@@ -5363,6 +5423,45 @@ export interface TableCommandOptions {
 
 // @public
 export function tableCommands(options: TableCommandOptions): Command[];
+
+// @public
+export interface TableData<TRow> {
+    readonly commit: () => void;
+    readonly dispose: () => void;
+    readonly finish: (sources: {
+        readonly resolved: TableSource<TRow>;
+        readonly frontend: TableSource<TRow>;
+    }) => TableSource<TRow>;
+    readonly loadOptions: () => () => void;
+    readonly plan: (config: TableDataConfig<TRow>) => TableDataPlan<TRow>;
+    readonly revision: () => number;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface TableDataConfig<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly data?: readonly TRow[];
+    readonly declaredFilters?: readonly FilterDef<TRow>[];
+    readonly engine: FilterEngine | undefined;
+    readonly facetKeys?: readonly string[];
+    readonly featureHost?: FeatureHostState;
+    readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterTypes?: readonly FilterTypeSpec[];
+    readonly locale?: string;
+    readonly mode?: "frontend" | "server";
+    readonly onQueryChange?: TableQueryListener;
+    readonly source?: TableSource<TRow>;
+}
+
+// @public
+export interface TableDataPlan<TRow> {
+    readonly facetKeys: readonly string[] | undefined;
+    readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterTreeFn: ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
+    readonly runtime: FilterRuntime<TRow>;
+    readonly tier: DataTier;
+}
 
 // @public
 export type TableDensity = "comfortable" | "compact";

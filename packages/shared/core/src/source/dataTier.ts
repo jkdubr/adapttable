@@ -395,6 +395,39 @@ export function canRequestCursorPage(
   return page <= trail.length;
 }
 
+/**
+ * What a cursor token's position depends on: a change to any of it describes
+ * a different result set, so every token already held is meaningless and the
+ * trail starts again from page 1. Wider than {@link appendBaseKey} — grouping,
+ * the reader's aggregate overrides and the filter tree reshape the result a
+ * token points into as surely as a sort does.
+ *
+ * @public
+ */
+export function cursorTrailKey(query: {
+  readonly limit: number;
+  readonly search: string;
+  readonly sortBy: string | undefined;
+  readonly sortDir: SortDirection | undefined;
+  readonly sortLevels: readonly SortLevel[];
+  readonly groupBy: string | undefined;
+  readonly groupAggregateOverrides: GroupAggregateOverrides;
+  readonly filters: ExtraFilters;
+  readonly filterTree: QueryFilterGroup | undefined;
+}): string {
+  return stableKey({
+    limit: query.limit,
+    search: query.search,
+    sortBy: query.sortBy ?? null,
+    sortDir: query.sortDir ?? null,
+    sortLevels: query.sortLevels,
+    groupBy: query.groupBy ?? null,
+    groupAggregateOverrides: query.groupAggregateOverrides,
+    filters: query.filters,
+    filterTree: query.filterTree ?? null,
+  });
+}
+
 /* ── Infinite pages ────────────────────────────────────────────────── */
 
 /**
