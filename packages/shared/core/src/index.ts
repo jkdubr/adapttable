@@ -969,6 +969,7 @@ export {
  */
 export type { TableCommandOptions } from "./actions/commandRegistry";
 export * from "./bindingExports";
+export * from "./columnFilterExports";
 export type {
   ColumnMenuChoice,
   ColumnMenuChoiceOption,
