@@ -17529,6 +17529,63 @@ CommandPaletteController` — the palette's open state, controlled or its own.
   (`CommandListView`), `commandListKeyAction` (`CommandListKeyAction`),
   `nextCommandIndex`, `runCommand`, `tabTrapTarget`.
 
+### Column and filter controllers
+
+The rules behind the column menu and the filter panel, for a binding to wire
+its own controls to.
+
+- `createColumnLayoutController(defaultColumnLayout?): ColumnLayoutController`
+  — the column layout store (`COLUMN_LAYOUT_STORE_OPTIONS`) plus the rename
+  baselines a reset restores while the host echoes an accepted name. Call
+  `configure(options: ColumnLayoutControllerOptions)` each render.
+  `columnLayoutVisibleColumns(columns, state, options?)` derives the columns
+  that render; `columnPinInsets(visibleColumns, state)` each pinned column's
+  sticky inset.
+- `writeStoredColumnLayout(storage, storageKey, next, fallback)` — save a
+  layout, removing the entry when it equals the default; a failed write is
+  swallowed.
+- `COLUMN_DND_MIME`, `columnDragAllowed(target: ColumnDragTarget | null)`,
+  `columnReorderKeyStep(key, rtl)` and
+  `columnDragRowAttrs(drag: ColumnDragSource | null, overIndex, key, index):
+ColumnDragRowAttrs` — the column-menu reorder: which drags start, which arrow
+  moves a column in either writing direction, and the drop edge.
+- `createColumnRenameEditor(options: ColumnRenameEditorOptions):
+ColumnRenameEditor` — the inline rename form. `ColumnRenameEditorSnapshot`;
+  `submit()` returns a `ColumnRenameSubmit`.
+- `rangeFilterWidget(def, source, op)` with `initialRangeFilterOp(def, extra)`,
+  `textFilterWidget(def, source, localOp, setLocalOp)` with
+  `initialTextFilterOp(def, extra)`, and `booleanFilterWidget(def, source)` —
+  the auto-built form's fields: `RangeFieldWidget` (`RangeOpArity`,
+  `RangeOpLabelKeys`), `TextFieldWidget`, `BooleanFieldWidget`
+  (`BooleanChoice`, `parseBooleanChoice`). `scalarFilterText`,
+  `filterOpLabel`.
+- `filterTreeConditionModel(condition, defs, registry, labels):
+FilterTreeConditionModel` — one AND/OR builder row: its field and operator
+  choices (`FilterTreeOption`) and its value editor
+  (`filterTreeValueEditor`, `FilterTreeValueEditor`).
+  `filterTreeEditorActions(tree, commit, first, registry):
+FilterTreeEditorActions`, `filterTreeCombinatorOptions`,
+  `filterTreeOpLabel`, `newFilterTreeCondition`, and
+  `filterTreeChipLabel(condition, defs, labels, registry?)`, which reads
+  operators through the same registry widget the builder does.
+- `activeFilterChips(options: ActiveFilterChipsOptions)`,
+  `chipValuesOf(extra, labels)`, `mergeFilterChips` and
+  `resolveActiveFilterCount` — the chip strip and the filters count.
+- `checklistItems(def, source: ChecklistSource): ChecklistItems`,
+  `searchChecklistItems(items, query)` and
+  `checklistActions(def, source, visible): ChecklistActions` — the checklist
+  filter. `checklistWindow(count, scrollTop, width): ChecklistWindow` and
+  `checklistColumnsAcross(width)` window a long list;
+  `CHECKLIST_VIRTUALIZE_AT`, `CHECKLIST_ITEM_HEIGHT`, `CHECKLIST_ITEM_WIDTH`,
+  `CHECKLIST_OPTION_GAP`, `CHECKLIST_LIST_HEIGHT`.
+- `headerFilterCellKind(def, registry): HeaderFilterCellKind` — the compact
+  control a header filter cell draws, with `headerFilterSelectModel`
+  (`HeaderFilterSelectModel`), `headerFilterMultiModel`
+  (`HeaderFilterMultiModel`), `headerFilterBooleanOptions`,
+  `headerFilterRangeModel` (`HeaderFilterRangeModel`) and
+  `HeaderFilterOption`. `hasActiveHeaderFilter` says when a column's funnel
+  lights.
+
 ### `@adapttable/core/binding` — the Chrome model
 
 - `chromeColumnPlan` (`ChromeColumnPlan`) — the columns a desktop table draws,
