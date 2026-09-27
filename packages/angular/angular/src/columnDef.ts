@@ -1,0 +1,115 @@
+/**
+ * Angular columns: core's column model, with renderers that are Angular
+ * templates or components.
+ */
+import {
+  type ColumnMetadata,
+  getPath,
+  humanizeKey,
+  localizedColumnPath,
+} from "@adapttable/core";
+import type { TemplateRef, Type } from "@angular/core";
+
+/**
+ * What a cell renderer receives: as a template's context (`let-row`,
+ * `let-value="value"`), or as a component's inputs of the same names.
+ *
+ * @public
+ */
+export interface CellContext<TRow> {
+  /** The row, so `let-row` binds it. */
+  readonly $implicit: TRow;
+  /** The row. */
+  readonly row: TRow;
+  /** The row's position in the rendered window. */
+  readonly rowIndex: number;
+  /** The column. */
+  readonly column: ColumnDef<TRow>;
+  /** The column's accessor value for the row. */
+  readonly value: unknown;
+}
+
+/**
+ * What a header or footer renderer receives.
+ *
+ * @public
+ */
+export interface HeaderContext<TRow> {
+  /** The column, so `let-column` binds it. */
+  readonly $implicit: ColumnDef<TRow>;
+  /** The column. */
+  readonly column: ColumnDef<TRow>;
+}
+
+/**
+ * A renderer: an `ng-template` or a standalone component. A component
+ * receives the context's fields it declares as inputs.
+ *
+ * @public
+ */
+export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
+
+/**
+ * One Angular column. Everything core reads — sorting, filtering, sizing,
+ * `i18n` paths — comes from `ColumnMetadata`; the renderers are
+ * Angular's own.
+ *
+ * @public
+ */
+export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+  /** Plain-text header. Defaults to the key, humanized. */
+  header?: string;
+  /** Renders the cell. Without one, the cell shows the accessor value. */
+  cell?: Renderer<CellContext<TRow>>;
+  /** Renders the header content. Without one, it shows `header`. */
+  headerCell?: Renderer<HeaderContext<TRow>>;
+  /** Renders the footer content. */
+  footer?: Renderer<HeaderContext<TRow>>;
+}
+
+/**
+ * The text of a primitive value; `null` for anything else — an object has no
+ * text a cell or an attribute should show.
+ */
+export function primitiveText(value: unknown): string | null {
+  switch (typeof value) {
+    case "string":
+      return value;
+    case "number":
+    case "boolean":
+    case "bigint":
+      return String(value);
+    default:
+      return null;
+  }
+}
+
+/**
+ * Fill a column's declarative defaults: a missing `header` is the key,
+ * humanized, and a column without an `accessor` reads the row by its
+ * locale-resolved data path — so a `cell` renderer still receives `value`.
+ *
+ * @param columns - The declared columns.
+ * @param locale - The active locale.
+ * @returns The columns, complete ones unchanged.
+ *
+ * @public
+ */
+export function resolveColumns<TRow>(
+  columns: readonly ColumnDef<TRow>[],
+  locale?: string
+): ColumnDef<TRow>[] {
+  return columns.map((column) => {
+    const needsHeader = column.header === undefined;
+    const needsAccessor = !column.accessor;
+    if (!needsHeader && !needsAccessor) return column;
+    const path = localizedColumnPath(column, locale);
+    return {
+      ...column,
+      header: needsHeader ? humanizeKey(column.key) : column.header,
+      accessor: needsAccessor
+        ? (row: TRow) => primitiveText(getPath(row, path))
+        : column.accessor,
+    };
+  });
+}

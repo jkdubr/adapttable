@@ -23,7 +23,7 @@
  * useful when auditing rather than gating.
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import ts from "typescript";
@@ -95,6 +95,11 @@ export function entriesOf(pkg, root = REPO_ROOT) {
     .filter((key) => key === "." || !key.slice(2).includes("."))
     .sort()
     .map((key) => {
+      const label = key === "." ? pkg : `${pkg}/${key.slice(2)}`;
+      // ng-packagr bundles an entry into `dist/fesm2022/…`, a path with no
+      // source beside it; the entry it bundles is named in `ng-package.json`.
+      const built = ngPackageEntry(pkg, key, root);
+      if (built) return { label, entry: built };
       const target = targetOf(exported[key]);
       const stem = join(
         pkg,
@@ -107,8 +112,24 @@ export function entriesOf(pkg, root = REPO_ROOT) {
       const entry = existsSync(resolvePackagePath(`${stem}.ts`, root))
         ? `${stem}.ts`
         : `${stem}.tsx`;
-      return { label: key === "." ? pkg : `${pkg}/${key.slice(2)}`, entry };
+      return { label, entry };
     });
+}
+
+/**
+ * The source entry ng-packagr builds a subpath from, read from the
+ * `ng-package.json` beside the subpath's folder; `undefined` for a package
+ * built any other way.
+ */
+function ngPackageEntry(pkg, key, root) {
+  const folder = join(packageDir(pkg, root), key === "." ? "" : key.slice(2));
+  const config = join(folder, "ng-package.json");
+  if (!existsSync(config)) return undefined;
+  const entryFile = JSON.parse(readFileSync(config, "utf8")).lib?.entryFile;
+  // Spelled the way the other entries are: from the package's folder name.
+  return entryFile === undefined
+    ? undefined
+    : join(pkg, relative(packageDir(pkg, root), join(folder, entryFile)));
 }
 
 const SURFACES = packageNames()

@@ -7,6 +7,7 @@ import {
   assertPackedMatchesExpected,
   EXTRA_PROBE_ROUTES,
   kitLoadDependencies,
+  probePrelude,
   probeRoutes,
   publishedPackageNames,
   publishedPackages,
@@ -19,6 +20,7 @@ const README_CLAIM =
 const PUBLISHED_SNAPSHOT = [
   "@adapttable/ai",
   "@adapttable/ai-react",
+  "@adapttable/angular",
   "@adapttable/antd",
   "@adapttable/base-ui",
   "@adapttable/chakra",
@@ -45,7 +47,7 @@ function packageManifests() {
 describe("supported Node contract", () => {
   it("declares one floor in the repo and every package", () => {
     const manifests = [join(ROOT, "package.json"), ...packageManifests()];
-    assert.equal(manifests.length, 17);
+    assert.equal(manifests.length, 18);
     for (const manifest of manifests) {
       assert.equal(json(manifest).engines?.node, FLOOR, manifest);
     }
@@ -89,7 +91,7 @@ describe("supported Node contract", () => {
   it("derives the packed set from non-private manifests, not a count", () => {
     const names = publishedPackageNames();
     assert.deepEqual(names, PUBLISHED_SNAPSHOT);
-    assert.equal(names.length, 15);
+    assert.equal(names.length, 16);
     assert.ok(!names.includes("@adapttable/bootstrap"));
   });
 
@@ -162,5 +164,13 @@ describe("supported Node contract", () => {
     assert.ok(deps.antd);
     assert.equal(deps.react, undefined);
     assert.equal(deps["@adapttable/core"], undefined);
+  });
+
+  it("installs and preloads the Angular compiler for the Angular binding", () => {
+    const deps = kitLoadDependencies(publishedPackages());
+    assert.equal(deps["@angular/compiler"], deps["@angular/core"]);
+    assert.ok(deps.rxjs);
+    assert.deepEqual(probePrelude(deps), ["@angular/compiler"]);
+    assert.deepEqual(probePrelude({ antd: "^5.0.0" }), []);
   });
 });
