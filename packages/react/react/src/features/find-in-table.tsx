@@ -5,7 +5,7 @@
  * never imports it never carries the find walk. The hook mounts in-tree
  * through {@link FIND_LIVE}.
  */
-import type { GridCell } from "@adapttable/core";
+import { findMatchRow, type GridCell } from "@adapttable/core";
 import { type ReactNode, useContext, useEffect, useRef } from "react";
 
 import {
@@ -40,8 +40,8 @@ function useScrollMatchIntoWindow(
       firstRowIndex: first,
       scrollToRow: scroll,
     } = latest.current;
-    if (!scroll || !current) return;
-    const row = loaded[current.row - (first ?? 0)];
+    if (!scroll) return;
+    const row = findMatchRow(loaded, first, current);
     if (row !== undefined) scroll(row);
   }, [current]);
 }
