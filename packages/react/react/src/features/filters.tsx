@@ -48,6 +48,7 @@ function LiveFilterChips({
     defs: props.filterDefs ?? [],
     labels: chrome.table.labels,
     setFilterTree: chrome.source.setFilterTree,
+    registry: chrome.filterRegistry,
   });
   const mergedChips = useMemo(
     () =>

@@ -3,40 +3,24 @@
  * Input and Button the end user clicks. Core does not draw form controls.
  */
 import {
-  addFilterTreeCondition,
-  addFilterTreeGroup,
-  DATE_OP_LABEL_KEYS,
   defaultFilterRegistry,
-  emptyFilterTree,
   type FilterDef,
-  filterLabel,
-  filterTypeDefaultOp,
-  filterTypeOps,
+  filterTreeCombinatorOptions,
+  type FilterTreeConditionModel,
+  filterTreeConditionModel,
+  filterTreeEditorActions,
+  type FilterTreeOption,
   type FilterTypeRegistry,
-  filterWidgetKind,
-  isBetweenFilterOp,
   isFilterGroup,
-  isListFilterOp,
-  isValuelessFilterOp,
-  joinRelativeToken,
-  NUMBER_OP_LABEL_KEYS,
   type QueryCondition,
   type QueryFilterGroup,
-  RELATIVE_PRESET_LABEL_KEYS,
-  RELATIVE_PRESETS,
-  type RelativePreset,
-  removeFilterTreeNode,
-  replaceFilterTreeNode,
   resolveLabels,
-  setFilterTreeCombinator,
-  splitRelativeToken,
   type TableLabels,
   type TableSource,
-  TEXT_OP_LABEL_KEYS,
 } from "@adapttable/core";
 import { type CSSProperties, type ReactNode, useState } from "react";
 
-import { filterOpLabel } from "./filterForm";
+export type { FilterTreeOption } from "@adapttable/core";
 
 /**
  * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
@@ -88,18 +72,6 @@ export interface FilterTreeBuilderProps<TRow> {
   readonly registry?: FilterTypeRegistry;
   /** Open Advanced on first paint. Default: open only when a tree already exists. */
   readonly defaultExpanded?: boolean;
-}
-
-/**
- * One option in a tree Select.
- *
- * @public
- */
-export interface FilterTreeOption {
-  /** Value stored when this option is chosen. */
-  readonly value: string;
-  /** Caption shown for the option. */
-  readonly label: string;
 }
 
 /**
@@ -266,186 +238,100 @@ export interface FilterTreeChromeProps<
   readonly slots: FilterTreeSlots;
 }
 
-function opsFor<TRow>(
-  def: FilterDef<TRow>,
-  registry: FilterTypeRegistry
-): readonly string[] {
-  return filterTypeOps(def, registry);
-}
-
-function opLabelKey(
-  widget: string | undefined,
-  op: string
-): keyof TableLabels | undefined {
-  if (widget === "text" && op in TEXT_OP_LABEL_KEYS) {
-    return TEXT_OP_LABEL_KEYS[op as keyof typeof TEXT_OP_LABEL_KEYS];
-  }
-  if (widget === "numberRange" && op in NUMBER_OP_LABEL_KEYS) {
-    return NUMBER_OP_LABEL_KEYS[op as keyof typeof NUMBER_OP_LABEL_KEYS];
-  }
-  if (widget === "dateRange" && op in DATE_OP_LABEL_KEYS) {
-    return DATE_OP_LABEL_KEYS[op as keyof typeof DATE_OP_LABEL_KEYS];
-  }
-  return undefined;
-}
-
-function newCondition<TRow>(
-  def: FilterDef<TRow>,
-  registry: FilterTypeRegistry
-): QueryCondition {
-  return { key: def.key, op: filterTypeDefaultOp(def, registry) };
-}
-
-function inputTypeFor(
-  widget: string | undefined,
-  op: string
-): "text" | "number" | "date" {
-  if (op === "relative" || isListFilterOp(op)) return "text";
-  if (widget === "numberRange") return "number";
-  if (widget === "dateRange") return "date";
-  return "text";
-}
-
-function asText(value: unknown): string {
-  if (value == null) return "";
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  return "";
-}
-
-function pairOf(value: unknown): { a: string; b: string } {
-  if (Array.isArray(value)) {
-    return { a: asText(value[0]), b: asText(value[1]) };
-  }
-  return { a: asText(value), b: "" };
-}
-
 function ConditionValue<TRow>({
-  def,
-  condition,
+  model,
   labels,
   classNames,
-  registry,
   slots,
   onChange,
 }: Readonly<{
-  def: FilterDef<TRow>;
-  condition: QueryCondition;
+  model: FilterTreeConditionModel<TRow>;
   labels: Required<TableLabels>;
   classNames: FilterTreeClassNames;
-  registry: FilterTypeRegistry;
   slots: FilterTreeSlots;
   onChange: (value: unknown) => void;
 }>) {
-  if (isValuelessFilterOp(condition.op)) return null;
-  if (filterWidgetKind(def, registry) === "boolean") {
-    const choice =
-      condition.value === false || condition.value === "false"
-        ? "false"
-        : "true";
-    const Select = slots.Select;
-    return (
-      <Select
-        label={labels.value}
-        value={choice}
-        part="filter-select"
-        className={classNames.filterSelect}
-        fieldClassName={classNames.filterField}
-        labelClassName={classNames.filterLabel}
-        options={[
-          { value: "true", label: labels.boolTrue },
-          { value: "false", label: labels.boolFalse },
-        ]}
-        onChange={(next) => onChange(next === "true")}
-      />
-    );
-  }
-  if (condition.op === "relative") {
-    const token =
-      typeof condition.value === "string" ? condition.value : "today";
-    const { preset, n } = splitRelativeToken(token);
-    const counted = preset === "last" || preset === "next";
-    const Select = slots.Select;
-    const Input = slots.Input;
-    return (
-      <>
+  const editor = model.value;
+  const Select = slots.Select;
+  const Input = slots.Input;
+  switch (editor.kind) {
+    case "none":
+      return null;
+    case "boolean":
+      return (
         <Select
-          label={labels.opRelative}
-          value={preset}
+          label={labels.value}
+          value={editor.choice}
           part="filter-select"
           className={classNames.filterSelect}
           fieldClassName={classNames.filterField}
           labelClassName={classNames.filterLabel}
-          options={RELATIVE_PRESETS.map((item) => ({
-            value: item,
-            label: labels[RELATIVE_PRESET_LABEL_KEYS[item]],
-          }))}
-          onChange={(next) =>
-            onChange(joinRelativeToken(next as RelativePreset, n))
-          }
+          options={editor.options}
+          onChange={(next) => onChange(editor.write(next))}
         />
-        {counted ? (
+      );
+    case "relative":
+      return (
+        <>
+          <Select
+            label={labels.opRelative}
+            value={editor.preset}
+            part="filter-select"
+            className={classNames.filterSelect}
+            fieldClassName={classNames.filterField}
+            labelClassName={classNames.filterLabel}
+            options={editor.options}
+            onChange={(next) => onChange(editor.writePreset(next))}
+          />
+          {editor.counted ? (
+            <Input
+              label="N"
+              type="number"
+              value={String(editor.n)}
+              className={classNames.filterInput}
+              fieldClassName={classNames.filterField}
+              labelClassName={classNames.filterLabel}
+              onChange={(next) => onChange(editor.writeCount(next))}
+            />
+          ) : null}
+        </>
+      );
+    case "between":
+      return (
+        <>
           <Input
-            label="N"
-            type="number"
-            value={String(n)}
+            label={labels.from}
+            type={editor.type}
+            value={editor.a}
             className={classNames.filterInput}
             fieldClassName={classNames.filterField}
             labelClassName={classNames.filterLabel}
-            onChange={(next) =>
-              onChange(joinRelativeToken(preset, Number(next) || 1))
-            }
+            onChange={(next) => onChange(editor.writeA(next))}
           />
-        ) : null}
-      </>
-    );
-  }
-  const type = inputTypeFor(filterWidgetKind(def, registry), condition.op);
-  if (isBetweenFilterOp(condition.op)) {
-    const { a, b } = pairOf(condition.value);
-    const Input = slots.Input;
-    return (
-      <>
+          <Input
+            label={labels.to}
+            type={editor.type}
+            value={editor.b}
+            className={classNames.filterInput}
+            fieldClassName={classNames.filterField}
+            labelClassName={classNames.filterLabel}
+            onChange={(next) => onChange(editor.writeB(next))}
+          />
+        </>
+      );
+    case "single":
+      return (
         <Input
-          label={labels.from}
-          type={type}
-          value={a}
+          label={labels.value}
+          type={editor.type}
+          value={editor.text}
           className={classNames.filterInput}
           fieldClassName={classNames.filterField}
           labelClassName={classNames.filterLabel}
-          onChange={(next) => onChange([next, b])}
+          onChange={(next) => onChange(editor.write(next))}
         />
-        <Input
-          label={labels.to}
-          type={type}
-          value={b}
-          className={classNames.filterInput}
-          fieldClassName={classNames.filterField}
-          labelClassName={classNames.filterLabel}
-          onChange={(next) => onChange([a, next])}
-        />
-      </>
-    );
+      );
   }
-  const text = Array.isArray(condition.value)
-    ? condition.value.map(asText).join(",")
-    : asText(condition.value);
-  const Input = slots.Input;
-  return (
-    <Input
-      label={labels.value}
-      type={type}
-      value={text}
-      className={classNames.filterInput}
-      fieldClassName={classNames.filterField}
-      labelClassName={classNames.filterLabel}
-      onChange={(next) =>
-        onChange(isListFilterOp(condition.op) ? next.split(",") : next)
-      }
-    />
-  );
 }
 
 function ConditionRow<TRow>({
@@ -469,9 +355,8 @@ function ConditionRow<TRow>({
   onReplace: (path: readonly number[], next: QueryCondition) => void;
   onRemove: (path: readonly number[]) => void;
 }>) {
-  const def = defs.find((item) => item.key === condition.key) ?? defs[0];
-  if (!def) return null;
-  const ops = opsFor(def, registry);
+  const model = filterTreeConditionModel(condition, defs, registry, labels);
+  if (!model) return null;
   const Select = slots.Select;
   const Button = slots.Button;
   return (
@@ -482,21 +367,18 @@ function ConditionRow<TRow>({
     >
       <Select
         label={labels.filterField}
-        value={def.key}
+        value={model.def.key}
         part="filter-select"
         className={classNames.filterSelect}
         fieldClassName={classNames.filterField}
         labelClassName={classNames.filterLabel}
-        options={defs.map((item) => ({
-          value: item.key,
-          label: filterLabel(item),
-        }))}
+        options={model.fieldOptions}
         onChange={(key) => {
-          const next = defs.find((item) => item.key === key);
-          if (next) onReplace(path, newCondition(next, registry));
+          const next = model.withField(key);
+          if (next) onReplace(path, next);
         }}
       />
-      {ops.length > 1 ? (
+      {model.opOptions.length > 0 ? (
         <Select
           label={labels.operator}
           value={condition.op}
@@ -504,26 +386,16 @@ function ConditionRow<TRow>({
           className={classNames.filterOperator}
           fieldClassName={classNames.filterField}
           labelClassName={classNames.filterLabel}
-          options={ops.map((op) => {
-            const key = opLabelKey(filterWidgetKind(def, registry), op);
-            return {
-              value: op,
-              label: key ? filterOpLabel(labels, key) : op,
-            };
-          })}
-          onChange={(op) =>
-            onReplace(path, { ...condition, op, value: undefined })
-          }
+          options={model.opOptions}
+          onChange={(op) => onReplace(path, model.withOp(op))}
         />
       ) : null}
       <ConditionValue
-        def={def}
-        condition={condition}
+        model={model}
         labels={labels}
         classNames={classNames}
-        registry={registry}
         slots={slots}
-        onChange={(value) => onReplace(path, { ...condition, value })}
+        onChange={(value) => onReplace(path, model.withValue(value))}
       />
       <Button
         label={labels.filterRemoveCondition}
@@ -582,7 +454,7 @@ function GroupView<TRow>({
   classNames: FilterTreeClassNames;
   registry: FilterTypeRegistry;
   slots: FilterTreeSlots;
-  onCombinator: (path: readonly number[], next: "and" | "or") => void;
+  onCombinator: (path: readonly number[], next: string) => void;
   onAddCondition: (path: readonly number[]) => void;
   onAddGroup: (path: readonly number[]) => void;
   onReplace: (path: readonly number[], next: QueryCondition) => void;
@@ -610,11 +482,8 @@ function GroupView<TRow>({
           className={classNames.filterOperator}
           fieldClassName={classNames.filterField}
           labelClassName={classNames.filterLabel}
-          options={[
-            { value: "and", label: labels.filterCombinatorAnd },
-            { value: "or", label: labels.filterCombinatorOr },
-          ]}
-          onChange={(next) => onCombinator(path, next === "or" ? "or" : "and")}
+          options={filterTreeCombinatorOptions(labels)}
+          onChange={(next) => onCombinator(path, next)}
         />
         {path.length > 0 ? (
           <Button
@@ -698,12 +567,7 @@ export function FilterTreeChrome<TRow>({
   if (!commit || !first || defs.length === 0) return null;
   const Disclosure = slots.Disclosure;
 
-  const onAddCondition = (path: readonly number[]) => {
-    commit(addFilterTreeCondition(tree, path, newCondition(first, registry)));
-  };
-  const onAddGroup = (path: readonly number[]) => {
-    commit(addFilterTreeGroup(tree ?? emptyFilterTree(), path));
-  };
+  const actions = filterTreeEditorActions(tree, commit, first, registry);
 
   return (
     <Disclosure
@@ -722,23 +586,19 @@ export function FilterTreeChrome<TRow>({
           classNames={classNames}
           registry={registry}
           slots={slots}
-          onCombinator={(path, next) =>
-            commit(setFilterTreeCombinator(tree, path, next))
-          }
-          onAddCondition={onAddCondition}
-          onAddGroup={onAddGroup}
-          onReplace={(path, next) =>
-            commit(replaceFilterTreeNode(tree, path, next))
-          }
-          onRemove={(path) => commit(removeFilterTreeNode(tree, path))}
+          onCombinator={actions.setCombinator}
+          onAddCondition={actions.addCondition}
+          onAddGroup={actions.addGroup}
+          onReplace={actions.replace}
+          onRemove={actions.remove}
         />
       ) : (
         <GroupActions
           labels={labels}
           classNames={classNames}
           slots={slots}
-          onAddCondition={() => onAddCondition([])}
-          onAddGroup={() => onAddGroup([])}
+          onAddCondition={() => actions.addCondition([])}
+          onAddGroup={() => actions.addGroup([])}
         />
       )}
     </Disclosure>

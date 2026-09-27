@@ -5,38 +5,23 @@
  * omits both does not offer the widget.
  */
 import {
+  CHECKLIST_VIRTUALIZE_AT,
+  checklistActions,
+  checklistItems,
   type ChecklistValue,
-  collectChecklistValues,
   type FilterDef,
-  type FilterValue,
+  listFilterValues,
+  searchChecklistItems,
   type TableSource,
 } from "@adapttable/core";
 import { useMemo, useState } from "react";
 
-import { listFilterValues } from "./filterForm";
-
-/**
- * Window the list once it is long enough that a full render would hitch.
- *
- * @public
- */
-export const CHECKLIST_VIRTUALIZE_AT = 40;
-
-/**
- * Fixed row height the virtual window measures against, in px.
- *
- * @public
- */
-export const CHECKLIST_ITEM_HEIGHT = 28;
-
-/**
- * Visible viewport of a virtualized list, in px.
- *
- * @public
- */
-export const CHECKLIST_LIST_HEIGHT = 240;
-
 export type { ChecklistValue } from "@adapttable/core";
+export {
+  CHECKLIST_ITEM_HEIGHT,
+  CHECKLIST_LIST_HEIGHT,
+  CHECKLIST_VIRTUALIZE_AT,
+} from "@adapttable/core";
 
 /**
  * Kit-agnostic state behind {@link useChecklistFilter}.
@@ -68,10 +53,6 @@ export interface ChecklistFilterState {
 
 export { collectChecklistValues } from "@adapttable/core";
 
-function selectedList(value: FilterValue): string[] {
-  return listFilterValues(value);
-}
-
 /**
  * Derive the checklist from `source.facets` or `source.allFilteredRows`.
  * Returns `available: false` when both are missing so a server page
@@ -88,49 +69,29 @@ export function useChecklistFilter<TRow>(
 ): ChecklistFilterState {
   const fromFacets = source.facets?.[def.key];
   const rows = source.allFilteredRows;
-  const available = fromFacets !== undefined || rows !== undefined;
   const raw = source.extra[def.key];
-  const selected = selectedList(raw);
-  const items = useMemo(() => {
-    if (fromFacets) return [...fromFacets];
-    return rows ? collectChecklistValues(def, rows, selectedList(raw)) : [];
-  }, [def, rows, raw, fromFacets]);
+  const { available, items } = useMemo(
+    () =>
+      checklistItems(def, {
+        facets: fromFacets ? { [def.key]: fromFacets } : undefined,
+        allFilteredRows: rows,
+        extra: { [def.key]: raw },
+      }),
+    [def, rows, raw, fromFacets]
+  );
   const [query, setQuery] = useState("");
-  const needle = query.trim().toLowerCase();
-  const visible = useMemo(() => {
-    if (needle === "") return items;
-    return items.filter((item) => {
-      return (
-        item.label.toLowerCase().includes(needle) ||
-        item.value.toLowerCase().includes(needle)
-      );
-    });
-  }, [items, needle]);
-
-  const write = (next: readonly string[]) => {
-    source.setExtra(def.key, next.length > 0 ? [...next] : undefined);
-  };
-
+  const visible = useMemo(
+    () => searchChecklistItems(items, query),
+    [items, query]
+  );
   return {
     available,
     items,
     visible,
     query,
     setQuery,
-    selected,
+    selected: listFilterValues(raw),
     virtualize: visible.length >= CHECKLIST_VIRTUALIZE_AT,
-    selectAllVisible: () => {
-      const next = new Set(selected);
-      for (const item of visible) next.add(item.value);
-      write([...next]);
-    },
-    clear: () => write([]),
-    toggle: (value, on) => {
-      if (on) {
-        write(selected.includes(value) ? selected : [...selected, value]);
-        return;
-      }
-      write(selected.filter((item) => item !== value));
-    },
+    ...checklistActions(def, source, visible),
   };
 }

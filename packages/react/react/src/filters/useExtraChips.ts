@@ -1,4 +1,8 @@
-import type { ExtraFilters, FilterValue } from "@adapttable/core";
+import {
+  chipValuesOf,
+  type ExtraFilters,
+  type FilterValue,
+} from "@adapttable/core";
 import { useCallback, useMemo } from "react";
 
 import {
@@ -40,16 +44,7 @@ export function useExtraChips({
   setExtra,
   labels,
 }: UseExtraChipsOptions): ActiveFilterChip[] {
-  const values = useMemo<Record<string, FilterValue>>(() => {
-    const out: Record<string, FilterValue> = {};
-    for (const key of Object.keys(labels)) {
-      const v = extra[key];
-      if (v == null || v === "") continue;
-      if (Array.isArray(v) && v.length === 0) continue;
-      out[key] = v;
-    }
-    return out;
-  }, [extra, labels]);
+  const values = useMemo(() => chipValuesOf(extra, labels), [extra, labels]);
 
   const onChange = useCallback(
     (key: string, next: FilterValue) => {

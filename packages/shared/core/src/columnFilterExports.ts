@@ -33,4 +33,77 @@ export {
   columnDragRowAttrs,
   columnReorderKeyStep,
 } from "./columns/columnReorderModel";
+export type { ActiveFilterChipsOptions } from "./filters/activeFilterChips";
+export {
+  activeFilterChips,
+  chipValuesOf,
+  mergeFilterChips,
+  resolveActiveFilterCount,
+} from "./filters/activeFilterChips";
+export type {
+  ChecklistActions,
+  ChecklistItems,
+  ChecklistSource,
+  ChecklistWindow,
+} from "./filters/checklistModel";
+export {
+  CHECKLIST_ITEM_HEIGHT,
+  CHECKLIST_ITEM_WIDTH,
+  CHECKLIST_LIST_HEIGHT,
+  CHECKLIST_OPTION_GAP,
+  CHECKLIST_VIRTUALIZE_AT,
+  checklistActions,
+  checklistColumnsAcross,
+  checklistItems,
+  checklistWindow,
+  searchChecklistItems,
+} from "./filters/checklistModel";
+export type {
+  FilterTreeConditionModel,
+  FilterTreeEditorActions,
+  FilterTreeOption,
+  FilterTreeValueEditor,
+} from "./filters/filterTreeEditor";
+export {
+  filterTreeChipLabel,
+  filterTreeCombinatorOptions,
+  filterTreeConditionModel,
+  filterTreeEditorActions,
+  filterTreeOpLabel,
+  filterTreeValueEditor,
+  newFilterTreeCondition,
+} from "./filters/filterTreeEditor";
+export type {
+  BooleanChoice,
+  BooleanFieldWidget,
+  RangeFieldWidget,
+  RangeOpArity,
+  RangeOpLabelKeys,
+  TextFieldWidget,
+} from "./filters/filterWidgets";
+export {
+  booleanFilterWidget,
+  filterOpLabel,
+  initialRangeFilterOp,
+  initialTextFilterOp,
+  parseBooleanChoice,
+  rangeFilterWidget,
+  scalarFilterText,
+  textFilterWidget,
+} from "./filters/filterWidgets";
+export type {
+  HeaderFilterCellKind,
+  HeaderFilterMultiModel,
+  HeaderFilterOption,
+  HeaderFilterRangeModel,
+  HeaderFilterSelectModel,
+} from "./filters/headerFilterCells";
+export {
+  hasActiveHeaderFilter,
+  headerFilterBooleanOptions,
+  headerFilterCellKind,
+  headerFilterMultiModel,
+  headerFilterRangeModel,
+  headerFilterSelectModel,
+} from "./filters/headerFilterCells";
 export { writeStoredColumnLayout } from "./state/tableStores";
