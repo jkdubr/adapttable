@@ -989,6 +989,7 @@ export type {
   FilterTypeExtend,
 } from "./features/currentHost";
 export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
+export * from "./rowFeatureExports";
 export type {
   FeatureNotice,
   FeatureNoticeAppearance,

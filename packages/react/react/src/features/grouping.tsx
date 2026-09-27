@@ -6,25 +6,20 @@
  * through {@link GROUPING_LIVE}.
  */
 import {
-  aggregationModel,
-  capabilityReason,
-  computedAggregateKeys,
   computePagination,
-  declaredAggregates,
   devWarn,
-  effectiveAggregateOps,
   formatGroupBy,
   type GroupByInput,
-  groupedEntriesForStrategy,
-  groupingComputationKind,
+  groupedRowModel,
+  groupedViewSource,
+  groupingAggregates,
+  groupingIgnoredWarning,
+  groupingPanelAggregations,
   type GroupNode,
+  groupShowMoreRequest,
   type GroupSort,
   parseGroupBy,
-  serializeAggregationDerivedKey,
-  sourceCapabilities,
-  withGroupAggregateOverrides,
 } from "@adapttable/core";
-import { insertExtraRows } from "@adapttable/core/binding";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
 import { useGroupCollapse } from "../grouping/useGroupCollapse";
@@ -45,23 +40,38 @@ function LiveGrouping({
     () => parseGroupBy(requestedGroupBy),
     [requestedGroupBy]
   );
-  const serverGroups = source.groups;
   const groupCollapse = useGroupCollapse({
     collapsedGroupIds: props.collapsedGroupIds,
     onCollapsedGroupIdsChange: props.onCollapsedGroupIdsChange,
   });
-  const capabilities = source.capabilities;
-  const canGroup = sourceCapabilities({
-    allFilteredRows: source.allFilteredRows,
-    groups: serverGroups,
-    capabilities,
-  }).grouping;
+  // Only the fields grouping reads, so a source change elsewhere — a page, a
+  // search — does not rebuild the grouped model.
+  const groupingSource = useMemo(
+    () => ({
+      allFilteredRows: source.allFilteredRows,
+      groups: source.groups,
+      capabilities: source.capabilities,
+      honorsAggregates: source.honorsAggregates,
+      aggregateOperations: source.aggregateOperations,
+      groupAggregateOverrides: source.groupAggregateOverrides,
+      queryAggregates: source.queryAggregates,
+      groupAggregations: source.groupAggregations,
+    }),
+    [
+      source.allFilteredRows,
+      source.groups,
+      source.capabilities,
+      source.honorsAggregates,
+      source.aggregateOperations,
+      source.groupAggregateOverrides,
+      source.queryAggregates,
+      source.groupAggregations,
+    ]
+  );
+  const ignoredWarning = groupingIgnoredWarning(groupByKeys, groupingSource);
   useEffect(() => {
-    if (groupByKeys.length === 0 || canGroup !== false) return;
-    devWarn(
-      `groupBy is ignored: ${capabilityReason("grouping")} Grouping needs either the full filtered set (\`allFilteredRows\`, which the frontend tier provides) or a source that groups server-side.`
-    );
-  }, [groupByKeys, canGroup]);
+    if (ignoredWarning !== undefined) devWarn(ignoredWarning);
+  }, [groupByKeys, ignoredWarning]);
 
   const { onGroupByChange } = props;
   const { setGroupBy: sourceSetGroupBy } = source;
@@ -85,119 +95,50 @@ function LiveGrouping({
     extraRows,
     locale,
   } = props;
-  const aggregationSource = useMemo(
-    () => ({
-      grouping: sourceCapabilities({
-        allFilteredRows: source.allFilteredRows,
-        groups: serverGroups,
-        capabilities,
-      }).grouping,
-      aggregateOperations:
-        source.honorsAggregates === false ? [] : source.aggregateOperations,
-    }),
-    [
-      capabilities,
-      serverGroups,
-      source.aggregateOperations,
-      source.allFilteredRows,
-      source.honorsAggregates,
-    ]
-  );
-  const effectiveGroupAggregates = useMemo(
+  const aggregates = useMemo(
     () =>
-      withGroupAggregateOverrides(
+      groupingAggregates({
+        source: groupingSource,
+        columns: chrome.allColumns,
         groupAggregates,
-        source.groupAggregateOverrides ?? {},
-        chrome.allColumns,
-        aggregationSource
-      ),
-    [
-      aggregationSource,
-      chrome.allColumns,
-      groupAggregates,
-      source.groupAggregateOverrides,
-    ]
+        panelDeclared: chrome.groupingPanel?.declaredAggregates,
+      }),
+    [chrome.allColumns, chrome.groupingPanel, groupAggregates, groupingSource]
   );
-  // Reader overrides alone are not enough: a host default changing from
-  // Sum to Average with the same rows must rebuild the cached groups.
-  const aggregateDerivedKey = serializeAggregationDerivedKey({
-    columns: chrome.allColumns,
-    overrides: source.groupAggregateOverrides ?? {},
-    declared:
-      declaredAggregates(effectiveGroupAggregates) ??
-      chrome.groupingPanel?.declaredAggregates,
-    queryAggregates: source.queryAggregates,
-    source: aggregationSource,
-  });
 
   const grouping = useMemo(() => {
-    if (groupByKeys.length === 0) return undefined;
-    const kind = groupingComputationKind({
+    const model = groupedRowModel({
       groupByKeys,
-      sourceGroups: serverGroups,
-      allFilteredRows: source.allFilteredRows,
-      capabilities,
-    });
-    if (kind === "none") return undefined;
-    const entries = groupedEntriesForStrategy({
-      kind,
-      groupByKeys,
-      sourceGroups: serverGroups,
-      allFilteredRows: source.allFilteredRows,
-      // The schema, never the visible subset: a column carries the
-      // `groupValue` that says which bucket a row belongs in, and hiding it or
-      // collapsing the group it sits under must not change how rows are
-      // bucketed or what those buckets are called. Resolved without it, a
-      // timeline groups by the instant it holds and every caption is an epoch.
+      source: groupingSource,
       columns: chrome.allColumns,
       locale,
       getRowId,
       collapsedGroupIds: groupCollapse.collapsedGroupIds,
-      aggregates: effectiveGroupAggregates,
-      footers: groupFooters === true,
-      sort: groupSort,
-      filter: groupFilter,
+      aggregates,
+      groupFooters,
+      groupSort,
+      groupFilter,
       groupPageSize,
-      rowPageSize: groupRowPageSize,
+      groupRowPageSize,
       paging: groupPaging.paging,
-      derivedKey: aggregateDerivedKey,
-      // Server groups: only metadata tied to the displayed response.
-      // `undefined` means the operation is unknown — never the reader's
-      // latest request. Local groups: the operation actually applied after
-      // defaults, host declarations and validated overrides.
-      aggregateOps:
-        kind === "source"
-          ? source.groupAggregations
-          : effectiveAggregateOps({
-              columns: chrome.allColumns,
-              overrides: source.groupAggregateOverrides ?? {},
-              declared:
-                declaredAggregates(effectiveGroupAggregates) ??
-                chrome.groupingPanel?.declaredAggregates,
-              queryAggregates: source.queryAggregates,
-              source: aggregationSource,
-            }),
+      extraRows,
     });
-    const openGroups = entries.flatMap((entry) =>
-      entry.kind === "group" ? [{ key: entry.key, level: entry.level }] : []
-    );
-    const withExtras = insertExtraRows(entries, extraRows, (entry) =>
-      entry.kind === "row" ? entry.key : undefined
-    );
+    if (!model) return undefined;
+    const { openGroups } = model;
     return {
       groupBy: groupByKeys,
       collapsed: groupCollapse,
-      aggregates: effectiveGroupAggregates,
-      entries: withExtras,
+      aggregates: aggregates.aggregates,
+      entries: model.entries,
       setGroupBy,
       showMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => {
-        const size =
-          entry.scope === "groups"
-            ? (groupPageSize ?? 0)
-            : (groupRowPageSize ?? 0);
-        groupPaging.showMore(size, entry.groupKey);
-        if (entry.scope === "rows" && entry.groupKey) {
-          onGroupLoadMore?.(entry.groupKey);
+        const request = groupShowMoreRequest(entry, {
+          groupPageSize,
+          groupRowPageSize,
+        });
+        groupPaging.showMore(request.pageSize, request.groupKey);
+        if (request.loadMoreKey !== undefined) {
+          onGroupLoadMore?.(request.loadMoreKey);
         }
       },
       expandAll: groupCollapse.expandAll,
@@ -211,15 +152,10 @@ function LiveGrouping({
   }, [
     groupByKeys,
     locale,
-    serverGroups,
-    capabilities,
-    source.allFilteredRows,
+    groupingSource,
     getRowId,
     groupCollapse,
-    aggregateDerivedKey,
-    source.groupAggregateOverrides,
-    source.groupAggregations,
-    effectiveGroupAggregates,
+    aggregates,
     groupFooters,
     groupSort,
     groupFilter,
@@ -229,50 +165,29 @@ function LiveGrouping({
     extraRows,
     groupPaging,
     setGroupBy,
-    aggregationSource,
     chrome.allColumns,
-    chrome.groupingPanel,
-    source.queryAggregates,
   ]);
 
-  const viewSource =
-    grouping && source.allFilteredRows
-      ? {
-          ...source,
-          rows: source.allFilteredRows,
-          page: 1,
-          limit: Math.max(source.allFilteredRows.length, 1),
-          total: source.allFilteredRows.length,
-          hasNextPage: false,
-          isFetchingNextPage: false,
-        }
-      : source;
+  const viewSource = grouping ? groupedViewSource(source) : source;
   const groupingArmed = grouping !== undefined;
   const groupingPanel = useMemo(() => {
     if (!chrome.groupingPanel) return undefined;
-    const computedKeys = grouping
-      ? computedAggregateKeys(grouping.entries)
-      : [];
     return {
       ...chrome.groupingPanel,
       groupBy: groupByKeys,
-      aggregations: aggregationModel({
+      aggregations: groupingPanelAggregations({
+        source: groupingSource,
         columns: chrome.allColumns,
-        overrides: source.groupAggregateOverrides ?? {},
         declared: chrome.groupingPanel.declaredAggregates,
-        queryAggregates: source.queryAggregates,
-        computedKeys,
-        source: aggregationSource,
+        entries: grouping?.entries,
       }),
     };
   }, [
-    aggregationSource,
     chrome.allColumns,
     chrome.groupingPanel,
     groupByKeys,
     grouping,
-    source.groupAggregateOverrides,
-    source.queryAggregates,
+    groupingSource,
   ]);
   return children({
     ...chrome,

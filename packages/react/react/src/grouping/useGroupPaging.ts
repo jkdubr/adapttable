@@ -1,14 +1,12 @@
 /**
- * How much of a paged group model has been asked for.
- *
- * Revealing more is not a query: the rows are already in hand on the frontend
- * tier, and on a server tier the host fetches them and hands over a longer
- * list. So this holds nothing but counts — how many extra top-level groups,
- * and how many extra leaves per group — which is all the model needs to show
- * one more page of either.
+ * How much of a paged group model has been asked for — the React side of
+ * core's group paging controller.
  */
-import type { GroupPaging } from "@adapttable/core";
-import { useCallback, useMemo, useState } from "react";
+import {
+  createGroupPagingController,
+  type GroupPaging,
+} from "@adapttable/core";
+import { useMemo, useState, useSyncExternalStore } from "react";
 
 /**
  * Paging state and the one action that changes it.
@@ -35,22 +33,13 @@ export interface GroupPagingState {
  * @public
  */
 export function useGroupPaging(): GroupPagingState {
-  const [paging, setPaging] = useState<GroupPaging>({});
-
-  const showMore = useCallback((pageSize: number, groupKey?: string) => {
-    setPaging((current) => {
-      if (groupKey === undefined) {
-        return { ...current, groups: (current.groups ?? 0) + pageSize };
-      }
-      const rows = { ...current.rows };
-      rows[groupKey] = (rows[groupKey] ?? 0) + pageSize;
-      return { ...current, rows };
-    });
-  }, []);
-
-  const reset = useCallback(() => {
-    setPaging({});
-  }, []);
+  const [controller] = useState(createGroupPagingController);
+  const paging = useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot,
+    controller.getSnapshot
+  );
+  const { showMore, reset } = controller;
 
   return useMemo(
     () => ({ paging, showMore, reset }),
