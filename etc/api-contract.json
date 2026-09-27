@@ -27,6 +27,9 @@
       "i18n",
       "server"
     ],
+    "angular": [
+      "angular"
+    ],
     "react": [
       "adapter-antd",
       "adapter-antd-assistant",
@@ -4875,6 +4878,38 @@
       "ConformanceScenario",
       "ConformanceTest",
       "tableConformanceTests"
+    ],
+    "angular": [
+      "AdaptAttrs",
+      "AdaptCell",
+      "AdaptCellTemplate",
+      "AdaptHeader",
+      "ADAPTTABLE_FEATURES",
+      "ADAPTTABLE_URL_ADAPTER",
+      "AdaptTableFeature",
+      "Attrs",
+      "CellContext",
+      "ColumnDef",
+      "DataTable",
+      "DataTableOptions",
+      "ExternalStore",
+      "fromStore",
+      "FromStoreOptions",
+      "FrontendDataOptions",
+      "HeaderContext",
+      "injectDataTable",
+      "injectFrontendData",
+      "injectIsMobile",
+      "injectTableUrlState",
+      "IsMobileOptions",
+      "MaybeSignal",
+      "MaybeSignalOptional",
+      "provideAdaptTableFeatures",
+      "Renderer",
+      "resolveColumns",
+      "ResolvedRenderer",
+      "TableUrlState",
+      "TableUrlStateOptions"
     ]
   },
   "entrypoints": {
@@ -5995,6 +6030,9 @@
     },
     "core-conformance.api.md": {
       "surface": "core-conformance"
+    },
+    "angular.api.md": {
+      "surface": "angular"
     }
   }
 }

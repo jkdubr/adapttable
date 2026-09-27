@@ -139,7 +139,25 @@ export function kitLoadDependencies(packages) {
     deps["@emotion/react"] ??= "^11.0.0";
     deps["@emotion/styled"] ??= "^11.0.0";
   }
+  // Angular's packages ship partially compiled: outside an app build they
+  // load only with the compiler present to finish them, and `@angular/core`
+  // needs RxJS, its own peer.
+  if (deps["@angular/core"]) {
+    deps["@angular/compiler"] ??= deps["@angular/core"];
+    deps.rxjs ??= "^7.4.0";
+  }
   return deps;
+}
+
+/**
+ * Modules a probe loads before the routes: the Angular compiler, when an
+ * Angular package is published, so its partially compiled classes can
+ * finish compiling as they load.
+ *
+ * @param {Record<string, string>} deps What {@link kitLoadDependencies} installs.
+ */
+export function probePrelude(deps) {
+  return deps["@angular/compiler"] ? ["@angular/compiler"] : [];
 }
 
 function pack() {
@@ -187,6 +205,8 @@ function verify() {
     packedNames.map((name) => [name, `file:${join(PACK_DIR, packages[name])}`])
   );
   const routes = probeRoutes(expected);
+  const loadDependencies = kitLoadDependencies(publishedPackages());
+  const prelude = probePrelude(loadDependencies);
 
   writeFileSync(
     join(scratch, "package.json"),
@@ -200,7 +220,7 @@ function verify() {
           ...tarballs,
           react: "^19.0.0",
           "react-dom": "^19.0.0",
-          ...kitLoadDependencies(publishedPackages()),
+          ...loadDependencies,
         },
         overrides: tarballs,
       },
@@ -212,6 +232,7 @@ function verify() {
   writeFileSync(
     join(scratch, "probe.mjs"),
     `const routes = ${JSON.stringify(routes, null, 2)};
+for (const module of ${JSON.stringify(prelude)}) await import(module);
 for (const route of routes) {
   const loaded = await import(route);
   if (Object.keys(loaded).length === 0) throw new Error(\`\${route} has no ESM exports\`);
@@ -221,6 +242,7 @@ for (const route of routes) {
   writeFileSync(
     join(scratch, "probe.cjs"),
     `const routes = ${JSON.stringify(routes, null, 2)};
+for (const module of ${JSON.stringify(prelude)}) require(module);
 for (const route of routes) {
   const loaded = require(route);
   if (Object.keys(loaded).length === 0) throw new Error(\`\${route} has no CommonJS exports\`);

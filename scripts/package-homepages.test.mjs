@@ -16,6 +16,7 @@ const HUB_PACKAGES = new Set([
   "@adapttable/server",
   "@adapttable/ai",
   "@adapttable/ai-react",
+  "@adapttable/angular",
 ]);
 const REPOSITORY = "git+https://github.com/orwa-mahmoud/adapttable.git";
 const BUGS = "https://github.com/orwa-mahmoud/adapttable/issues";

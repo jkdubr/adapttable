@@ -186,6 +186,18 @@ function proposedImport(current, cls, dir) {
   return current.replace("@adapttable/core", "@adapttable/react");
 }
 
+/**
+ * The split moves exports between core and React, so the map covers the
+ * published neutral and React entry points. Another framework's binding was
+ * born after the split and has nothing to move.
+ */
+function inSplit(entry) {
+  return (
+    entry.published &&
+    (entry.framework === "neutral" || entry.framework === "react")
+  );
+}
+
 function entrySymbols(entry, manifest) {
   const policy = manifest.entrypoints[entry.report];
   if (!policy) return [];
@@ -207,7 +219,7 @@ export function buildPackageSplitMap() {
   const symbols = [];
   const seen = new Set();
   for (const entry of entrypoints()) {
-    if (!entry.published) continue;
+    if (!inSplit(entry)) continue;
     const name = packageName(entry.dir);
     const currentImport = specifier(name, entry.subpath);
     const reportText = reports[entry.report];
@@ -247,7 +259,7 @@ export function buildPackageSplitMap() {
 export function contractKeys(manifest) {
   const keys = new Set();
   for (const entry of entrypoints()) {
-    if (!entry.published) continue;
+    if (!inSplit(entry)) continue;
     const name = packageName(entry.dir);
     const currentImport = specifier(name, entry.subpath);
     const policy = manifest.entrypoints[entry.report];
