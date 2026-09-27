@@ -7,6 +7,7 @@ import {
   assertPackedMatchesExpected,
   EXTRA_PROBE_ROUTES,
   kitLoadDependencies,
+  probePrelude,
   probeRoutes,
   publishedPackageNames,
   publishedPackages,
@@ -163,5 +164,13 @@ describe("supported Node contract", () => {
     assert.ok(deps.antd);
     assert.equal(deps.react, undefined);
     assert.equal(deps["@adapttable/core"], undefined);
+  });
+
+  it("installs and preloads the Angular compiler for the Angular binding", () => {
+    const deps = kitLoadDependencies(publishedPackages());
+    assert.equal(deps["@angular/compiler"], deps["@angular/core"]);
+    assert.ok(deps.rxjs);
+    assert.deepEqual(probePrelude(deps), ["@angular/compiler"]);
+    assert.deepEqual(probePrelude({ antd: "^5.0.0" }), []);
   });
 });
