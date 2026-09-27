@@ -35,6 +35,17 @@ const PACKAGE_DIRS = new Map(
 );
 const LIB_PACKAGES = [...PACKAGE_DIRS.keys()];
 
+/**
+ * The package group each package sits in. `"use client"` is React's module
+ * boundary, so the directive rule below holds for React packages and the
+ * neutral ones a React app imports; another framework's binding has no such
+ * boundary and ships without the directive.
+ */
+const PACKAGE_GROUPS = new Map(
+  listPackages(process.cwd()).map((pkg) => [pkg.name, pkg.group])
+);
+const DIRECTIVE_GROUPS = new Set(["react", "shared"]);
+
 function readPackageJson(pkg) {
   return JSON.parse(
     readFileSync(join(PACKAGE_DIRS.get(pkg), "package.json"), "utf8")
@@ -297,7 +308,10 @@ for (const pkg of LIB_PACKAGES) {
 
   const misdirected = { absent: [], present: [] };
   for (const { target, file } of runtimeEntries) {
-    const wanted = serverSafeRule(pkg, target) ? "absent" : "present";
+    const client =
+      DIRECTIVE_GROUPS.has(PACKAGE_GROUPS.get(pkg)) &&
+      !serverSafeRule(pkg, target);
+    const wanted = client ? "present" : "absent";
     if (hasClientDirective(file) !== (wanted === "present")) {
       misdirected[wanted].push(target);
     }
