@@ -149,5 +149,28 @@ export default defineConfig(
       "sonarjs/prefer-read-only-props": "off",
     },
   },
+  {
+    // A kit talks only to its framework binding: a React kit imports
+    // `@adapttable/react/…`, a Vue or Angular kit its own binding. Only a
+    // binding imports `@adapttable/core`, and it re-exports what its kits
+    // need, so it can adapt any of it to its framework without touching a kit.
+    // Tests may still reach core's test tooling, such as the conformance suite.
+    files: ["packages/*/adapter-*/src/**/*.{ts,tsx}"],
+    ignores: ["**/*.{test,spec}.{ts,tsx}", "**/*test-utils.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@adapttable/core", "@adapttable/core/*"],
+              message:
+                "A kit imports only from its framework binding (for a React kit, @adapttable/react/…); only a binding imports @adapttable/core.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   prettier
 );
