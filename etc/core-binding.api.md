@@ -41,6 +41,108 @@ export interface ActiveFilterChipsSlotProps {
 }
 
 // @public
+export const AGENT_ALWAYS_ALLOW_STATE: FeatureStateKey<AgentAlwaysAllowState | null>;
+
+// @public
+export const AGENT_APPROVAL: FeatureSlotKey<AgentApprovalProps>;
+
+// @public
+export const AGENT_APPROVAL_STATE: FeatureStateKey<AgentApprovalPending | null>;
+
+// @public
+export const AGENT_PROGRESS_STATE: FeatureStateKey<AgentProgress | null>;
+
+// @public
+export const AGENT_VIEW_STATE: FeatureStateKey<AgentViewState | null>;
+
+// @public
+export interface AgentAlwaysAllowState {
+    readonly capabilities: readonly string[];
+    readonly revoke: (capability: string) => void;
+}
+
+// @public
+export interface AgentApprovalButtonProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly onClick: () => void;
+    readonly part: string;
+}
+
+// @public
+export type AgentApprovalDecision = "pending" | "approved" | "rejected";
+
+// @public
+export interface AgentApprovalListProps<TNode = unknown> {
+    readonly children: TNode;
+    readonly className?: string;
+    readonly label: string;
+    readonly part: string;
+}
+
+// @public
+export interface AgentApprovalOperation {
+    readonly arguments: unknown;
+    readonly capability: string;
+    readonly title?: string;
+}
+
+// @public
+export interface AgentApprovalPending {
+    readonly alwaysAllow?: () => void;
+    readonly approve: () => void;
+    readonly decideAt?: (index: number, approved: boolean) => void;
+    readonly decisions: readonly AgentApprovalDecision[];
+    readonly operation?: AgentApprovalOperation;
+    readonly presentation: ApprovalPresentation;
+    readonly proposals: readonly AgentApprovalProposal[];
+    readonly reject: (reason?: string) => void;
+}
+
+// @public
+export interface AgentApprovalProposal {
+    readonly after?: unknown;
+    readonly afterText?: string;
+    readonly before?: unknown;
+    readonly beforeText?: string;
+    readonly beforeUnavailable?: boolean;
+    readonly column?: string;
+    readonly columnLabel?: string;
+    readonly rowKey: string;
+    readonly rowLabel?: string;
+}
+
+// @public
+export interface AgentApprovalProps {
+    readonly buttonClassName?: string;
+    readonly className?: string;
+    readonly labels?: TableLabels;
+    readonly pending?: AgentApprovalPending | null;
+}
+
+// @public
+export interface AgentApprovalSlots<TNode = unknown> {
+    readonly Action: (props: AgentApprovalButtonProps) => TNode;
+    readonly Approve: (props: AgentApprovalButtonProps) => TNode;
+    readonly List: (props: AgentApprovalListProps<TNode>) => TNode;
+    readonly Reject: (props: AgentApprovalButtonProps) => TNode;
+}
+
+// @public
+export interface AgentProgress {
+    readonly capability: string;
+    readonly done: number;
+    readonly idempotencyKey: string;
+    readonly label?: string;
+    readonly total?: number;
+}
+
+// @public
+export interface AgentViewState {
+    readonly read: () => unknown;
+}
+
+// @public
 export type Aggregatable<TValue = AggregateOrderedValue> = boolean | AggregatableConfig<TValue>;
 
 // @public
@@ -117,7 +219,45 @@ export function applyCollapsedColumnGroups<TRow>(columns: readonly ColumnMetadat
 export type ApprovalPresentation = "widget" | "table" | "modal";
 
 // @public
+export interface ApprovalReviewSlots<TNode = unknown> {
+    readonly Action: (props: AgentApprovalButtonProps) => TNode;
+    readonly Approve: (props: AgentApprovalButtonProps) => TNode;
+    readonly List: (props: AgentApprovalListProps<TNode>) => TNode;
+    readonly Reject: (props: AgentApprovalButtonProps) => TNode;
+}
+
+// @public
+export const ASSISTANT_ACTIONS_ICON: IconDescriptor;
+
+// @public
+export const ASSISTANT_AVATAR_ICON: IconDescriptor;
+
+// @public
+export const ASSISTANT_CLOSE_ICON: IconDescriptor;
+
+// @public
+export const ASSISTANT_EXAMPLES_ICON: IconDescriptor;
+
+// @public
 export const ASSISTANT_FLOATING_MIN_WIDTH = 640;
+
+// @public
+export const ASSISTANT_KIND_HUES: Readonly<Record<string, number>>;
+
+// @public
+export const ASSISTANT_KIND_PATHS: Readonly<Record<string, string>>;
+
+// @public
+export const ASSISTANT_SEND_ICON: IconDescriptor;
+
+// @public
+export const ASSISTANT_SETTINGS_ICON: IconDescriptor;
+
+// @public
+export const ASSISTANT_STOP_ICON: IconDescriptor;
+
+// @public
+export const ASSISTANT_UNDO_ICON: IconDescriptor;
 
 // @public
 export function assistantActionsName(count: number, labels: TableLabels | undefined): string;
@@ -144,10 +284,16 @@ export function assistantIsBusy(status: string): boolean;
 export function assistantIsUsable(status: string): boolean;
 
 // @public
+export function assistantKindIcon(kind: string | undefined): IconDescriptor | undefined;
+
+// @public
 export function assistantLauncherName(labels: TableLabels | undefined, waiting: boolean): string;
 
 // @public
 export function assistantLauncherStyle(contained: boolean): TableAssistantPlacement;
+
+// @public
+export function assistantMicIcon(listening?: boolean): IconDescriptor;
 
 // @public
 export function assistantProgressText(progress: TableAssistantProgressView, labels: TableLabels | undefined): string;
@@ -160,6 +306,12 @@ export function assistantReceiptDetail(receipt: TableAssistantReceiptView, label
 
 // @public
 export function assistantReceiptHeadline(receipt: TableAssistantReceiptView, labels: TableLabels | undefined): string;
+
+// @public
+export function assistantReceiptIcon(kind: string | undefined): {
+    readonly icon: IconDescriptor;
+    readonly ink: string;
+};
 
 // @public
 export function assistantReceiptNeedsSave(receipt: TableAssistantReceiptView): boolean;
@@ -189,6 +341,54 @@ export function assistantWithGreeting(messages: readonly TableAssistantMessageVi
 export function assistantWorkingText(progress: TableAssistantProgressView | null | undefined, labels: TableLabels | undefined): string;
 
 // @public
+export const BATCH_EDIT_BAR: FeatureSlotKey<BatchEditBarProps<never>>;
+
+// @public
+export interface BatchEditBarProps<TRow> {
+    batch: BatchEditingState<TRow>;
+    buttonClassName?: string;
+    className?: string;
+    contested?: boolean;
+    labels?: TableLabels;
+}
+
+// @public
+export interface BatchEditBarSlots<TNode = unknown> {
+    readonly Button: (props: BatchEditButtonProps) => TNode;
+}
+
+// @public
+export interface BatchEditButtonProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly onClick: () => void;
+    readonly part: string;
+}
+
+// @public
+export interface BatchEditingState<TRow> {
+    acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    cancelAll: () => void;
+    cancelRow: (rowId: string) => void;
+    count: number;
+    draftFor: (row: TRow, rowId: string, columnKey: string) => string;
+    entries: readonly {
+        readonly rowId: string;
+        readonly openedRow: unknown;
+        readonly seeds: Readonly<Record<string, string>>;
+        readonly drafts: Readonly<Record<string, string>>;
+    }[];
+    featureHost?: FeatureHostState;
+    isChanged: (rowId: string, columnKey: string) => boolean;
+    isPending: (rowId: string) => boolean;
+    pending: boolean;
+    saveAll: () => void;
+    setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    signature: string;
+    takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+}
+
+// @public
 export interface BodyCell<TRow> {
     colSpan: number;
     column: ColumnMetadata<TRow>;
@@ -200,6 +400,9 @@ export interface BodyCell<TRow> {
 export function bodyCellsHaveRowSpan(cellsByRow: ReadonlyMap<string, readonly {
     rowSpan: number;
 }[]>): boolean;
+
+// @public
+export const BULK_BAR: FeatureSlotKey<BulkBarSlotProps<unknown>>;
 
 // @public
 export interface BulkAction {
@@ -220,6 +423,18 @@ export interface BulkActionContext {
 }
 
 // @public
+export interface BulkBarSlotProps<TSelection = unknown> {
+    bulkActions: BulkAction[];
+    confirm: ConfirmHandler;
+    labels: Required<TableLabels>;
+    selection: TSelection;
+    total: number;
+}
+
+// @public
+export const CELL_NAV_LIVE: FeatureSlotKey<CellNavLiveSlotProps<unknown, unknown, unknown, unknown>>;
+
+// @public
 export function cellAttributes<TRow>(column: ColumnMetadata<TRow>, sizing: ChromeCellSizing): {
     role: "cell";
     "data-column-key": string;
@@ -227,10 +442,101 @@ export function cellAttributes<TRow>(column: ColumnMetadata<TRow>, sizing: Chrom
 };
 
 // @public
+export function cellHighlightKind(props: Readonly<Record<string, unknown>> | undefined): "current-match" | "match" | "selected" | undefined;
+
+// @public
+export function cellHighlightStyle<TStyle extends {
+    readonly outline?: unknown;
+    readonly outlineOffset?: unknown;
+}>(props: Readonly<Record<string, unknown>> | undefined, base: TStyle | undefined, selected: TStyle): TStyle | undefined;
+
+// @public
+export interface CellNavLiveSlotProps<TOptions = unknown, THostProps = unknown, TFocus = unknown, TNode = unknown> {
+    children: (gridFocus: TFocus) => TNode;
+    currentMatch: GridCell | null | undefined;
+    hostProps: THostProps;
+    matchKeys: ReadonlySet<string>;
+    onFind?: () => void;
+    options: TOptions;
+    pinOffset?: (key: string) => PinOffset | undefined;
+    record: (edits: readonly unknown[]) => void;
+    redo: () => number;
+    undo: () => number;
+}
+
+// @public
+export interface CellRange {
+    anchor: GridCell;
+    head: GridCell;
+}
+
+// @public
 export function cellsForRow<TRow>(cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]> | undefined, rowKey: string): readonly BodyCell<TRow>[];
 
 // @public
+export type CellSpanAppearance = "merged" | "plain";
+
+// @public
 export function cellSpanMark(colSpan: number, rowSpan: number): string | undefined;
+
+// @public
+export interface CellSpanRequest {
+    colSpan?: number;
+    rowSpan?: number;
+}
+
+// @public
+export interface ChecklistButtonProps {
+    readonly label: string;
+    readonly onClick: () => void;
+}
+
+// @public
+export interface ChecklistCheckboxProps {
+    readonly checked: boolean;
+    readonly className?: string;
+    readonly count: string;
+    readonly countClassName?: string;
+    readonly label: string;
+    readonly onChange: (checked: boolean) => void;
+}
+
+// @public
+export interface ChecklistClassNames {
+    filterCheckbox?: string;
+    filterCheckboxGroup?: string;
+    filterChecklist?: string;
+    filterChecklistActions?: string;
+    filterChecklistCount?: string;
+    filterChecklistList?: string;
+    filterChecklistSearch?: string;
+    filterField?: string;
+    filterInput?: string;
+    filterLabel?: string;
+}
+
+// @public
+export interface ChecklistFilterProps<TRow> {
+    readonly classNames?: ChecklistClassNames;
+    readonly def: FilterDef<TRow>;
+    readonly labels?: TableLabels;
+    readonly source: Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">;
+}
+
+// @public
+export interface ChecklistSearchProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly onChange: (value: string) => void;
+    readonly value: string;
+}
+
+// @public
+export interface ChecklistSlots<TNode = unknown> {
+    readonly Button: (props: ChecklistButtonProps) => TNode;
+    readonly Checkbox: (props: ChecklistCheckboxProps) => TNode;
+    readonly Search: (props: ChecklistSearchProps) => TNode;
+}
 
 // @public
 export interface ChecklistValue {
@@ -243,7 +549,17 @@ export interface ChecklistValue {
 export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
 
 // @public
+export const CHROME_BODY: FeatureSlotKey<ChromeBodySlotProps<unknown, unknown, unknown, unknown>>;
+
+// @public
 export type ChromeBodySlot<TRow, TWiring, TNode = unknown, TStyle = unknown> = ChromeExtraSlot<TNode, TStyle> | ChromeVirtualPadSlot | ChromeGroupSlot<TRow> | ChromeRowSlot<TWiring>;
+
+// @public
+export interface ChromeBodySlotProps<TChrome = unknown, TProps = unknown, TBody = unknown, TNode = unknown> {
+    children: (body: TBody) => TNode;
+    chrome: TChrome;
+    props: TProps;
+}
 
 // @public
 export interface ChromeCellSizing {
@@ -277,6 +593,13 @@ export interface ChromeExtraSlot<TNode = unknown, TStyle = unknown> {
     key: string;
     kind: "extra";
     render?: () => TNode;
+}
+
+// @public
+export interface ChromeExtraSlotProps<TChrome = unknown, TProps = unknown, TNode = unknown> {
+    children: (chrome: TChrome) => TNode;
+    chrome: TChrome;
+    props: TProps;
 }
 
 // @public
@@ -329,10 +652,19 @@ export const COLUMN_GROUP_STUB_PREFIX = "__groupStub:";
 export const COLUMN_GROUP_STUB_WIDTH = 36;
 
 // @public
+export const COLUMN_GROUP_TOGGLE: FeatureSlotKey<ColumnGroupToggleProps>;
+
+// @public
 export const COLUMN_HEADER_RENAME: FeatureSlotKey<ColumnHeaderRenameSlotProps<unknown>>;
 
 // @public
+export const COLUMN_LAYOUT_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
 export const COLUMN_MENU: FeatureSlotKey<ColumnMenuSlotProps<never>>;
+
+// @public
+export const COLUMN_SELECT: FeatureSlotKey<ColumnSelectCheckboxChromeProps>;
 
 // @public
 export interface ColumnAiOptions {
@@ -384,6 +716,27 @@ export type ColumnGroupShow = "open" | "closed" | "always";
 
 // @public
 export function columnGroupStubStyle(): CssProperties;
+
+// @public
+export interface ColumnGroupToggleButtonProps {
+    readonly className?: string;
+    readonly expanded: boolean;
+    readonly label: string;
+    readonly onClick: () => void;
+}
+
+// @public
+export interface ColumnGroupToggleProps {
+    cell: HeaderGroupCell;
+    className?: string;
+    labels: Required<TableLabels>;
+    onToggle: (id: string) => void;
+}
+
+// @public
+export interface ColumnGroupToggleSlots<TNode = unknown> {
+    readonly Button: (props: ColumnGroupToggleButtonProps) => TNode;
+}
 
 // @public
 export interface ColumnHeaderRenameSlotProps<TNode = unknown> {
@@ -597,10 +950,129 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 // @public
+export interface ColumnSelectCheckboxChromeProps {
+    readonly checked: boolean;
+    readonly className?: string;
+    readonly label: string;
+    readonly onToggle: () => void;
+}
+
+// @public
+export interface ColumnSelectCheckboxProps {
+    readonly checked: boolean;
+    readonly label: string;
+    readonly onToggle: () => void;
+}
+
+// @public
+export interface ColumnSelectSlots<TNode = unknown> {
+    readonly Checkbox: (props: ColumnSelectCheckboxProps) => TNode;
+}
+
+// @public
 export function columnTextAlign(align: string | undefined): "start" | "center" | "end";
 
 // @public
 export type Command = ContextMenuItem;
+
+// @public
+export const COMMAND_PALETTE: FeatureSlotKey<Omit<CommandPaletteChromeProps<unknown, KeyboardEvent>, "slots">>;
+
+// @public
+export const COMMAND_PALETTE_LIVE: FeatureSlotKey<unknown>;
+
+// @public
+export interface CommandPaletteChromeProps<TNode = unknown, TKeyboardEvent = KeyboardEvent> {
+    className?: string;
+    commands: readonly Command[];
+    labels?: TableLabels;
+    onClose: () => void;
+    open: boolean;
+    slots: CommandPaletteSlots<TNode, TKeyboardEvent>;
+}
+
+// @public
+export interface CommandPaletteInputProps<TKeyboardEvent = KeyboardEvent> {
+    readonly inputProps: {
+        readonly value: string;
+        readonly onChange: (next: string) => void;
+        readonly onKeyDown: (event: TKeyboardEvent) => void;
+        readonly ref: (element: HTMLInputElement | null) => void;
+        readonly role: "combobox";
+        readonly "aria-expanded": true;
+        readonly "aria-controls": string;
+        readonly "aria-activedescendant": string | undefined;
+        readonly "aria-label": string;
+        readonly placeholder: string;
+        readonly "data-adapttable-part": "command-input";
+    };
+}
+
+// @public
+export interface CommandPaletteItemProps {
+    readonly active: boolean;
+    readonly command: Command;
+    readonly itemProps: {
+        readonly id: string;
+        readonly role: "option";
+        readonly "aria-selected": boolean;
+        readonly "aria-disabled": boolean | undefined;
+        readonly "data-adapttable-part": "command-item";
+        readonly onClick: () => void;
+        readonly onMouseEnter: () => void;
+    };
+}
+
+// @public
+export interface CommandPaletteSlots<TNode = unknown, TKeyboardEvent = KeyboardEvent> {
+    readonly Empty: (props: {
+        readonly message: string;
+    }) => TNode;
+    readonly Input: (props: CommandPaletteInputProps<TKeyboardEvent>) => TNode;
+    readonly Item: (props: CommandPaletteItemProps) => TNode;
+    readonly Surface: (props: CommandPaletteSurfaceProps<TNode>) => TNode;
+}
+
+// @public
+export interface CommandPaletteSurfaceProps<TNode = unknown> {
+    readonly children: TNode;
+    readonly className?: string;
+    readonly label: string;
+    readonly onClose: () => void;
+}
+
+// @public
+export type ConfirmHandler = (request: ConfirmRequest) => void;
+
+// @public
+export interface ConfirmRequest {
+    cancelLabel: string;
+    confirmLabel: string;
+    danger?: boolean;
+    message: string;
+    onConfirm: () => void;
+    title: string;
+}
+
+// @public
+export const CONTEXT_MENU: FeatureSlotKey<Omit<ContextMenuChromeProps<unknown>, "slots">>;
+
+// @public
+export const CONTEXT_MENU_LIVE: FeatureSlotKey<{
+    container?: HTMLElement | null;
+    children: (regionProps: Record<string, unknown>) => unknown;
+}>;
+
+// @public
+export interface ContextMenuChromeProps<TNode = unknown> {
+    at: ContextMenuPoint | null;
+    className?: string;
+    container?: HTMLElement;
+    items: readonly ContextMenuItem[];
+    labels?: TableLabels;
+    onClose: () => void;
+    slots: ContextMenuSlots<TNode>;
+}
 
 // @public
 export interface ContextMenuItem {
@@ -613,7 +1085,45 @@ export interface ContextMenuItem {
 }
 
 // @public
+export interface ContextMenuItemProps {
+    readonly item: ContextMenuItem;
+    readonly onSelect: () => void;
+}
+
+// @public
 export type ContextMenuItemsFactory<TRow = unknown> = (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
+
+// @public
+export type ContextMenuLiveSlotProps<TOptions = unknown, TNode = unknown> = TOptions & {
+    container?: HTMLElement | null;
+    children: (regionProps: Record<string, unknown>) => TNode;
+};
+
+// @public
+export interface ContextMenuPoint {
+    x: number;
+    y: number;
+}
+
+// @public
+export interface ContextMenuSlots<TNode = unknown> {
+    readonly Item: (props: ContextMenuItemProps) => TNode;
+    readonly Separator: () => TNode;
+    readonly Surface: (props: ContextMenuSurfaceProps<TNode>) => TNode;
+}
+
+// @public
+export interface ContextMenuSurfaceProps<TNode = unknown> {
+    readonly anchorRef: {
+        readonly current: HTMLElement | null;
+    };
+    readonly at: ContextMenuPoint;
+    readonly children: TNode;
+    readonly className?: string;
+    readonly container?: HTMLElement;
+    readonly label: string;
+    readonly onClose: () => void;
+}
 
 // @public
 export type ContextMenuTarget<TRow> = {
@@ -635,6 +1145,13 @@ export function createFeatureHost<TPanel extends SidePanelEntry = SidePanelEntry
 
 // @public
 export type CssProperties = Record<string, string | number | undefined>;
+
+// @public
+export const CURRENT_MATCH_CELL_STYLE: {
+    readonly background: "var(--adapttable-find-match-current, rgba(255, 150, 50, 0.75))";
+    readonly outline: "2px solid CanvasText";
+    readonly outlineOffset: "-2px";
+};
 
 // @public
 export interface CustomAggregateOperation<TValue = AggregateOrderedValue> {
@@ -806,7 +1323,86 @@ export function drawnSlotFills<TNode>(slot: {
 }, fills: readonly SlotFill<TNode>[]): readonly SlotFill<TNode>[];
 
 // @public
+export const EDIT_HISTORY_LIVE: FeatureSlotKey<EditHistoryLiveSlotProps<never, unknown, unknown, ColumnModel<never>, unknown>>;
+
+// @public
+export const EDITABLE_CELL: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
+
+// @public
+export interface EditableCellActivateProps<TNode = unknown> {
+    readonly activateRef: (node: HTMLButtonElement | null) => void;
+    readonly className?: string;
+    readonly dirty: boolean;
+    readonly display: TNode;
+    readonly onClick: (event: {
+        stopPropagation: () => void;
+    }) => void;
+    readonly onDoubleClick: (event: {
+        preventDefault: () => void;
+        stopPropagation: () => void;
+    }) => void;
+    readonly onKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        stopPropagation: () => void;
+    }) => void;
+    readonly saveStatus: string | undefined;
+    readonly title: string;
+}
+
+// @public
+export interface EditableCellButtonProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly onClick: (event: {
+        stopPropagation: () => void;
+    }) => void;
+    readonly onMouseDown?: (event: {
+        preventDefault: () => void;
+    }) => void;
+    readonly part: string;
+}
+
+// @public
+export interface EditableCellSlotProps<TRow = never, TEditing = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
+    column: TColumn;
+    columns: readonly TColumn[];
+    display?: TNode;
+    editing: TEditing | undefined;
+    editLabel: string;
+    row: TRow;
+    rowId: string;
+    rowIndex: number;
+    rowKey: (row: TRow) => string;
+    rows: readonly TRow[];
+    undoLabel?: string;
+}
+
+// @public
+export interface EditableCellSlots<TNode = unknown> {
+    readonly Activate: (props: EditableCellActivateProps<TNode>) => TNode;
+    readonly Button: (props: EditableCellButtonProps) => TNode;
+}
+
+// @public
+export interface EditHistoryLiveSlotProps<TRow = never, THistory = unknown, TOptions = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
+    children: (result: {
+        history: THistory;
+        onCellEdit: ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
+    }) => TNode;
+    columns: readonly TColumn[];
+    editHistory: boolean | TOptions | undefined;
+    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+}
+
+// @public
+export const EDITING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
 export const EMPTY_FEATURE_HOST: FeatureHostState;
+
+// @public
+export function ensureForcedColorsStyles(): void;
 
 // @public
 export function entryKeys(entries?: readonly {
@@ -815,6 +1411,12 @@ export function entryKeys(entries?: readonly {
 
 // @public
 export const EXPAND_TOGGLE: FeatureSlotKey<ExpandToggleSlotProps>;
+
+// @public
+export function expandChevronIcon(state: {
+    readonly open: boolean;
+    readonly dir?: Direction;
+}): IconDescriptor;
 
 // @public
 export interface ExpandToggleSlotProps {
@@ -827,10 +1429,172 @@ export interface ExpandToggleSlotProps {
 }
 
 // @public
+export const EXPANSION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
+export const EXPORT_LIVE: FeatureSlotKey<ExportLiveSlotProps<never, unknown, ColumnModel<never>, unknown>>;
+
+// @public
+export interface ExportAllControls {
+    readonly setMessage?: (message: string) => void;
+    readonly setProgress?: (progress: number) => void;
+    readonly signal: AbortSignal;
+}
+
+// @public
+export interface ExportAllQuery {
+    readonly columns: readonly string[];
+    readonly filename: string;
+    readonly filters: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+    readonly format: string;
+    readonly groupBy: readonly string[];
+    readonly search: string;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+    readonly visibleColumns: readonly string[];
+}
+
+// @public
+export type ExportAllResult = {
+    readonly url: string;
+} | void;
+
+// @public
+export type ExportColumnScope = "visible" | "all" | readonly string[];
+
+// @public
+export interface ExportContext<TRow> {
+    allColumns?: readonly ColumnMetadata<TRow>[];
+    firstRowIndex?: number;
+    getCellSpan?: GetCellSpan<TRow>;
+    getRowId?: (row: TRow) => string;
+    grouping?: {
+        groupBy?: readonly string[];
+        entries: readonly GroupedFlatEntry<TRow>[];
+    };
+    groupTotal?: (label: string) => string;
+    range?: CellRange | null;
+    selectedIds?: ReadonlySet<string>;
+    summaryRow?: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>;
+    tree?: {
+        entries: readonly TreeEntry<TRow>[];
+        allEntries?: readonly TreeEntry<TRow>[];
+    };
+}
+
+// @public
+export interface ExportCsvOptions<TRow = unknown> {
+    columns?: ExportColumnScope;
+    escapeFormulas?: boolean;
+    fetchAll?: FetchAllExport<TRow>;
+    filename?: string;
+    onAfterExport?: (info: ExportInfo<TRow> & {
+        csv: string;
+        file: ExportPayload;
+    }) => void;
+    onBeforeExport?: (info: ExportInfo<TRow>) => boolean | void | {
+        filename?: string;
+    };
+    onExportAll?: (query: ExportAllQuery, controls: ExportAllControls) => ExportAllResult | Promise<ExportAllResult>;
+    request?: (info: ExportRequest<TRow>) => void | Promise<void>;
+    scope?: ExportRowScope;
+    writer?: ExportWriter;
+}
+
+// @public
+export interface ExportInfo<TRow> {
+    columns: readonly ColumnMetadata<TRow>[];
+    filename: string;
+    rows: readonly TRow[];
+}
+
+// @public
+export interface ExportLiveSlotProps<TRow = never, TExport = unknown, TColumn = ColumnModel<TRow>, TNode = unknown> {
+    children: (exportHandler: TExport) => TNode;
+    columns: readonly TColumn[];
+    context: ExportContext<TRow>;
+    exportCsv: boolean | ExportCsvOptions<TRow> | undefined;
+    featureHost?: FeatureHostState;
+    labels: TableLabels;
+    pageOnly: boolean;
+    source: TableSource<TRow>;
+}
+
+// @public
 export interface ExportPayload {
     mimeType: string;
     parts: readonly BlobPart[];
     text: string;
+}
+
+// @public
+export interface ExportProgressAction {
+    readonly label: string;
+    readonly onAction: () => void;
+}
+
+// @public
+export interface ExportProgressChromeProps<TNode = unknown> {
+    readonly labels: TableLabels;
+    readonly progress: ExportProgressState | null;
+    readonly slots: ExportProgressSlots<TNode>;
+}
+
+// @public
+export interface ExportProgressDownload {
+    readonly label: string;
+    readonly url: string;
+}
+
+// @public
+export interface ExportProgressSlots<TNode = unknown> {
+    readonly Surface: (props: ExportProgressSurfaceSlotProps) => TNode;
+}
+
+// @public
+export interface ExportProgressState {
+    readonly downloadUrl: string | undefined;
+    readonly error: string;
+    readonly message: string;
+    readonly onCancel: (() => void) | undefined;
+    readonly onDismiss: (() => void) | undefined;
+    readonly onRetry: (() => void) | undefined;
+    readonly status: Exclude<ExportStatus, "idle">;
+    readonly value: number | undefined;
+}
+
+// @public
+export interface ExportProgressSurfaceSlotProps {
+    readonly cancel: ExportProgressAction | undefined;
+    readonly dismiss: ExportProgressAction | undefined;
+    readonly download: ExportProgressDownload | undefined;
+    readonly error: string;
+    readonly heading: string;
+    readonly message: string;
+    readonly progress: number | undefined;
+    readonly progressLabel: string;
+    readonly retry: ExportProgressAction | undefined;
+    readonly status: Exclude<ExportStatus, "idle">;
+}
+
+// @public
+export interface ExportQuery {
+    filters: ExtraFilters;
+    groupBy: string | undefined;
+    limit: number | undefined;
+    page: number | undefined;
+    search: string;
+    sortBy: string | undefined;
+    sortDir: SortDirection | undefined;
+}
+
+// @public
+export interface ExportRequest<TRow> extends ExportInfo<TRow> {
+    format: string;
+    query: ExportQuery;
+    scope: ExportRowScope;
 }
 
 // @public
@@ -843,7 +1607,13 @@ export interface ExportRowMeta {
 export type ExportRowRole = "data" | "group" | "aggregate";
 
 // @public
+export type ExportRowScope = "page" | "all" | "selected" | "range";
+
+// @public
 export type ExportScopeCapability = "all" | "page";
+
+// @public
+export type ExportStatus = "idle" | "busy" | "done" | "failed" | "cancelled";
 
 // @public
 export interface ExportTable {
@@ -937,6 +1707,9 @@ export function extraRowsForSection(extraRows: readonly ExtraRow[] | undefined, 
 export function extraUncoveredColSpans(columnSpan: number, coveredSlots: ReadonlySet<number> | undefined): readonly number[];
 
 // @public
+export function eyeIcon(off?: boolean): IconDescriptor;
+
+// @public
 export type FacetCounts = readonly ChecklistValue[];
 
 // @public
@@ -954,6 +1727,19 @@ export interface FeatureHostState<TRow = unknown> {
     readonly panels: readonly SidePanelEntry[];
     readonly writers: readonly ExportWriter[];
 }
+
+// @public
+export interface FeatureNotice {
+    readonly appearance: FeatureNoticeAppearance;
+    readonly kind: FeatureNoticeKind;
+    readonly message: string;
+}
+
+// @public
+export type FeatureNoticeAppearance = "off" | "disabled" | "one-page";
+
+// @public
+export type FeatureNoticeKind = "virtualize-paged" | "pin-nested" | "grouping-unavailable" | "export-all-page" | "edit-without-writer";
 
 // @public
 export interface FeatureRender<TProps, TNode = unknown> {
@@ -989,7 +1775,49 @@ export interface FeatureStateKey<T> {
 export function featureStateKey<T>(id: string): FeatureStateKey<T>;
 
 // @public
+export interface FetchAllExport<TRow> {
+    fetchPage: (query: ExportQuery) => Promise<readonly TRow[]>;
+    maxRows?: number;
+    onCapped?: (info: {
+        rows: number;
+        maxRows: number;
+    }) => void;
+    pageSize?: number;
+}
+
+// @public
+export const FILL_HANDLE: FeatureSlotKey<FillHandleCellSlotProps<unknown>>;
+
+// @public
+export interface FillHandleCellSlotProps<TFocus = unknown> {
+    col: number;
+    focus: TFocus | undefined;
+    windowIndex: number;
+}
+
+// @public
+export interface FillHandleSlotProps {
+    readonly className?: string;
+    readonly handleProps: Readonly<Record<string, unknown>>;
+    readonly label: string;
+}
+
+// @public
+export interface FillHandleSlots<TNode = unknown> {
+    readonly Handle: (props: FillHandleSlotProps) => TNode;
+}
+
+// @public
+export const FILTER_CHIPS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
 export const FILTER_DRAWER: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
+
+// @public
+export const FILTER_ENGINE: FeatureStateKey<FilterEngine>;
+
+// @public
+export const FILTER_HEADER: FeatureSlotKey<FilterHeaderControlProps<never>>;
 
 // @public
 export const FILTER_POPOVER: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
@@ -1018,7 +1846,129 @@ export interface FilterDef<TRow = unknown> {
 }
 
 // @public
+export interface FilterEngine {
+    // (undocumented)
+    buildRuntime<TRow>(input: {
+        columns: readonly ColumnMetadata<TRow>[];
+        declaredFilters: readonly FilterDef<TRow>[] | undefined;
+        locale: string | undefined;
+        data: readonly TRow[];
+        loadedOptions: Record<string, readonly {
+            value: string;
+            label: string;
+        }[]>;
+        filterTypes: readonly FilterTypeSpec[] | undefined;
+        featureHost: FeatureHostState | undefined;
+        optionCache: Map<string, () => Promise<readonly {
+            value: string;
+            label: string;
+        }[]>>;
+    }): FilterRuntime<TRow>;
+    // (undocumented)
+    computeFacets<TRow>(defs: readonly FilterDef<TRow>[], rows: readonly TRow[], extra: ExtraFilters, keep: (row: TRow, extra: ExtraFilters) => boolean, registry: FilterTypeRegistry): FacetMap;
+    // (undocumented)
+    evaluateTree<TRow>(tree: QueryFilterGroup, row: TRow, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry): boolean;
+}
+
+// @public
 export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
+
+// @public
+export interface FilterHeaderClassNames {
+    actionsHeader?: string;
+    expandHeader?: string;
+    filterHeaderCell?: string;
+    filterHeaderInput?: string;
+    filterHeaderMenu?: string;
+    filterHeaderRow?: string;
+    headerCell?: string;
+    reorderHeader?: string;
+    selectionHeader?: string;
+}
+
+// @public
+export interface FilterHeaderControlProps<TRow> {
+    readonly className?: string;
+    readonly closeOnSelect?: boolean;
+    readonly def: FilterDef<TRow>;
+    readonly labels: Required<TableLabels>;
+    readonly registry?: FilterTypeRegistry;
+    readonly source: FilterFormSource<TRow>;
+}
+
+// @public
+export interface FilterHeaderMultiProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly menuClassName?: string;
+    readonly onToggle: (value: string, checked: boolean) => void;
+    readonly options: readonly FilterHeaderOption[];
+    readonly selected: readonly string[];
+    readonly summary: string;
+}
+
+// @public
+export interface FilterHeaderOption {
+    readonly label: string;
+    readonly value: string;
+}
+
+// @public
+export interface FilterHeaderRangeProps {
+    readonly label: string;
+    readonly onChange: (value: string) => void;
+    readonly type: "text" | "number" | "date";
+    readonly value: string;
+}
+
+// @public
+export interface FilterHeaderRowProps<TRow, TColumn = ColumnModel<TRow>, TStyle = CssProperties> {
+    readonly cellStyle?: (column: TColumn) => TStyle | undefined;
+    readonly classNames?: FilterHeaderClassNames;
+    readonly columns: readonly TColumn[];
+    readonly columnSpacers?: {
+        start: number;
+        end: number;
+    };
+    readonly defs: readonly FilterDef<TRow>[];
+    readonly enabled?: boolean;
+    readonly expandable?: boolean;
+    readonly labels: Required<TableLabels>;
+    readonly padStyle?: TStyle;
+    readonly pinSide?: (key: string) => "start" | "end" | undefined;
+    readonly registry?: FilterTypeRegistry;
+    readonly selection?: boolean;
+    readonly showActions?: boolean;
+    readonly showReorder?: boolean;
+    readonly source: FilterFormSource<TRow>;
+    readonly stickyAttr?: true;
+}
+
+// @public
+export interface FilterHeaderSearchProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly onChange: (value: string) => void;
+    readonly placeholder: string;
+    readonly value: string;
+}
+
+// @public
+export interface FilterHeaderSelectProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly onChange: (value: string) => void;
+    readonly options: readonly FilterHeaderOption[];
+    readonly value: string;
+}
+
+// @public
+export interface FilterHeaderSlots<TNode = unknown> {
+    readonly Multi: (props: FilterHeaderMultiProps) => TNode;
+    readonly Range: (props: FilterHeaderRangeProps) => TNode;
+    readonly Search: (props: FilterHeaderSearchProps) => TNode;
+    readonly Select: (props: FilterHeaderSelectProps) => TNode;
+}
 
 // @public
 export interface FilterOption {
@@ -1041,6 +1991,113 @@ export interface FilterOverlaySlotProps<TNode = unknown> {
     onClearFilters: () => void;
     onClose: () => void;
     open: boolean;
+}
+
+// @public
+export interface FilterRuntime<TRow> {
+    arrayExtraKeys: string[];
+    defs: readonly FilterDef<TRow>[];
+    filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    filterLabels: Record<string, ChipLabelResolver>;
+    numberExtraKeys: string[];
+    registry: FilterTypeRegistry;
+}
+
+// @public
+export const FILTERS_FORM: FeatureSlotKey<FiltersFormSlotProps<never>>;
+
+// @public
+export const FILTERS_ICON: IconDescriptor;
+
+// @public
+export interface FiltersFormSlotProps<TRow> {
+    readonly defaultExpanded?: boolean;
+    readonly defs: readonly FilterDef<TRow>[];
+    readonly labels: Required<TableLabels>;
+    readonly registry: FilterTypeRegistry;
+    readonly showSimpleFields: boolean;
+    readonly source: TableSource<TRow>;
+}
+
+// @public
+export interface FilterTreeBuilderProps<TRow> {
+    readonly classNames?: FilterTreeClassNames;
+    readonly defaultExpanded?: boolean;
+    readonly defs: readonly FilterDef<TRow>[];
+    readonly labels?: TableLabels;
+    readonly registry?: FilterTypeRegistry;
+    readonly source: Pick<TableSource<TRow>, "filterTree" | "setFilterTree">;
+}
+
+// @public
+export interface FilterTreeButtonProps {
+    readonly className?: string;
+    readonly label: string;
+    readonly onClick: () => void;
+    readonly part?: string;
+}
+
+// @public
+export interface FilterTreeClassNames {
+    filterField?: string;
+    filterInput?: string;
+    filterLabel?: string;
+    filterOperator?: string;
+    filterSelect?: string;
+    filtersForm?: string;
+    filterTree?: string;
+    filterTreeActions?: string;
+    filterTreeCondition?: string;
+    filterTreeGroup?: string;
+    filterTreeRemove?: string;
+    filterTreeSummary?: string;
+}
+
+// @public
+export interface FilterTreeDisclosureProps<TNode = unknown> {
+    readonly children: TNode;
+    readonly className?: string;
+    readonly expanded: boolean;
+    readonly label: string;
+    readonly onExpandedChange: (expanded: boolean) => void;
+    readonly summaryClassName?: string;
+}
+
+// @public
+export interface FilterTreeInputProps {
+    readonly className?: string;
+    readonly fieldClassName?: string;
+    readonly label: string;
+    readonly labelClassName?: string;
+    readonly onChange: (value: string) => void;
+    readonly type: "text" | "number" | "date";
+    readonly value: string;
+}
+
+// @public
+export interface FilterTreeOption {
+    readonly label: string;
+    readonly value: string;
+}
+
+// @public
+export interface FilterTreeSelectProps {
+    readonly className?: string;
+    readonly fieldClassName?: string;
+    readonly label: string;
+    readonly labelClassName?: string;
+    readonly onChange: (value: string) => void;
+    readonly options: readonly FilterTreeOption[];
+    readonly part: string;
+    readonly value: string;
+}
+
+// @public
+export interface FilterTreeSlots<TNode = unknown> {
+    readonly Button: (props: FilterTreeButtonProps) => TNode;
+    readonly Disclosure: (props: FilterTreeDisclosureProps<TNode>) => TNode;
+    readonly Input: (props: FilterTreeInputProps) => TNode;
+    readonly Select: (props: FilterTreeSelectProps) => TNode;
 }
 
 // @public
@@ -1089,6 +2146,77 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
 }
 
 // @public
+export const FIND_BAR: FeatureSlotKey<FindBarProps>;
+
+// @public
+export const FIND_LIVE: FeatureSlotKey<{
+    root?: {
+        readonly current: HTMLElement | null;
+    };
+    children: (find: FindInTableState) => unknown;
+}>;
+
+// @public
+export interface FindBarProps {
+    className?: string;
+    find: FindInTableState;
+    labels?: TableLabels;
+}
+
+// @public
+export interface FindBarSlots<TNode = unknown, TKeyboardEvent = KeyboardEvent> {
+    readonly Button: (props: FindButtonProps) => TNode;
+    readonly Search: (props: FindSearchProps<TKeyboardEvent>) => TNode;
+}
+
+// @public
+export type FindButtonKind = "previous" | "next" | "close";
+
+// @public
+export interface FindButtonProps {
+    readonly disabled?: boolean;
+    readonly kind: FindButtonKind;
+    readonly label: string;
+    readonly onClick: () => void;
+    readonly part: string;
+}
+
+// @public
+export interface FindInTableState {
+    current: GridCell | null;
+    index: number;
+    matches: readonly GridCell[];
+    matchKeys: ReadonlySet<string>;
+    next: () => void;
+    open: boolean;
+    openBar?: () => void;
+    previous: () => void;
+    query: string;
+    setOpen: (open: boolean) => void;
+    setQuery: (query: string) => void;
+}
+
+// @public
+export type FindLiveSlotProps<TOptions = unknown, TNode = unknown> = TOptions & {
+    root?: {
+        readonly current: HTMLElement | null;
+    };
+    children: (find: FindInTableState) => TNode;
+};
+
+// @public
+export interface FindSearchProps<TKeyboardEvent = KeyboardEvent> {
+    readonly focusRef: (node: {
+        focus: () => void;
+    } | null) => void;
+    readonly label: string;
+    readonly onChange: (value: string) => void;
+    readonly onKeyDown: (event: TKeyboardEvent) => void;
+    readonly placeholder: string;
+    readonly value: string;
+}
+
+// @public
 export function flattenColumnTree<TRow>(columns: readonly ColumnInput<TRow>[]): FlattenedColumns<TRow>;
 
 // @public
@@ -1096,6 +2224,54 @@ export interface FlattenedColumns<TRow> {
     readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
     readonly leaves: ColumnMetadata<TRow>[];
 }
+
+// @public
+export const FORCED_COLORS_CSS: string;
+
+// @public
+export const FULLSCREEN_LIVE: FeatureSlotKey<FullscreenLiveSlotProps<unknown, unknown>>;
+
+// @public
+export interface FullscreenLiveSlotProps<TFullscreen = unknown, TNode = unknown> {
+    children: (fullscreen: TFullscreen) => TNode;
+    element: HTMLElement | null;
+}
+
+// @public
+export type GetCellSpan<TRow> = (args: GetCellSpanArgs<TRow>) => CellSpanRequest | undefined;
+
+// @public
+export interface GetCellSpanArgs<TRow> {
+    column: ColumnMetadata<TRow>;
+    columnIndex: number;
+    row: TRow;
+    rowIndex: number;
+    sectionRowIndex: number;
+    sectionRows: readonly TRow[];
+}
+
+// @public
+export const GRID_FOCUS_ANNOUNCER: FeatureSlotKey<GridFocusAnnouncerSlotProps<unknown>>;
+
+// @public
+export interface GridCell {
+    col: number;
+    row: number;
+}
+
+// @public
+export interface GridFocusAnnouncerSlotProps<TFocus = unknown> {
+    focus: TFocus;
+}
+
+// @public
+export const GRIP_ICON: IconDescriptor;
+
+// @public
+export const GROUP_HEADER_CARD: FeatureSlotKey<GroupHeaderCardSlotProps<never, unknown, ColumnModel<never>>>;
+
+// @public
+export const GROUP_HEADER_ROW: FeatureSlotKey<GroupHeaderRowSlotProps<never, unknown, ColumnModel<never>>>;
 
 // @public
 export type GroupAggregateOps = Readonly<Partial<Record<string, AggregateOperationId | "none">>>;
@@ -1181,22 +2357,70 @@ export function groupedHeaderChildRule(hairline: string): {
 export function groupedHeaderLabelStyle(): CssProperties;
 
 // @public
+export interface GroupHeaderCardSlotProps<TRow = never, TSelection = unknown, TColumn = ColumnModel<TRow>> {
+    columns: readonly TColumn[];
+    compact: boolean;
+    entry: Extract<GroupedFlatEntry<TRow>, {
+        kind: "group" | "groupFooter" | "groupMore";
+    }>;
+    labels: Required<TableLabels>;
+    onShowMore: (entry: {
+        scope: "groups" | "rows";
+        groupKey?: string;
+    }) => void;
+    onToggleCollapse: (groupKey: string) => void;
+    selection: TSelection | null;
+}
+
+// @public
+export interface GroupHeaderRowSlotProps<TRow = never, TSelection = unknown, TColumn = ColumnModel<TRow>> {
+    columns: readonly TColumn[];
+    entry: Extract<GroupedFlatEntry<TRow>, {
+        kind: "group" | "groupFooter" | "groupMore";
+    }>;
+    getCellProps: (column: TColumn) => Record<string, unknown>;
+    labels: Required<TableLabels>;
+    leadingCells: number;
+    onShowMore: (entry: {
+        scope: "groups" | "rows";
+        groupKey?: string;
+    }) => void;
+    onToggleCollapse: (groupKey: string) => void;
+    selection: TSelection | null;
+    showActions: boolean;
+}
+
+// @public
+export function groupIndentStyle(level: number): {
+    paddingInlineStart?: string;
+};
+
+// @public
+export const GROUPING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
+export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
+
+// @public
+export const GROUPING_PANEL_STATE: FeatureStateKey<GroupingPanelInteractions>;
+
+// @public
 export type GroupingCapability = "client" | "server" | false;
 
 // @public
-export interface GroupingChipKeyboardProps {
+export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
     "aria-label": string;
-    onKeyDown: (event: KeyboardEvent) => void;
+    onKeyDown: (event: TKeyboardEvent) => void;
     role: "button";
     tabIndex: 0;
 }
 
 // @public
-export interface GroupingDragProps {
+export interface GroupingDragProps<TDragEvent = DragEvent> {
     "data-grouping-dragging"?: boolean;
     draggable?: boolean;
-    onDragEnd?: (event: DragEvent) => void;
-    onDragStart?: (event: DragEvent) => void;
+    onDragEnd?: (event: TDragEvent) => void;
+    onDragStart?: (event: TDragEvent) => void;
 }
 
 // @public
@@ -1211,12 +2435,65 @@ export interface GroupingDragState {
 }
 
 // @public
-export interface GroupingDropProps {
+export interface GroupingDropProps<TDragEvent = DragEvent> {
     "data-drop-active"?: boolean;
-    onDragEnter?: (event: DragEvent) => void;
-    onDragLeave?: (event: DragEvent) => void;
-    onDragOver?: (event: DragEvent) => void;
-    onDrop?: (event: DragEvent) => void;
+    onDragEnter?: (event: TDragEvent) => void;
+    onDragLeave?: (event: TDragEvent) => void;
+    onDragOver?: (event: TDragEvent) => void;
+    onDrop?: (event: TDragEvent) => void;
+}
+
+// @public
+export interface GroupingPanelAggregationItemProps<TNode = unknown> {
+    "data-adapttable-part": "grouping-aggregation-item";
+    children: TNode;
+    label: string;
+    readOnly: boolean;
+    readOnlyLabel: string;
+}
+
+// @public
+export interface GroupingPanelAggregationRemoveProps {
+    "data-adapttable-part": "grouping-aggregation-remove";
+    label: string;
+    onRemove: () => void;
+}
+
+// @public
+export interface GroupingPanelChecklistOption {
+    checked: boolean;
+    label: string;
+    value: string;
+}
+
+// @public
+export interface GroupingPanelChecklistProps {
+    "data-adapttable-part": "grouping-aggregation-add";
+    disabled?: boolean;
+    label: string;
+    onToggle: (value: string, checked: boolean) => void;
+    options: readonly GroupingPanelChecklistOption[];
+}
+
+// @public
+export interface GroupingPanelChipProps<TKeyboardEvent = KeyboardEvent, TDragEvent = DragEvent> {
+    "data-adapttable-part": "grouping-chip";
+    dragProps: GroupingDragProps<TDragEvent>;
+    keyboardProps: GroupingChipKeyboardProps<TKeyboardEvent>;
+    label: string;
+    level: number;
+    onRemove: () => void;
+    removeLabel: string;
+}
+
+// @public
+export interface GroupingPanelDropZoneProps<TDragEvent = DragEvent> {
+    "data-adapttable-part": "grouping-drop-zone";
+    active: boolean;
+    dragging: boolean;
+    dropProps: GroupingDropProps<TDragEvent>;
+    empty: boolean;
+    label: string;
 }
 
 // @public
@@ -1240,11 +2517,101 @@ export interface GroupingPanelInteractions {
 }
 
 // @public
+export interface GroupingPanelOption {
+    label: string;
+    value: string;
+}
+
+// @public
+export interface GroupingPanelRemoveZoneProps<TDragEvent = DragEvent> {
+    "data-adapttable-part": "grouping-remove-zone";
+    active: boolean;
+    dropProps: GroupingDropProps<TDragEvent>;
+    label: string;
+}
+
+// @public
+export interface GroupingPanelRestoreProps {
+    "data-adapttable-part": "grouping-aggregations-restore";
+    disabled: boolean;
+    label: string;
+    onRestore: () => void;
+}
+
+// @public
+export interface GroupingPanelSelectProps {
+    "data-adapttable-part": "grouping-add" | "grouping-aggregation-operation";
+    disabled?: boolean;
+    label: string;
+    onChange: (value: string) => void;
+    options: readonly GroupingPanelOption[];
+    value: string;
+}
+
+// @public
+export interface GroupingPanelSlotProps<TColumn = unknown> {
+    columns: readonly TColumn[];
+    dir?: Direction;
+    labels: Required<TableLabels>;
+    mobile: boolean;
+    state: GroupingPanelState;
+}
+
+// @public
+export interface GroupingPanelSlots<TNode = unknown, TKeyboardEvent = KeyboardEvent, TDragEvent = DragEvent> {
+    AggregationItem: (props: GroupingPanelAggregationItemProps<TNode>) => TNode;
+    AggregationPicker: (props: GroupingPanelChecklistProps) => TNode;
+    AggregationRemove: (props: GroupingPanelAggregationRemoveProps) => TNode;
+    AggregationRestore: (props: GroupingPanelRestoreProps) => TNode;
+    Chip: (props: GroupingPanelChipProps<TKeyboardEvent, TDragEvent>) => TNode;
+    DropZone: (props: GroupingPanelDropZoneProps<TDragEvent>) => TNode;
+    RemoveZone: (props: GroupingPanelRemoveZoneProps<TDragEvent>) => TNode;
+    Select: (props: GroupingPanelSelectProps) => TNode;
+    Surface: (props: GroupingPanelSurfaceProps<TNode, TDragEvent>) => TNode;
+}
+
+// @public
 export interface GroupingPanelState extends GroupingPanelInteractions {
     aggregateOverrides: GroupAggregateOverrides;
     aggregations: AggregationModel;
     canSetAggregates: boolean;
     groupBy: readonly string[];
+}
+
+// @public
+export interface GroupingPanelSurfaceProps<TNode = unknown, TDragEvent = DragEvent> {
+    "data-adapttable-part": "grouping-panel";
+    children: TNode;
+    dir?: Direction;
+    label: string;
+    mobile: boolean;
+    onDragEnter?: (event: TDragEvent) => void;
+    onDragLeave?: (event: TDragEvent) => void;
+    onDragOver?: (event: TDragEvent) => void;
+    onDrop?: (event: TDragEvent) => void;
+}
+
+// @public
+export interface GroupMoreButtonProps {
+    groupKey?: string;
+    labels: Required<TableLabels>;
+    onShowMore: (entry: {
+        scope: "groups" | "rows";
+        groupKey?: string;
+    }) => void;
+    remaining: number;
+    scope: "groups" | "rows";
+}
+
+// @public
+export interface GroupMoreButtonSlotProps {
+    readonly label: string;
+    readonly onClick: () => void;
+}
+
+// @public
+export interface GroupMoreButtonSlots<TNode = unknown> {
+    readonly Button: (props: GroupMoreButtonSlotProps) => TNode;
 }
 
 // @public
@@ -1261,6 +2628,17 @@ export interface GroupPaging {
     groups?: number;
     rows?: Readonly<Record<string, number>>;
 }
+
+// @public
+export type GroupRowKind = "group" | "groupFooter" | "groupMore";
+
+// @public
+export function groupRowParts(kind: GroupRowKind): {
+    row: string;
+    cell: string;
+    card: string;
+    label: string;
+};
 
 // @public
 export type GroupSort<TRow> = "label" | "label-desc" | "count" | "count-desc" | ((a: GroupNode<TRow>, b: GroupNode<TRow>) => number);
@@ -1325,6 +2703,49 @@ export function htmlGroupedHeaderPlan<TRow>(columns: readonly ColumnMetadata<TRo
 }>): HtmlGroupedHeaderCell[][] | null;
 
 // @public
+export interface IconDescriptor {
+    readonly fill?: string;
+    readonly focusable?: "false";
+    readonly height: number | string;
+    readonly shapes: readonly IconShape[];
+    readonly stroke?: string;
+    readonly strokeLinecap?: "round";
+    readonly strokeLinejoin?: "round";
+    readonly strokeWidth?: number | string;
+    readonly style?: {
+        readonly transform?: string;
+        readonly transition?: string;
+    };
+    readonly viewBox: string;
+    readonly width: number | string;
+}
+
+// @public
+export type IconShape = {
+    readonly tag: "path";
+    readonly d: string;
+    readonly fill?: string;
+    readonly stroke?: string;
+    readonly strokeWidth?: number | string;
+    readonly strokeLinecap?: "round";
+    readonly strokeLinejoin?: "round";
+} | {
+    readonly tag: "circle";
+    readonly cx: number | string;
+    readonly cy: number | string;
+    readonly r: number | string;
+    readonly fill?: string;
+} | {
+    readonly tag: "rect";
+    readonly x: number | string;
+    readonly y: number | string;
+    readonly width: number | string;
+    readonly height: number | string;
+    readonly rx?: number | string;
+    readonly fill?: string;
+};
+
+// @public
 export interface IncrementalViewConfig<TRow> {
     aggregateOptions?: AggregateOptions<TRow>;
     aggregateSpec?: AggregateSpec;
@@ -1384,7 +2805,30 @@ export function isColumnGroupStubKey(key: string): boolean;
 export function isColumnGroupSummaryKey(key: string): boolean;
 
 // @public
+export function isCurrentMatchCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
+
+// @public
 export function isExtraEntry(entry: object): entry is ExtraEntry;
+
+// @public
+export function isMatchedCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
+
+// @public
+export function isSelectedCell(props: Readonly<Record<string, unknown>> | undefined): boolean;
+
+// @public
+export const KEYED_WINDOW: FeatureSlotKey<KeyedWindowSlotProps<unknown, unknown>>;
+
+// @public
+export interface KeyedWindowSlotProps<TWindow = unknown, TNode = unknown> {
+    children: (window: TWindow) => TNode;
+    enabled: boolean;
+    estimateSize: number;
+    getScrollElement?: () => Element | null;
+    keys: readonly string[];
+    overscan?: number;
+    scrollMargin?: number;
+}
 
 // @public
 export class LiveFeatureHost<TRow = unknown, TPanel extends SidePanelEntry = SidePanelEntry> implements FeatureHostState<TRow> {
@@ -1411,10 +2855,62 @@ export class LiveFeatureHost<TRow = unknown, TPanel extends SidePanelEntry = Sid
 }
 
 // @public
+export function logicalAlign(align: ColumnModel["align"]): "start" | "center" | "end";
+
+// @public
+export const MATCHED_CELL_STYLE: {
+    readonly background: "var(--adapttable-find-match, rgba(255, 213, 0, 0.45))";
+    readonly outline: "2px dashed CanvasText";
+    readonly outlineOffset: "-2px";
+};
+
+// @public
 export function measureRowDetailAsPair(isMobile: boolean, renderRowDetail: unknown): boolean;
 
 // @public
 export function measureWindowScrollMargin(root: Element | null): number;
+
+// @public
+export interface MergedCellStyle {
+    background?: string;
+    textAlign: "center";
+    verticalAlign: "middle";
+}
+
+// @public
+export function mergedCellStyle(colSpan: number, rowSpan: number, appearance?: CellSpanAppearance, fill?: "on" | "off"): MergedCellStyle | undefined;
+
+// @public
+export const MOUNT_STAGGER: {
+    readonly selector: "[data-stagger]";
+    readonly stepMs: 40;
+    readonly durationMs: 320;
+    readonly easing: "cubic-bezier(0.16, 1, 0.3, 1)";
+    readonly keyframes: readonly [{
+        readonly opacity: 0;
+        readonly transform: "translateY(8px)";
+    }, {
+        readonly opacity: 1;
+        readonly transform: "translateY(0)";
+    }];
+};
+
+// @public
+export interface MultiSelectEditorCheckboxProps<TNode = unknown, TKeyboardEvent = KeyboardEvent> {
+    readonly checked: boolean;
+    readonly focusRef?: (node: {
+        focus: () => void;
+    } | null) => void;
+    readonly label: TNode;
+    readonly onKeyDown: (event: TKeyboardEvent) => void;
+    readonly onToggle: () => void;
+    readonly value: string;
+}
+
+// @public
+export interface MultiSelectEditorSlots<TNode = unknown, TKeyboardEvent = KeyboardEvent> {
+    readonly Checkbox: (props: MultiSelectEditorCheckboxProps<TNode, TKeyboardEvent>) => TNode;
+}
 
 // @public
 export interface NeutralTable<TRow = unknown> {
@@ -1458,6 +2954,20 @@ export function orderedContributions<TFeature extends {
 }, TContribution>(features: readonly TFeature[], pick: (feature: TFeature) => TContribution | undefined, kind: string): readonly OrderedContribution<TFeature, TContribution>[];
 
 // @public
+export const OVERLAY_MOTION: {
+    readonly enterMs: 340;
+    readonly exitMs: 240;
+    readonly enterEasing: "cubic-bezier(0.32, 0.72, 0, 1)";
+    readonly exitEasing: "cubic-bezier(0.4, 0, 1, 1)";
+};
+
+// @public
+export const PERSON_AVATAR_ICON: IconDescriptor;
+
+// @public
+export const PIN_ICON: IconDescriptor;
+
+// @public
 export interface PinLeads {
     end?: number;
     start?: number;
@@ -1476,6 +2986,16 @@ export interface PinnedCellStyle {
     position: "sticky";
     zIndex: number;
 }
+
+// @public
+export function pinnedDataCellStyle(pin: PinOffset | undefined, z: number, leads: PinLeads, bg: string): (PinnedCellStyle & {
+    background: string;
+}) | undefined;
+
+// @public
+export function pinnedEdgeCellStyle(side: PinSide, active: boolean, z: number, bg: string, shift?: number): (PinnedCellStyle & {
+    background: string;
+}) | undefined;
 
 // @public
 export function pinnedRowCellStyle(side: RowPinSide | undefined, headerOffsetPx: number, columnPinned: boolean): {
@@ -1506,6 +3026,9 @@ export function pinnedRowStickyStyle(side: RowPinSide, headerOffsetPx: number): 
 export type PinnedSide = PinSide | undefined;
 
 // @public
+export const PINNING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
 export interface PinOffset {
     inset: number;
     side: PinSide;
@@ -1513,6 +3036,93 @@ export interface PinOffset {
 
 // @public
 export type PinSide = "start" | "end";
+
+// @public
+export interface PivotAddProps {
+    readonly label: string;
+    readonly onAdd: (key: string) => void;
+    readonly options: readonly PivotField[];
+}
+
+// @public
+export interface PivotAggProps {
+    readonly label: string;
+    readonly onChange: (next: AggregateName) => void;
+    readonly options: readonly AggregateName[];
+    readonly value: AggregateName;
+}
+
+// @public
+export interface PivotConfig {
+    columns: readonly string[];
+    grandTotals?: boolean;
+    measures: readonly PivotMeasure[];
+    rows: readonly string[];
+    subtotals?: boolean;
+}
+
+// @public
+export interface PivotField {
+    key: string;
+    label: string;
+}
+
+// @public
+export interface PivotFieldProps<TNode = unknown> {
+    readonly "data-adapttable-part": "pivot-field";
+    readonly aggregation?: TNode;
+    readonly label: string;
+    readonly moveDownLabel: string;
+    readonly moveUpLabel: string;
+    readonly onMoveDown?: () => void;
+    readonly onMoveUp?: () => void;
+    readonly onRemove: () => void;
+    readonly removeLabel: string;
+}
+
+// @public
+export interface PivotMeasure {
+    agg: AggregateName | (string & {}) | Aggregator;
+    key: string;
+    label?: string;
+}
+
+// @public
+export interface PivotPanelChromeProps<TNode = unknown> {
+    className?: string;
+    config: PivotConfig;
+    fields: readonly PivotField[];
+    labels?: TableLabels;
+    onChange: (next: PivotConfig) => void;
+    slots: PivotPanelSlots<TNode>;
+}
+
+// @public
+export interface PivotPanelSlots<TNode = unknown> {
+    readonly Add: (props: PivotAddProps) => TNode;
+    readonly Agg: (props: PivotAggProps) => TNode;
+    readonly Field: (props: PivotFieldProps<TNode>) => TNode;
+    readonly Surface: (props: PivotPanelSurfaceProps<TNode>) => TNode;
+    readonly Zone: (props: PivotZoneProps<TNode>) => TNode;
+}
+
+// @public
+export interface PivotPanelSurfaceProps<TNode = unknown> {
+    readonly "data-adapttable-part": "pivot-panel";
+    readonly children: TNode;
+    readonly className?: string;
+}
+
+// @public
+export type PivotZone = "rows" | "columns" | "measures";
+
+// @public
+export interface PivotZoneProps<TNode = unknown> {
+    readonly "data-adapttable-part": "pivot-zone";
+    readonly children: TNode;
+    readonly label: string;
+    readonly zone: PivotZone;
+}
 
 // @public
 export interface QueryAggregate {
@@ -1561,18 +3171,37 @@ export interface ResolvedAggregateOperation {
 export type ResolvedPaginationMode = "infinite" | "paged";
 
 // @public
+export function resolveMobileLabel(column: {
+    readonly key: string;
+    readonly header?: unknown;
+    readonly mobileLabel?: string;
+}): string | undefined;
+
+// @public
 export function resolveRowHeight<TRow>(rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): number | undefined;
 
 // @public
 export function resolveRowStyle<TRow>(rowStyle: RowStyle<TRow> | undefined, rowHeight: RowHeight<TRow> | undefined, row: TRow, index: number): CssProperties | undefined;
 
 // @public
+export const ROW_ACTIONS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
 export const ROW_DND_MIME = "application/x-adapttable-row";
+
+// @public
+export const ROW_EDIT_ACTIONS: FeatureSlotKey<RowEditActionsProps<never>>;
 
 // @public
 export const ROW_REORDER_ANNOUNCER: FeatureSlotKey<{
     announcement: string;
 }>;
+
+// @public
+export const ROW_REORDER_BUTTONS: FeatureSlotKey<RowReorderButtonsProps<never, unknown>>;
+
+// @public
+export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<never, unknown>>;
 
 // @public
 export interface RowAction<TRow> {
@@ -1599,6 +3228,73 @@ export function rowAttributes(id: string, index: number, selected: boolean | und
 };
 
 // @public
+export interface RowEditActionsProps<TRow> extends RowEditControlsOptions<TRow> {
+    buttonClassName?: string;
+    className?: string;
+    conflict?: RowEditConflict;
+    icons?: RowEditIcons;
+    showBegin?: boolean;
+}
+
+// @public
+export interface RowEditActionsSlots<TNode = unknown> {
+    readonly Button: (props: RowEditButtonProps) => TNode;
+}
+
+// @public
+export interface RowEditButtonProps {
+    readonly className?: string;
+    readonly icon?: DisplayValue | false;
+    readonly label: string;
+    readonly onClick: (event: {
+        stopPropagation: () => void;
+    }) => void;
+    readonly part: string;
+}
+
+// @public
+export interface RowEditConflict {
+    readonly asking: boolean;
+}
+
+// @public
+export interface RowEditControlsOptions<TRow> {
+    labels?: TableLabels;
+    row: TRow;
+    rowEditing: RowEditingState<TRow>;
+    rowId: string;
+}
+
+// @public
+export type RowEditDrafts = Readonly<Record<string, string>>;
+
+// @public
+export interface RowEditIcons {
+    readonly begin?: DisplayValue | false;
+    readonly cancel?: DisplayValue | false;
+    readonly save?: DisplayValue | false;
+}
+
+// @public
+export interface RowEditingState<TRow> {
+    acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    activeRowId: string | null;
+    begin: (row: TRow, rowId: string) => void;
+    cancel: () => void;
+    draftFor: (columnKey: string) => string;
+    drafts: RowEditDrafts;
+    featureHost?: FeatureHostState;
+    isDirty: boolean;
+    isEditing: (rowId: string) => boolean;
+    openedRow: () => TRow | undefined;
+    save: () => void;
+    seeds: () => RowEditDrafts | undefined;
+    setDraft: (columnKey: string, value: string) => void;
+    signature: string;
+    takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+}
+
+// @public
 export interface RowGroupLevel {
     readonly key: string;
     readonly label: string;
@@ -1614,6 +3310,32 @@ export interface RowGroupRef {
 
 // @public
 export type RowHeight<TRow> = number | ((row: TRow, index: number) => number);
+
+// @public
+export interface RowMoveConfirmationProps {
+    readonly cancelLabel: string;
+    readonly confirmLabel: string;
+    readonly description: string;
+    readonly onCancel: () => void;
+    readonly onConfirm: () => void;
+    readonly title: string;
+}
+
+// @public
+export interface RowMoveMenuItemProps {
+    readonly disabled: boolean;
+    readonly disabledReason?: string;
+    readonly id: string;
+    readonly label: string;
+    readonly onSelect: () => void;
+}
+
+// @public
+export interface RowMoveMenuSlotProps {
+    readonly confirmation?: RowMoveConfirmationProps;
+    readonly items: readonly RowMoveMenuItemProps[];
+    readonly label: string;
+}
 
 // @public
 export interface RowPairMeasurer {
@@ -1633,6 +3355,25 @@ export type RowPinSide = "top" | "bottom";
 export function rowPinSignature(pinning: RowPinLookup | undefined, rowId: string): string | null;
 
 // @public
+export interface RowReorderButtonsProps<TRow, TReorder = unknown> {
+    className?: string;
+    downClassName?: string;
+    labels: RowReorderLabels;
+    localIndex: number;
+    reorder: TReorder;
+    row: TRow;
+    rowCount: number;
+    upClassName?: string;
+    windowStart: number;
+}
+
+// @public
+export interface RowReorderButtonsSlots<TNode = unknown> {
+    readonly Button: (props: RowReorderMoveButtonProps) => TNode;
+    readonly Menu: (props: RowMoveMenuSlotProps) => TNode;
+}
+
+// @public
 export interface RowReorderDigest {
     hostConfirmPending?: boolean;
     isLifted: (rowId: string) => boolean;
@@ -1649,6 +3390,71 @@ export function rowReorderDropStyle(attrs: {
 } | undefined): CssProperties;
 
 // @public
+export interface RowReorderHandleProps<TRow, TReorder = unknown> {
+    className?: string;
+    labels: RowReorderLabels;
+    localIndex: number;
+    reorder: TReorder;
+    row: TRow;
+    rowCount: number;
+    rowId: string;
+    windowStart: number;
+}
+
+// @public
+export interface RowReorderHandleSlotProps<TKeyboardEvent = KeyboardEvent, TDragEvent = DragEvent> {
+    readonly className?: string;
+    readonly disabled: boolean;
+    readonly dragging: boolean;
+    readonly dragProps: {
+        draggable: true;
+        onDragStart: (event: TDragEvent) => void;
+        onDragEnd: () => void;
+    };
+    readonly label: string;
+    readonly onKeyDown: (event: TKeyboardEvent) => void;
+    readonly pressed: boolean;
+}
+
+// @public
+export interface RowReorderHandleSlots<TNode = unknown, TKeyboardEvent = KeyboardEvent, TDragEvent = DragEvent> {
+    readonly Handle: (props: RowReorderHandleSlotProps<TKeyboardEvent, TDragEvent>) => TNode;
+    readonly Menu: (props: RowMoveMenuSlotProps) => TNode;
+}
+
+// @public
+export interface RowReorderLabels {
+    cancel?: string;
+    confirmRowMove?: string;
+    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+    confirmRowMoveTitle?: string;
+    moveRejectedCycle?: string;
+    moveRejectedPolicyNever?: string;
+    moveRejectedSorted?: string;
+    moveRowDown: string;
+    moveRowUp: string;
+    moveToGroup?: string;
+    moveUnavailable?: string;
+    moveUnder?: string;
+    reorderRow: string;
+    rootLevel?: string;
+    rowLifted: (position: number) => string;
+    rowMoved: (from: number, to: number) => string;
+    rowMovedToGroup?: (group: string) => string;
+    rowMovedUnder?: (parent: string) => string;
+    rowReorderCancelled: string;
+}
+
+// @public
+export interface RowReorderMoveButtonProps {
+    readonly className?: string;
+    readonly disabled: boolean;
+    readonly label: string;
+    readonly onClick: () => void;
+    readonly part: string;
+}
+
+// @public
 export function rowReorderSignature(reorder: RowReorderDigest | undefined, rowId: string, localIndex: number): string | null;
 
 // @public
@@ -1662,6 +3468,111 @@ export type RowStyle<TRow> = (row: TRow, index: number) => CssProperties | undef
 
 // @public
 export function rowStyleSignature(style: CssProperties | undefined): string;
+
+// @public
+export const SAVED_VIEWS: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
+
+// @public
+export interface SavedView {
+    isDefault?: boolean;
+    name: string;
+    readOnly?: boolean;
+    search: string;
+    version?: number;
+    visibility?: SavedViewVisibility;
+}
+
+// @public
+export type SavedViewControlKey = "rename" | "moveUp" | "moveDown" | "default" | "remove";
+
+// @public
+export interface SavedViewRowControl<TNode = unknown> {
+    readonly danger?: boolean;
+    readonly icon: TNode;
+    readonly key: SavedViewControlKey;
+    readonly label: string;
+    readonly onPress?: () => void;
+    readonly pressed?: boolean;
+}
+
+// @public
+export interface SavedViewsPanelChromeProps<TNode = unknown, TStyle = CssProperties> {
+    className?: string;
+    footer?: TNode;
+    labels?: TableLabels;
+    onApply: (name: string) => void;
+    onMove: (name: string, delta: -1 | 1) => void;
+    onRemove: (name: string) => void;
+    onRename: (from: string, to: string) => void;
+    onSetDefault: (name: string) => void;
+    slots: SavedViewsPanelSlots<TNode, TStyle>;
+    views: readonly SavedView[];
+}
+
+// @public
+export interface SavedViewsPanelEmptyProps {
+    readonly message: string;
+}
+
+// @public
+export interface SavedViewsPanelInputProps {
+    readonly label: string;
+    readonly onCancel: () => void;
+    readonly onChange: (next: string) => void;
+    readonly onCommit: () => void;
+    readonly ref: (element: HTMLInputElement | null) => void;
+    readonly value: string;
+}
+
+// @public
+export interface SavedViewsPanelRowProps<TNode = unknown, TStyle = CssProperties> {
+    readonly "data-adapttable-part": "saved-view-row";
+    readonly applyLabel: string;
+    readonly controls: readonly SavedViewRowControl<TNode>[];
+    readonly defaultLabel: string;
+    readonly isDefault: boolean;
+    readonly isEditing: boolean;
+    readonly layout: {
+        readonly row: TStyle;
+        readonly caption: TStyle;
+        readonly controls: TStyle;
+        readonly control: TStyle;
+    };
+    readonly name: TNode;
+    readonly onApply: () => void;
+    readonly readOnly: boolean;
+    readonly readOnlyLabel: string;
+    readonly viewName: string;
+}
+
+// @public
+export interface SavedViewsPanelSlots<TNode = unknown, TStyle = CssProperties> {
+    readonly Empty: (props: SavedViewsPanelEmptyProps) => TNode;
+    readonly Input: (props: SavedViewsPanelInputProps) => TNode;
+    readonly Row: (props: SavedViewsPanelRowProps<TNode, TStyle>) => TNode;
+    readonly Surface: (props: SavedViewsPanelSurfaceProps<TNode>) => TNode;
+}
+
+// @public
+export interface SavedViewsPanelSurfaceProps<TNode = unknown> {
+    readonly "data-adapttable-part": "saved-views-panel";
+    readonly children: TNode;
+    readonly className?: string;
+    readonly footer?: TNode;
+    readonly title: string;
+}
+
+// @public
+export interface SavedViewsSlotProps<TOptions = unknown> {
+    labels: Pick<Required<TableLabels>, "savedViews" | "saveView" | "viewName" | "deleteView">;
+    options: TOptions;
+}
+
+// @public
+export type SavedViewVisibility = "private" | "team";
+
+// @public
+export const SEARCH_ICON: IconDescriptor;
 
 // @public
 export function searchInputAttributes(value: string, labels: {
@@ -1681,11 +3592,127 @@ export function searchInputAttributes(value: string, labels: {
 };
 
 // @public
+export const SELECTED_CELL_OUTLINE: {
+    readonly outline: "2px solid CanvasText";
+    readonly outlineOffset: "-2px";
+};
+
+// @public
+export const SELECTION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
+export const SELECTION_STATS_LIVE: FeatureSlotKey<SelectionStatsLiveSlotProps<never, ColumnModel<never>, unknown>>;
+
+// @public
+export interface SelectionStatPart {
+    readonly key: "count" | "sum" | "average" | "min" | "max";
+    readonly text: string;
+}
+
+// @public
+export interface SelectionStats {
+    average: number | null;
+    cells: number;
+    max: number | null;
+    min: number | null;
+    numeric: number;
+    sum: number | null;
+}
+
+// @public
+export interface SelectionStatsChromeProps<TNode = unknown> {
+    className?: string;
+    labels?: TableLabels;
+    locale?: string;
+    slots: SelectionStatsSlots<TNode>;
+    stats: SelectionStats | null;
+}
+
+// @public
+export interface SelectionStatsLiveSlotProps<TRow = never, TColumn = ColumnModel<TRow>, TNode = unknown> {
+    children: (stats: SelectionStats | null) => TNode;
+    columns: readonly TColumn[];
+    firstRowIndex: number;
+    range: CellRange | null;
+    rows: readonly TRow[];
+}
+
+// @public
+export interface SelectionStatsSlotProps {
+    readonly className?: string;
+    readonly parts: readonly SelectionStatPart[];
+}
+
+// @public
+export interface SelectionStatsSlots<TNode = unknown> {
+    readonly Stats: (props: SelectionStatsSlotProps) => TNode;
+}
+
+// @public
+export function shallowEqualByKeys<T>(keys: readonly (keyof T)[], prev: Readonly<T>, next: Readonly<T>): boolean;
+
+// @public
+export const SHARED_DESKTOP_ROW_KEYS: readonly ["row", "id", "index", "selected", "expanded", "size", "dir", "columns", "columnWidths", "pinSignature", "className", "labels", "hasSelection", "expandable", "showActions", "showReorder", "reorderSignature", "rowPinSignature", "spanSignature", "hasRowClick", "columnSpan", "gridFocus", "treeEntry", "treeColumnKey", "rowActionsLayout", "renderRowActions", "cellSpanAppearance"];
+
+// @public
 export function showAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;
+
+// @public
+export const SIDE_PANEL: FeatureSlotKey<Omit<SidePanelChromeProps<unknown, SidePanelEntry, KeyboardEvent>, "slots">>;
+
+// @public
+export interface SidePanelChromeProps<TNode = unknown, TPanel extends SidePanelEntry = SidePanelEntry, TKeyboardEvent = KeyboardEvent> {
+    className?: string;
+    idPrefix?: string;
+    labels?: TableLabels;
+    onClose: () => void;
+    onOpenPanel: (key: string) => void;
+    openPanel: string;
+    panels: readonly TPanel[];
+    side?: "start" | "end";
+    slots: SidePanelSlots<TNode, TPanel, TKeyboardEvent>;
+}
+
+// @public
+export interface SidePanelCloseProps {
+    readonly label: string;
+    readonly onClose: () => void;
+}
 
 // @public
 export interface SidePanelEntry {
     key: string;
+}
+
+// @public
+export interface SidePanelFrameProps<TNode = unknown> {
+    readonly children: TNode;
+    readonly className?: string;
+    readonly side: "start" | "end";
+}
+
+// @public
+export interface SidePanelSlots<TNode = unknown, TPanel extends SidePanelEntry = SidePanelEntry, TKeyboardEvent = KeyboardEvent> {
+    readonly Close: (props: SidePanelCloseProps) => TNode;
+    readonly Frame: (props: SidePanelFrameProps<TNode>) => TNode;
+    readonly Tab: (props: SidePanelTabProps<TPanel, TKeyboardEvent>) => TNode;
+}
+
+// @public
+export interface SidePanelTabProps<TPanel extends SidePanelEntry = SidePanelEntry, TKeyboardEvent = KeyboardEvent> {
+    readonly buttonProps: {
+        readonly id: string;
+        readonly role: "tab";
+        readonly type: "button";
+        readonly tabIndex: number;
+        readonly "aria-selected": boolean;
+        readonly "aria-controls": string;
+        readonly "data-adapttable-part": "side-panel-tab";
+        readonly onClick: () => void;
+        readonly onKeyDown: (event: TKeyboardEvent) => void;
+    };
+    readonly panel: TPanel;
+    readonly selected: boolean;
 }
 
 // @public
@@ -1707,6 +3734,9 @@ export function slotRender<TProps, TNode>(slot: FeatureSlotKey<TProps>, render: 
 
 // @public
 export type SortableValue = string | number | boolean | null | undefined;
+
+// @public
+export function sortArrow(sort: unknown): string;
 
 // @public
 export function sortButtonAttributes(column: {
@@ -1789,19 +3819,170 @@ export interface SpeechInputState {
 export type SpeechInputStatus = "idle" | "listening" | "processing" | "denied" | "unsupported" | "error";
 
 // @public
+export const STATUS_BAR: FeatureSlotKey<Omit<StatusBarChromeProps<unknown>, "slots">>;
+
+// @public
+export interface StatusBarChromeProps<TNode = unknown> {
+    className?: string;
+    enabled: boolean;
+    labels?: TableLabels;
+    limit?: number;
+    locale?: string;
+    notices?: readonly FeatureNotice[];
+    page?: number;
+    selected: number;
+    shown: number;
+    slots: StatusBarSlots<TNode>;
+    stats: SelectionStats | null;
+    total?: number;
+}
+
+// @public
+export interface StatusBarItem {
+    readonly appearance?: FeatureNotice["appearance"];
+    readonly key: "rows" | "selected" | FeatureNoticeKind;
+    readonly text: string;
+}
+
+// @public
+export interface StatusBarSlotProps<TNode = unknown> {
+    readonly className?: string;
+    readonly items: readonly StatusBarItem[];
+    readonly stats: TNode;
+}
+
+// @public
+export interface StatusBarSlots<TNode = unknown> {
+    readonly Bar: (props: StatusBarSlotProps<TNode>) => TNode;
+    readonly stats: SelectionStatsSlots<TNode>;
+}
+
+// @public
+export const TABLE_ASSISTANT: FeatureSlotKey<TableAssistantProps<unknown>>;
+
+// @public
 export interface TableAssistantAllowanceView {
     readonly capability: string;
     readonly name?: string;
 }
 
 // @public
+export interface TableAssistantAvatars<TNode = unknown> {
+    readonly assistant?: TableAssistantFace<TNode>;
+    readonly user?: TableAssistantFace<TNode>;
+}
+
+// @public
+export interface TableAssistantBadgeProps {
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly part: string;
+    readonly tone: "neutral" | "busy" | "warning" | "danger";
+}
+
+// @public
 export type TableAssistantBadgeTone = "neutral" | "busy" | "warning" | "danger";
+
+// @public
+export type TableAssistantBoundary = "viewport" | {
+    readonly current: HTMLElement | null;
+};
+
+// @public
+export interface TableAssistantButtonProps<TNode = unknown> {
+    readonly children?: TNode;
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly disabled?: boolean;
+    readonly expanded?: boolean;
+    readonly icon?: TNode;
+    readonly iconOnly?: boolean;
+    readonly label: string;
+    // (undocumented)
+    readonly onClick: () => void;
+    readonly part: string;
+    readonly tooltip?: string;
+    readonly variant?: "primary" | "secondary" | "subtle";
+}
+
+// @public
+export interface TableAssistantComposerProps<TKeyboardEvent = KeyboardEvent> {
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly disabled?: boolean;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly onChange: (value: string) => void;
+    readonly onKeyDown: (event: TKeyboardEvent) => void;
+    // (undocumented)
+    readonly part: string;
+    // (undocumented)
+    readonly placeholder: string;
+    // (undocumented)
+    readonly value: string;
+}
 
 // @public
 export interface TableAssistantComposerState {
     readonly answering: boolean;
     readonly busy: boolean | undefined;
     readonly send: () => void;
+}
+
+// @public
+export type TableAssistantFace<TNode = unknown> = Exclude<TNode, undefined>;
+
+// @public
+export interface TableAssistantLanguageChipProps {
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly disabled?: boolean;
+    readonly label: string;
+    // (undocumented)
+    readonly onChange: (value: string) => void;
+    readonly options: readonly {
+        readonly value: string;
+        readonly label: string;
+    }[];
+    // (undocumented)
+    readonly part: string;
+    readonly value: string;
+}
+
+// @public
+export interface TableAssistantMenuItem<TNode = unknown> {
+    // (undocumented)
+    readonly description?: string;
+    // (undocumented)
+    readonly icon?: TNode;
+    readonly id: string;
+    // (undocumented)
+    readonly part: string;
+    // (undocumented)
+    readonly title: string;
+}
+
+// @public
+export interface TableAssistantMenuProps<TNode = unknown> {
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly disabled?: boolean;
+    readonly icon?: TNode;
+    // (undocumented)
+    readonly items: readonly TableAssistantMenuItem<TNode>[];
+    readonly label: string;
+    readonly maxHeight?: string;
+    // (undocumented)
+    readonly onSelect: (id: string) => void;
+    readonly part: string;
 }
 
 // @public
@@ -1816,6 +3997,18 @@ export interface TableAssistantMessageView {
     readonly streaming?: boolean;
     readonly text: string;
     readonly transcribing?: boolean;
+}
+
+// @public
+export interface TableAssistantPanelProps<TNode = unknown> {
+    // (undocumented)
+    readonly children: TNode;
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly part: string;
 }
 
 // @public
@@ -1841,10 +4034,38 @@ export interface TableAssistantPlacement {
 }
 
 // @public
+export type TableAssistantPresentation = "panel" | "sheet" | "floating";
+
+// @public
 export interface TableAssistantProgressView {
     readonly done: number;
     readonly label?: string;
     readonly total?: number;
+}
+
+// @public
+export interface TableAssistantProps<TNode = unknown> {
+    readonly accent?: string;
+    readonly approval?: AgentApprovalPending | null;
+    readonly assistant: TableAssistantView;
+    readonly avatars?: TableAssistantAvatars<TNode>;
+    readonly boundary?: TableAssistantBoundary;
+    readonly className?: string;
+    readonly dir?: "ltr" | "rtl";
+    readonly greeting?: string;
+    readonly labels?: TableLabels;
+    readonly launcher?: boolean;
+    readonly messageAction?: (message: TableAssistantMessageView) => {
+        readonly label: string;
+        readonly onRun: () => void;
+    } | undefined;
+    readonly note?: string;
+    readonly onOpenChange: (open: boolean) => void;
+    readonly onSettings?: () => void;
+    readonly open: boolean;
+    readonly presentation?: TableAssistantPresentation;
+    readonly receipts?: boolean;
+    readonly speech?: SpeechInputHandle;
 }
 
 // @public
@@ -1900,6 +4121,35 @@ export interface TableAssistantResumableView {
 }
 
 // @public
+export interface TableAssistantSheetProps<TNode = unknown> {
+    // (undocumented)
+    readonly children: TNode;
+    // (undocumented)
+    readonly className?: string;
+    readonly dir?: "ltr" | "rtl";
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly onClose: () => void;
+    // (undocumented)
+    readonly open: boolean;
+    // (undocumented)
+    readonly part: string;
+}
+
+// @public
+export interface TableAssistantSlots<TNode = unknown, TKeyboardEvent = KeyboardEvent, TStyle = CssProperties> {
+    readonly Badge: (props: TableAssistantBadgeProps) => TNode;
+    readonly Button: (props: TableAssistantButtonProps<TNode>) => TNode;
+    readonly Composer: (props: TableAssistantComposerProps<TKeyboardEvent>) => TNode;
+    readonly LanguageChip?: (props: TableAssistantLanguageChipProps) => TNode;
+    readonly Menu?: (props: TableAssistantMenuProps<TNode>) => TNode;
+    readonly Panel: (props: TableAssistantPanelProps<TNode>) => TNode;
+    readonly Sheet: (props: TableAssistantSheetProps<TNode>) => TNode;
+    readonly Window: (props: TableAssistantWindowProps<TNode, TStyle>) => TNode;
+}
+
+// @public
 export interface TableAssistantSuggestionView {
     // (undocumented)
     readonly description?: string;
@@ -1947,6 +4197,19 @@ export interface TableAssistantView {
     readonly undo?: TableAssistantUndoView | null;
     readonly undoAction?: (idempotencyKey: string) => void | Promise<void>;
     readonly undoTurn?: () => void | Promise<void>;
+}
+
+// @public
+export interface TableAssistantWindowProps<TNode = unknown, TStyle = CssProperties> {
+    // (undocumented)
+    readonly children: TNode;
+    // (undocumented)
+    readonly className?: string;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly part: string;
+    readonly style?: TStyle;
 }
 
 // @public
@@ -2574,7 +4837,95 @@ export interface TableStateMutators {
 export function toggleCollapsedColumnGroup(collapsedIds: readonly string[], id: string): string[];
 
 // @public
+export const TOOLBAR_EXTRAS: FeatureSlotKey<ToolbarExtrasSlotProps>;
+
+// @public
+export interface ToolbarExtrasSlotProps {
+    accentColor?: string;
+    canRedo?: boolean;
+    canUndo?: boolean;
+    classNames?: Readonly<Record<string, string | undefined>>;
+    density: "comfortable" | "compact";
+    exportAnnouncement?: string;
+    exportBusy?: boolean;
+    exportDisabled?: boolean;
+    exportDisabledReason?: string;
+    exportLabel?: string;
+    exportProgressState?: ExportProgressState | null;
+    isFullscreen?: boolean;
+    labels: Required<TableLabels>;
+    onDensityChange: (next: "comfortable" | "compact") => void;
+    onExportCsv?: () => void;
+    onPrint?: () => void;
+    onRedo?: () => void;
+    onToggleFullscreen?: () => void;
+    onUndo?: () => void;
+    printLabel?: string;
+    redoLabel?: string;
+    undoLabel?: string;
+}
+
+// @public
 export type TotalCountCapability = "exact" | "loaded";
+
+// @public
+export const TREE_CELL: FeatureSlotKey<TreeCellProps<never, unknown>>;
+
+// @public
+export const TREE_LIVE: FeatureSlotKey<ChromeExtraSlotProps<unknown, unknown, unknown>>;
+
+// @public
+export const TREE_TOGGLE: FeatureSlotKey<TreeToggleProps<never>>;
+
+// @public
+export interface TreeCellProps<TRow, TNode = unknown> {
+    children: TNode;
+    className?: string;
+    columnKey: string;
+    entry: TreeEntry<TRow> | undefined;
+    labels?: TableLabels;
+    onToggle?: (id: string) => void;
+    spacerClassName?: string;
+    toggleClassName?: string;
+    treeColumnKey: string | undefined;
+}
+
+// @public
+export interface TreeEntry<TRow> {
+    descendantIds: readonly string[];
+    expanded: boolean;
+    hasChildren: boolean;
+    key: string;
+    level: number;
+    loading?: boolean;
+    parentId?: string;
+    path: readonly string[];
+    row: TRow;
+    siblingIndex?: number;
+}
+
+// @public
+export interface TreeToggleButtonProps {
+    readonly className?: string;
+    readonly expanded: boolean;
+    readonly label: string;
+    readonly loading: boolean;
+    readonly onClick: () => void;
+}
+
+// @public
+export interface TreeToggleProps<TRow> {
+    entry: TreeEntry<TRow>;
+    labels?: TableLabels;
+    onToggle: (id: string) => void;
+    spacerClassName?: string;
+    toggleClassName?: string;
+}
+
+// @public
+export interface TreeToggleSlots<TNode = unknown> {
+    readonly Button: (props: TreeToggleButtonProps) => TNode;
+}
 
 // @public
 export function unpinAllColumns<TRow>(rows: readonly ColumnMenuRow<TRow>[], layout: UseColumnLayoutResult<TRow>): void;

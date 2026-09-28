@@ -3102,9 +3102,9 @@ export const GROUPING_COLUMN_DND_MIME = "application/x-adapttable-grouping-colum
 export type GroupingCapability = "client" | "server" | false;
 
 // @public
-export interface GroupingChipKeyboardProps {
+export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
     "aria-label": string;
-    onKeyDown: (event: KeyboardEvent) => void;
+    onKeyDown: (event: TKeyboardEvent) => void;
     role: "button";
     tabIndex: 0;
 }
@@ -3124,11 +3124,11 @@ export function groupingComputationKind(input: {
 export function groupingDragKey(event: Pick<DragEvent, "dataTransfer">): string | undefined;
 
 // @public
-export interface GroupingDragProps {
+export interface GroupingDragProps<TDragEvent = DragEvent> {
     "data-grouping-dragging"?: boolean;
     draggable?: boolean;
-    onDragEnd?: (event: DragEvent) => void;
-    onDragStart?: (event: DragEvent) => void;
+    onDragEnd?: (event: TDragEvent) => void;
+    onDragStart?: (event: TDragEvent) => void;
 }
 
 // @public
@@ -3143,12 +3143,12 @@ export interface GroupingDragState {
 }
 
 // @public
-export interface GroupingDropProps {
+export interface GroupingDropProps<TDragEvent = DragEvent> {
     "data-drop-active"?: boolean;
-    onDragEnter?: (event: DragEvent) => void;
-    onDragLeave?: (event: DragEvent) => void;
-    onDragOver?: (event: DragEvent) => void;
-    onDrop?: (event: DragEvent) => void;
+    onDragEnter?: (event: TDragEvent) => void;
+    onDragLeave?: (event: TDragEvent) => void;
+    onDragOver?: (event: TDragEvent) => void;
+    onDrop?: (event: TDragEvent) => void;
 }
 
 // @public

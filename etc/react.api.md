@@ -13,6 +13,7 @@ import { applyRowPin } from '@adapttable/core';
 import { applyRowReorder } from '@adapttable/core';
 import { asBatchGesture } from '@adapttable/core';
 import { asGesture } from '@adapttable/core';
+import { BatchEditingState } from '@adapttable/core/binding';
 import { BatchRowEdit } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
@@ -60,6 +61,9 @@ import { Direction } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
 import { edgePinStyle } from '@adapttable/core';
+import { EditableCellActivateProps } from '@adapttable/core/binding';
+import { EditableCellButtonProps as EditableCellConflictButtonProps } from '@adapttable/core/binding';
+import { EditableCellSlots } from '@adapttable/core/binding';
 import { EditableColumnLike } from '@adapttable/core';
 import { EditConflict } from '@adapttable/core';
 import { EditConflictChange } from '@adapttable/core';
@@ -84,12 +88,14 @@ import { FeatureRegistration } from '@adapttable/core';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
+import { FilterFormSource } from '@adapttable/core/binding';
 import { FilterOption } from '@adapttable/core';
 import { FilterRuntime } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
+import { FindInTableState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { getHistoryAdapter } from '@adapttable/core';
 import { GRID_CELL_ATTR } from '@adapttable/core';
@@ -110,6 +116,8 @@ import { KeyboardEvent as KeyboardEvent_2 } from 'react';
 import { LayoutStorage } from '@adapttable/core';
 import { MobileCardField } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
+import { MultiSelectEditorCheckboxProps as MultiSelectEditorCheckboxProps_2 } from '@adapttable/core/binding';
+import { MultiSelectEditorSlots as MultiSelectEditorSlots_2 } from '@adapttable/core/binding';
 import { NeutralFeatureHost } from '@adapttable/core';
 import { normalizeEditorOptions } from '@adapttable/core';
 import { NUMBER_OP_LABEL_KEYS } from '@adapttable/core';
@@ -138,6 +146,9 @@ import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { RowAction } from '@adapttable/core';
 import { RowDropPosition } from '@adapttable/core';
+import { RowEditDrafts } from '@adapttable/core/binding';
+import { RowEditIcons } from '@adapttable/core/binding';
+import { RowEditingState } from '@adapttable/core/binding';
 import { RowHeight } from '@adapttable/core';
 import { RowMoveMenuModel } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
@@ -199,28 +210,7 @@ export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> 
     renderCard?: ReactMobileCardRenderer<TRow>;
 }
 
-// @public
-export interface BatchEditingState<TRow> {
-    acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
-    cancelAll: () => void;
-    cancelRow: (rowId: string) => void;
-    count: number;
-    draftFor: (row: TRow, rowId: string, columnKey: string) => string;
-    entries: readonly {
-        readonly rowId: string;
-        readonly openedRow: unknown;
-        readonly seeds: Readonly<Record<string, string>>;
-        readonly drafts: Readonly<Record<string, string>>;
-    }[];
-    featureHost?: FeatureHostState;
-    isChanged: (rowId: string, columnKey: string) => boolean;
-    isPending: (rowId: string) => boolean;
-    pending: boolean;
-    saveAll: () => void;
-    setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
-    signature: string;
-    takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
-}
+export { BatchEditingState }
 
 export { BatchRowEdit }
 
@@ -537,39 +527,9 @@ export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
 export { edgePinStyle }
 
 // @public
-export interface EditableCellActivateControlProps {
-    readonly activateRef: (node: HTMLButtonElement | null) => void;
-    readonly className?: string;
-    readonly dirty: boolean;
-    readonly display: ReactNode;
-    readonly onClick: (event: {
-        stopPropagation: () => void;
-    }) => void;
-    readonly onDoubleClick: (event: {
-        preventDefault: () => void;
-        stopPropagation: () => void;
-    }) => void;
-    readonly onKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        stopPropagation: () => void;
-    }) => void;
-    readonly saveStatus: string | undefined;
-    readonly title: string;
-}
+export type EditableCellActivateControlProps = EditableCellActivateProps<ReactNode>;
 
-// @public
-export interface EditableCellConflictButtonProps {
-    readonly className?: string;
-    readonly label: string;
-    readonly onClick: (event: {
-        stopPropagation: () => void;
-    }) => void;
-    readonly onMouseDown?: (event: {
-        preventDefault: () => void;
-    }) => void;
-    readonly part: string;
-}
+export { EditableCellConflictButtonProps }
 
 // @public
 export interface EditableCellController<TRow = unknown> {
@@ -618,10 +578,7 @@ export function editableCellController<TRow>(options: {
 }): EditableCellController;
 
 // @public
-export interface EditableCellControls {
-    readonly Activate: (props: EditableCellActivateControlProps) => ReactNode;
-    readonly Button: (props: EditableCellConflictButtonProps) => ReactNode;
-}
+export type EditableCellControls = EditableCellSlots<ReactNode>;
 
 // @public
 export interface EditableCellEditing<TRow> {
@@ -879,8 +836,7 @@ export { FeatureSlotKey }
 // @public
 export function filterDefForColumn<TRow>(defs: readonly FilterDef<TRow>[], key: string): FilterDef<TRow> | undefined;
 
-// @public
-export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
+export { FilterFormSource }
 
 // @public
 export function filterOpLabel(labels: Required<TableLabels>, key: keyof TableLabels): string;
@@ -896,20 +852,7 @@ export interface FilterTriggerToggle {
 
 export { FIND_URL_WRITE_DEBOUNCE_MS }
 
-// @public
-export interface FindInTableState {
-    current: GridCell | null;
-    index: number;
-    matches: readonly GridCell[];
-    matchKeys: ReadonlySet<string>;
-    next: () => void;
-    open: boolean;
-    openBar?: () => void;
-    previous: () => void;
-    query: string;
-    setOpen: (open: boolean) => void;
-    setQuery: (query: string) => void;
-}
+export { FindInTableState }
 
 export { getHistoryAdapter }
 
@@ -1035,16 +978,7 @@ export function liveRowChanged<TRow>(input: {
 }): boolean;
 
 // @public
-export interface MultiSelectEditorCheckboxProps {
-    readonly checked: boolean;
-    readonly focusRef?: (node: {
-        focus: () => void;
-    } | null) => void;
-    readonly label: ReactNode;
-    readonly onKeyDown: (event: KeyboardEvent_2) => void;
-    readonly onToggle: () => void;
-    readonly value: string;
-}
+export type MultiSelectEditorCheckboxProps = MultiSelectEditorCheckboxProps_2<ReactNode, KeyboardEvent_2>;
 
 // @public
 export function MultiSelectEditorChrome(input: Readonly<MultiSelectEditorChromeProps>): ReactNode;
@@ -1058,9 +992,7 @@ export interface MultiSelectEditorChromeProps {
 }
 
 // @public
-export interface MultiSelectEditorSlots {
-    readonly Checkbox: (props: MultiSelectEditorCheckboxProps) => ReactNode;
-}
+export type MultiSelectEditorSlots = MultiSelectEditorSlots_2<ReactNode, KeyboardEvent_2>;
 
 // @public
 export interface NestedTable {
@@ -1234,34 +1166,11 @@ export interface ResolvedFilterOptions {
 // @public
 export function resolveNeutralColumnHeaders<TRow>(columns: readonly ColumnMetadata<TRow>[]): ColumnMetadata<TRow>[];
 
-// @public
-export type RowEditDrafts = Readonly<Record<string, string>>;
+export { RowEditDrafts }
 
-// @public
-export interface RowEditIcons {
-    readonly begin?: DisplayValue | false;
-    readonly cancel?: DisplayValue | false;
-    readonly save?: DisplayValue | false;
-}
+export { RowEditIcons }
 
-// @public
-export interface RowEditingState<TRow> {
-    acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
-    activeRowId: string | null;
-    begin: (row: TRow, rowId: string) => void;
-    cancel: () => void;
-    draftFor: (columnKey: string) => string;
-    drafts: RowEditDrafts;
-    featureHost?: FeatureHostState;
-    isDirty: boolean;
-    isEditing: (rowId: string) => boolean;
-    openedRow: () => TRow | undefined;
-    save: () => void;
-    seeds: () => RowEditDrafts | undefined;
-    setDraft: (columnKey: string, value: string) => void;
-    signature: string;
-    takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
-}
+export { RowEditingState }
 
 // @public
 export interface RowElementProps extends Props {

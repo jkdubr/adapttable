@@ -69,6 +69,7 @@ import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FetchAllExport } from '@adapttable/core';
 import { FilterDef } from '@adapttable/core';
+import { FilterFormSource } from '@adapttable/core/binding';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
 import { FilterType } from '@adapttable/core';
@@ -103,6 +104,7 @@ import { QueryGroupRow } from '@adapttable/core';
 import { ReactNode } from 'react';
 import { ResolvedPaginationMode } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
+import { RowEditIcons } from '@adapttable/core/binding';
 import { RowGroupLevel } from '@adapttable/core';
 import { RowGroupMoveHandler } from '@adapttable/core';
 import { RowGroupRef } from '@adapttable/core';
@@ -447,8 +449,7 @@ export { FetchAllExport }
 
 export { FilterDef }
 
-// @public
-export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
+export { FilterFormSource }
 
 export { FilterOption }
 
@@ -598,12 +599,7 @@ export function rowAppearance<TRow>(options: {
 // @public
 export function rowDetail<TRow>(renderRowDetail: (row: TRow) => unknown, defaultExpandedRowIds?: readonly string[]): TableFeature<TRow>;
 
-// @public
-export interface RowEditIcons {
-    readonly begin?: DisplayValue | false;
-    readonly cancel?: DisplayValue | false;
-    readonly save?: DisplayValue | false;
-}
+export { RowEditIcons }
 
 // @public
 export function rowEditing<TRow>(onRowEdit: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
