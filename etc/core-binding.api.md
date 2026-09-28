@@ -413,6 +413,14 @@ export interface BatchEditButtonProps {
 }
 
 // @public
+export interface BatchEditEntry {
+    readonly drafts: Readonly<Record<string, string>>;
+    readonly openedRow: unknown;
+    readonly rowId: string;
+    readonly seeds: Readonly<Record<string, string>>;
+}
+
+// @public
 export interface BatchEditingState<TRow> {
     acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
     cancelAll: () => void;

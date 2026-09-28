@@ -140,7 +140,7 @@ export {
   isColumnGroupSummaryKey,
   toggleCollapsedColumnGroup,
 } from "./columns/headerGroups";
-export type { BatchEditingState } from "./editing/batchEditing";
+export type { BatchEditEntry, BatchEditingState } from "./editing/batchEditing";
 export type {
   EditableCellActivateProps,
   EditableCellButtonProps,
