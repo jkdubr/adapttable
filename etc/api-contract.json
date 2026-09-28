@@ -1,5 +1,5 @@
 {
-  "$comment": "The published contract: what each entry point commits to, checked both ways by scripts/check-api-contract.mjs. Bootstrapped from origin/main's committed reports plus the additions this branch made deliberately, each audited before this file was written — never read back from the current reports, because a list derived from its own output approves whatever drift produced it. Edit by hand, with a changeset saying what moved. Every surface is filed under one framework in `frameworks`: `neutral` for the packages under packages/shared, one key per binding folder under packages/ — an entry point names only surfaces of its own package's framework.",
+  "$comment": "The published contract: what each entry point commits to, checked both ways by scripts/check-api-contract.mjs. Bootstrapped from origin/main's committed reports plus the additions this branch made deliberately, each audited before this file was written \u2014 never read back from the current reports, because a list derived from its own output approves whatever drift produced it. Edit by hand, with a changeset saying what moved. Every surface is filed under one framework in `frameworks`: `neutral` for the packages under packages/shared, one key per binding folder under packages/ \u2014 an entry point names only surfaces of its own package's framework.",
   "frameworks": {
     "neutral": [
       "ai",
@@ -5085,6 +5085,7 @@
       "BatchEditBarProps",
       "BatchEditBarSlots",
       "BatchEditButtonProps",
+      "BatchEditEntry",
       "BatchEditingState",
       "bodyCanLoadMore",
       "BodyCell",

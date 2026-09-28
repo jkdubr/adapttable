@@ -439,7 +439,7 @@ import { ReconcileLiveEdit } from '@adapttable/core';
 import { ReconcileLiveRowEdit } from '@adapttable/core';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
-import { REORDER_COLUMN_WIDTH } from '@adapttable/core';
+import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
 import { resetColumnLayout } from '@adapttable/core/binding';
 import { resolveContextTarget } from '@adapttable/core';
 import { ResolvedContextTarget } from '@adapttable/core';
