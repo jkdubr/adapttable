@@ -8,6 +8,7 @@ import { ActionConfirm } from '@adapttable/core';
 import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
+import { applyTableFeatures } from '@adapttable/core/binding';
 import { BatchRowEdit } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
@@ -63,8 +64,9 @@ import { ExtraRow } from '@adapttable/core';
 import { ExtraRowKind } from '@adapttable/core';
 import { FacetCounts } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
+import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
-import { FeatureRegistration } from '@adapttable/core';
+import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FetchAllExport } from '@adapttable/core';
@@ -95,6 +97,7 @@ import { GroupSort } from '@adapttable/core';
 import { LayoutStorage } from '@adapttable/core';
 import { NestedTableDefaults } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
+import { PatchFeature } from '@adapttable/core/binding';
 import { PinnedRows } from '@adapttable/core';
 import { PinnedSide } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
@@ -144,8 +147,7 @@ export { AggregateName }
 
 export { Aggregator }
 
-// @public
-export function applyTableFeatures<P extends object>(props: P): P;
+export { applyTableFeatures }
 
 // @public
 export function batchEditing<TRow>(onBatchEdit: (edits: readonly BatchRowEdit<TRow>[]) => unknown, extras?: FeaturePatch<TRow>): TableFeature<TRow>;
@@ -355,18 +357,11 @@ export { FacetMap }
 // @public
 export function feature<TRow>(id: string, patch?: FeaturePatch<TRow>, setup?: TableFeature<TRow>["setup"]): TableFeature<TRow>;
 
-// @public
-export type FeatureApplyInput<TRow = unknown> = object & {
-    readonly __row?: TRow;
-};
+export { FeatureApplyInput }
 
 export { FeatureHostState }
 
-// @public
-export interface FeaturePatch<TRow = unknown> {
-    readonly [key: string]: unknown;
-    readonly __row?: (row: TRow) => void;
-}
+export { FeaturePatch }
 
 // @public
 export interface FeatureProps<TRow> {
@@ -724,7 +719,7 @@ export interface StaticTableFeature {
 export function statusBar(): StaticTableFeature;
 
 // @public
-export interface TableFeature<TRow = unknown> extends FeatureRegistration<TRow> {
+export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;

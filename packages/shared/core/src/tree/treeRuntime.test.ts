@@ -7,7 +7,6 @@ import {
   toggleTreeNode,
   treeExpansionActions,
   treeExportExpandedIds,
-  treeHasLoadedChildren,
 } from "./treeRuntime";
 
 interface Node {
@@ -49,42 +48,6 @@ describe("treeExpansionActions", () => {
     expect([...store.getSnapshot()]).toEqual(["x", "y"]);
     actions.collapseAll();
     expect(store.getSnapshot().size).toBe(0);
-  });
-});
-
-describe("treeHasLoadedChildren", () => {
-  const rowKey = (row: Node) => row.id;
-
-  it("reads a nested list first", () => {
-    const getChildren = (row: Node) => row.children;
-    expect(
-      treeHasLoadedChildren({ id: "a", children: [{ id: "b" }] }, [], {
-        getChildren,
-        rowKey,
-      })
-    ).toBe(true);
-    expect(
-      treeHasLoadedChildren({ id: "a", children: [] }, [], {
-        getChildren,
-        rowKey,
-      })
-    ).toBe(false);
-  });
-
-  it("falls back to parent ids, and knows nothing without them", () => {
-    const rows = [{ id: "a" }, { id: "b", parent: "a" }];
-    const getParentId = (row: Node) => row.parent;
-    expect(
-      treeHasLoadedChildren(rows[0]!, rows, {
-        getChildren: () => undefined,
-        getParentId,
-        rowKey,
-      })
-    ).toBe(true);
-    expect(treeHasLoadedChildren(rows[1]!, rows, { getParentId, rowKey })).toBe(
-      false
-    );
-    expect(treeHasLoadedChildren(rows[0]!, rows, { rowKey })).toBe(false);
   });
 });
 

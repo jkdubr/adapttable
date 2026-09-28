@@ -11,6 +11,7 @@ import {
   cellRangeKey,
   reportedCellRange,
 } from "@adapttable/core";
+import { coreCellNavigation } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useRef } from "react";
 
 import { useFindFocus } from "../find/useFindInTable";
@@ -97,11 +98,7 @@ export function cellNavigation(
   options: CellNavigationOptions = {}
 ): StaticTableFeature {
   return {
-    id: "cell-navigation",
-    apply: () =>
-      options.onRangeChange
-        ? { cellNavigation: true, onCellRangeChange: options.onRangeChange }
-        : { cellNavigation: true },
+    ...coreCellNavigation(options),
     renders: [
       slotRender(CELL_NAV_LIVE, (props) => <LiveCellNav {...props} />),
       slotRender(GRID_FOCUS_ANNOUNCER, (props) => (

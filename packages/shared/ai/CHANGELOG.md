@@ -1,5 +1,20 @@
 # @adapttable/ai
 
+## 0.4.0
+
+### Minor Changes
+
+- 4613ab6: `createTableAgentController`: the table agent's approval parking, always-allow memory, announcements, column sampling and WebMCP lifecycle as a framework-neutral controller.
+
+### Patch Changes
+
+- Updated dependencies [4613ab6]
+- Updated dependencies [73d62b5]
+- Updated dependencies [8c6aeda]
+- Updated dependencies [6bec4e8]
+- Updated dependencies [1bce1a4]
+  - @adapttable/core@3.6.0
+
 ## 0.3.2
 
 ### Patch Changes

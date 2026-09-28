@@ -7,6 +7,7 @@
 import { ActionAiOptions } from '@adapttable/core';
 import { AgentApprovalDecision } from '@adapttable/core';
 import { AgentApprovalOperation } from '@adapttable/core';
+import { AgentApprovalPending } from '@adapttable/core';
 import { AgentApprovalProposal } from '@adapttable/core';
 import { AgentProgress } from '@adapttable/core';
 import { ApprovalPresentation } from '@adapttable/core';
@@ -961,6 +962,9 @@ export function createStreamReply(onText?: (text: string) => void): {
 };
 
 // @public
+export function createTableAgentController(inputs: TableAgentControllerInputs): TableAgentController;
+
+// @public
 export function createTableAssistant(inputs?: TableAssistantInputs): TableAssistantStore;
 
 // @public
@@ -1512,6 +1516,35 @@ export interface TableAgentColumnPatch {
 }
 
 // @public
+export interface TableAgentController {
+    readonly disconnect: () => void;
+    readonly getState: () => TableAgentState;
+    readonly session: () => AgentSession;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly subscribeTable: (listener: () => void) => () => void;
+    readonly sync: () => void;
+    readonly tableStamp: () => string;
+}
+
+// @public
+export interface TableAgentControllerInputs {
+    readonly flush: (run: () => void) => void;
+    readonly flushAdmission: () => void;
+    readonly options: {
+        readonly current: TableAgentControllerOptions;
+    };
+    readonly runtime: {
+        readonly current: TableRuntime;
+    };
+}
+
+// @public
+export interface TableAgentControllerOptions extends TableAgentRuntimeOptions {
+    readonly bridge?: TableAgentBridge<AgentApprovalPending>;
+    readonly webmcp?: true | TableAgentWebMcpOptions;
+}
+
+// @public
 export interface TableAgentRuntimeOptions {
     readonly apply?: AgentApply;
     readonly approval?: SharedApproval;
@@ -1525,6 +1558,27 @@ export interface TableAgentRuntimeOptions {
     readonly readMax?: number;
     readonly tableId: string;
     readonly writePolicy?: WritePolicy;
+}
+
+// @public
+export interface TableAgentState {
+    readonly alwaysAllow: AlwaysAllowedState;
+    readonly approval: AgentApprovalPending | null;
+    readonly progress: AgentProgress | null;
+    readonly session: AgentSession;
+    readonly view: TableAgentViewReader;
+}
+
+// @public
+export interface TableAgentViewReader {
+    readonly read: () => AgentContextInputs;
+}
+
+// @public
+export interface TableAgentWebMcpOptions {
+    // (undocumented)
+    readonly exposedTo?: readonly string[];
+    readonly onRegister?: (names: readonly string[]) => void;
 }
 
 // @public

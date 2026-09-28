@@ -1,5 +1,19 @@
 # @adapttable/ai-react
 
+## 0.2.9
+
+### Patch Changes
+
+- 4613ab6: `tableAgent` runs on `createTableAgentController` from `@adapttable/ai`. Its API is unchanged.
+- Updated dependencies [4613ab6]
+- Updated dependencies [73d62b5]
+- Updated dependencies [8c6aeda]
+- Updated dependencies [6bec4e8]
+- Updated dependencies [1bce1a4]
+  - @adapttable/core@3.6.0
+  - @adapttable/ai@0.4.0
+  - @adapttable/react@1.3.6
+
 ## 0.2.8
 
 ### Patch Changes

@@ -14,6 +14,7 @@ import {
   rowPinningUrlSync,
   withRowPinActions,
 } from "@adapttable/core";
+import { coreRowPinning } from "@adapttable/core/binding";
 import { type ReactNode, useEffect } from "react";
 
 import {
@@ -119,8 +120,7 @@ export function rowPinning(
   } = {}
 ): StaticTableFeature {
   return {
-    id: "row-pinning",
-    apply: () => ({ rowPinningArmed: true, ...options }),
+    ...coreRowPinning(options),
     renders: [slotRender(PINNING_LIVE, (props) => <LivePinning {...props} />)],
   };
 }

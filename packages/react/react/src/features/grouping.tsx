@@ -20,6 +20,7 @@ import {
   type GroupSort,
   parseGroupBy,
 } from "@adapttable/core";
+import { coreGrouping } from "@adapttable/core/binding";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
 import { useGroupCollapse } from "../grouping/useGroupCollapse";
@@ -291,8 +292,7 @@ export function grouping<TRow>(
   extras?: GroupingExtras<TRow>
 ): TableFeature<TRow> {
   return {
-    id: "grouping",
-    apply: () => ({ groupBy, ...extras }),
+    ...coreGrouping<TRow>(groupBy, extras),
     renders: [
       slotRender(GROUPING_LIVE, (props) => <LiveGrouping {...props} />),
     ],

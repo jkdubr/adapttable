@@ -13,20 +13,20 @@ import { applyRowPin } from '@adapttable/core';
 import { applyRowReorder } from '@adapttable/core';
 import { asBatchGesture } from '@adapttable/core';
 import { asGesture } from '@adapttable/core';
+import { BatchEditingState } from '@adapttable/core';
 import { BatchRowEdit } from '@adapttable/core';
 import { BooleanChoice } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { BulkActionOutcome } from '@adapttable/core';
-import { CellEdit } from '@adapttable/core';
-import { CellEditCommit } from '@adapttable/core';
+import { CellEditingState } from '@adapttable/core';
 import { CellEditKeyAction } from '@adapttable/core';
 import { CellEditKeyOutcome } from '@adapttable/core';
 import { CellEditNavigation } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
-import { CellEditTarget } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
+import { CellSaveState } from '@adapttable/core';
 import { CellSaveStatus } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
 import { CellValidator } from '@adapttable/core';
@@ -65,21 +65,28 @@ import { defaultFrontendRowId } from '@adapttable/core';
 import { defaultSearchText } from '@adapttable/core';
 import { DELETE_ROW_ACTION_KEY } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { DirtyCellState } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
 import { DUPLICATE_ROW_ACTION_KEY } from '@adapttable/core';
 import { edgePinStyle } from '@adapttable/core';
+import { EditableCellController } from '@adapttable/core';
+import { EditableCellMode } from '@adapttable/core';
 import { EditableColumnLike } from '@adapttable/core';
 import { EditConflict } from '@adapttable/core';
 import { EditConflictChange } from '@adapttable/core';
 import { EditConflictChoice } from '@adapttable/core';
 import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictPolicy } from '@adapttable/core';
+import { EditConflictState } from '@adapttable/core';
 import { EditEvent } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
 import { EditHistoryEntry } from '@adapttable/core';
+import { EditHistoryState } from '@adapttable/core';
+import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
 import { EditUnit } from '@adapttable/core';
+import { EditValidationState } from '@adapttable/core';
 import { EMPTY_ROW_PIN_STATE } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportWriter } from '@adapttable/core';
@@ -87,10 +94,11 @@ import { ExtraFilters } from '@adapttable/core';
 import { ExtraRow } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
 import { FailedCellSave } from '@adapttable/core';
+import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
-import { FeatureRegistration } from '@adapttable/core';
+import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
@@ -124,11 +132,11 @@ import { isDeclarativeFilters } from '@adapttable/core';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
 import { LayoutStorage } from '@adapttable/core';
 import { listFilterValues } from '@adapttable/core';
+import { liveRowChanged } from '@adapttable/core';
 import { MobileCardField } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
 import { NestedTableDefaults } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
-import { normalizeEditorOptions } from '@adapttable/core';
 import { NumberOp } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
@@ -136,6 +144,7 @@ import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { parseBooleanChoice } from '@adapttable/core';
 import { partitionPinnedRows } from '@adapttable/core';
+import { PatchFeature } from '@adapttable/core/binding';
 import { PIN_BOTTOM_ACTION_KEY } from '@adapttable/core';
 import { PIN_TOP_ACTION_KEY } from '@adapttable/core';
 import { PIN_Z } from '@adapttable/core';
@@ -154,10 +163,15 @@ import { RangeOpArity } from '@adapttable/core';
 import { RangeOpLabelKeys } from '@adapttable/core';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
+import { ReconcileLiveBatchEdit } from '@adapttable/core';
+import { ReconcileLiveEdit } from '@adapttable/core';
+import { ReconcileLiveRowEdit } from '@adapttable/core';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { RowAction } from '@adapttable/core';
 import { RowDropPosition } from '@adapttable/core';
+import { RowEditDrafts } from '@adapttable/core';
+import { RowEditingState } from '@adapttable/core';
 import { RowHeight } from '@adapttable/core';
 import { RowMoveMenuModel } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
@@ -225,28 +239,7 @@ export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> 
     renderCard?: ReactMobileCardRenderer<TRow>;
 }
 
-// @public
-export interface BatchEditingState<TRow> {
-    acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
-    cancelAll: () => void;
-    cancelRow: (rowId: string) => void;
-    count: number;
-    draftFor: (row: TRow, rowId: string, columnKey: string) => string;
-    entries: readonly {
-        readonly rowId: string;
-        readonly openedRow: unknown;
-        readonly seeds: Readonly<Record<string, string>>;
-        readonly drafts: Readonly<Record<string, string>>;
-    }[];
-    featureHost?: FeatureHostState;
-    isChanged: (rowId: string, columnKey: string) => boolean;
-    isPending: (rowId: string) => boolean;
-    pending: boolean;
-    saveAll: () => void;
-    setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
-    signature: string;
-    takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
-}
+export { BatchEditingState }
 
 export { BatchRowEdit }
 
@@ -271,26 +264,7 @@ export interface BulkActionRunner {
     run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
 }
 
-// @public
-export interface CellEditingState {
-    active: CellEditTarget | null;
-    begin: (rowId: string, columnKey: string, initialValue: string, row?: unknown) => void;
-    cancel: () => void;
-    close: () => void;
-    commit: () => CellEditCommit | null;
-    discardIfRowMissing: (rows: readonly unknown[], rowKey: (row: unknown) => string) => void;
-    draft: string;
-    handleKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        shiftKey?: boolean;
-    }, navigation?: CellEditNavigation) => CellEditKeyOutcome | null;
-    isActive: (rowId: string, columnKey: string) => boolean;
-    keepLive: (row: unknown) => void;
-    openedRow: () => unknown;
-    setDraft: (value: string) => void;
-    takeLive: (row: unknown, value: string) => void;
-}
+export { CellEditingState }
 
 export { CellEditKeyAction }
 
@@ -311,23 +285,7 @@ export interface CellProps<TRow> {
     readonly rowIndex: number;
 }
 
-// @public
-export interface CellSaveState<TRow> {
-    canRollback: boolean;
-    clear: (rowId: string, columnKey: string) => void;
-    failureFor: (rowId: string, columnKey: string) => FailedCellSave<TRow> | undefined;
-    rollback: (rowId: string, columnKey: string) => void;
-    signature: string;
-    statusFor: (rowId: string, columnKey: string) => CellSaveStatus | undefined;
-    track: (options: {
-        rowId: string;
-        columnKey: string;
-        previous: TRow;
-        attempted: unknown;
-        previousValue?: unknown;
-        result: unknown;
-    }) => Promise<boolean>;
-}
+export { CellSaveState }
 
 export { CellSaveStatus }
 
@@ -516,17 +474,7 @@ export { DELETE_ROW_ACTION_KEY }
 // @public
 export type Density = TableDensity;
 
-// @public
-export interface DirtyCellState {
-    confirm: (rowId: string, columnKey: string) => void;
-    confirmAll: () => void;
-    confirmRow: (rowId: string) => void;
-    count: number;
-    isDirty: (rowId: string, columnKey: string) => boolean;
-    isRowDirty: (rowId: string) => boolean;
-    mark: (rowId: string, columnKey: string) => void;
-    signature: string;
-}
+export { DirtyCellState }
 
 // @public
 export interface DirtyEdits {
@@ -575,40 +523,7 @@ export interface EditableCellConflictButtonProps {
     readonly part: string;
 }
 
-// @public
-export interface EditableCellController<TRow = unknown> {
-    begin: () => void;
-    cancel: () => void;
-    canRollback: boolean;
-    commit: () => void;
-    commitOnBlur: () => void;
-    conflict?: EditConflict<TRow>;
-    conflictLabels?: {
-        message: string;
-        keepMine: string;
-        takeTheirs: string;
-        theirsValue: (value: string) => string;
-    };
-    dismissFailure: () => void;
-    draft: string;
-    editor: CellEditor | null;
-    error?: string;
-    isDirty: boolean;
-    keepConflict: () => void;
-    mode: EditableCellMode;
-    onEditorKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        shiftKey?: boolean;
-    }) => void;
-    rollback: () => void;
-    saveFailure?: FailedCellSave<TRow>;
-    saveStatus?: CellSaveStatus;
-    selectOptions: ReturnType<typeof normalizeEditorOptions>;
-    setDraft: (value: string) => void;
-    takeConflict: () => void;
-    validating: boolean;
-}
+export { EditableCellController }
 
 // @public
 export function editableCellController<TRow>(options: {
@@ -628,24 +543,8 @@ export interface EditableCellControls {
 }
 
 // @public
-export interface EditableCellEditing<TRow> {
-    batch?: BatchEditingState<TRow>;
-    conflict?: EditConflictState<TRow>;
-    conflictLabels?: {
-        message: string;
-        keepMine: string;
-        takeTheirs: string;
-        theirsValue: (value: string) => string;
-    };
-    dirty?: DirtyCellState;
-    featureHost?: FeatureHostState;
-    lifecycle?: EditLifecycle<TRow>;
-    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
     rowEditIcons?: RowEditIcons;
-    rowEditing?: RowEditingState<TRow>;
-    saving?: CellSaveState<TRow>;
-    state: CellEditingState;
-    validation?: EditValidationState<TRow>;
 }
 
 // @public
@@ -693,8 +592,7 @@ export interface EditableCellGateProps<TRow> {
     readonly undoLabel?: string;
 }
 
-// @public
-export type EditableCellMode = "display" | "activatable" | "editing";
+export { EditableCellMode }
 
 export { EditConflict }
 
@@ -706,26 +604,7 @@ export { EditConflictHandler }
 
 export { EditConflictPolicy }
 
-// @public
-export interface EditConflictState<TRow> {
-    anyContested: boolean;
-    clear: () => void;
-    contestedCell: (rowId: string, columnKey: string) => {
-        readonly incomingValue: string;
-    } | undefined;
-    current: EditConflict<TRow> | null;
-    isConflict: (rowId: string, columnKey: string) => boolean;
-    isRowConflict: (rowId: string) => boolean;
-    isRowContested: (rowId: string) => boolean;
-    keep: () => void;
-    keepCell: (rowId: string, columnKey: string) => void;
-    reconcile: (input: ReconcileLiveEdit<TRow>) => void;
-    reconcileBatch: (input: ReconcileLiveBatchEdit<TRow>) => void;
-    reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
-    rowSignature: (rowId: string) => string;
-    take: () => void;
-    takeCell: (rowId: string, columnKey: string) => void;
-}
+export { EditConflictState }
 
 export { EditEvent }
 
@@ -748,57 +627,25 @@ export interface EditHistoryOptions {
     readonly onChange?: (history: EditHistoryHandle) => void;
 }
 
-// @public
-export interface EditHistoryState<TRow> {
-    canRedo: boolean;
-    canUndo: boolean;
-    clear: () => void;
-    enabled: boolean;
-    record: (edits: readonly CellEdit<TRow>[]) => void;
-    redo: () => number;
-    undo: () => number;
-}
+export { EditHistoryState }
 
 export { EditLifecycle }
 
 export { EditUnit }
 
-// @public
-export interface EditValidationState<TRow> {
-    check: (options: {
-        target: ValidationTarget;
-        value: unknown;
-        row: TRow;
-        validateCell?: CellValidator<TRow>;
-    }) => Promise<ValidationCheckResult>;
-    clear: (rowId: string, columnKey: string) => void;
-    clearAll: () => void;
-    errorFor: (rowId: string, columnKey: string) => string | undefined;
-    hasRowValidator: boolean;
-    isValidating: (rowId: string, columnKey: string) => boolean;
-    rowErrorFor: (rowId: string) => string | undefined;
-    rowHasError: (rowId: string) => boolean;
-    signature: string;
-}
+export { EditValidationState }
 
 export { EMPTY_ROW_PIN_STATE }
 
 export { FailedCellSave }
 
-// @public
-export type FeatureApplyInput<TRow = unknown> = object & {
-    readonly __row?: TRow;
-};
+export { FeatureApplyInput }
 
 export { FeatureNotice }
 
 export { FeatureNoticeKind }
 
-// @public
-export interface FeaturePatch<TRow = unknown> {
-    readonly [key: string]: unknown;
-    readonly __row?: (row: TRow) => void;
-}
+export { FeaturePatch }
 
 // @public
 export interface FeatureProps<TRow> {
@@ -1020,13 +867,7 @@ export interface LazyChildrenState<TRow> {
 
 export { listFilterValues }
 
-// @public
-export function liveRowChanged<TRow>(input: {
-    opened: TRow;
-    current: TRow;
-    column: EditableColumnLike<TRow>;
-    rowVersion?: (row: TRow) => string | number;
-}): boolean;
+export { liveRowChanged }
 
 // @public
 export interface MultiSelectEditorCheckboxProps {
@@ -1134,55 +975,11 @@ export interface ReactUseColumnLayoutResult<TRow> extends Omit<UseColumnLayoutRe
 // @public
 export function readCellValue<TRow>(row: TRow, column: ColumnDef<TRow>): unknown;
 
-// @public
-export interface ReconcileLiveBatchEdit<TRow> {
-    accept: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
-    columns: readonly EditableColumnLike<TRow>[];
-    entries: readonly {
-        readonly rowId: string;
-        readonly seeds: Readonly<Record<string, string>>;
-        readonly drafts: Readonly<Record<string, string>>;
-        readonly openedRow?: unknown;
-    }[];
-    onEditConflict?: EditConflictHandler<TRow>;
-    policy: EditConflictPolicy;
-    rowKey: (row: TRow) => string;
-    rows: readonly TRow[];
-    take: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
-}
+export { ReconcileLiveBatchEdit }
 
-// @public
-export interface ReconcileLiveEdit<TRow> {
-    active: {
-        rowId: string;
-        columnKey: string;
-    } | null;
-    columns: readonly EditableColumnLike<TRow>[];
-    draft: string;
-    keep: (row: TRow) => void;
-    onEditConflict?: EditConflictHandler<TRow>;
-    openedRow: TRow | undefined;
-    policy: EditConflictPolicy;
-    rowKey: (row: TRow) => string;
-    rows: readonly TRow[];
-    rowVersion?: (row: TRow) => string | number;
-    take: (row: TRow, incomingValue: string) => void;
-}
+export { ReconcileLiveEdit }
 
-// @public
-export interface ReconcileLiveRowEdit<TRow> {
-    accept: (row: TRow, columnKeys: readonly string[]) => void;
-    activeRowId: string | null;
-    columns: readonly EditableColumnLike<TRow>[];
-    drafts: Readonly<Record<string, string>>;
-    onEditConflict?: EditConflictHandler<TRow>;
-    openedRow?: TRow;
-    policy: EditConflictPolicy;
-    rowKey: (row: TRow) => string;
-    rows: readonly TRow[];
-    seeds: Readonly<Record<string, string>> | undefined;
-    take: (row: TRow, columnKeys: readonly string[]) => void;
-}
+export { ReconcileLiveRowEdit }
 
 // @public
 export function resolveColumnFooter<TRow>(column: ColumnDef<TRow>, value: ReactNode): ReactNode;
@@ -1202,8 +999,7 @@ export interface ResolvedFilterOptions {
 // @public
 export function resolveNeutralColumnHeaders<TRow>(columns: readonly ColumnMetadata<TRow>[]): ColumnMetadata<TRow>[];
 
-// @public
-export type RowEditDrafts = Readonly<Record<string, string>>;
+export { RowEditDrafts }
 
 // @public
 export interface RowEditIcons {
@@ -1212,24 +1008,7 @@ export interface RowEditIcons {
     readonly save?: DisplayValue | false;
 }
 
-// @public
-export interface RowEditingState<TRow> {
-    acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
-    activeRowId: string | null;
-    begin: (row: TRow, rowId: string) => void;
-    cancel: () => void;
-    draftFor: (columnKey: string) => string;
-    drafts: RowEditDrafts;
-    featureHost?: FeatureHostState;
-    isDirty: boolean;
-    isEditing: (rowId: string) => boolean;
-    openedRow: () => TRow | undefined;
-    save: () => void;
-    seeds: () => RowEditDrafts | undefined;
-    setDraft: (columnKey: string, value: string) => void;
-    signature: string;
-    takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
-}
+export { RowEditingState }
 
 // @public
 export interface RowElementProps extends Props {
@@ -1469,7 +1248,7 @@ export interface TableElementProps extends Props {
 export { TableErrorState }
 
 // @public
-export interface TableFeature<TRow = unknown> extends FeatureRegistration<TRow> {
+export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;

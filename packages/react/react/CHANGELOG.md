@@ -1,5 +1,18 @@
 # @adapttable/react
 
+## 1.3.6
+
+### Patch Changes
+
+- 6bec4e8: `useQuerySource` returns to page 1 when a sort, grouping or filter change restarts its cursor trail, instead of asking for a later page without its token.
+- 73d62b5: Data, editing, table assembly and the assistant panel run on the new `@adapttable/core` controllers. The public API is unchanged.
+- Updated dependencies [4613ab6]
+- Updated dependencies [73d62b5]
+- Updated dependencies [8c6aeda]
+- Updated dependencies [6bec4e8]
+- Updated dependencies [1bce1a4]
+  - @adapttable/core@3.6.0
+
 ## 1.3.5
 
 ### Patch Changes

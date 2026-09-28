@@ -103,5 +103,4 @@ export {
   toggleTreeNode,
   treeExpansionActions,
   treeExportExpandedIds,
-  treeHasLoadedChildren,
 } from "./tree/treeRuntime";

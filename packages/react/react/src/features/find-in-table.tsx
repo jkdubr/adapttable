@@ -6,6 +6,7 @@
  * through {@link FIND_LIVE}.
  */
 import { findMatchRow, type GridCell } from "@adapttable/core";
+import { coreFindInTable } from "@adapttable/core/binding";
 import { type ReactNode, useContext, useEffect, useRef } from "react";
 
 import {
@@ -74,8 +75,7 @@ function LiveFind({
  */
 export function findInTable(): StaticTableFeature {
   return {
-    id: "find-in-table",
-    apply: () => ({ findInTable: true }),
+    ...coreFindInTable(),
     renders: [slotRender(FIND_LIVE, (props) => <LiveFind {...props} />)],
   };
 }

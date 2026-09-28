@@ -26,7 +26,7 @@ import { SpeechInputHandle } from '@adapttable/react/adapter';
 import { StaticTableFeature } from '@adapttable/react/adapter';
 import { TableAgentBridge as TableAgentBridge_2 } from '@adapttable/ai';
 import { TableAgentColumnPatch } from '@adapttable/ai';
-import { TableAgentRuntimeOptions } from '@adapttable/ai';
+import { TableAgentControllerOptions } from '@adapttable/ai';
 import { TableAssistantSnapshot } from '@adapttable/ai';
 import { TableAssistantStore } from '@adapttable/ai';
 import { VoiceOptions } from '@adapttable/ai/voice';
@@ -59,13 +59,7 @@ export type TableAgentBridge = TableAgentBridge_2<AgentApprovalPending>;
 export { TableAgentColumnPatch }
 
 // @public
-export interface TableAgentOptions extends TableAgentRuntimeOptions {
-    readonly bridge?: TableAgentBridge;
-    readonly webmcp?: true | {
-        readonly exposedTo?: readonly string[];
-        readonly onRegister?: (names: readonly string[]) => void;
-    };
-}
+export type TableAgentOptions = TableAgentControllerOptions;
 
 // @public
 export interface TableAssistantOptions {

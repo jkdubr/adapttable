@@ -1,29 +1,19 @@
 /** Shared desktop-table assembly — wiring, not pixels. */
 import {
-  type AssemblyFns,
-  bodyRowEntries,
-  columnSelectLabel,
   type ConfirmHandler,
-  edgePinStyle,
   type FilterDef,
-  filterDefForColumn,
-  fittedTableStyle,
   type GroupedFlatEntry,
-  PIN_Z,
   type PinLeads,
-  pinnedSummaryEntries,
-  pinnedSummaryPart,
+  type pinnedSummaryPart,
   type PinOffset,
   resolveAssembly,
-  rowFlashSignature,
   type TableLabels,
-  tableMinWidth,
   type TreeEntry,
 } from "@adapttable/core";
 import {
+  absoluteColumnIndex,
   type BodyCell,
   bodyCellsHaveRowSpan,
-  cellsForRow,
   type ChromeBodySlot,
   type ChromeExtraSlot,
   type ChromeGroupEntry,
@@ -32,28 +22,27 @@ import {
   type ChromeVirtualPadSlot,
   DESKTOP_RESIZE_HANDLE_STYLE as NEUTRAL_DESKTOP_RESIZE_HANDLE_STYLE,
   desktopBodyPinStyle as neutralDesktopBodyPinStyle,
+  desktopBodySlots,
   desktopChromeMetrics,
   type DesktopChromeWidths,
-  desktopDetailMeasureRef,
-  desktopEdgeHeadPin,
+  desktopEdgeBodyStyle,
+  desktopEdgeHeadStyle as neutralDesktopEdgeHeadStyle,
   desktopHasPinned,
-  desktopHeadCellGeometry,
-  desktopPinSignature,
-  desktopRowMeasureRef,
+  desktopHeadCellStyle as neutralDesktopHeadCellStyle,
+  desktopHeaderLeaf,
+  desktopPinEdges,
+  desktopRowWiring,
+  type DesktopRowWiringContext as DesktopRowWiringContextModel,
+  desktopRowWiringEqual as neutralDesktopRowWiringEqual,
   desktopScrollBoxStyle as neutralDesktopScrollBoxStyle,
+  desktopStickyPlan,
+  desktopTableStyle,
   type HtmlGroupedHeaderCell,
   htmlGroupedHeaderPlan,
-  isExtraEntry,
-  pinnedRowCellStyle,
-  pinnedRowPart,
-  pinnedRowSticky,
+  type pinnedRowCellStyle,
+  type pinnedRowPart,
+  type pinnedRowSticky,
   REORDER_COLUMN_WIDTH,
-  resolveRowStyle,
-  rowPinSignature,
-  rowReorderDropStyle,
-  rowReorderSignature,
-  rowSpanSignature,
-  rowStyleSignature,
 } from "@adapttable/core/binding";
 import {
   type CSSProperties,
@@ -75,13 +64,8 @@ import {
   type ReactColumnResizeHandleProps,
   toReactColumnResizeHandleProps,
 } from "../columns/reactColumnResize";
-import {
-  type EditableCellEditing,
-  rowEditingSignature,
-  rowIsDirty,
-} from "../editing/editableCellController";
+import { type EditableCellEditing } from "../editing/editableCellController";
 import type { GridFocusState } from "../focus/useGridFocus";
-import { rowClickProps } from "../rows/rowClickProps";
 import type { RowPinSide } from "../rows/rowPinning";
 import {
   type SharedTableRenderProps,
@@ -569,20 +553,7 @@ export function desktopHeadCellStyle(
     stickyStyle?: CSSProperties;
   }
 ): CSSProperties | undefined {
-  const { pin, width, anchorsResize } = desktopHeadCellGeometry(
-    column,
-    options
-  );
-  if (!options.stickyStyle && !pin && width == null && !anchorsResize) {
-    return undefined;
-  }
-  const merged: CSSProperties = {
-    ...options.stickyStyle,
-    ...pin,
-    ...(width != null && { width }),
-  };
-  if (anchorsResize && !merged.position) merged.position = "relative";
-  return merged;
+  return neutralDesktopHeadCellStyle(column, options);
 }
 
 /**
@@ -597,49 +568,8 @@ export function desktopEdgeHeadStyle(
   active: boolean,
   stickyStyle: CSSProperties | undefined
 ): CSSProperties | undefined {
-  const edge = desktopEdgeHeadPin(side, active);
-  if (!stickyStyle && !edge) return undefined;
-  return { ...stickyStyle, ...edge };
+  return neutralDesktopEdgeHeadStyle(side, active, stickyStyle);
 }
-
-const WIRING_EQUAL_KEYS = [
-  "row",
-  "index",
-  "id",
-  "selected",
-  "expanded",
-  "treeEntry",
-  "columns",
-  "spanSignature",
-  "labels",
-  "showActions",
-  "showReorder",
-  "reorderSignature",
-  "rowPinSignature",
-  "rowPinSide",
-  "pinRowSticky",
-  "rowPinOffset",
-  "sourceIndex",
-  "reorderPinned",
-  "rowActions",
-  "rowActionsLayout",
-  "cellSpanAppearance",
-  "renderRowActions",
-  "columnSpan",
-  "columnWidths",
-  "pinSignature",
-  "hasStartPin",
-  "hasEndPin",
-  "actionsPinned",
-  "rowClass",
-  "rowStyleSignature",
-  "flashSignature",
-  "clickable",
-  "hasPrefetch",
-  "editingSignature",
-  "gridFocus",
-  "treeColumnKey",
-] as const satisfies readonly (keyof DesktopRowWiring<unknown>)[];
 
 /**
  * Re-render a row only when a visual input changes.
@@ -652,7 +582,7 @@ export function desktopRowWiringEqual<TRow>(
   prev: Readonly<DesktopRowWiring<TRow>>,
   next: Readonly<DesktopRowWiring<TRow>>
 ): boolean {
-  return WIRING_EQUAL_KEYS.every((key) => prev[key] === next[key]);
+  return neutralDesktopRowWiringEqual(prev, next);
 }
 
 /**
@@ -675,535 +605,23 @@ export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(
   });
 }
 
-function isGroupEntry<TRow>(
-  entry: GroupedFlatEntry<TRow>
-): entry is DesktopGroupEntry<TRow> {
-  return (
-    entry.kind === "group" ||
-    entry.kind === "groupFooter" ||
-    entry.kind === "groupMore"
-  );
-}
-
-function extraSlot(
-  slot: {
-    kind: "separator" | "fullWidth";
-    key: string;
-    render?: () => unknown;
-  },
-  columnSpan: number,
-  extraFill: (key: string) => CSSProperties | undefined
-): DesktopExtraSlot {
-  return {
-    kind: "extra",
-    key: slot.key,
-    extraKind: slot.kind,
-    colSpan: columnSpan,
-    render:
-      slot.kind === "fullWidth"
-        ? (slot.render as (() => ReactNode) | undefined)
-        : undefined,
-    fillStyle: extraFill(slot.key),
-  };
-}
-
-interface DesktopRowWiringContext<TRow> {
-  cellsByRow: ReadonlyMap<string, readonly BodyCell<TRow>[]>;
-  rowStyle: SharedTableRenderProps<TRow>["rowStyle"];
-  rowHeight: SharedTableRenderProps<TRow>["rowHeight"];
-  leads: PinLeads;
-  pinRowSticky: boolean;
-  rowPinOffset: number;
-  measureRowPair: SharedTableRenderProps<TRow>["measureRowPair"];
-  measureElement: SharedTableRenderProps<TRow>["measureElement"];
-  rowReorder: SharedTableRenderProps<TRow>["rowReorder"];
-  table: UseDataTableResult<TRow>;
-  gridFocus: SharedTableRenderProps<TRow>["gridFocus"];
-  onRowClick: SharedTableRenderProps<TRow>["onRowClick"];
-  handleRowClick: (row: TRow) => void;
-  windowStart: number;
-  selection: TableRenderModel<TRow>["selection"];
-  editing: SharedTableRenderProps<TRow>["editing"];
-  prefetch: SharedTableRenderProps<TRow>["prefetch"];
-  handlePrefetch: (row: TRow) => void;
-  columns: readonly ColumnDef<TRow>[];
-  labels: Required<TableLabels>;
-  expansionState: SharedTableRenderProps<TRow>["expansion"];
-  showActions: boolean;
-  showReorder: boolean;
-  rows: readonly TRow[];
-  reorderPinned: boolean;
-  rowPinning: SharedTableRenderProps<TRow>["rowPinning"];
-  rowActions: SharedTableRenderProps<TRow>["rowActions"];
-  rowActionsLayout: SharedTableRenderProps<TRow>["rowActionsLayout"];
-  cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
-  renderRowActions: SharedTableRenderProps<TRow>["renderRowActions"];
-  confirm: ConfirmHandler;
-  columnSpan: number;
-  columnSpacers: TableRenderModel<TRow>["columnSpacers"];
-  tree: SharedTableRenderProps<TRow>["tree"];
-  columnWidths: SharedTableRenderProps<TRow>["columnWidths"];
-  pinOffset: SharedTableRenderProps<TRow>["pinOffset"];
-  pinSignature: string;
-  hasStartPin: boolean;
-  hasEndPin: boolean;
-  stickActions: boolean;
-  rowClassName: SharedTableRenderProps<TRow>["rowClassName"];
-  isCellFlashing: SharedTableRenderProps<TRow>["isCellFlashing"];
-  getRowId: (row: TRow) => string;
-  summaryTopCount: number;
-  onToggleSelect: (id: string) => void;
-  onToggleExpand: (id: string) => void;
-  renderDetail: (row: TRow) => ReactNode;
-}
-
-interface DesktopRowWiringArgs<TRow> {
-  row: TRow;
-  index: number;
-  id: string;
-  sourceIndex: number;
-  rowPinSide: RowPinSide | undefined;
-  treeEntry: TreeEntry<TRow> | undefined;
-  measure: boolean;
-  summary?: boolean;
-}
-
-interface DesktopBodySlotsContext<TRow> {
-  pinnedTopRows: readonly TRow[];
-  pinnedBottomRows: readonly TRow[];
-  pinnedSummaryTop: readonly TRow[];
-  pinnedSummaryBottom: readonly TRow[];
-  extraRows: SharedTableRenderProps<TRow>["extraRows"];
-  extraFill: (key: string) => CSSProperties | undefined;
-  insertExtraRows: AssemblyFns<TRow>["insertExtraRows"];
-  insertExtrasBeforeRows: AssemblyFns<TRow>["insertExtrasBeforeRows"];
-  paddingTop: number;
-  paddingBottom: number;
-  grouping: SharedTableRenderProps<TRow>["grouping"];
-  entries: TableRenderModel<TRow>["entries"];
-  wiring: DesktopRowWiringContext<TRow>;
-}
-
-function summaryOrPinPart(
-  summary: boolean,
-  side: RowPinSide | undefined
-): ReturnType<typeof pinnedRowPart> | ReturnType<typeof pinnedSummaryPart> {
-  if (!summary) return pinnedRowPart(side);
-  if (!side) return undefined;
-  return pinnedSummaryPart(side);
-}
-
-function desktopFocusIndex(
-  summary: boolean,
-  sourceIndex: number,
-  windowStart: number,
-  summaryTopCount: number
-): number {
-  if (summary) return sourceIndex - windowStart;
-  return sourceIndex + summaryTopCount;
-}
-
-function omitWhenSummary(
-  summary: boolean,
-  value: boolean | undefined
-): boolean | undefined {
-  if (summary) return undefined;
-  return value;
-}
-
-function desktopSummaryRowDomProps<TRow>(args: {
-  table: UseDataTableResult<TRow>;
-  row: TRow;
-  focusIndex: number;
-  gridFocus: SharedTableRenderProps<TRow>["gridFocus"];
-  onRowClick: SharedTableRenderProps<TRow>["onRowClick"];
-  handleRowClick: (row: TRow) => void;
-  summary: boolean;
-  rowReorder: SharedTableRenderProps<TRow>["rowReorder"];
-  index: number;
-  windowStart: number;
-  reorderAttrs:
-    | ReturnType<
-        NonNullable<
-          NonNullable<SharedTableRenderProps<TRow>["rowReorder"]>["rowAttrs"]
-        >
-      >
-    | undefined;
-  rowPinSide: RowPinSide | undefined;
-  pinPart:
-    ReturnType<typeof pinnedRowPart> | ReturnType<typeof pinnedSummaryPart>;
-  selection: TableRenderModel<TRow>["selection"];
-  id: string;
-  editing: SharedTableRenderProps<TRow>["editing"];
-  labels: Required<TableLabels>;
-  visualStyle: CSSProperties | undefined;
-  pinSticky: CSSProperties | undefined;
-  prefetch: SharedTableRenderProps<TRow>["prefetch"];
-  handlePrefetch: (row: TRow) => void;
-}): Record<string, unknown> {
-  const click =
-    args.summary || !args.onRowClick ? undefined : args.handleRowClick;
-  const dropProps = args.summary
-    ? undefined
-    : args.rowReorder?.dropProps?.(args.index, args.row, args.windowStart);
-  let selectedMark: string | undefined;
-  if (!args.summary && args.selection?.isSelected(args.id)) selectedMark = "";
-  // The live selection is the one the row's checkbox toggles, so it is what
-  // the row announces; a table without selection announces nothing.
-  const ariaSelected =
-    args.summary || !args.selection
-      ? undefined
-      : args.selection.isSelected(args.id);
-  let clickable: string | undefined;
-  if (!args.summary && args.onRowClick) clickable = "";
-  return {
-    ...args.table.getRowProps(args.row, args.focusIndex),
-    "aria-selected": ariaSelected,
-    ...args.gridFocus?.getRowPropsAt(args.focusIndex),
-    ...rowClickProps(args.row, click, args.focusIndex),
-    ...dropProps,
-    ...args.reorderAttrs,
-    "data-row-pin": args.rowPinSide,
-    "data-adapttable-part": args.pinPart ?? "row",
-    "data-stagger": "",
-    "data-selected": selectedMark,
-    "data-dirty": rowIsDirty(args.editing, args.id) ? "" : undefined,
-    "data-clickable": clickable,
-    "aria-label": args.summary ? args.labels.pinnedSummaryRow : undefined,
-    style: {
-      ...args.visualStyle,
-      ...args.pinSticky,
-      ...rowReorderDropStyle(args.reorderAttrs),
-    },
-    onMouseEnter:
-      args.prefetch && !args.summary
-        ? () => args.handlePrefetch(args.row)
-        : undefined,
-  };
-}
-
-function buildDesktopRowWiring<TRow>(
-  ctx: DesktopRowWiringContext<TRow>,
-  args: DesktopRowWiringArgs<TRow>
-): DesktopRowWiring<TRow> {
-  const {
-    cellsByRow,
-    rowStyle,
-    rowHeight,
-    leads,
-    pinRowSticky,
-    rowPinOffset,
-    measureRowPair,
-    measureElement,
-    rowReorder,
-    table,
-    gridFocus,
-    onRowClick,
-    handleRowClick,
-    windowStart,
-    selection,
-    editing,
-    prefetch,
-    handlePrefetch,
-    columns,
-    labels,
-    expansionState,
-    showActions,
-    showReorder,
-    rows,
-    reorderPinned,
-    rowPinning,
-    rowActions,
-    rowActionsLayout,
-    cellSpanAppearance,
-    renderRowActions,
-    confirm,
-    columnSpan,
-    columnSpacers,
-    tree,
-    columnWidths,
-    pinOffset,
-    pinSignature,
-    hasStartPin,
-    hasEndPin,
-    stickActions,
-    rowClassName,
-    isCellFlashing,
-    getRowId,
-    summaryTopCount,
-    onToggleSelect,
-    onToggleExpand,
-    renderDetail,
-  } = ctx;
-  const { row, index, id, sourceIndex, rowPinSide, treeEntry, measure } = args;
-  const summary = args.summary === true;
-  const bodyCells = cellsForRow(cellsByRow, id);
-  const visualStyle = resolveRowStyle(rowStyle, rowHeight, row, sourceIndex);
-  const focusIndex = desktopFocusIndex(
-    summary,
-    sourceIndex,
-    windowStart,
-    summaryTopCount
-  );
-  const pinPart = summaryOrPinPart(summary, rowPinSide);
-  const pinSticky = pinnedRowSticky(rowPinSide, pinRowSticky, rowPinOffset);
-  const edgeRowPin = pinnedRowCellStyle(rowPinSide, rowPinOffset, true);
-  const measureRef = measure
-    ? desktopRowMeasureRef(rowPinSide, measureRowPair, index, measureElement)
-    : undefined;
-  const detailMeasureRef = measure
-    ? desktopDetailMeasureRef(rowPinSide, measureRowPair, index)
-    : undefined;
-  const reorderAttrs = summary ? undefined : rowReorder?.rowAttrs?.(id, index);
-  const rowDomProps = desktopSummaryRowDomProps({
-    table,
-    row,
-    focusIndex,
-    gridFocus,
-    onRowClick,
-    handleRowClick,
-    summary,
-    rowReorder,
-    index,
-    windowStart,
-    reorderAttrs,
-    rowPinSide,
-    pinPart,
-    selection,
-    id,
-    editing,
-    labels,
-    visualStyle,
-    pinSticky,
-    prefetch,
-    handlePrefetch,
-  });
-  return {
-    gridFocus,
-    row,
-    index,
-    id,
-    table,
-    columns,
-    bodyCells,
-    spanSignature: rowSpanSignature(bodyCells),
-    labels,
-    selected: omitWhenSummary(summary, selection?.isSelected(id)),
-    expanded: omitWhenSummary(summary, expansionState?.isExpanded(id)),
-    showActions: summary ? false : showActions,
-    showReorder: summary ? false : showReorder,
-    rowReorder,
-    windowStart,
-    rowCount: rows.length,
-    reorderPinned,
-    reorderSignature: rowReorderSignature(rowReorder, id, index),
-    rowPinSide,
-    pinRowSticky,
-    rowPinOffset,
-    rowPinSignature: rowPinSignature(rowPinning, id),
-    sourceIndex,
-    rowActions,
-    rowActionsLayout,
-    cellSpanAppearance,
-    renderRowActions,
-    confirm,
-    columnSpan,
-    columnSpacers,
-    treeEntry,
-    treeColumnKey: tree?.columnKey,
-    onToggleTree: tree?.expansion.toggle,
-    columnWidths,
-    pinOffset,
-    pinSignature,
-    hasStartPin,
-    hasEndPin,
-    actionsPinned: stickActions,
-    rowClass: rowClassName?.(row, sourceIndex),
-    rowVisualStyle: visualStyle,
-    rowStyleSignature: rowStyleSignature(visualStyle),
-    flashSignature: rowFlashSignature(isCellFlashing, id, columns),
-    isCellFlashing,
-    clickable: Boolean(onRowClick),
-    hasPrefetch: Boolean(prefetch),
-    editing,
-    rows,
-    getRowId,
-    editingSignature: rowEditingSignature(editing, id),
-    onRowClick: handleRowClick,
-    onPrefetch: handlePrefetch,
-    onToggleSelect,
-    onToggleExpand,
-    renderDetail,
-    measureElement: measure ? measureElement : undefined,
-    measureRowPair: measure ? measureRowPair : undefined,
-    leads,
-    focusIndex,
-    pinPart,
-    pinSticky,
-    edgeRowPin,
-    measureRef,
-    detailMeasureRef,
-    rowDomProps,
-    bodyPinStyle: (key: string) =>
-      desktopBodyPinStyle(key, pinOffset, leads, rowPinSide, rowPinOffset),
-  };
-}
-
-function appendSummaryDesktopSlots<TRow>(
-  bodySlots: DesktopBodySlot<TRow>[],
-  ctx: DesktopBodySlotsContext<TRow>,
-  rows: readonly TRow[],
-  side: RowPinSide
-): void {
-  for (const entry of pinnedSummaryEntries(rows, side)) {
-    bodySlots.push({
-      kind: "row",
-      key: entry.id,
-      wiring: buildDesktopRowWiring(ctx.wiring, {
-        row: entry.row,
-        index: entry.index,
-        id: entry.id,
-        sourceIndex: entry.index,
-        rowPinSide: side,
-        treeEntry: undefined,
-        measure: false,
-        summary: true,
-      }),
-    });
-  }
-}
-
-function appendPinnedDesktopSlots<TRow>(
-  bodySlots: DesktopBodySlot<TRow>[],
-  ctx: DesktopBodySlotsContext<TRow>,
-  pinnedRows: readonly TRow[],
-  side: RowPinSide
-): void {
-  const { extraRows, extraFill, insertExtrasBeforeRows, wiring } = ctx;
-  const { getRowId, columnSpan, rows } = wiring;
-  for (const slot of insertExtrasBeforeRows(pinnedRows, extraRows, getRowId)) {
-    if (isExtraEntry(slot)) {
-      bodySlots.push(extraSlot(slot, columnSpan, extraFill));
-    } else {
-      const id = getRowId(slot.row);
-      const found = rows.findIndex((item) => getRowId(item) === id);
-      const sourceIndex = Math.max(0, found);
-      bodySlots.push({
-        kind: "row",
-        key: slot.key,
-        wiring: buildDesktopRowWiring(wiring, {
-          row: slot.row,
-          index: sourceIndex,
-          id,
-          sourceIndex,
-          rowPinSide: side,
-          treeEntry: undefined,
-          measure: false,
-        }),
-      });
-    }
-  }
-}
-
-function appendGroupedDesktopSlots<TRow>(
-  bodySlots: DesktopBodySlot<TRow>[],
-  ctx: DesktopBodySlotsContext<TRow>
-): void {
-  const grouping = ctx.grouping;
-  if (!grouping) return;
-  const { extraFill, wiring } = ctx;
-  const { getRowId, columnSpan } = wiring;
-  for (const entry of grouping.entries) {
-    if (entry.kind === "separator" || entry.kind === "fullWidth") {
-      bodySlots.push(extraSlot(entry, columnSpan, extraFill));
-      continue;
-    }
-    if (isGroupEntry(entry)) {
-      bodySlots.push({ kind: "group", key: entry.key, entry });
-      continue;
-    }
-    const id = getRowId(entry.row);
-    bodySlots.push({
-      kind: "row",
-      key: entry.key,
-      wiring: buildDesktopRowWiring(wiring, {
-        row: entry.row,
-        index: entry.index,
-        id,
-        sourceIndex: entry.index,
-        rowPinSide: undefined,
-        treeEntry: undefined,
-        measure: true,
-      }),
-    });
-  }
-}
-
-function appendScrollDesktopSlots<TRow>(
-  bodySlots: DesktopBodySlot<TRow>[],
-  ctx: DesktopBodySlotsContext<TRow>
-): void {
-  const { extraRows, extraFill, insertExtraRows, entries, wiring } = ctx;
-  const { getRowId, columnSpan, tree } = wiring;
-  for (const slot of insertExtraRows(
-    bodyRowEntries(entries, tree),
-    extraRows,
-    (entry) => entry.key
-  )) {
-    if (isExtraEntry(slot)) {
-      bodySlots.push(extraSlot(slot, columnSpan, extraFill));
-      continue;
-    }
-    const { row, index, key, treeEntry, sourceIndex } = slot;
-    const id = getRowId(row);
-    const resolvedSource = sourceIndex ?? index;
-    bodySlots.push({
-      kind: "row",
-      key,
-      wiring: buildDesktopRowWiring(wiring, {
-        row,
-        index,
-        id,
-        sourceIndex: resolvedSource,
-        rowPinSide: undefined,
-        treeEntry,
-        measure: true,
-      }),
-    });
-  }
-}
-
-function collectDesktopBodySlots<TRow>(
-  ctx: DesktopBodySlotsContext<TRow>
-): DesktopBodySlot<TRow>[] {
-  const bodySlots: DesktopBodySlot<TRow>[] = [];
-  appendSummaryDesktopSlots(bodySlots, ctx, ctx.pinnedSummaryTop, "top");
-  appendPinnedDesktopSlots(bodySlots, ctx, ctx.pinnedTopRows, "top");
-  if (ctx.paddingTop > 0) {
-    bodySlots.push({
-      kind: "virtualPad",
-      key: "pad-top",
-      height: ctx.paddingTop,
-      colSpan: ctx.wiring.columnSpan,
-    });
-  }
-  if (ctx.grouping) {
-    appendGroupedDesktopSlots(bodySlots, ctx);
-  } else {
-    appendScrollDesktopSlots(bodySlots, ctx);
-  }
-  if (ctx.paddingBottom > 0) {
-    bodySlots.push({
-      kind: "virtualPad",
-      key: "pad-bottom",
-      height: ctx.paddingBottom,
-      colSpan: ctx.wiring.columnSpan,
-    });
-  }
-  appendPinnedDesktopSlots(bodySlots, ctx, ctx.pinnedBottomRows, "bottom");
-  appendSummaryDesktopSlots(bodySlots, ctx, ctx.pinnedSummaryBottom, "bottom");
-  return bodySlots;
-}
+/** What every desktop row of one table shares, in this binding's types. */
+type DesktopRowWiringContext<TRow> = DesktopRowWiringContextModel<TRow> & {
+  readonly table: UseDataTableResult<TRow>;
+  readonly gridFocus: SharedTableRenderProps<TRow>["gridFocus"];
+  readonly editing: SharedTableRenderProps<TRow>["editing"];
+  readonly columns: readonly ColumnDef<TRow>[];
+  readonly labels: Required<TableLabels>;
+  readonly rowReorder: SharedTableRenderProps<TRow>["rowReorder"];
+  readonly rowActions: SharedTableRenderProps<TRow>["rowActions"];
+  readonly rowActionsLayout: SharedTableRenderProps<TRow>["rowActionsLayout"];
+  readonly cellSpanAppearance: SharedTableRenderProps<TRow>["cellSpanAppearance"];
+  readonly renderRowActions: SharedTableRenderProps<TRow>["renderRowActions"];
+  readonly confirm: ConfirmHandler;
+  readonly isCellFlashing: SharedTableRenderProps<TRow>["isCellFlashing"];
+  readonly renderDetail: (row: TRow) => ReactNode;
+  readonly rows: readonly TRow[];
+};
 
 /**
  * Shared desktop-table assembly. Calls {@link tableRenderModel} and
@@ -1377,24 +795,26 @@ export function useDesktopTableAssembly<TRow>(
     stickActions,
     showReorder && reorderPinned
   );
-  const inScrollBox = maxHeight != null || hasPinned || overflowing;
-  const headerStickTop = inScrollBox ? 0 : stickyTop;
-  const rowPinOffset = stickyHeader ? headerStickTop + headerHeight : 0;
-  const stickyStyle: CSSProperties | undefined = stickyHeader
-    ? {
-        position: "sticky",
-        top: inScrollBox ? 0 : stickyTop,
-        zIndex: PIN_Z.header,
-      }
-    : undefined;
-  const stickyAttr = stickyHeader || undefined;
-  const hasStartPin = columns.some(
-    (column) => pinOffset?.(column.key)?.side === "start"
-  );
-  const hasEndPin = columns.some(
-    (column) => pinOffset?.(column.key)?.side === "end"
-  );
-  const pinSignature = desktopPinSignature(columns, pinOffset);
+  const {
+    inScrollBox,
+    headerStickTop,
+    rowPinOffset,
+    stickyStyle,
+    stickyAttr,
+    boxStyle,
+  } = desktopStickyPlan({
+    maxHeight,
+    hasPinned,
+    overflowing,
+    stickyHeader,
+    stickyTop,
+    headerHeight,
+  });
+  const {
+    hasStartPin,
+    hasEndPin,
+    signature: pinSignature,
+  } = desktopPinEdges(columns, pinOffset);
   const headStyle = (column: { key: string; width?: number | string }) =>
     desktopHeadCellStyle(column, {
       pinOffset,
@@ -1406,7 +826,7 @@ export function useDesktopTableAssembly<TRow>(
   const edgeHeadStyle = (side: "start" | "end", active: boolean) =>
     desktopEdgeHeadStyle(side, active, stickyStyle);
   const edgeBodyStyle = (side: "start" | "end", active: boolean) =>
-    edgePinStyle(side, active, PIN_Z.body);
+    desktopEdgeBodyStyle(side, active);
 
   const headerPlan = htmlGroupedHeaderPlan(
     columns,
@@ -1418,16 +838,10 @@ export function useDesktopTableAssembly<TRow>(
   const summary = useSummaryCells(summaryRow, rows);
   const showColumnFooter = summary !== undefined || columnsHaveFooter(columns);
 
-  const minWidth = tableMinWidth(columns, {
-    widths: columnWidths,
-    extra: metrics.extraMinWidth,
-  });
-  const mergedTableStyle: CSSProperties = {
-    ...(minWidth > 0 ? { minWidth } : {}),
-    ...fittedTableStyle(fitColumns),
-  };
-  const resolvedTableStyle =
-    Object.keys(mergedTableStyle).length > 0 ? mergedTableStyle : undefined;
+  const resolvedTableStyle: CSSProperties | undefined = desktopTableStyle(
+    columns,
+    { columnWidths, extraMinWidth: metrics.extraMinWidth, fitColumns }
+  );
 
   const bindScrollBox = useCallback<RefCallback<HTMLDivElement>>(
     (node) => {
@@ -1487,7 +901,12 @@ export function useDesktopTableAssembly<TRow>(
     renderDetail,
   };
 
-  const bodySlots = collectDesktopBodySlots({
+  const bodySlots = desktopBodySlots<
+    TRow,
+    DesktopRowWiring<TRow>,
+    ReactNode,
+    CSSProperties
+  >({
     pinnedTopRows,
     pinnedBottomRows,
     pinnedSummaryTop,
@@ -1500,95 +919,60 @@ export function useDesktopTableAssembly<TRow>(
     paddingBottom,
     grouping,
     entries,
-    wiring: wiringCtx,
+    tree,
+    getRowId,
+    columnSpan,
+    rows,
+    wiring: (args) => desktopRowWiring(wiringCtx, args),
   });
 
   // Focus addresses columns by their position in the FULL visible list. Built
   // once here rather than searched per header cell: the header row is the
   // hottest prop path in this file, and a scan inside it would make the cost of
   // naming a column quadratic in the number of columns.
-  const absoluteColumnIndex = new Map(
-    table.columns.map((column, index) => [column.key, index])
-  );
-
+  const absoluteIndex = absoluteColumnIndex(table.columns);
+  const leafCtx = {
+    table,
+    headStyle,
+    groupingPanel,
+    gridFocus,
+    headerFilters,
+    filterDefs,
+    pinOffset,
+    setWidth,
+    resizeLabel,
+    columnResizeHandleProps: assemblyFns.columnResizeHandleProps,
+    labels,
+  };
   const leaf = (
     column: ColumnDef<TRow>,
     headerIndex: number,
     rowSpan = 1
   ): DesktopHeaderLeaf<TRow> => {
-    const localStyle = headStyle(column);
-    const baseHeaderProps = table.getHeaderCellProps(
-      column,
-      localStyle && { style: localStyle }
-    );
-    const headerProps = {
-      ...baseHeaderProps,
-      // A column the host closed to grouping offers no drag: the reader is
-      // never handed a gesture the panel would refuse.
-      ...(column.groupable === false
-        ? {}
-        : groupingPanel?.headerDragProps(column.key)),
-    };
-    const chainDir = table.source.sortLevels.find(
-      (level) => level.key === column.key
-    )?.dir;
-    const effectiveDir =
-      chainDir ?? (table.sortBy === column.key ? table.sortDir : undefined);
-    const sortButtonProps = table.getSortButtonProps(column);
-    const sortIndex = sortButtonProps["data-sort-index"];
-    // A windowed header is handed its position within the rendered slice, so the
-    // absolute index is what column selection, the header checkbox and
-    // `aria-colindex` all have to name — windowed or not.
-    const focusIndex = absoluteColumnIndex.get(column.key) ?? headerIndex;
-    const headerController = columnHeaderController(column, {
-      sortDir: effectiveDir,
-      sortIndex: typeof sortIndex === "number" ? sortIndex : undefined,
-      toggleSort: sortButtonProps.onClick,
-    });
-    const headerCaption = resolveColumnHeader(column, headerController);
-    const headerDef =
-      headerFilters === true
-        ? filterDefForColumn(filterDefs ?? [], column.key)
-        : undefined;
-    const columnName =
-      typeof column.header === "string" ? column.header : column.key;
-    const style = {
-      ...headerProps.style,
-      ...(rowSpan > 1 ? { verticalAlign: "middle" as const } : {}),
-    };
-    return {
+    const { resizeHandleProps, ...rest } = desktopHeaderLeaf(
+      leafCtx,
       column,
       headerIndex,
       rowSpan,
-      headerProps,
-      columnHeaderProps:
-        gridFocus?.getColumnHeaderProps(focusIndex, {
-          sortable: column.sortable,
-        }) ?? {},
-      style,
-      sortDir: effectiveDir,
-      sortActive: effectiveDir !== undefined,
-      sortButtonProps,
-      sortIndex: typeof sortIndex === "number" ? sortIndex : undefined,
-      caption: headerCaption,
-      headerDef,
-      pinSide: pinOffset?.(column.key)?.side,
-      resizeHandleProps: (() => {
-        if (!setWidth) return undefined;
-        const props = assemblyFns.columnResizeHandleProps(
-          column.key,
-          setWidth,
-          `${resizeLabel}: ${columnName}`
-        );
-        return props ? toReactColumnResizeHandleProps(props) : undefined;
-      })(),
-      columnName,
-      showColumnCheckbox: gridFocus?.columnCheckbox === true,
-      columnCheckboxChecked: gridFocus?.isColumnSelected(focusIndex) ?? false,
-      onToggleColumn: gridFocus
-        ? () => gridFocus.toggleColumn(focusIndex)
+      absoluteIndex
+    );
+    return {
+      ...rest,
+      caption: resolveColumnHeader(
+        column,
+        columnHeaderController(column, {
+          sortDir: rest.sortDir,
+          sortIndex: rest.sortIndex,
+          toggleSort: rest.sortButtonProps.onClick,
+        })
+      ),
+      resizeHandleProps: resizeHandleProps
+        ? toReactColumnResizeHandleProps(
+            resizeHandleProps as Parameters<
+              typeof toReactColumnResizeHandleProps
+            >[0]
+          )
         : undefined,
-      columnSelectAriaLabel: columnSelectLabel(labels.selectColumn, column),
     };
   };
 
@@ -1637,7 +1021,7 @@ export function useDesktopTableAssembly<TRow>(
     },
     scroll: {
       overflowing,
-      boxStyle: desktopScrollBoxStyle(maxHeight, hasPinned || overflowing),
+      boxStyle,
       bindScrollBox,
     },
     tableStyle: resolvedTableStyle,

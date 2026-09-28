@@ -287,7 +287,41 @@ export function applyRowReorder<T>(rows: readonly T[], from: number, to: number)
 export function applyTableUrlState(search: string, savedSearch: string, namespace: string): string;
 
 // @public
+export const APPROVAL_PREVIEW_LIMIT = 3;
+
+// @public
 export type ApprovalPresentation = "widget" | "table" | "modal";
+
+// @public
+export interface ApprovalReview {
+    readonly approved: number;
+    readonly approveLabel: string;
+    readonly changes: number;
+    readonly items: readonly ApprovalReviewItem[];
+    readonly operation?: AgentApprovalOperation;
+    readonly pending: number;
+    readonly perItem: boolean;
+    readonly preview: readonly ApprovalReviewItem[];
+    readonly rejected: number;
+    readonly rejectLabel: string;
+    readonly reviewAllLabel: string | undefined;
+    readonly rows: number;
+    readonly started: boolean;
+    readonly summary: string;
+    readonly tally: string | undefined;
+    readonly truncated: boolean;
+}
+
+// @public (undocumented)
+export function approvalReview(pending: AgentApprovalPending | null | undefined, labels: TableLabels | undefined): ApprovalReview | null;
+
+// @public
+export interface ApprovalReviewItem {
+    readonly decision: AgentApprovalDecision;
+    readonly id: string;
+    readonly index: number;
+    readonly proposal: AgentApprovalProposal;
+}
 
 // @public
 export function asBatchGesture<TRow>(apply: ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): ((edits: readonly BatchRowEdit<TRow>[]) => unknown) | undefined;
@@ -344,7 +378,88 @@ export function autoSizeColumns(root: Element | null, keys: readonly string[], s
 export function availableFields(fields: readonly PivotField[], config: PivotConfig): PivotField[];
 
 // @public
+export interface BatchEditBarModel {
+    readonly cancelLabel: string;
+    readonly conflictMessage: string | undefined;
+    readonly count: string;
+    readonly saveLabel: string;
+}
+
+// @public
+export function batchEditBarModel<TRow>(batch: Pick<BatchEditingState<TRow>, "pending" | "count">, contested: boolean | undefined, labels: TableLabels | undefined): BatchEditBarModel | null;
+
+// @public
+export interface BatchEditEntry {
+    readonly drafts: Readonly<Record<string, string>>;
+    readonly openedRow: unknown;
+    readonly rowId: string;
+    readonly seeds: Readonly<Record<string, string>>;
+}
+
+// @public
+export function batchEditErrorId(rowId: string, columnKey: string): string;
+
+// @public
 export function batchEditHandler<TRow>(batch: ((edits: CellEdit<TRow>[]) => void) | undefined, onCellEdit: ((row: TRow, key: string, nextValue: unknown) => void) | undefined): ((edits: CellEdit<TRow>[]) => void) | undefined;
+
+// @public
+export interface BatchEditingState<TRow> {
+    acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    cancelAll: () => void;
+    cancelRow: (rowId: string) => void;
+    count: number;
+    draftFor: (row: TRow, rowId: string, columnKey: string) => string;
+    entries: readonly BatchEditEntry[];
+    featureHost?: FeatureHostState;
+    isChanged: (rowId: string, columnKey: string) => boolean;
+    isPending: (rowId: string) => boolean;
+    pending: boolean;
+    saveAll: () => void;
+    setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    signature: string;
+    takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+}
+
+// @public
+export function batchEditingView<TRow>(store: BatchEditStore<TRow>, snapshot: BatchEditSnapshot, options: Pick<BatchEditStoreOptions<TRow>, "columns" | "featureHost">): BatchEditingState<TRow>;
+
+// @public
+export interface BatchEditSnapshot {
+    readonly entries: readonly BatchEditEntry[];
+    readonly pending: BatchPendingDrafts;
+    readonly signature: string;
+}
+
+// @public
+export interface BatchEditStore<TRow> {
+    readonly acceptSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    readonly cancelAll: () => void;
+    readonly cancelRow: (rowId: string) => void;
+    readonly configure: (options: BatchEditStoreOptions<TRow>) => void;
+    readonly getSnapshot: () => BatchEditSnapshot;
+    readonly saveAll: () => void;
+    readonly setDraft: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+}
+
+// @public
+export interface BatchEditStoreOptions<TRow> {
+    readonly columns: readonly EditableColumnLike<TRow>[];
+    readonly enabled?: boolean;
+    readonly featureHost?: FeatureHostState;
+    readonly onBatchEdit?: (edits: readonly BatchRowEdit<TRow>[]) => unknown;
+    readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditStart?: EditEventHandler<TRow>;
+}
+
+// @public
+export type BatchPendingDrafts = Readonly<Record<string, {
+    row: unknown;
+    drafts: RowEditDrafts;
+    seeds: RowEditDrafts;
+}>>;
 
 // @public
 export interface BatchRowEdit<TRow> {
@@ -352,6 +467,9 @@ export interface BatchRowEdit<TRow> {
     row: TRow;
     rowId: string;
 }
+
+// @public
+export function beginCellEdit<TRow>(editing: Pick<CellEditingState, "begin">, row: TRow, column: EditableColumnLike<TRow>, rowKey: (row: TRow) => string): boolean;
 
 // @public
 export type BinaryOp = "+" | "-" | "*" | "/" | "&" | "=" | "<>" | "<" | "<=" | ">" | ">=";
@@ -581,6 +699,16 @@ export interface CapabilitySource {
 export function captureTableUrlState(search: string, namespace: string): string;
 
 // @public
+export interface CellConflictAsk {
+    readonly incomingValue: string;
+    readonly keep: () => void;
+    readonly take: () => void;
+}
+
+// @public
+export function cellConflictAsk<TRow>(editing: Pick<EditingBundle<TRow>, "conflict"> | undefined, rowId: string, columnKey: string): CellConflictAsk | undefined;
+
+// @public
 export interface CellEdit<TRow> {
     columnKey: string;
     row: TRow;
@@ -593,6 +721,33 @@ export interface CellEditCommit {
     draft: string;
     rowId: string;
 }
+
+// @public
+export type CellEditHandler<TRow> = (row: TRow, key: string, nextValue: unknown) => unknown;
+
+// @public
+export interface CellEditingState {
+    active: CellEditTarget | null;
+    begin: (rowId: string, columnKey: string, initialValue: string, row?: unknown) => void;
+    cancel: () => void;
+    close: () => void;
+    commit: () => CellEditCommit | null;
+    discardIfRowMissing: (rows: readonly unknown[], rowKey: (row: unknown) => string) => void;
+    draft: string;
+    handleKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        shiftKey?: boolean;
+    }, navigation?: CellEditNavigation) => CellEditKeyOutcome | null;
+    isActive: (rowId: string, columnKey: string) => boolean;
+    keepLive: (row: unknown) => void;
+    openedRow: () => unknown;
+    setDraft: (value: string) => void;
+    takeLive: (row: unknown, value: string) => void;
+}
+
+// @public
+export function cellEditingView<TRow>(session: CellEditSession<TRow>, snapshot: CellEditSnapshot): CellEditingState;
 
 // @public
 export type CellEditKeyAction = "commit" | "cancel" | "commit-advance";
@@ -765,6 +920,24 @@ export interface CellSaveSnapshot<TRow> {
 }
 
 // @public
+export interface CellSaveState<TRow> {
+    canRollback: boolean;
+    clear: (rowId: string, columnKey: string) => void;
+    failureFor: (rowId: string, columnKey: string) => FailedCellSave<TRow> | undefined;
+    rollback: (rowId: string, columnKey: string) => void;
+    signature: string;
+    statusFor: (rowId: string, columnKey: string) => CellSaveStatus | undefined;
+    track: (options: {
+        rowId: string;
+        columnKey: string;
+        previous: TRow;
+        attempted: unknown;
+        previousValue?: unknown;
+        result: unknown;
+    }) => Promise<boolean>;
+}
+
+// @public
 export type CellSaveStatus = "saving" | "failed";
 
 // @public
@@ -794,6 +967,9 @@ export interface CellSaveStoreOptions<TRow> {
     readonly onEditError?: EditEventHandler<TRow>;
     readonly onRollback?: (previous: TRow, columnKey: string) => void;
 }
+
+// @public
+export function cellSaveView<TRow>(store: CellSaveStore<TRow>, snapshot: CellSaveSnapshot<TRow>, canRollback: boolean): CellSaveState<TRow>;
 
 // @public @deprecated
 export const cellsForRow: typeof cellsForRow_2;
@@ -1560,6 +1736,20 @@ export interface ConfirmRequest {
 }
 
 // @public
+export function contestedCellKey(rowId: string, columnKey: string): string;
+
+// @public
+export interface ContestedEditCell<TRow> {
+    readonly accept: (row: TRow, columnKeys: readonly string[]) => void;
+    readonly incoming: string;
+    readonly row: TRow;
+    readonly take: (row: TRow, columnKeys: readonly string[]) => void;
+}
+
+// @public
+export function contestedRowSignature<TRow>(snapshot: EditConflictSnapshot<TRow>, rowId: string): string;
+
+// @public
 export interface ContextMenuActions<TRow> {
     onCopy?: (target: ContextMenuTarget<TRow>) => void;
     onCut?: (target: ContextMenuTarget<TRow>) => void;
@@ -1755,6 +1945,9 @@ export interface ControllableStoreOptions<T> {
 }
 
 // @public
+export function controllerConflictAsk<TRow>(controller: Pick<EditableCellController<TRow>, "conflict" | "keepConflict" | "takeConflict">): CellConflictAsk | undefined;
+
+// @public
 export function copyContextMenuSelection(focus: ContextMenuCopyFocus & {
     readonly copyCells: (cell?: GridCell, cut?: boolean) => void;
 }, target: {
@@ -1808,6 +2001,9 @@ export function coveredAddressSet<TRow>(options: {
 export function createAllMatchingScope(): AllMatchingScope;
 
 // @public
+export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>): BatchEditStore<TRow>;
+
+// @public
 export function createBulkActionRunner(initial: BulkActionRunnerOptions): BulkActionRunnerController;
 
 // @public
@@ -1836,6 +2032,15 @@ export function createContextMenuOpenController<TRow>(initial: ContextMenuOpenCo
 
 // @public
 export function createControllableStore<T>(initial: T, options?: ControllableStoreOptions<T>): ControllableStore<T>;
+
+// @public
+export function createDirtyCellStore(options?: DirtyCellStoreOptions): DirtyCellStore;
+
+// @public
+export function createEditConflictStore<TRow>(): EditConflictStore<TRow>;
+
+// @public
+export function createEditHistory<TRow>(options: EditHistoryControllerOptions<TRow>): EditHistoryController<TRow>;
 
 // @public
 export function createEditHistoryStack<TRow>(): EditHistoryStack<TRow>;
@@ -1898,6 +2103,15 @@ export function createNeutralTable<TRow>(engine: TableEngine<TRow>, tableId: str
 export function createQueryEmitter(seenKey?: string): QueryEmitter;
 
 // @public
+export function createQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(): QuerySource<TRow, TParams, TPage>;
+
+// @public
+export function createResponseAggregateOps(): ResponseAggregateOps;
+
+// @public
+export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>): RowEditStore<TRow>;
+
+// @public
 export function createRowReorderController<TRow>(initial: RowReorderControllerOptions<TRow>): RowReorderController<TRow>;
 
 // @public
@@ -1907,7 +2121,13 @@ export function createSavedViewRenameController(): SavedViewRenameController;
 export function createSavedViewsController(initial: SavedViewsControllerOptions): SavedViewsController;
 
 // @public
+export function createServerSource<TRow>(): ServerSource<TRow>;
+
+// @public
 export function createShortcutHandler(shortcuts: readonly Shortcut[], onCommand: (command: string) => void): (event: ShortcutKeyEvent) => boolean;
+
+// @public
+export function createTableData<TRow>(): TableData<TRow>;
 
 // @public
 export function createTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
@@ -1955,6 +2175,19 @@ export function cursorHasMore(trail: CursorTrail, page: number): boolean;
 export type CursorTrail = readonly (string | undefined)[];
 
 // @public
+export function cursorTrailKey(query: {
+    readonly limit: number;
+    readonly search: string;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+    readonly groupBy: string | undefined;
+    readonly groupAggregateOverrides: GroupAggregateOverrides;
+    readonly filters: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+}): string;
+
+// @public
 export const CUSTOM_AGGREGATE = "custom";
 
 // @public
@@ -1996,6 +2229,9 @@ export interface CustomCellEditorCtrl {
 
 // @public
 export type CustomCellEditorRender = (ctrl: CustomCellEditorCtrl) => DisplayValue;
+
+// @public
+export function customEditorConflict(ask: CellConflictAsk | undefined): CustomCellEditorConflict | undefined;
 
 // @public
 export function datasetIndex(localIndex: number, windowStart: number): number;
@@ -2075,6 +2311,9 @@ export function defaultFrontendRowId<TRow>(row: TRow): string;
 export const defaultLabels: Required<TableLabels>;
 
 // @public
+export function defaultPendingRows(count: number): string;
+
+// @public
 export const defaultRowReorderAnnouncements: RowReorderAnnouncements;
 
 // @public
@@ -2115,6 +2354,48 @@ export function devWarn(message: string): void;
 export type Direction = "ltr" | "rtl";
 
 // @public
+export function dirtyCellKey(rowId: string, columnKey: string): string;
+
+// @public
+export interface DirtyCellSnapshot {
+    readonly cells: ReadonlySet<string>;
+}
+
+// @public
+export interface DirtyCellState {
+    confirm: (rowId: string, columnKey: string) => void;
+    confirmAll: () => void;
+    confirmRow: (rowId: string) => void;
+    count: number;
+    isDirty: (rowId: string, columnKey: string) => boolean;
+    isRowDirty: (rowId: string) => boolean;
+    mark: (rowId: string, columnKey: string) => void;
+    signature: string;
+}
+
+// @public
+export interface DirtyCellStore {
+    readonly configure: (options: DirtyCellStoreOptions) => void;
+    readonly confirm: (rowId: string, columnKey: string) => void;
+    readonly confirmAll: () => void;
+    readonly confirmRow: (rowId: string) => void;
+    readonly getSnapshot: () => DirtyCellSnapshot;
+    readonly mark: (rowId: string, columnKey: string) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface DirtyCellStoreOptions {
+    readonly enabled?: boolean;
+}
+
+// @public
+export function dirtyCellView(store: DirtyCellStore, snapshot: DirtyCellSnapshot): DirtyCellState;
+
+// @public
+export function dirtyMarkerView(tracked: DirtyCellState, markers: boolean): DirtyCellState;
+
+// @public
 export function dispatchRowMove<TRow>(request: RowMoveRequest<TRow>, options: RowReorderOptions<TRow> | undefined): void;
 
 // @public
@@ -2145,6 +2426,47 @@ export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
 
 // @public
 export function edgePinStyle(side: PinSide, active: boolean, zIndex?: number): PinnedCellStyle | undefined;
+
+// @public
+export interface EditableCellController<TRow = unknown> {
+    begin: () => void;
+    cancel: () => void;
+    canRollback: boolean;
+    commit: () => void;
+    commitOnBlur: () => void;
+    conflict?: EditConflict<TRow>;
+    conflictLabels?: EditConflictLabels;
+    dismissFailure: () => void;
+    draft: string;
+    editor: CellEditor | null;
+    error?: string;
+    isDirty: boolean;
+    keepConflict: () => void;
+    mode: EditableCellMode;
+    onEditorKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        shiftKey?: boolean;
+    }) => void;
+    rollback: () => void;
+    saveFailure?: FailedCellSave<TRow>;
+    saveStatus?: CellSaveStatus;
+    selectOptions: ReturnType<typeof normalizeEditorOptions>;
+    setDraft: (value: string) => void;
+    takeConflict: () => void;
+    validating: boolean;
+}
+
+// @public
+export function editableCellController<TRow>(options: {
+    editing: EditingBundle<TRow> | undefined;
+    row: TRow;
+    column: EditableColumnLike<TRow>;
+    rowId: string;
+    rows: readonly TRow[];
+    columns: readonly EditableColumnLike<TRow>[];
+    rowKey: (row: TRow) => string;
+}): EditableCellController<TRow>;
 
 // @public
 export interface EditableCellEditing<_TRow = unknown> {
@@ -2190,6 +2512,18 @@ export interface EditableCellEditing<_TRow = unknown> {
         errorFor(rowId: string, columnKey: string): string | undefined;
     };
 }
+
+// @public
+export function editableCellErrorId(rowId: string, columnKey: string): string;
+
+// @public
+export type EditableCellMode = "display" | "activatable" | "editing";
+
+// @public
+export type EditableCellPresentation = "batch" | "row" | "display" | "custom-editor" | "editor" | "activatable";
+
+// @public
+export function editableCellPresentation<TRow>(editing: EditingBundle<TRow> | undefined, rowId: string, controller: Pick<EditableCellController<TRow>, "mode" | "editor">): EditableCellPresentation;
 
 // @public
 export interface EditableColumnLike<TRow = unknown> {
@@ -2239,7 +2573,59 @@ export type EditConflictChoice = "keep" | "take";
 export type EditConflictHandler<TRow> = (conflict: EditConflict<TRow>) => EditConflictChoice | void;
 
 // @public
+export interface EditConflictLabels {
+    keepMine: string;
+    message: string;
+    takeTheirs: string;
+    theirsValue: (value: string) => string;
+}
+
+// @public
 export type EditConflictPolicy = "keep" | "take" | "ask";
+
+// @public
+export interface EditConflictSnapshot<TRow> {
+    readonly contested: ReadonlyMap<string, ContestedEditCell<TRow>>;
+    readonly current: EditConflict<TRow> | null;
+}
+
+// @public
+export interface EditConflictState<TRow> {
+    anyContested: boolean;
+    clear: () => void;
+    contestedCell: (rowId: string, columnKey: string) => {
+        readonly incomingValue: string;
+    } | undefined;
+    current: EditConflict<TRow> | null;
+    isConflict: (rowId: string, columnKey: string) => boolean;
+    isRowConflict: (rowId: string) => boolean;
+    isRowContested: (rowId: string) => boolean;
+    keep: () => void;
+    keepCell: (rowId: string, columnKey: string) => void;
+    reconcile: (input: ReconcileLiveEdit<TRow>) => void;
+    reconcileBatch: (input: ReconcileLiveBatchEdit<TRow>) => void;
+    reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
+    rowSignature: (rowId: string) => string;
+    take: () => void;
+    takeCell: (rowId: string, columnKey: string) => void;
+}
+
+// @public
+export interface EditConflictStore<TRow> {
+    readonly clear: () => void;
+    readonly getSnapshot: () => EditConflictSnapshot<TRow>;
+    readonly keep: () => void;
+    readonly keepCell: (rowId: string, columnKey: string) => void;
+    readonly reconcile: (input: ReconcileLiveEdit<TRow>) => void;
+    readonly reconcileBatch: (input: ReconcileLiveBatchEdit<TRow>) => void;
+    readonly reconcileRow: (input: ReconcileLiveRowEdit<TRow>) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly take: () => void;
+    readonly takeCell: (rowId: string, columnKey: string) => void;
+}
+
+// @public
+export function editConflictView<TRow>(store: EditConflictStore<TRow>, snapshot: EditConflictSnapshot<TRow>): EditConflictState<TRow>;
 
 // @public
 export interface EditEvent<TRow> {
@@ -2254,6 +2640,29 @@ export interface EditEvent<TRow> {
 
 // @public
 export type EditEventHandler<TRow> = (event: EditEvent<TRow>) => void;
+
+// @public
+export interface EditHistoryController<TRow> {
+    readonly clear: () => void;
+    readonly configure: (options: EditHistoryControllerOptions<TRow>) => void;
+    readonly getSnapshot: () => EditHistorySnapshot;
+    readonly record: (edits: readonly CellEdit<TRow>[]) => void;
+    readonly redo: () => number;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly undo: () => number;
+}
+
+// @public
+export interface EditHistoryControllerOptions<TRow> {
+    readonly columns: readonly {
+        readonly key: string;
+        readonly editValue?: (row: TRow) => unknown;
+        readonly sortValue?: (row: TRow) => unknown;
+    }[];
+    readonly depth?: number;
+    readonly enabled: boolean;
+    readonly onCellEdit?: CellEditHandler<TRow>;
+}
 
 // @public
 export interface EditHistoryEntry<TRow> {
@@ -2283,6 +2692,56 @@ export interface EditHistoryStack<TRow> {
 }
 
 // @public
+export interface EditHistoryState<TRow> {
+    canRedo: boolean;
+    canUndo: boolean;
+    clear: () => void;
+    enabled: boolean;
+    record: (edits: readonly CellEdit<TRow>[]) => void;
+    redo: () => number;
+    undo: () => number;
+}
+
+// @public
+export function editHistoryView<TRow>(history: EditHistoryController<TRow>, snapshot: EditHistorySnapshot, enabled: boolean): EditHistoryState<TRow>;
+
+// @public
+export interface EditingArming {
+    readonly any: boolean;
+    readonly batch: boolean;
+    readonly cell: boolean;
+    readonly dirtyMarkers: boolean;
+    readonly row: boolean;
+    readonly trackDirty: boolean;
+}
+
+// @public
+export interface EditingArmingProps {
+    readonly batchEditing?: boolean;
+    readonly dirtyIndicators?: boolean;
+    readonly onBatchEdit?: unknown;
+    readonly onCellEdit?: unknown;
+    readonly onDirtyChange?: unknown;
+    readonly onRowEdit?: unknown;
+    readonly rowEditing?: boolean;
+}
+
+// @public
+export interface EditingBundle<TRow> {
+    batch?: BatchEditingState<TRow>;
+    conflict?: EditConflictState<TRow>;
+    conflictLabels?: EditConflictLabels;
+    dirty?: DirtyCellState;
+    featureHost?: FeatureHostState;
+    lifecycle?: EditLifecycle<TRow>;
+    onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+    rowEditing?: RowEditingState<TRow>;
+    saving?: CellSaveState<TRow>;
+    state: CellEditingState;
+    validation?: EditValidationState<TRow>;
+}
+
+// @public
 export interface EditLifecycle<TRow> {
     onEditCancel?: EditEventHandler<TRow>;
     onEditCommit?: EditEventHandler<TRow>;
@@ -2292,7 +2751,36 @@ export interface EditLifecycle<TRow> {
 }
 
 // @public
+export interface EditorAriaState {
+    readonly conflict?: boolean;
+    readonly error?: string;
+    readonly errorId: string;
+    readonly validating: boolean;
+}
+
+// @public
+export function editorBusyProps(ctrl: EditorAriaState): {
+    "aria-busy"?: true;
+    "aria-describedby"?: string;
+    "data-conflict"?: "";
+};
+
+// @public
 export function editorInputType(editor: CellEditor | null): "text" | "number" | "date" | "datetime-local" | "time";
+
+// @public
+export function editorKeyRestoresFocus(key: string): boolean;
+
+// @public
+export function editorSelectOptions(editor: CellEditor): ReturnType<typeof normalizeEditorOptions>;
+
+// @public
+export function editorValidationProps(ctrl: EditorAriaState): {
+    "aria-invalid"?: true;
+    "aria-describedby"?: string;
+    "aria-busy"?: true;
+    "data-conflict"?: "";
+};
 
 // @public
 export type EditUnit = "cell" | "row" | "batch";
@@ -2302,6 +2790,24 @@ export interface EditValidationSnapshot {
     readonly cellErrors: ReadonlyMap<string, string>;
     readonly rowErrors: ReadonlyMap<string, string>;
     readonly validating: ReadonlySet<string>;
+}
+
+// @public
+export interface EditValidationState<TRow> {
+    check: (options: {
+        target: ValidationTarget;
+        value: unknown;
+        row: TRow;
+        validateCell?: CellValidator<TRow>;
+    }) => Promise<ValidationCheckResult>;
+    clear: (rowId: string, columnKey: string) => void;
+    clearAll: () => void;
+    errorFor: (rowId: string, columnKey: string) => string | undefined;
+    hasRowValidator: boolean;
+    isValidating: (rowId: string, columnKey: string) => boolean;
+    rowErrorFor: (rowId: string) => string | undefined;
+    rowHasError: (rowId: string) => boolean;
+    signature: string;
 }
 
 // @public
@@ -2325,6 +2831,9 @@ export interface EditValidationStoreOptions<TRow> {
     readonly applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
     readonly validateRow?: RowValidator<TRow>;
 }
+
+// @public
+export function editValidationView<TRow>(store: EditValidationStore<TRow>, snapshot: EditValidationSnapshot, hasRowValidator: boolean): EditValidationState<TRow>;
 
 // @public
 export function effectiveAggregateOps<TRow>(input: AggregationModelInput<TRow>): Readonly<Record<string, string>> | undefined;
@@ -3171,6 +3680,11 @@ export interface FlattenedColumns<TRow> {
 export function focusAfterAggregationRemoval(root: ParentNode | null, remainingKeys: readonly string[], removedIndex: number): void;
 
 // @public
+export function focusEditorOnMount(node: {
+    focus: () => void;
+} | null): void;
+
+// @public
 export function focusExportTrigger(root?: Pick<ParentNode, "querySelector"> | undefined): boolean;
 
 // @public
@@ -4013,6 +4527,12 @@ export function groupValueKey(value: unknown): string;
 export function handleFindBarKey(event: FindBarKeyEvent, find: FindBarKeyTarget): boolean;
 
 // @public
+export function handleRowEditorKey<TRow>(event: {
+    key: string;
+    preventDefault: () => void;
+}, rowEditing: Pick<RowEditingState<TRow>, "save" | "cancel">, saveBlocked: boolean): void;
+
+// @public
 export function handleSidePanelBodyKey(event: Pick<SidePanelKeyEvent, "key" | "stopPropagation">, onClose: () => void): boolean;
 
 // @public
@@ -4324,6 +4844,9 @@ export function isCellEditable<TRow>(column: EditableColumnLike<TRow>, row: TRow
 export function isCellEditActive(snapshot: CellEditSnapshot, rowId: string, columnKey: string): boolean;
 
 // @public
+export function isCellInConflict<TRow>(snapshot: EditConflictSnapshot<TRow>, rowId: string, columnKey: string): boolean;
+
+// @public
 export function isColumnGroup<TRow>(column: ColumnInput<TRow>): column is ColumnGroupDef<TRow>;
 
 // @public @deprecated
@@ -4363,6 +4886,9 @@ export function isDeclarativeFilters<TRow>(filters: DisplayValue | undefined): f
 export function isDraftChecked(draft: string): boolean;
 
 // @public
+export function isEditActivateKey(key: string): boolean;
+
+// @public
 export function isElementShowing(element: Element): boolean;
 
 // @public
@@ -4382,6 +4908,12 @@ export function isFilterOpKey(key: string): boolean;
 
 // @public
 export function isFindShortcut(event: ChordKeyEvent): boolean;
+
+// @public
+export function isFirstEditableColumn(columns: readonly {
+    key: string;
+    editable?: unknown;
+}[], key: string): boolean;
 
 // @public
 export function isFormulaError(value: FormulaValue): boolean;
@@ -4417,6 +4949,9 @@ export function isPivotReady(config: PivotConfig): boolean;
 
 // @public
 export function isRelativeDateToken(raw: string | undefined): boolean;
+
+// @public
+export function isRowContested<TRow>(snapshot: EditConflictSnapshot<TRow>, rowId: string): boolean;
 
 // @public
 export function isRowMovePending<TRow>(pendingMove: RowMoveRequest<TRow> | null, row: TRow, getRowId?: (row: TRow) => string): boolean;
@@ -4485,6 +5020,14 @@ export interface LazyChildrenSnapshot {
 
 // @public
 export function listFilterValues(value: FilterValue): string[];
+
+// @public
+export function liveRowChanged<TRow>(input: {
+    opened: TRow;
+    current: TRow;
+    column: EditableColumnLike<TRow>;
+    rowVersion?: (row: TRow) => string | number;
+}): boolean;
 
 // @public
 export interface LoadedFilterOption {
@@ -4821,6 +5364,9 @@ export function parseChord(chord: string): ParsedChord;
 
 // @public
 export function parseClipboardTable(text: string): string[][];
+
+// @public
+export function parseColumnDraft<TRow>(column: EditableColumnLike<TRow>, draft: string, row: TRow, featureHost?: FeatureHostState): unknown;
 
 // @public
 export function parseDateOp(raw: FilterValue | undefined): DateOp | undefined;
@@ -5262,6 +5808,47 @@ export interface QueryPivotRow {
 }
 
 // @public
+export interface QuerySource<TRow, TParams extends TableQueryParams, TPage> {
+    readonly commit: () => void;
+    readonly fetchNextPage: () => void;
+    readonly params: (config: QuerySourceConfig<TRow, TParams, TPage>, view: ServerSourceViewState) => Partial<TParams>;
+    readonly refetch: () => Promise<unknown> | void;
+    readonly revision: () => number;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly update: (answer: QuerySourceAnswer<TRow, TPage>) => QuerySourceFrame<TRow>;
+}
+
+// @public
+export interface QuerySourceAnswer<TRow, TPage> {
+    readonly query: InfiniteQueryLike<TPage>;
+    readonly selectorKey?: string | number;
+    readonly selectPage?: PageSelector<TRow, TPage>;
+}
+
+// @public
+export interface QuerySourceConfig<TRow, TParams extends TableQueryParams, TPage> {
+    readonly aggregates?: readonly QueryAggregate[];
+    readonly baseParams?: Partial<TParams>;
+    readonly columns?: readonly ColumnMetadata<TRow>[];
+    readonly expandedIds?: readonly string[];
+    readonly facetKeys?: readonly string[];
+    readonly nextCursor?: (page: TPage) => string | null | undefined;
+    readonly paginationMode: ResolvedPaginationMode;
+    readonly sanitizeParams?: (params: Partial<TParams>) => Partial<TParams>;
+    readonly supports?: QuerySupport;
+}
+
+// @public
+export interface QuerySourceFrame<TRow> {
+    readonly facets: FacetMap | undefined;
+    readonly groupAggregations: GroupAggregateOps | undefined;
+    readonly hasNextPage: boolean;
+    readonly isFetchingNextPage: boolean;
+    readonly rows: readonly TRow[];
+    readonly total: number;
+}
+
+// @public
 export interface QuerySupport {
     aggregateOperations?: readonly string[];
     aggregates?: boolean;
@@ -5413,7 +6000,60 @@ export function readStoredColumnLayout(storage: LayoutStorage | undefined, stora
 export function reconcileAggregations<TRow>(overrides: Readonly<Partial<Record<string, string>>>, columns: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): Readonly<Partial<Record<string, string>>>;
 
 // @public
+export interface ReconcileLiveBatchEdit<TRow> {
+    accept: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+    columns: readonly EditableColumnLike<TRow>[];
+    entries: readonly {
+        readonly rowId: string;
+        readonly seeds: Readonly<Record<string, string>>;
+        readonly drafts: Readonly<Record<string, string>>;
+        readonly openedRow?: unknown;
+    }[];
+    onEditConflict?: EditConflictHandler<TRow>;
+    policy: EditConflictPolicy;
+    rowKey: (row: TRow) => string;
+    rows: readonly TRow[];
+    take: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
+}
+
+// @public
+export interface ReconcileLiveEdit<TRow> {
+    active: {
+        rowId: string;
+        columnKey: string;
+    } | null;
+    columns: readonly EditableColumnLike<TRow>[];
+    draft: string;
+    keep: (row: TRow) => void;
+    onEditConflict?: EditConflictHandler<TRow>;
+    openedRow: TRow | undefined;
+    policy: EditConflictPolicy;
+    rowKey: (row: TRow) => string;
+    rows: readonly TRow[];
+    rowVersion?: (row: TRow) => string | number;
+    take: (row: TRow, incomingValue: string) => void;
+}
+
+// @public
+export interface ReconcileLiveRowEdit<TRow> {
+    accept: (row: TRow, columnKeys: readonly string[]) => void;
+    activeRowId: string | null;
+    columns: readonly EditableColumnLike<TRow>[];
+    drafts: Readonly<Record<string, string>>;
+    onEditConflict?: EditConflictHandler<TRow>;
+    openedRow?: TRow;
+    policy: EditConflictPolicy;
+    rowKey: (row: TRow) => string;
+    rows: readonly TRow[];
+    seeds: Readonly<Record<string, string>> | undefined;
+    take: (row: TRow, columnKeys: readonly string[]) => void;
+}
+
+// @public
 export function recordCursor(trail: CursorTrail, page: number, token: string): CursorTrail;
+
+// @public
+export function recordingCellEdit<TRow>(onCellEdit: CellEditHandler<TRow> | undefined, record: (edits: readonly CellEdit<TRow>[]) => void): CellEditHandler<TRow> | undefined;
 
 // @public
 export const RELATIVE_NAMED: readonly ["today", "yesterday", "tomorrow", "thisWeek", "thisMonth", "previousMonth"];
@@ -5544,6 +6184,9 @@ export function resolveCommitValue<TRow>(options: {
 } | null;
 
 // @public
+export function resolveConflictChoice<TRow>(handler: EditConflictHandler<TRow> | undefined, conflict: EditConflict<TRow>, policy: EditConflictPolicy): EditConflictChoice | "ask";
+
+// @public
 export function resolveContextTarget<TRow>(from: Element, rowFor: (rowId: string) => TRow | undefined): ResolvedContextTarget<TRow> | null;
 
 // @public
@@ -5579,6 +6222,23 @@ export function resolveDisabledReason(reason: string | undefined): string | unde
 
 // @public
 export type ResolvedPaginationMode = "infinite" | "paged";
+
+// @public
+export function resolveEditableCellDisplay<TRow, TNode, TCell>(display: TNode | null | undefined, column: {
+    readonly Cell?: TCell;
+    readonly accessor?: (row: TRow) => TNode;
+}, renderCell: (Cell: TCell) => TNode, row: TRow): TNode | undefined;
+
+// @public
+export function resolveEditHistory(editHistory: boolean | {
+    readonly depth?: number;
+} | undefined): {
+    readonly enabled: boolean;
+    readonly depth: number | undefined;
+};
+
+// @public
+export function resolveEditingArming(props: EditingArmingProps): EditingArming;
 
 // @public
 export function resolveEffectiveAggregation<TRow>(input: EffectiveAggregationInput<TRow>): EffectiveAggregation;
@@ -5641,6 +6301,9 @@ export function resolvePinnedRows<TRow>(pinnedRows: PinnedRows<TRow> | undefined
 // @public
 export function resolveRelativeRange(raw: string | undefined, now?: number | Date): RelativeDateRange | undefined;
 
+// @public
+export function resolveRowEditTrigger<TRow>(actions: readonly RowAction<TRow>[] | undefined, rowEditing: Pick<RowEditingState<TRow>, "isEditing" | "begin"> | undefined, row: TRow, rowId: string): RowEditTrigger<TRow>;
+
 // @public @deprecated
 export const resolveRowHeight: typeof resolveRowHeight_2;
 
@@ -5664,6 +6327,24 @@ export function resolveUrlAdapter(adapter: UrlStateAdapter | undefined, enabled:
 
 // @public
 export function resolveVirtualRows<TRow>(rows: readonly TRow[], rowKey: (row: TRow) => string, rowEntries?: readonly VirtualTableRow<TRow>[]): readonly VirtualTableRow<TRow>[];
+
+// @public
+export interface ResponseAggregateOps {
+    readonly current: () => GroupAggregateOps | undefined;
+    readonly remember: (requestKey: string, requested: GroupAggregateOps | undefined) => void;
+    readonly settle: (input: ResponseAggregateOpsInput) => boolean;
+}
+
+// @public
+export interface ResponseAggregateOpsInput {
+    readonly failed: boolean;
+    readonly fetching: boolean;
+    readonly hasData: boolean;
+    readonly requested: GroupAggregateOps | undefined;
+    readonly requestKey: string;
+    readonly respondedAt?: number;
+    readonly responseKey?: string;
+}
 
 // @public
 export interface ResponsiveColumns<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> {
@@ -5772,7 +6453,124 @@ export type RowDropPosition = "before" | "inside" | "after";
 export function rowDropPosition(clientY: number, bounds: Pick<DOMRect, "top" | "height">): RowDropPosition;
 
 // @public
+export type RowEditActionsLayout = {
+    readonly kind: "none";
+} | {
+    readonly kind: "begin";
+} | {
+    readonly kind: "open";
+    readonly showSave: boolean;
+};
+
+// @public
+export function rowEditActionsLayout(controls: Pick<RowEditControls, "editing">, conflict: RowEditConflict | undefined, showBegin: boolean | undefined): RowEditActionsLayout;
+
+// @public
+export interface RowEditConflict {
+    readonly asking: boolean;
+}
+
+// @public
+export function rowEditConflict<TRow>(editing: Pick<EditingBundle<TRow>, "conflict"> | undefined, rowId: string): RowEditConflict | undefined;
+
+// @public
+export interface RowEditControls {
+    begin: () => void;
+    cancel: () => void;
+    cancelLabel: string;
+    dirty: boolean;
+    editing: boolean;
+    editLabel: string;
+    save: () => void;
+    saveLabel: string;
+}
+
+// @public
+export function rowEditControls<TRow>(input: Readonly<RowEditControlsOptions<TRow>>): RowEditControls;
+
+// @public
+export interface RowEditControlsOptions<TRow> {
+    labels?: TableLabels;
+    row: TRow;
+    rowEditing: RowEditingState<TRow>;
+    rowId: string;
+}
+
+// @public
+export type RowEditDrafts = Readonly<Record<string, string>>;
+
+// @public
+export function rowEditErrorId(columnKey: string): string;
+
+// @public
 export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
+
+// @public
+export interface RowEditingState<TRow> {
+    acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    activeRowId: string | null;
+    begin: (row: TRow, rowId: string) => void;
+    cancel: () => void;
+    draftFor: (columnKey: string) => string;
+    drafts: RowEditDrafts;
+    featureHost?: FeatureHostState;
+    isDirty: boolean;
+    isEditing: (rowId: string) => boolean;
+    openedRow: () => TRow | undefined;
+    save: () => void;
+    seeds: () => RowEditDrafts | undefined;
+    setDraft: (columnKey: string, value: string) => void;
+    signature: string;
+    takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+}
+
+// @public
+export function rowEditingView<TRow>(store: RowEditStore<TRow>, snapshot: RowEditSnapshot, featureHost?: FeatureHostState): RowEditingState<TRow>;
+
+// @public
+export function rowEditSaveBlocked(ask: CellConflictAsk | undefined, rowAsking: boolean | undefined): boolean;
+
+// @public
+export function rowEditSignature(snapshot: RowEditSnapshot): string;
+
+// @public
+export interface RowEditSnapshot {
+    readonly activeRowId: string | null;
+    readonly drafts: RowEditDrafts;
+    readonly isDirty: boolean;
+}
+
+// @public
+export interface RowEditStore<TRow> {
+    readonly acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+    readonly begin: (row: TRow, rowId: string) => void;
+    readonly cancel: () => void;
+    readonly configure: (options: RowEditStoreOptions<TRow>) => void;
+    readonly getSnapshot: () => RowEditSnapshot;
+    readonly openedRow: () => TRow | undefined;
+    readonly save: () => void;
+    readonly seeds: () => RowEditDrafts | undefined;
+    readonly setDraft: (columnKey: string, value: string) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
+}
+
+// @public
+export interface RowEditStoreOptions<TRow> {
+    readonly columns: readonly EditableColumnLike<TRow>[];
+    readonly enabled?: boolean;
+    readonly featureHost?: FeatureHostState;
+    readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditStart?: EditEventHandler<TRow>;
+    readonly onRowEdit?: (row: TRow, patch: Readonly<Record<string, unknown>>) => unknown;
+}
+
+// @public
+export interface RowEditTrigger<TRow> {
+    readonly actions: readonly RowAction<TRow>[];
+    readonly showBegin: boolean;
+}
 
 // @public
 export function rowFlashSignature(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columns: readonly {
@@ -6417,6 +7215,61 @@ export interface ServerPivotOptions {
 export function serverPivotResult(page: QueryPivotPage, input: ServerPivotOptions): PivotResult;
 
 // @public
+export interface ServerSource<TRow> {
+    readonly commit: () => void;
+    readonly dispose: () => void;
+    readonly fetchNextPage: () => void;
+    readonly refetch: () => void;
+    readonly revision: () => number;
+    readonly setPage: (page: number) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly update: (config: ServerSourceConfig<TRow>, view: ServerSourceViewState) => ServerSourceFrame<TRow>;
+}
+
+// @public
+export interface ServerSourceConfig<TRow> {
+    readonly aggregates?: readonly QueryAggregate[];
+    readonly columns?: readonly ColumnMetadata<TRow>[];
+    readonly error?: unknown;
+    readonly expandedIds?: readonly string[];
+    readonly facetKeys?: readonly string[];
+    readonly loading?: boolean;
+    readonly nextCursor?: string | null;
+    readonly onQueryChange?: TableQueryListener;
+    readonly paginationMode: ResolvedPaginationMode;
+    readonly responseKey?: string;
+    readonly rows: readonly TRow[];
+    readonly supports?: QuerySupport;
+    readonly total: number;
+}
+
+// @public
+export interface ServerSourceFrame<TRow> {
+    readonly groupAggregations: GroupAggregateOps | undefined;
+    readonly hasNextPage: boolean;
+    readonly isFetchingNextPage: boolean;
+    readonly isLoading: boolean;
+    readonly query: TableQuery;
+    readonly queryKey: string;
+    readonly rows: readonly TRow[];
+}
+
+// @public
+export interface ServerSourceViewState {
+    readonly extra: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+    readonly groupAggregateOverrides: GroupAggregateOverrides;
+    readonly groupBy: string | undefined;
+    readonly limit: number;
+    readonly page: number;
+    readonly search: string;
+    readonly setPage: (page: number) => void;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+}
+
+// @public
 export function setFilterTreeCombinator(tree: QueryFilterGroup, path: readonly number[], combinator: QueryFilterGroup["combinator"]): QueryFilterGroup;
 
 // @public
@@ -6643,6 +7496,17 @@ export interface StickyToolbarStyle {
 export function stickyToolbarStyle(enabled: boolean, stickyTop?: number): StickyToolbarStyle | undefined;
 
 // @public
+export function stopCellEditKeyboard(event: {
+    stopPropagation: () => void;
+}): void;
+
+// @public
+export function stopEditKeys(event: Readonly<{
+    key: string;
+    stopPropagation: () => void;
+}>): void;
+
+// @public
 export interface StreamSocket {
     addEventListener(type: string, listener: (event: StreamSocketEvent) => void): void;
     close(): void;
@@ -6685,6 +7549,45 @@ export interface TableCommandOptions {
 
 // @public
 export function tableCommands(options: TableCommandOptions): Command[];
+
+// @public
+export interface TableData<TRow> {
+    readonly commit: () => void;
+    readonly dispose: () => void;
+    readonly finish: (sources: {
+        readonly resolved: TableSource<TRow>;
+        readonly frontend: TableSource<TRow>;
+    }) => TableSource<TRow>;
+    readonly loadOptions: () => () => void;
+    readonly plan: (config: TableDataConfig<TRow>) => TableDataPlan<TRow>;
+    readonly revision: () => number;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface TableDataConfig<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly data?: readonly TRow[];
+    readonly declaredFilters?: readonly FilterDef<TRow>[];
+    readonly engine: FilterEngine | undefined;
+    readonly facetKeys?: readonly string[];
+    readonly featureHost?: FeatureHostState;
+    readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterTypes?: readonly FilterTypeSpec[];
+    readonly locale?: string;
+    readonly mode?: "frontend" | "server";
+    readonly onQueryChange?: TableQueryListener;
+    readonly source?: TableSource<TRow>;
+}
+
+// @public
+export interface TableDataPlan<TRow> {
+    readonly facetKeys: readonly string[] | undefined;
+    readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterTreeFn: ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
+    readonly runtime: FilterRuntime<TRow>;
+    readonly tier: DataTier;
+}
 
 // @public
 export type TableDensity = "comfortable" | "compact";
@@ -7652,13 +8555,6 @@ export function treeExpansionActions(store: ControllableStore<ReadonlySet<string
 
 // @public
 export function treeExportExpandedIds<TRow>(entries: readonly TreeEntry<TRow>[]): Set<string>;
-
-// @public
-export function treeHasLoadedChildren<TRow>(row: TRow, rows: readonly TRow[], hierarchy: {
-    readonly getChildren?: (row: TRow) => readonly TRow[] | undefined;
-    readonly getParentId?: (row: TRow) => string | undefined;
-    readonly rowKey: (row: TRow) => string;
-}): boolean;
 
 // @public
 export function treeIndentStyle(level: number): {

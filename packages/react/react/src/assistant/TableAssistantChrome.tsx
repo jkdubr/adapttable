@@ -12,7 +12,19 @@
  * for both, it becomes the kit's own modal sheet instead of a panel squeezed
  * to nothing.
  */
-import type { TableLabels } from "@adapttable/core";
+import {
+  type ApprovalReview,
+  approvalReview,
+  type TableLabels,
+} from "@adapttable/core";
+import {
+  assistantBadgeTone,
+  assistantComposerState,
+  assistantLauncherName,
+  assistantQuestion,
+  assistantRejoinable,
+  assistantWithGreeting,
+} from "@adapttable/core/binding";
 import {
   type CSSProperties,
   type ReactElement,
@@ -26,7 +38,6 @@ import {
 
 import { LiveRegion } from "../a11y/LiveRegion";
 import type { AgentApprovalPending } from "../editing/AgentApprovalChrome";
-import { type ApprovalReview, approvalReview } from "../editing/approvalReview";
 import {
   ApprovalReviewChrome,
   type ApprovalReviewSlots,
@@ -54,7 +65,6 @@ import type {
 import {
   assistantIsBusy,
   type TableAssistantMessageView,
-  type TableAssistantQuestionView,
   type TableAssistantView,
 } from "./assistantView";
 import type { SpeechInputHandle } from "./speechView";
@@ -240,13 +250,6 @@ function useFloatingFits(): boolean {
   );
 }
 
-function badgeTone(status: string): "neutral" | "busy" | "warning" | "danger" {
-  if (status === "sending" || status === "connecting") return "busy";
-  if (status === "awaiting-approval") return "warning";
-  if (status === "error" || status === "disconnected") return "danger";
-  return "neutral";
-}
-
 function Header({
   slots,
   labels,
@@ -303,7 +306,7 @@ function Header({
       <Badge
         label={connection}
         part="assistant-connection"
-        tone={badgeTone(status)}
+        tone={assistantBadgeTone(status)}
       />
       {/* The controls sit together at the trailing edge, as icons: the header
           is one row at 400px wide, and a spelled-out "Assistant settings"
@@ -392,7 +395,7 @@ function Launcher({
     // and the face is the one thing a reader recognises from across a page.
     // Its name stays on the control for anyone who cannot see it.
     <Button
-      label={launcherName(labels, waiting)}
+      label={assistantLauncherName(labels, waiting)}
       part="assistant-launcher"
       // Subtle, because the mark inside already carries its own ground. A
       // solid button would paint the kit's primary behind it and give the
@@ -422,24 +425,6 @@ function Launcher({
       onClick={onOpen}
     />
   );
-}
-
-/**
- * What the launcher is called, and whether it says a write is parked.
- *
- * The dot beside it is decoration; this is the part a screen reader gets,
- * so the waiting write has to be in the name rather than only in the glyph.
- */
-function launcherName(
-  labels: TableLabels | undefined,
-  waiting: boolean
-): string {
-  const open = labels?.assistantOpen ?? "Ask AI";
-  if (!waiting) return open;
-  const note =
-    labels?.approvalWaitingElsewhere ??
-    "A change is waiting for your decision.";
-  return `${open} — ${note}`;
 }
 
 /**
@@ -596,7 +581,7 @@ function Transcript({
           while a question is parked on the reader. Nothing is working then:
           the turn is waiting on them, and saying otherwise is why a question
           gets read as progress. */}
-      {assistant.busy && !asking(messages) && !parked ? (
+      {assistant.busy && !assistantQuestion(messages) && !parked ? (
         <AssistantWorking labels={labels} progress={assistant.progress} />
       ) : null}
     </ul>
@@ -638,23 +623,6 @@ function FullApproval({
       />
     </div>
   );
-}
-
-/**
- * The question still waiting on the reader, if one is.
- *
- * Read off the conversation rather than from a field beside it: the question
- * belongs to the message that asked it, and a second copy is a second thing
- * to keep in step.
- */
-function asking(
-  messages: readonly TableAssistantMessageView[]
-): TableAssistantQuestionView | undefined {
-  for (let i = messages.length - 1; i >= 0; i -= 1) {
-    const question = messages[i]?.question;
-    if (question) return question;
-  }
-  return undefined;
 }
 
 /**
@@ -717,66 +685,6 @@ function PanelNotice({
 }
 
 /**
- * Whether to offer a way back to work a released connection left running.
- *
- * Offered whenever there is some and no turn is in flight, which covers a
- * connection released a moment ago and a handle a host kept across a reload.
- * A turn the reader stopped leaves nothing to rejoin, so the control's absence
- * is itself the difference between the two.
- */
-function rejoinable(assistant: TableAssistantView): boolean {
-  if (assistant.resumable === undefined) return false;
-  if (assistant.resume === undefined) return false;
-  return !(assistant.busy ?? assistantIsBusy(assistant.status));
-}
-
-/**
- * What the one box at the bottom does right now.
- *
- * A turn parked on a question is waiting on the reader, not working — so the
- * box answers it, and reports itself idle. Reported busy it drew Stop where
- * Send belongs and swallowed the Enter that would have answered.
- */
-function composerState(assistant: TableAssistantView): {
-  readonly send: () => void;
-  /** Undefined leaves the composer to read the status itself. */
-  readonly busy: boolean | undefined;
-  readonly answering: boolean;
-} {
-  const answering = composerAnswers(assistant);
-  if (answering) {
-    return { send: answering.send, busy: false, answering: true };
-  }
-  return {
-    send: () => void assistant.send(),
-    busy: assistant.busy,
-    answering: false,
-  };
-}
-
-/**
- * Whether the composer is answering a question rather than starting a turn.
- *
- * Returns nothing when there is no question on screen, or nothing to answer
- * it with — and the composer goes back to being the composer.
- */
-function composerAnswers(
-  assistant: TableAssistantView
-): { readonly send: () => void } | undefined {
-  const question = asking(assistant.messages);
-  const answer = assistant.answer;
-  if (!question || !answer) return undefined;
-  return {
-    send: () => {
-      const said = assistant.draft.trim();
-      if (!said) return;
-      assistant.setDraft("");
-      answer({ text: said });
-    },
-  };
-}
-
-/**
  * Only what the host actually gave.
  *
  * An optional prop has to be absent rather than `undefined` to fall back to
@@ -788,27 +696,6 @@ function present<T extends object>(given: T): Partial<T> {
   return Object.fromEntries(
     Object.entries(given).filter(([, value]) => value !== undefined)
   ) as Partial<T>;
-}
-
-/**
- * The conversation, opening line included.
- *
- * The greeting is a message like any other, so it goes through the same
- * renderer and stays where it was said. An empty string is a host asking for
- * silence; omitted leaves the built-in question.
- */
-function withGreeting(
-  messages: readonly TableAssistantMessageView[],
-  greeting: string | undefined,
-  labels: TableLabels | undefined
-): readonly TableAssistantMessageView[] {
-  const said =
-    greeting ?? labels?.assistantEmpty ?? "What would you like to do?";
-  if (!said.trim()) return messages;
-  return [
-    { id: "assistant-greeting", role: "assistant", text: said },
-    ...messages,
-  ];
 }
 
 function Body({
@@ -852,7 +739,7 @@ function Body({
   const parked = Boolean(approval);
   // The opening line, ahead of whatever has been said since. An empty string
   // is a host asking for silence; omitted leaves the built-in question.
-  const shown = withGreeting(assistant.messages, greeting, labels);
+  const shown = assistantWithGreeting(assistant.messages, greeting, labels);
   const showingFullList = Boolean(review && expanded);
   return (
     <div
@@ -1145,12 +1032,12 @@ export function TableAssistantChrome({
   // The one box the panel has. A question the assistant asked is answered
   // here rather than in a second box drawn beside it: two text inputs on one
   // screen is a form, and a reader has to work out which one is theirs.
-  const composer = composerState(assistant);
+  const composer = assistantComposerState(assistant);
   // Offered whenever there is work to rejoin and no turn in flight — which
   // covers a connection released a moment ago and a handle a host kept across
   // a reload. A stopped turn leaves nothing here, so the control's absence is
   // itself the difference between the two.
-  const rejoin = rejoinable(assistant);
+  const rejoin = assistantRejoinable(assistant);
 
   const contents = (
     <div

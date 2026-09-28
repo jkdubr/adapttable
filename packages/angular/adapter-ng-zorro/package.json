@@ -1,0 +1,19 @@
+{
+  "name": "@adapttable/ng-zorro",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AdaptTable's Angular DataTable rendered with NG-ZORRO components. Not built yet: a private placeholder for #471.",
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/angular/adapter-ng-zorro"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "type": "module",
+  "exports": {},
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

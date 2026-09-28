@@ -10,6 +10,7 @@ import {
   withRowMutationActions,
   withRowPinActions,
 } from "@adapttable/core";
+import { coreRowActions } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
 import {
@@ -89,18 +90,7 @@ export function rowActions<TRow>(
   handlers?: RowMutationHandlers<TRow>
 ): TableFeature<TRow> {
   return {
-    id: "row-actions",
-    apply: () => ({
-      ...(actions ? { rowActions: actions } : {}),
-      ...(handlers
-        ? {
-            onAddRow: handlers.onAddRow,
-            onDuplicateRow: handlers.onDuplicateRow,
-            onDeleteRow: handlers.onDeleteRow,
-            confirmDeleteRow: handlers.confirmDeleteRow,
-          }
-        : {}),
-    }),
+    ...coreRowActions<TRow>(actions, handlers),
     renders: [
       slotRender(ROW_ACTIONS_LIVE, (props) => <LiveRowActions {...props} />),
     ],

@@ -1,4 +1,5 @@
 import { type BulkAction, type FilterDef } from "@adapttable/core";
+import { standardFeatureList } from "@adapttable/core/binding";
 
 import type {
   StaticTableFeature,
@@ -94,28 +95,11 @@ export function createAdapterStandardFeatures(
 ): StandardFeaturesFactory {
   return <TRow>(
     options: StandardFeatureOptions<TRow> = {}
-  ): TableFeature<TRow>[] => [
-    factories.columnMenu(),
-    factories.densityChooser(),
-    factories.exportCsv(),
-    factories.findInTable(options.findButton === true ? { button: true } : {}),
-    factories.fitColumns(),
-    factories.fullscreen(),
-    factories.headerFilters(),
-    factories.multiSort(),
-    factories.resizableColumns(),
-    factories.statusBar(),
-    ...(options.grouping === undefined
-      ? []
-      : [factories.grouping(options.grouping)]),
-    ...(options.bulkActions === undefined
-      ? []
-      : [factories.bulkActions(options.bulkActions)]),
-    ...(options.filters === undefined
-      ? []
-      : [factories.filters(options.filters)]),
-    ...(options.savedViews === undefined
-      ? []
-      : [factories.savedViews(options.savedViews)]),
-  ];
+  ): TableFeature<TRow>[] =>
+    standardFeatureList<
+      TableFeature<TRow>,
+      BulkAction,
+      FilterDef<TRow>,
+      UseSavedViewsOptions
+    >(factories, options);
 }

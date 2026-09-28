@@ -1,33 +1,24 @@
 import {
-  applyQuerySupport,
-  clampedPage,
   type ColumnMetadata,
-  type CursorTrail,
-  effectiveQueryAggregates,
-  EMPTY_CURSOR_TRAIL,
-  type FacetMap,
+  createQuerySource,
   type InfiniteQueryLike,
   type PageSelector,
   type PaginatedResponse,
   type PaginationMode,
   type QueryAggregate,
-  queryAggregateOps,
-  queryGroupBy,
+  type QuerySource,
   type QuerySupport,
-  recordCursor,
   resolvePaginationMode,
-  stableKey,
   type TableQueryParams,
   type TableSource,
 } from "@adapttable/core";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
-import { useAggregateOpsForResponse } from "./aggregateOpsForResponse";
 
 export type { InfiniteQueryLike, PageSelector } from "@adapttable/core";
 
@@ -136,10 +127,6 @@ export interface UseQuerySourceOptions<
   facetKeys?: readonly string[];
 }
 
-const defaultSelectPage: PageSelector<unknown, PaginatedResponse<unknown>> = (
-  page
-) => ({ rows: page.rows ?? [], total: page.total, facets: page.facets });
-
 /**
  * Server-paginated {@link TableSource}. Wraps a caller's
  * `useInfiniteQuery` hook and exposes the uniform contract: flattening
@@ -155,6 +142,10 @@ export function useQuerySource<
   TParams extends TableQueryParams = TableQueryParams,
   TPage = PaginatedResponse<TRow>,
 >(options: UseQuerySourceOptions<TRow, TParams, TPage>): TableSource<TRow> {
+  // The source is mutable and must see every render's inputs; its own state
+  // re-renders through the subscription below, and the result is memoized
+  // explicitly, so the compiler's cache would only skip updates.
+  "use no memo";
   const {
     usePaginatedQuery,
     selectPage,
@@ -176,203 +167,44 @@ export function useQuerySource<
   const mediaMobile = useIsMobile(mobileBreakpoint);
   const isMobile = forceMobile ?? mediaMobile;
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
-  const paged = resolvedMode === "paged";
 
   const state = useTableUrlState(urlOptions);
-  const {
-    page,
-    limit,
-    search,
-    sortBy,
-    sortDir,
-    groupBy,
-    groupAggregateOverrides,
-    extra,
-  } = state;
-  const effectiveAggregates = useMemo(
-    () =>
-      effectiveQueryAggregates(
-        aggregates,
-        groupAggregateOverrides,
-        columns,
-        supports
-      ),
-    [aggregates, columns, groupAggregateOverrides, supports]
+  const { page, limit, search, sortBy, sortDir, groupBy } = state;
+  const { groupAggregateOverrides, extra } = state;
+
+  const [source] = useState<QuerySource<TRow, TParams, TPage>>(
+    createQuerySource<TRow, TParams, TPage>
   );
-  const effectiveGroupBy = useMemo(() => queryGroupBy(groupBy), [groupBy]);
-  // What the request asks for, and what the answer on screen was asked for —
-  // the same thing only while nothing is in flight.
-  const requestedOps = useMemo(
-    () => queryAggregateOps(effectiveAggregates),
-    [effectiveAggregates]
+  // The cursor trail and the aggregate operations re-render through here.
+  useSyncExternalStore(source.subscribe, source.revision, source.revision);
+
+  const params = source.params(
+    {
+      paginationMode: resolvedMode,
+      baseParams,
+      sanitizeParams,
+      supports,
+      aggregates,
+      columns,
+      expandedIds,
+      facetKeys,
+      nextCursor,
+    },
+    state
   );
-  const queryKeyForOps = stableKey({
-    aggregates: effectiveAggregates,
-    groupBy: effectiveGroupBy,
-  });
-
-  // Cursor mode keeps every token the server has handed out, indexed by the
-  // page it opens: `cursors[0]` is always `undefined` (page 1 needs no token)
-  // and `cursors[n]` opens page n+1. The trail is what lets the user page BACK
-  // through what they have already seen — a single "next cursor" cannot.
-  const cursorMode = supports?.cursor === true;
-  const [cursors, setCursors] = useState<CursorTrail>(EMPTY_CURSOR_TRAIL);
-  const cursor = cursorMode ? cursors[page - 1] : undefined;
-
-  const params = useMemo(() => {
-    // baseParams are DEFAULTS: everything live is written after them, so a
-    // static param can never beat the user's current state. Filter values
-    // travel under their own `filters` key — a user filter named `sortBy`,
-    // `search` or `groupBy` can never collide with a state param.
-    const merged: Record<string, unknown> = { ...baseParams };
-    merged.page = page;
-    merged.limit = limit;
-    merged.search = search || undefined;
-    merged.sortBy = sortBy;
-    merged.sortDir = sortDir;
-    merged.groupBy = groupBy;
-    merged.filters = extra;
-    // Everything past the baseline is gated on what the source declared. The
-    // grouping keys travel as a LIST even when there is one — the contract has
-    // always been an array, so nesting needed no new field.
-    Object.assign(
-      merged,
-      applyQuerySupport(
-        {
-          cursor,
-          groupBy: effectiveGroupBy,
-          aggregates: effectiveAggregates,
-          expandedIds,
-          filterTree: state.filterTree,
-          facets: facetKeys,
-        },
-        supports
-      )
-    );
-    const next = merged as Partial<TParams>;
-    return sanitizeParams ? sanitizeParams(next) : next;
-  }, [
-    extra,
-    baseParams,
-    page,
-    limit,
-    search,
-    sortBy,
-    sortDir,
-    groupBy,
-    effectiveGroupBy,
-    sanitizeParams,
-    cursor,
-    effectiveAggregates,
-    expandedIds,
-    supports,
-    state.filterTree,
-    facetKeys,
-  ]);
-
   const query = usePaginatedQuery(params);
-
-  // Record the token the CURRENT page handed back, so "next" has something to
-  // send and a later "back" can retrace the trail. Read from the last page the
-  // infinite query holds, which is the one the table is showing.
-  const lastPage = query.data?.pages.at(-1);
-  const token = cursorMode && lastPage ? nextCursor?.(lastPage) : undefined;
+  const frame = source.update({ query, selectPage, selectorKey });
+  const { rows, total, facets, groupAggregations } = frame;
+  // Once React accepts the render: record the cursor, restart a stale trail,
+  // settle the aggregate operations and clamp a page past the end.
   useEffect(() => {
-    if (!cursorMode || token === undefined || token === null) return;
-    setCursors((prev) => recordCursor(prev, page, token));
-  }, [cursorMode, token, page]);
-
-  // A query whose cursor trail is stale must start over rather than page into
-  // a position that no longer exists: any change to what the query MEANS
-  // (search, sort, filters, page size) invalidates every token already held.
-  const trailKey = `${limit}|${search}|${sortBy ?? ""}|${sortDir ?? ""}|${groupBy ?? ""}|${JSON.stringify(groupAggregateOverrides)}|${JSON.stringify(extra)}`;
-  const previousTrailKey = useRef(trailKey);
-  useEffect(() => {
-    if (!cursorMode || previousTrailKey.current === trailKey) return;
-    previousTrailKey.current = trailKey;
-    setCursors(EMPTY_CURSOR_TRAIL);
-  }, [cursorMode, trailKey]);
-
-  // Route the selector through a ref so the rows memo only refires when
-  // upstream data changes, not on every parent render (inline selectors
-  // are a fresh reference each render).
-  const selector = (selectPage ?? defaultSelectPage) as PageSelector<
-    TRow,
-    TPage
-  >;
-  const selectorRef = useRef({ project: selector, invalidation: selectorKey });
-  selectorRef.current = { project: selector, invalidation: selectorKey };
-
-  const { rows, total, facets } = useMemo(() => {
-    const pages = query.data?.pages;
-    const { project, invalidation } = selectorRef.current;
-    // selectorKey is the host invalidation token. The selector itself lives
-    // on the ref so an inline function does not re-project every render; a
-    // key change both updates the ref and re-runs this memo.
-    if (!pages?.length || invalidation !== selectorKey) {
-      return { rows: [] as readonly TRow[], total: 0, facets: undefined };
-    }
-    if (paged) {
-      const lastPage = pages.at(-1)!;
-      const projected = project(lastPage);
-      return {
-        rows: projected.rows,
-        total: projected.total ?? projected.rows.length,
-        facets: projected.facets,
-      };
-    }
-    const acc: TRow[] = [];
-    let lastTotal: number | undefined;
-    let lastFacets: FacetMap | undefined;
-    for (const pg of pages) {
-      const projected = project(pg);
-      acc.push(...projected.rows);
-      if (projected.total !== undefined) lastTotal = projected.total;
-      if (projected.facets) lastFacets = projected.facets;
-    }
-    // Mirror the paged branch / useFrontendData: when the source reports no
-    // grand total, fall back to the accumulated row count rather than 0.
-    return { rows: acc, total: lastTotal ?? acc.length, facets: lastFacets };
-  }, [query.data, paged, selectorKey]);
-
-  const groupAggregations = useAggregateOpsForResponse({
-    requestKey: queryKeyForOps,
-    requested: requestedOps,
-    // TanStack moves this only when a fetch actually answered, so retained
-    // pages keep the operations they were computed with through a failure,
-    // a cancellation and a `loading` flag that lands late.
-    respondedAt: query.dataUpdatedAt,
-    hasData: query.data !== undefined,
-    fetching: query.isFetching,
-    failed: query.error !== null,
+    source.commit();
   });
-
-  // Clamp out-of-range pages (hand-edited / stale shared links) once the
-  // total is known and nothing is in flight.
-  useEffect(() => {
-    if (!paged || query.isLoading || query.isFetching) return;
-    const lastPage = clampedPage(page, limit, total);
-    if (lastPage !== undefined) state.setPage(lastPage);
-  }, [paged, query.isLoading, query.isFetching, total, limit, page, state]);
-
-  // Query libraries hand back a FRESH result object every render — latch
-  // it so these two keep stable identity (they gate the source memo).
-  // Shared contract: append semantics exist only in infinite mode — paged
-  // navigation is `setPage`, so in paged mode `fetchNextPage` no-ops and
-  // the append flags below read false instead of leaking TanStack's values.
-  const queryRef = useRef(query);
-  queryRef.current = query;
-  const fetchNextPage = useCallback(() => {
-    if (paged) return;
-    const live = queryRef.current;
-    if (live.hasNextPage && !live.isFetchingNextPage) void live.fetchNextPage();
-  }, [paged]);
-
-  const refetch = useCallback(() => queryRef.current.refetch(), []);
+  const { fetchNextPage, refetch } = source;
 
   // Memoised so the returned source keeps its identity across unrelated
   // renders — a fresh object every render defeated downstream memoization
-  // (and the React Compiler bails on this hook, unlike useFrontendData).
+  // (this hook opts out of the React Compiler, so it memoizes by hand).
   // The mutators are destructured because the url-state RESULT object is
   // itself fresh every render; its members are the stable parts.
   const {
@@ -397,8 +229,8 @@ export function useQuerySource<
       total,
       isLoading: query.isLoading,
       isFetching: query.isFetching,
-      isFetchingNextPage: paged ? false : query.isFetchingNextPage,
-      hasNextPage: paged ? false : query.hasNextPage,
+      isFetchingNextPage: frame.isFetchingNextPage,
+      hasNextPage: frame.hasNextPage,
       fetchNextPage,
       error: query.error,
       refetch,
@@ -437,11 +269,10 @@ export function useQuerySource<
     [
       rows,
       total,
-      paged,
       query.isLoading,
       query.isFetching,
-      query.isFetchingNextPage,
-      query.hasNextPage,
+      frame.isFetchingNextPage,
+      frame.hasNextPage,
       fetchNextPage,
       query.error,
       refetch,

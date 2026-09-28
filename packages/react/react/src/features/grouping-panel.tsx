@@ -8,6 +8,7 @@ import {
   createGroupingPanelController,
   declaredAggregates,
 } from "@adapttable/core";
+import { coreGroupingPanel } from "@adapttable/core/binding";
 import {
   type ReactNode,
   useEffect,
@@ -89,15 +90,9 @@ export function groupingPanel<TRow = unknown>(
   const base = grouping(groupBy ?? [], extras);
   return {
     ...base,
-    id: "grouping-panel",
+    ...coreGroupingPanel<TRow>(groupBy, extras),
     initialGroupBy: groupBy,
     extras,
-    apply(input) {
-      const patch = base.apply?.(input) ?? {};
-      const withoutInitialGroup = { ...patch };
-      delete withoutInitialGroup.groupBy;
-      return withoutInitialGroup;
-    },
     provider: { Provider: GroupingPanelProvider },
   } as GroupingPanelFeature<TRow>;
 }

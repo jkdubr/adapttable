@@ -57,35 +57,6 @@ export function treeExpansionActions(
 }
 
 /**
- * Whether a row's children are already in the data: its nested list is
- * non-empty, or — for a flat list with parent ids — some row names it as
- * parent.
- *
- * @param row - The node.
- * @param rows - Every row the table holds.
- * @param hierarchy - How the host declares the hierarchy, and row identity.
- * @returns Whether opening it needs no fetch.
- *
- * @public
- */
-export function treeHasLoadedChildren<TRow>(
-  row: TRow,
-  rows: readonly TRow[],
-  hierarchy: {
-    readonly getChildren?: (row: TRow) => readonly TRow[] | undefined;
-    readonly getParentId?: (row: TRow) => string | undefined;
-    readonly rowKey: (row: TRow) => string;
-  }
-): boolean {
-  const nested = hierarchy.getChildren?.(row);
-  if (nested !== undefined) return nested.length > 0;
-  const { getParentId, rowKey } = hierarchy;
-  if (!getParentId) return false;
-  const id = rowKey(row);
-  return rows.some((candidate) => getParentId(candidate) === id);
-}
-
-/**
  * Toggle a node, fetching its children first when it is being opened. The
  * node opens at once; its children fill in when they arrive.
  *
