@@ -786,6 +786,31 @@ CommandPaletteController` — the palette's open state, controlled or its own.
   `EMPTY_FEATURE_HOST` / `FeatureSetup` — the host that runs composed
   features. `SlotFill`, `slotFillsOf`, `drawnSlotFills`, `OrderedContribution`,
   `orderedContributions` — how features fill slots, in order.
+- The slot contract: every position a kit fills, with the id and `single`
+  flag each binding shares — `STATUS_BAR`, `FIND_BAR`, `BULK_BAR`
+  (`BulkBarSlotProps`), `EDITABLE_CELL`, `GRID_FOCUS_ANNOUNCER`
+  (`GridFocusAnnouncerSlotProps`), `TOOLBAR_EXTRAS`, the `*_LIVE` keys and the
+  rest — and the props each kit control receives. Props that carry rendered
+  content take the binding's node as `TNode`, and key, drag and style types
+  are parameters too. A binding re-types a neutral key with its own props;
+  the id stays core's. The feature-state keys that go with them
+  include `FILTER_ENGINE` and `GROUPING_PANEL_STATE`.
+- Glyphs as data: `IconDescriptor` is an `<svg>`'s attributes and its
+  `IconShape` list, which each binding draws with its own renderer.
+  `FILTERS_ICON`, `SEARCH_ICON`, `expandChevronIcon` (turned for open and
+  RTL), `GRIP_ICON`, `eyeIcon`, `PIN_ICON`; the assistant's
+  `ASSISTANT_AVATAR_ICON`, `PERSON_AVATAR_ICON`, `ASSISTANT_SETTINGS_ICON`,
+  `ASSISTANT_CLOSE_ICON`, `ASSISTANT_SEND_ICON`, `ASSISTANT_STOP_ICON`,
+  `ASSISTANT_EXAMPLES_ICON`, `ASSISTANT_UNDO_ICON`, `ASSISTANT_ACTIONS_ICON`,
+  `assistantMicIcon`, `assistantKindIcon` and `assistantReceiptIcon`, over
+  the per-kind `ASSISTANT_KIND_PATHS` and `ASSISTANT_KIND_HUES`.
+- Motion and paint rules: `OVERLAY_MOTION`, `MOUNT_STAGGER` (the entrance
+  stagger's selector, step, duration, easing and keyframes),
+  `FORCED_COLORS_CSS`, and the cell rules — `cellHighlightKind` (current
+  match over match over selection) and `cellHighlightStyle`, which merges it
+  into a kit's cell style, with `CURRENT_MATCH_CELL_STYLE`,
+  `MATCHED_CELL_STYLE` and `SELECTED_CELL_OUTLINE`, and `mergedCellStyle`
+  (`MergedCellStyle`).
 
 ### The builder tier
 
