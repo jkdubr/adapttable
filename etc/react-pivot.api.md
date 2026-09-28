@@ -35,6 +35,7 @@ import { moveField } from '@adapttable/core';
 import { pivot } from '@adapttable/core';
 import { PIVOT_BLANK } from '@adapttable/core';
 import { PIVOT_GRAND_TOTAL_KEY } from '@adapttable/core';
+import { PIVOT_ROW_COLUMN_KEY } from '@adapttable/core';
 import { PIVOT_ZONES } from '@adapttable/core';
 import { PivotColumnLeaf } from '@adapttable/core';
 import { PivotColumnNode } from '@adapttable/core';
@@ -127,8 +128,7 @@ export { PIVOT_BLANK }
 
 export { PIVOT_GRAND_TOTAL_KEY }
 
-// @public
-export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
+export { PIVOT_ROW_COLUMN_KEY }
 
 export { PIVOT_ZONES }
 

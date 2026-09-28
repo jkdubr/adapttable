@@ -18,6 +18,7 @@ import { BooleanChoice } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
+import { BulkActionOutcome } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditCommit } from '@adapttable/core';
 import { CellEditKeyAction } from '@adapttable/core';
@@ -59,11 +60,14 @@ import { CSSProperties } from 'react';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { datasetIndex } from '@adapttable/core';
 import { DateOp } from '@adapttable/core';
+import { DEFAULT_SHORTCUTS } from '@adapttable/core';
 import { defaultFrontendRowId } from '@adapttable/core';
 import { defaultSearchText } from '@adapttable/core';
+import { DELETE_ROW_ACTION_KEY } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
+import { DUPLICATE_ROW_ACTION_KEY } from '@adapttable/core';
 import { edgePinStyle } from '@adapttable/core';
 import { EditableColumnLike } from '@adapttable/core';
 import { EditConflict } from '@adapttable/core';
@@ -76,6 +80,7 @@ import { EditEventHandler } from '@adapttable/core';
 import { EditHistoryEntry } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
 import { EditUnit } from '@adapttable/core';
+import { EMPTY_ROW_PIN_STATE } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportWriter } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
@@ -113,6 +118,7 @@ import { GroupingPanelState } from '@adapttable/core';
 import { GroupPaging } from '@adapttable/core';
 import { headerFilterFieldIsComplete } from '@adapttable/core';
 import { HeaderFilterOpenHost } from '@adapttable/core';
+import { HighlightedCell } from '@adapttable/core';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { isDeclarativeFilters } from '@adapttable/core';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
@@ -120,6 +126,7 @@ import { LayoutStorage } from '@adapttable/core';
 import { listFilterValues } from '@adapttable/core';
 import { MobileCardField } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
+import { NestedTableDefaults } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
 import { normalizeEditorOptions } from '@adapttable/core';
 import { NumberOp } from '@adapttable/core';
@@ -129,6 +136,8 @@ import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { parseBooleanChoice } from '@adapttable/core';
 import { partitionPinnedRows } from '@adapttable/core';
+import { PIN_BOTTOM_ACTION_KEY } from '@adapttable/core';
+import { PIN_TOP_ACTION_KEY } from '@adapttable/core';
 import { PIN_Z } from '@adapttable/core';
 import { PinLeads } from '@adapttable/core';
 import { PinnedCellStyle } from '@adapttable/core';
@@ -154,6 +163,9 @@ import { RowMoveMenuModel } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
 import { RowPairMeasurer } from '@adapttable/core/binding';
+import { RowPinLabels } from '@adapttable/core';
+import { RowPinSide } from '@adapttable/core';
+import { RowPinState } from '@adapttable/core';
 import { RowReorderControllerOptions } from '@adapttable/core';
 import { RowReorderDecision } from '@adapttable/core';
 import { RowReorderHandler } from '@adapttable/core';
@@ -168,6 +180,7 @@ import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
 import { scalarFilterText } from '@adapttable/core';
 import { HEADER_FILTER_SESSION_ATTR as SESSION_ATTR } from '@adapttable/core';
+import { Shortcut } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
@@ -186,6 +199,7 @@ import { TableVirtualization } from '@adapttable/core';
 import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
 import { TreeEntry } from '@adapttable/core';
+import { UNPIN_ROW_ACTION_KEY } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { ValidationCheckResult } from '@adapttable/core';
@@ -248,13 +262,7 @@ export { BooleanChoice }
 
 export { BooleanFieldWidget }
 
-// @public
-export type BulkActionOutcome = {
-    status: "success";
-} | {
-    status: "error";
-    error: unknown;
-};
+export { BulkActionOutcome }
 
 // @public
 export interface BulkActionRunner {
@@ -497,15 +505,13 @@ export { datasetIndex }
 
 export { DateOp }
 
-// @public
-export const DEFAULT_SHORTCUTS: readonly Shortcut[];
+export { DEFAULT_SHORTCUTS }
 
 export { defaultFrontendRowId }
 
 export { defaultSearchText }
 
-// @public
-export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
+export { DELETE_ROW_ACTION_KEY }
 
 // @public
 export type Density = TableDensity;
@@ -530,8 +536,7 @@ export interface DirtyEdits {
     readonly count: number;
 }
 
-// @public
-export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
+export { DUPLICATE_ROW_ACTION_KEY }
 
 export { edgePinStyle }
 
@@ -776,8 +781,7 @@ export interface EditValidationState<TRow> {
     signature: string;
 }
 
-// @public
-export const EMPTY_ROW_PIN_STATE: RowPinState;
+export { EMPTY_ROW_PIN_STATE }
 
 export { FailedCellSave }
 
@@ -983,11 +987,7 @@ export function headerFilterStickTop(sticky: boolean, base: CSSProperties | unde
 // @public
 export type HeaderSelectionState = "all" | "some" | "none";
 
-// @public
-export interface HighlightedCell {
-    columnKey: string;
-    rowId: string;
-}
+export { HighlightedCell }
 
 // @public
 export interface HighlightState {
@@ -1062,14 +1062,7 @@ export interface NestedTable {
     table: (defaults: NestedTableDefaults) => ReactNode;
 }
 
-// @public
-export interface NestedTableDefaults {
-    density: Density | undefined;
-    labels: TableLabels | undefined;
-    searchable: boolean;
-    tableLabel: string;
-    urlSync: false;
-}
+export { NestedTableDefaults }
 
 // @public
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
@@ -1085,11 +1078,9 @@ export { parseBooleanChoice }
 
 export { partitionPinnedRows }
 
-// @public
-export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
+export { PIN_BOTTOM_ACTION_KEY }
 
-// @public
-export const PIN_TOP_ACTION_KEY = "adapttable:pin-row-top";
+export { PIN_TOP_ACTION_KEY }
 
 export { PIN_Z }
 
@@ -1273,12 +1264,7 @@ export interface RowMutationsState<TRow> {
 
 export { RowPairMeasurer }
 
-// @public
-export interface RowPinLabels {
-    pinToBottom: string;
-    pinToTop: string;
-    unpinRow: string;
-}
+export { RowPinLabels }
 
 // @public
 export interface RowPinningState<TRow> {
@@ -1289,14 +1275,9 @@ export interface RowPinningState<TRow> {
     unpin: (rowId: string) => void;
 }
 
-// @public
-export type RowPinSide = "top" | "bottom";
+export { RowPinSide }
 
-// @public
-export interface RowPinState {
-    readonly bottom: readonly string[];
-    readonly top: readonly string[];
-}
+export { RowPinState }
 
 export { RowReorderDecision }
 
@@ -1357,11 +1338,7 @@ export interface SelectionState {
 
 export { SESSION_ATTR }
 
-// @public
-export interface Shortcut {
-    chord: string;
-    command: string;
-}
+export { Shortcut }
 
 // @public
 export interface SidePanelEntry {
@@ -1568,8 +1545,7 @@ export interface TreeExpansionState {
     toggle: (id: string) => void;
 }
 
-// @public
-export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
+export { UNPIN_ROW_ACTION_KEY }
 
 export { UrlStateAdapter }
 

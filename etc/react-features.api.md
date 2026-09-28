@@ -93,6 +93,7 @@ import { GroupingPanelState } from '@adapttable/core';
 import { GroupNode } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
 import { LayoutStorage } from '@adapttable/core';
+import { NestedTableDefaults } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
 import { PinnedRows } from '@adapttable/core';
 import { PinnedSide } from '@adapttable/core';
@@ -113,6 +114,7 @@ import { RowMoveMenuModel } from '@adapttable/core';
 import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
+import { RowPinState } from '@adapttable/core';
 import { RowReorderHandler } from '@adapttable/core';
 import { RowReorderOptions } from '@adapttable/core';
 import { RowStyle } from '@adapttable/core';
@@ -123,6 +125,7 @@ import { SavedViewMigration } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
+import { Shortcut } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { SortLevel } from '@adapttable/core';
@@ -545,14 +548,7 @@ export interface NestedTable {
 // @public
 export function nestedTable<TRow>(nested: NestedTableFor<TRow>, defaultExpandedRowIds?: readonly string[]): TableFeature<TRow>;
 
-// @public
-export interface NestedTableDefaults {
-    density: Density | undefined;
-    labels: TableLabels | undefined;
-    searchable: boolean;
-    tableLabel: string;
-    urlSync: false;
-}
+export { NestedTableDefaults }
 
 // @public
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
@@ -645,11 +641,7 @@ export function rowPinning(options?: {
     onPinnedRowIdsChange?: (next: RowPinState) => void;
 }): StaticTableFeature;
 
-// @public
-export interface RowPinState {
-    readonly bottom: readonly string[];
-    readonly top: readonly string[];
-}
+export { RowPinState }
 
 // @public
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): TableFeature<TRow>;
@@ -678,11 +670,7 @@ export { SavedViewVisibility }
 // @public
 export function selectionStats(): StaticTableFeature;
 
-// @public
-export interface Shortcut {
-    chord: string;
-    command: string;
-}
+export { Shortcut }
 
 // @public
 export function sidePanel(options: SidePanelOptions): StaticTableFeature;

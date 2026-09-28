@@ -28,6 +28,7 @@ import { bodyCellsHaveRowSpan } from '@adapttable/core/binding';
 import { buildBodyCells } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
+import { bulkActionErrorMessage } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditCommit } from '@adapttable/core';
 import { CellEditKeyAction } from '@adapttable/core';
@@ -96,6 +97,8 @@ import { ConfirmHandler } from '@adapttable/core';
 import { ConfirmRequest } from '@adapttable/core';
 import { Context } from 'react';
 import { ContextMenuActions } from '@adapttable/core';
+import { ContextMenuCopyTarget } from '@adapttable/core';
+import { contextMenuCopyTarget } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuItemsFactory } from '@adapttable/core';
 import { ContextMenuPoint } from '@adapttable/core';
@@ -137,6 +140,8 @@ import { ExportContext } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportInfo } from '@adapttable/core';
 import { ExportPayload } from '@adapttable/core';
+import { ExportProgressAction } from '@adapttable/core';
+import { ExportProgressDownload } from '@adapttable/core';
 import { ExportProgressState } from '@adapttable/core';
 import { ExportQuery } from '@adapttable/core';
 import { ExportRequest } from '@adapttable/core';
@@ -243,6 +248,9 @@ import { MobileCardField } from '@adapttable/core';
 import { mobileCardListStyle } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
 import { MobileCardRenderer } from '@adapttable/core';
+import { NestedTableDefaults } from '@adapttable/core';
+import { nestedTableDefaults } from '@adapttable/core';
+import { NestedTableParent } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { normalizeEditorOptions } from '@adapttable/core';
@@ -288,6 +296,7 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
+import { REORDER_COLUMN_WIDTH } from '@adapttable/core';
 import { resetColumnLayout } from '@adapttable/core/binding';
 import { resolveContextTarget } from '@adapttable/core';
 import { ResolvedContextTarget } from '@adapttable/core';
@@ -295,7 +304,9 @@ import { resolveDisabledReason } from '@adapttable/core';
 import { ResolvedPaginationMode } from '@adapttable/core';
 import { resolveRowHeight } from '@adapttable/core/binding';
 import { resolveRowStyle } from '@adapttable/core/binding';
+import { resolveStickyToolbar } from '@adapttable/core';
 import { resolveVirtualRows } from '@adapttable/core';
+import { restoreFocusSoon } from '@adapttable/core';
 import { ROW_DND_MIME } from '@adapttable/core/binding';
 import { ROW_ID_ATTRIBUTE } from '@adapttable/core';
 import { ROW_REORDER_ANNOUNCER } from '@adapttable/core/binding';
@@ -315,7 +326,9 @@ import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
 import { RowPairMeasurer } from '@adapttable/core/binding';
+import { RowPinSide } from '@adapttable/core';
 import { rowPinSignature } from '@adapttable/core/binding';
+import { RowPinState } from '@adapttable/core';
 import { RowReorderHandler } from '@adapttable/core';
 import { RowReorderLabels } from '@adapttable/core';
 import { RowReorderOptions } from '@adapttable/core';
@@ -327,16 +340,20 @@ import { RowTreeMoveHandler } from '@adapttable/core';
 import { RowTreeParentRef } from '@adapttable/core';
 import { RowValidator } from '@adapttable/core';
 import { SavedView } from '@adapttable/core';
+import { SavedViewControlKey } from '@adapttable/core';
 import { SavedViewMigration } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
+import { SelectionStatPart } from '@adapttable/core';
 import { SelectionStats } from '@adapttable/core';
+import { Shortcut } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { SortLevel } from '@adapttable/core';
+import { StatusBarItem } from '@adapttable/core';
 import { SummaryRowFn as SummaryRowFn_2 } from '@adapttable/core';
 import { TableCommandOptions } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
@@ -757,8 +774,7 @@ export { BulkAction }
 
 export { BulkActionContext }
 
-// @public
-export function bulkActionErrorMessage(error: unknown): string | null;
+export { bulkActionErrorMessage }
 
 // @public
 export interface BulkBarChromeProps {
@@ -1343,18 +1359,9 @@ export interface ContextMenuChromeProps {
     slots: ContextMenuSlots;
 }
 
-// @public
-export interface ContextMenuCopyTarget {
-    readonly available: boolean;
-    readonly cell?: GridCell;
-}
+export { ContextMenuCopyTarget }
 
-// @public
-export function contextMenuCopyTarget(focus: Pick<GridFocusState, "cellAt" | "range">, target: {
-    kind: string;
-    rowId?: string;
-    columnKey?: string;
-}): ContextMenuCopyTarget;
+export { contextMenuCopyTarget }
 
 export { ContextMenuItem }
 
@@ -2166,11 +2173,7 @@ export interface ExportLiveSlotProps<TRow = never> {
 
 export { ExportPayload }
 
-// @public
-export interface ExportProgressAction {
-    readonly label: string;
-    readonly onAction: () => void;
-}
+export { ExportProgressAction }
 
 // @public
 export function ExportProgressChrome(input: Readonly<ExportProgressChromeProps>): ReactElement | null;
@@ -2182,11 +2185,7 @@ export interface ExportProgressChromeProps {
     readonly slots: ExportProgressSlots;
 }
 
-// @public
-export interface ExportProgressDownload {
-    readonly label: string;
-    readonly url: string;
-}
+export { ExportProgressDownload }
 
 // @public
 export interface ExportProgressSlots {
@@ -3280,17 +3279,9 @@ export interface NestedTable {
     table: (defaults: NestedTableDefaults) => ReactNode;
 }
 
-// @public
-export interface NestedTableDefaults {
-    density: Density | undefined;
-    labels: TableLabels | undefined;
-    searchable: boolean;
-    tableLabel: string;
-    urlSync: false;
-}
+export { NestedTableDefaults }
 
-// @public
-export function nestedTableDefaults(label: string, parent?: NestedTableParent): NestedTableDefaults;
+export { nestedTableDefaults }
 
 // @public
 export function nestedTableDetail<TRow>(options: {
@@ -3302,11 +3293,7 @@ export function nestedTableDetail<TRow>(options: {
 // @public
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 
-// @public
-export interface NestedTableParent {
-    density?: Density;
-    labels?: TableLabels;
-}
+export { NestedTableParent }
 
 export { nextPinSide }
 
@@ -3573,8 +3560,7 @@ export interface ReconcileLiveRowEdit<TRow> {
 // @public
 export function rememberFeatureHost(props: object, host: FeatureHostState | undefined): void;
 
-// @public
-export const REORDER_COLUMN_WIDTH = 64;
+export { REORDER_COLUMN_WIDTH }
 
 export { resetColumnLayout }
 
@@ -3607,13 +3593,11 @@ export { resolveRowHeight }
 
 export { resolveRowStyle }
 
-// @public
-export function resolveStickyToolbar(stickyHeader?: boolean, stickyToolbar?: boolean, inScrollBox?: boolean): boolean;
+export { resolveStickyToolbar }
 
 export { resolveVirtualRows }
 
-// @public
-export function restoreFocusSoon(element: HTMLElement | null): () => void;
+export { restoreFocusSoon }
 
 // @public
 export const ROW_ACTIONS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
@@ -3859,16 +3843,11 @@ export interface RowPinningState<TRow> {
     unpin: (rowId: string) => void;
 }
 
-// @public
-export type RowPinSide = "top" | "bottom";
+export { RowPinSide }
 
 export { rowPinSignature }
 
-// @public
-export interface RowPinState {
-    readonly bottom: readonly string[];
-    readonly top: readonly string[];
-}
+export { RowPinState }
 
 // @public
 export function RowReorderAnnouncer(props: Readonly<{
@@ -4019,8 +3998,7 @@ export const SAVED_VIEWS: FeatureSlotKey<SavedViewsSlotProps>;
 
 export { SavedView }
 
-// @public
-export type SavedViewControlKey = "rename" | "moveUp" | "moveDown" | "default" | "remove";
+export { SavedViewControlKey }
 
 export { SavedViewMigration }
 
@@ -4160,11 +4138,7 @@ export interface SelectionState {
     visibleIds: string[];
 }
 
-// @public
-export interface SelectionStatPart {
-    readonly key: "count" | "sum" | "average" | "min" | "max";
-    readonly text: string;
-}
+export { SelectionStatPart }
 
 export { SelectionStats }
 
@@ -4293,11 +4267,7 @@ export function ShellLiveGate<TRow>(input: {
     readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode;
 
-// @public
-export interface Shortcut {
-    chord: string;
-    command: string;
-}
+export { Shortcut }
 
 export { showAllColumns }
 
@@ -4498,12 +4468,7 @@ export interface StatusBarChromeProps {
     total?: number;
 }
 
-// @public
-export interface StatusBarItem {
-    readonly appearance?: FeatureNotice["appearance"];
-    readonly key: "rows" | "selected" | FeatureNoticeKind;
-    readonly text: string;
-}
+export { StatusBarItem }
 
 // @public
 export interface StatusBarSlotProps {
