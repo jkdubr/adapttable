@@ -1,21 +1,13 @@
 /** The card list rendered in place of the table on narrow screens. */
 import {
-  bodyRowEntries,
-  type ConfirmHandler,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  type TableLabels,
-  treeCardStyle,
-  type TreeEntry,
-} from "@adapttable/core";
-import {
   type ColumnDef,
   type EditableCellEditing,
   type ReactMobileCardRenderer,
 } from "@adapttable/react";
 import {
+  bodyRowEntries,
   cellFlashAttr,
+  type ConfirmHandler,
   EXTRA_ROW_PARTS,
   insertExtraRows,
   isExtraEntry,
@@ -27,6 +19,9 @@ import {
   resolveMobileLabel,
   resolveRowEditTrigger,
   resolveRowStyle,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
   rowClickProps,
   rowEditConflict,
   rowEditingSignature,
@@ -34,6 +29,9 @@ import {
   rowIsDirty,
   rowReorderSignature,
   rowStyleSignature,
+  type TableLabels,
+  treeCardStyle,
+  type TreeEntry,
   useSummaryCells,
 } from "@adapttable/react/adapter";
 import { Box, Card, Stack, Text } from "@chakra-ui/react";

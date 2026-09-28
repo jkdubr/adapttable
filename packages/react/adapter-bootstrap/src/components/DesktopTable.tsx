@@ -1,9 +1,4 @@
 import {
-  columnResizeHandleProps,
-  type Direction,
-  tableMinWidth,
-} from "@adapttable/core";
-import {
   type ColumnDef,
   columnHeaderController,
   resolveColumnHeader,
@@ -11,12 +6,15 @@ import {
 import {
   cellFlashAttr,
   columnFlexShares,
+  columnResizeHandleProps,
   columnSizeStyle,
+  type Direction,
   fittedTableStyle,
   pinnedColumnWidth,
   type PinOffset,
   type SharedTableRenderProps,
   sortArrow,
+  tableMinWidth,
   tableRenderModel,
   toReactColumnResizeHandleProps,
 } from "@adapttable/react/adapter";

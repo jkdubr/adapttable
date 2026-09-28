@@ -2,9 +2,9 @@
 import {
   pageSizeOptions,
   type PaginationInfo,
+  paginationSlots,
   type TableLabels,
-} from "@adapttable/core";
-import { paginationSlots } from "@adapttable/react/adapter";
+} from "@adapttable/react/adapter";
 import { Button, HStack, Text } from "@chakra-ui/react";
 
 import { subtleText } from "../styles";

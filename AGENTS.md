@@ -37,6 +37,13 @@ Unify the **model**, never the **pixels**. The standing pattern is
 - `data-adapttable-part` names and placement are part of the public contract:
   the same part lands on the same element in every adapter, and documented
   `classNames` keys are honored by every adapter that renders the part.
+- A kit talks only to its binding: a React kit imports only
+  `@adapttable/react/…`, a Vue or Angular kit only its own binding. Only a
+  binding imports `@adapttable/core`, and it re-exports what its kits need.
+  When a kit needs a core name its binding lacks, add the re-export to the
+  binding — never import core from the kit. Core's deprecation notes point to
+  core (`@adapttable/core/binding`), never to a framework package. ESLint
+  enforces this on kit sources.
 
 ## Product decisions — settled, do not reopen
 

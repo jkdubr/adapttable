@@ -2,10 +2,10 @@
 import {
   pageSizeOptions,
   type PaginationInfo,
+  paginationSlots,
   type TableLabels,
   type TableSource,
-} from "@adapttable/core";
-import { paginationSlots } from "@adapttable/react/adapter";
+} from "@adapttable/react/adapter";
 
 import type { DataTableClassNames } from "../types";
 

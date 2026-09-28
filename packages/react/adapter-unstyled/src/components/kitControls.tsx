@@ -2,7 +2,6 @@
  * Unstyled kit controls — native HTML is this adapter's kit.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
-import { filterLabel, type TableSource } from "@adapttable/core";
 import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
   type AgentApprovalButtonProps,
@@ -27,6 +26,7 @@ import {
   type FilterHeaderSearchProps,
   type FilterHeaderSelectProps,
   type FilterHeaderSlots,
+  filterLabel,
   FindBarChrome,
   type FindBarProps,
   type FindButtonProps,
@@ -47,6 +47,7 @@ import {
   type RowReorderHandleProps,
   type RowReorderHandleSlotProps,
   type RowReorderMoveButtonProps,
+  type TableSource,
   TreeCellChrome,
   type TreeCellProps,
   type TreeToggleButtonProps,

@@ -1,19 +1,17 @@
-import {
-  type Direction,
-  groupAggregateEntries,
-  type GroupedFlatEntry,
-  groupLeafCount,
-  groupRowLayout,
-  groupSelectionState,
-  type TableLabels,
-} from "@adapttable/core";
 import { type ColumnDef, type SelectionState } from "@adapttable/react";
 import {
+  type Direction,
   ExpandChevron,
+  groupAggregateEntries,
+  type GroupedFlatEntry,
   groupIndentStyle,
+  groupLeafCount,
+  groupRowLayout,
   groupRowParts,
+  groupSelectionState,
   GroupToggleSpacer,
   resolveMobileLabel,
+  type TableLabels,
 } from "@adapttable/react/adapter";
 import type { ReactElement, ReactNode } from "react";
 

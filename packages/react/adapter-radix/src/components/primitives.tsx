@@ -1,4 +1,4 @@
-import type { Direction } from "@adapttable/core";
+import type { Direction } from "@adapttable/react/adapter";
 import {
   Checkbox as RadixCheckbox,
   Flex,

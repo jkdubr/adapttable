@@ -1,8 +1,8 @@
 /** Funnel on the column header — the same field the Filters panel draws. */
-import { filterLabel } from "@adapttable/core";
 import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
   type FilterHeaderControlProps,
+  filterLabel,
   hasActiveHeaderFilter,
 } from "@adapttable/react/adapter";
 import { IconButton, Paper, Popper } from "@mui/material";

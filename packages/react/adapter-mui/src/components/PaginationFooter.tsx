@@ -3,7 +3,7 @@ import {
   pageSizeOptions,
   type PaginationInfo,
   type TableLabels,
-} from "@adapttable/core";
+} from "@adapttable/react/adapter";
 import {
   MenuItem,
   Pagination,

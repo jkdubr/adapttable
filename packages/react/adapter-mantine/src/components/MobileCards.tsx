@@ -1,21 +1,13 @@
 import {
-  bodyRowEntries,
-  type ConfirmHandler,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  type TableLabels,
-  treeCardStyle,
-  type TreeEntry,
-} from "@adapttable/core";
-import {
   type ColumnDef,
   type EditableCellEditing,
   type ReactMobileCardRenderer,
 } from "@adapttable/react";
 import {
   bindMobileCardList,
+  bodyRowEntries,
   cellFlashAttr,
+  type ConfirmHandler,
   EXTRA_ROW_PARTS,
   insertExtraRows,
   isExtraEntry,
@@ -27,6 +19,9 @@ import {
   resolveMobileLabel,
   resolveRowEditTrigger,
   resolveRowStyle,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
   rowClickProps,
   rowEditConflict,
   rowEditingSignature,
@@ -35,6 +30,9 @@ import {
   rowReorderSignature,
   rowStyleSignature,
   type SharedTableRenderProps,
+  type TableLabels,
+  treeCardStyle,
+  type TreeEntry,
   useSummaryCells,
 } from "@adapttable/react/adapter";
 import { Card, Checkbox, Group, Stack, Text } from "@mantine/core";

@@ -1,21 +1,19 @@
-import {
-  ACTIONS_COLUMN_KEY,
-  columnMenuRows,
-  REORDER_COLUMN_KEY,
-  type UseColumnLayoutResult,
-} from "@adapttable/core";
 import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
 import {
+  ACTIONS_COLUMN_KEY,
   columnMenuActions,
   type ColumnMenuLabels,
   type ColumnMenuRow,
+  columnMenuRows,
   type ColumnMenuSlotProps,
   filterColumnMenuRows,
   hideAllColumns,
   nextPinSide,
   pinActionLabel,
+  REORDER_COLUMN_KEY,
   showAllColumns,
   unpinAllColumns,
+  type UseColumnLayoutResult,
   useFeatureHost,
 } from "@adapttable/react/adapter";
 import { useState } from "react";

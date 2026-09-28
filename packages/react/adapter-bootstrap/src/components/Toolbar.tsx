@@ -1,6 +1,6 @@
-import { pageSizeOptions } from "@adapttable/core";
 import {
   ExportAnnouncer,
+  pageSizeOptions,
   type ToolbarChromeProps,
 } from "@adapttable/react/adapter";
 import { type ReactNode } from "react";

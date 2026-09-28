@@ -1,8 +1,3 @@
-import {
-  resolveLabels,
-  showSimpleFilterFields,
-  type TableLabels,
-} from "@adapttable/core";
 import type { UseSavedViewsOptions } from "@adapttable/react";
 import {
   ACTIVE_FILTER_CHIPS,
@@ -28,11 +23,14 @@ import {
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
   OptionalSidePanel,
+  resolveLabels,
   resolveStickyToolbar,
   ROW_REORDER_ANNOUNCER,
   SAVED_VIEWS,
+  showSimpleFilterFields,
   SIDE_PANEL,
   STATUS_BAR,
+  type TableLabels,
   TableStatusAnnouncer,
   useDataTableShell,
   useFeatureState,

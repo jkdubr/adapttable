@@ -1,1 +1,1 @@
-export * from "@adapttable/core/pivot";
+export * from "@adapttable/react/pivot";

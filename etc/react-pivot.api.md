@@ -215,6 +215,9 @@ export interface UsePivotUrlStateResult {
     onConfigChange: (next: PivotConfig) => void;
 }
 
+
+export * from "@adapttable/core/pivot";
+
 // (No @packageDocumentation comment for this package)
 
 ```

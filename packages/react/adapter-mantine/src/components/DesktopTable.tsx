@@ -1,9 +1,3 @@
-import {
-  edgePinStyle,
-  PIN_Z,
-  pinnedCellStyle,
-  type TableLabels,
-} from "@adapttable/core";
 import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
@@ -14,6 +8,7 @@ import {
   createDesktopRow,
   type DesktopHeaderLeaf,
   type DesktopRowWiring,
+  edgePinStyle,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
@@ -22,10 +17,13 @@ import {
   groupedHeaderLabelStyle,
   type HtmlGroupedHeaderCell,
   mergedCellStyle,
+  PIN_Z,
+  pinnedCellStyle,
   REORDER_COLUMN_WIDTH,
   resolveRowEditTrigger,
   rowEditConflict,
   type SharedTableRenderProps,
+  type TableLabels,
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
 import { Badge, Checkbox, Group, Table, VisuallyHidden } from "@mantine/core";

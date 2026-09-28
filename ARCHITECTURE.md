@@ -44,6 +44,16 @@ AI. AI depends only on neutral `@adapttable/core` contracts. AI React imports
 the binding through `@adapttable/react/adapter`. The React package does not
 depend on a kit; `@adapttable/shadcn` builds on `@adapttable/unstyled`.
 
+**A kit talks only to its binding.** A React kit imports only
+`@adapttable/react/…`; a Vue or Angular kit imports only its own binding. Only
+a binding imports `@adapttable/core`, and it re-exports every core name its
+kits use, as is or adapted to its framework, so the binding can change how its
+framework sees a name without touching a kit. Core's own notes point to core:
+a deprecated name on `@adapttable/core` names its replacement in
+`@adapttable/core/binding`, because whoever imports core is building a
+binding. ESLint enforces the rule on kit sources; kit tests may still use
+core's test tooling, such as `@adapttable/core/conformance`.
+
 Kit imports: `import { DataTable } from "@adapttable/mui"`,
 `import { grouping } from "@adapttable/mui/grouping"`, and
 `standardFeatures()` from `@adapttable/mui/preset`. Preset options affect

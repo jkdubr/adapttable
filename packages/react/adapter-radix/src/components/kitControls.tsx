@@ -2,7 +2,6 @@
  * Radix Themes kit controls — TextField / Button / IconButton / Checkbox.
  * Same `data-adapttable-part` names the chrome and the e2e suite already use.
  */
-import { filterLabel } from "@adapttable/core";
 import { useHeaderFilterOverlay } from "@adapttable/react";
 import {
   type AgentApprovalButtonProps,
@@ -27,6 +26,7 @@ import {
   type FilterHeaderSearchProps,
   type FilterHeaderSelectProps,
   type FilterHeaderSlots,
+  filterLabel,
   FindBarChrome,
   type FindBarProps,
   type FindButtonProps,

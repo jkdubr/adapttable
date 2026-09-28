@@ -1,4 +1,4 @@
-import type { Direction, TableLabels } from "@adapttable/core";
+import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { type ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 

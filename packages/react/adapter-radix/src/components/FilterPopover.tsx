@@ -1,4 +1,4 @@
-import type { Direction, TableLabels } from "@adapttable/core";
+import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { Button, Flex, Popover, Text } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 

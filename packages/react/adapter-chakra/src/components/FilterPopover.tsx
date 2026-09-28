@@ -1,5 +1,8 @@
-import type { Direction, TableLabels } from "@adapttable/core";
-import { restoreFocusSoon } from "@adapttable/react/adapter";
+import {
+  type Direction,
+  restoreFocusSoon,
+  type TableLabels,
+} from "@adapttable/react/adapter";
 import { Button, HStack, Popover, Stack, Text } from "@chakra-ui/react";
 import { type ReactNode, useEffect, useRef } from "react";
 

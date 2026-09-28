@@ -3,6 +3,24 @@ export type { DataTableProps } from "./types";
 export type { DataTablePropsBase } from "./types";
 export type { DataTableClassNames } from "./types";
 export type { DataTableSlots } from "./types";
+export { useTableUrlState } from "@adapttable/react";
+export {
+  type ActiveFilterChip,
+  type ColumnDef,
+  type SavedView,
+  type ToolbarSlots,
+  useDataTable,
+  type UseDataTableResult,
+  useFrontendData,
+  type UseFrontendDataOptions,
+  useQuerySource,
+  type UseQuerySourceOptions,
+  useSavedViews,
+  type UseSavedViewsOptions,
+  type UseSavedViewsResult,
+  useServerData,
+  type UseServerDataOptions,
+} from "@adapttable/react";
 export {
   type BulkAction,
   type CellProps,
@@ -34,22 +52,4 @@ export {
   type TableLabels,
   type TableQuery,
   type TableSource,
-} from "@adapttable/core";
-export { useTableUrlState } from "@adapttable/react";
-export {
-  type ActiveFilterChip,
-  type ColumnDef,
-  type SavedView,
-  type ToolbarSlots,
-  useDataTable,
-  type UseDataTableResult,
-  useFrontendData,
-  type UseFrontendDataOptions,
-  useQuerySource,
-  type UseQuerySourceOptions,
-  useSavedViews,
-  type UseSavedViewsOptions,
-  type UseSavedViewsResult,
-  useServerData,
-  type UseServerDataOptions,
-} from "@adapttable/react";
+} from "@adapttable/react/adapter";

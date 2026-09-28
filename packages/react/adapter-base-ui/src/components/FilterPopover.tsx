@@ -1,4 +1,4 @@
-import type { Direction, TableLabels } from "@adapttable/core";
+import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { Popover } from "@base-ui/react/popover";
 import { isValidElement, type ReactElement, type ReactNode } from "react";
 

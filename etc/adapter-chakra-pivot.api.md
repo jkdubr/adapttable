@@ -11,7 +11,7 @@ import { PivotPanelChromeProps } from '@adapttable/react/adapter';
 export function PivotPanel(props: Readonly<Omit<PivotPanelChromeProps, "slots">>): JSX.Element;
 
 
-export * from "@adapttable/core/pivot";
+export * from "@adapttable/react/pivot";
 
 // (No @packageDocumentation comment for this package)
 

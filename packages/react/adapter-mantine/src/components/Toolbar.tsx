@@ -1,7 +1,7 @@
-import { pageSizeOptions } from "@adapttable/core";
 import {
   FeatureSlot,
   FILTER_POPOVER,
+  pageSizeOptions,
   TOOLBAR_EXTRAS,
   type ToolbarChromeProps,
 } from "@adapttable/react/adapter";

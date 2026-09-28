@@ -71,6 +71,29 @@ export type {
 } from "./types";
 
 /* Re-exported headless engine — source builders, hooks, and types. */
+export type { CellProps, ColumnDef, ColumnInput } from "@adapttable/react";
+export {
+  type ActiveFilterChip,
+  type SavedView,
+  type ToolbarSlots,
+  useDataTable,
+  type UseDataTableResult,
+  useFrontendData,
+  type UseFrontendDataOptions,
+  useQuerySource,
+  type UseQuerySourceOptions,
+  useSavedViews,
+  type UseSavedViewsOptions,
+  type UseSavedViewsResult,
+  useServerData,
+  type UseServerDataOptions,
+  useTableData,
+  type UseTableDataOptions,
+  type UseTableDataResult,
+  useTableUrlState,
+  type UseTableUrlStateOptions,
+  type UseTableUrlStateResult,
+} from "@adapttable/react";
 export {
   type BulkAction,
   type ColorScheme,
@@ -104,33 +127,9 @@ export {
   type TableLabels,
   type TableQuery,
   type TableSource,
-} from "@adapttable/core";
-export type { CellProps, ColumnDef, ColumnInput } from "@adapttable/react";
-export {
-  type ActiveFilterChip,
-  type SavedView,
-  type ToolbarSlots,
-  useDataTable,
-  type UseDataTableResult,
-  useFrontendData,
-  type UseFrontendDataOptions,
-  useQuerySource,
-  type UseQuerySourceOptions,
-  useSavedViews,
-  type UseSavedViewsOptions,
-  type UseSavedViewsResult,
-  useServerData,
-  type UseServerDataOptions,
-  useTableData,
-  type UseTableDataOptions,
-  type UseTableDataResult,
-  useTableUrlState,
-  type UseTableUrlStateOptions,
-  type UseTableUrlStateResult,
-} from "@adapttable/react";
+} from "@adapttable/react/adapter";
 
 /* Router / custom-source integration types. */
-export { type ActionConfirm, type SortableValue } from "@adapttable/core";
 export {
   createHistoryAdapter,
   createMemoryAdapter,
@@ -139,6 +138,10 @@ export {
   type PageSelector,
   type UrlStateAdapter,
 } from "@adapttable/react";
+export {
+  type ActionConfirm,
+  type SortableValue,
+} from "@adapttable/react/adapter";
 export { deriveSortByOptions } from "@adapttable/react/adapter";
 
 /* The adapter's own names: the props base every DataTableProps is built
@@ -149,15 +152,6 @@ export type { DataTablePropsBase } from "./types";
 /* Completed public surface (v2): every type a consumer's own code
    needs — CSV options, column layout, cell editors, tier props —
    without ever depending on @adapttable/core directly. */
-export {
-  type BulkActionContext,
-  type CellEditor,
-  type ChipLabelResolver,
-  type CustomCellEditorCtrl,
-  type CustomCellEditorRender,
-  type ExportCsvOptions,
-  FILTER_TYPES,
-} from "@adapttable/core";
 export {
   type BaseDataTableProps,
   type ColumnLayoutState,
@@ -171,4 +165,13 @@ export {
   type EditLifecycle,
   type EditUnit,
 } from "@adapttable/react";
+export {
+  type BulkActionContext,
+  type CellEditor,
+  type ChipLabelResolver,
+  type CustomCellEditorCtrl,
+  type CustomCellEditorRender,
+  type ExportCsvOptions,
+  FILTER_TYPES,
+} from "@adapttable/react/adapter";
 export { type DataModeProps } from "@adapttable/react/adapter";
