@@ -106,4 +106,5 @@ export {
   headerFilterRangeModel,
   headerFilterSelectModel,
 } from "./filters/headerFilterCells";
+export { EMPTY_ROW_PIN_STATE } from "./rows/rowPinModel";
 export { writeStoredColumnLayout } from "./state/tableStores";

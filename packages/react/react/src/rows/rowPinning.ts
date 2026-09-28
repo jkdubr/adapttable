@@ -13,17 +13,21 @@
  */
 import {
   commitRowPin,
+  EMPTY_ROW_PIN_STATE,
   ROW_PIN_STORE_OPTIONS,
   type RowAction,
   rowPinActions,
   type RowPinLabels,
+  type RowPinSide,
   rowPinSideOf,
+  type RowPinState,
 } from "@adapttable/core";
 import { useCallback, useMemo } from "react";
 
 import { useControllableStore } from "../hooks/useControllableStore";
 import { useEventCallback } from "../hooks/useEventCallback";
 
+export type { RowPinSide, RowPinState } from "@adapttable/core";
 export { applyRowPin, partitionPinnedRows } from "@adapttable/core";
 export {
   PIN_BOTTOM_ACTION_KEY,
@@ -31,33 +35,8 @@ export {
   type RowPinLabels,
   UNPIN_ROW_ACTION_KEY,
 } from "@adapttable/core";
+export { EMPTY_ROW_PIN_STATE } from "@adapttable/core";
 export { rowPinSignature } from "@adapttable/core/binding";
-
-/**
- * Which edge a pinned row sticks to.
- *
- * @public
- */
-export type RowPinSide = "top" | "bottom";
-
-/**
- * Controlled pin lists — ids in dataset order within each edge.
- *
- * @public
- */
-export interface RowPinState {
-  /** Row ids pinned to the top. */
-  readonly top: readonly string[];
-  /** Row ids pinned to the bottom. */
-  readonly bottom: readonly string[];
-}
-
-/**
- * Empty pin lists — omit `pinnedRowIds` and this is what the table holds.
- *
- * @public
- */
-export const EMPTY_ROW_PIN_STATE: RowPinState = { top: [], bottom: [] };
 
 /**
  * Headless pin state adapters read.
