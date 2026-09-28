@@ -16,7 +16,7 @@ import type { FeatureHostState } from "../features/currentHost";
 import { type EditableColumnLike, readEditableCellValue } from "./cellEditing";
 import type { BatchRowEdit, EditEventHandler } from "./editContracts";
 import { observeEdit } from "./editingController";
-import { parseColumnDraft } from "./rowEditing";
+import { parseColumnDraft, type RowEditDrafts } from "./rowEditing";
 import { listenerSet } from "./storePlumbing";
 
 /**
@@ -118,9 +118,6 @@ export interface BatchEditStoreOptions<TRow> {
   readonly featureHost?: FeatureHostState;
 }
 
-/** The drafts of one row, by column key. */
-type RowDrafts = Readonly<Record<string, string>>;
-
 /**
  * Every pending row's drafts, by row id.
  *
@@ -131,7 +128,7 @@ type RowDrafts = Readonly<Record<string, string>>;
  * @public
  */
 export type BatchPendingDrafts = Readonly<
-  Record<string, { row: unknown; drafts: RowDrafts; seeds: RowDrafts }>
+  Record<string, { row: unknown; drafts: RowEditDrafts; seeds: RowEditDrafts }>
 >;
 
 /**
