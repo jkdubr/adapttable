@@ -13,17 +13,6 @@ import {
   REORDER_COLUMN_KEY,
   type RowPinSide,
 } from "@adapttable/core";
-import { type ReactNode, useRef } from "react";
-
-import { deriveRuntimeOperations } from "../agent/deriveRuntimeOperations";
-import type { ComposedTableProps } from "../props";
-import type { TableChrome } from "../useTableChrome";
-import {
-  FeatureSlot,
-  type TableRuntimeView,
-  useFeatureSlotFilled,
-  usePublishTableRuntime,
-} from "./providers";
 import {
   type ChromeExtraSlotProps,
   COLUMN_LAYOUT_LIVE,
@@ -35,7 +24,18 @@ import {
   ROW_ACTIONS_LIVE,
   SELECTION_LIVE,
   TREE_LIVE,
-} from "./slotKeys";
+} from "@adapttable/core/binding";
+import { type ReactNode, useRef } from "react";
+
+import { deriveRuntimeOperations } from "../agent/deriveRuntimeOperations";
+import type { ComposedTableProps } from "../props";
+import type { TableChrome } from "../useTableChrome";
+import {
+  FeatureSlot,
+  type TableRuntimeView,
+  useFeatureSlotFilled,
+  usePublishTableRuntime,
+} from "./providers";
 
 function ExtraGate<TRow>({
   slot,
@@ -53,7 +53,7 @@ function ExtraGate<TRow>({
     chrome,
     props,
     children,
-  } as unknown as ChromeExtraSlotProps<never>;
+  } as unknown as ChromeExtraSlotProps;
   return filled ? (
     <FeatureSlot slot={slot} props={slotProps} />
   ) : (

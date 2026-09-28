@@ -3,6 +3,10 @@ import {
   formatMultiDraft,
   isCustomEditor,
 } from "@adapttable/core";
+import type {
+  EditableCellActivateProps as NeutralEditableCellActivateProps,
+  EditableCellSlots as NeutralEditableCellSlots,
+} from "@adapttable/core/binding";
 import {
   type ReactElement,
   type ReactNode,
@@ -18,6 +22,25 @@ import {
   stopCellEditKeyboard,
 } from "./editableCellController";
 import { BatchEditCell, RowEditCell } from "./RowEditGate";
+
+export type { EditableCellButtonProps } from "@adapttable/core/binding";
+
+/**
+ * Kit activate control the gate calls while the cell is idle —
+ * `@adapttable/core`'s `EditableCellActivateProps` with React's node.
+ *
+ * @public
+ */
+export type EditableCellActivateProps =
+  NeutralEditableCellActivateProps<ReactNode>;
+
+/**
+ * Adapter-supplied controls for `EditableCellGate` — `@adapttable/core`'s
+ * `EditableCellSlots` drawing React nodes.
+ *
+ * @public
+ */
+export type EditableCellSlots = NeutralEditableCellSlots<ReactNode>;
 
 /**
  * Props for a kit-native editor while a cell is active.
@@ -141,69 +164,6 @@ export interface EditableCellGateProps<TRow> {
   readonly renderEditor: (ctrl: EditableCellEditorCtrl) => ReactElement;
   /** Kit activate control and conflict / undo buttons. */
   readonly slots: EditableCellSlots;
-}
-
-/**
- * Kit activate control the gate calls while the cell is idle.
- *
- * @public
- */
-export interface EditableCellActivateProps {
-  /** Tooltip for the control. */
-  readonly title: string;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Save state for this cell, when one is being reported. */
-  readonly saveStatus: string | undefined;
-  /** Whether the cell holds an unsaved edit. */
-  readonly dirty: boolean;
-  /** Ref to the control, so the gate can put focus back. */
-  readonly activateRef: (node: HTMLButtonElement | null) => void;
-  /** What the cell shows while idle. */
-  readonly display: ReactNode;
-  /** Opens the editor on a double click. */
-  readonly onDoubleClick: (event: {
-    preventDefault: () => void;
-    stopPropagation: () => void;
-  }) => void;
-  /** Called when pressed. */
-  readonly onClick: (event: { stopPropagation: () => void }) => void;
-  /** Handles the keys this control owns. */
-  readonly onKeyDown: (event: {
-    key: string;
-    preventDefault: () => void;
-    stopPropagation: () => void;
-  }) => void;
-}
-
-/**
- * Kit button the gate calls for conflict choices and undo.
- *
- * @public
- */
-export interface EditableCellButtonProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Part name, so styling can target this element. */
-  readonly part: string;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Called on press, before focus moves. */
-  readonly onMouseDown?: (event: { preventDefault: () => void }) => void;
-  /** Called when pressed. */
-  readonly onClick: (event: { stopPropagation: () => void }) => void;
-}
-
-/**
- * Adapter-supplied controls for `EditableCellGate`.
- *
- * @public
- */
-export interface EditableCellSlots {
-  /** Renders the idle cell that opens the editor. */
-  readonly Activate: (props: EditableCellActivateProps) => ReactNode;
-  /** Renders a conflict-resolution button. */
-  readonly Button: (props: EditableCellButtonProps) => ReactNode;
 }
 
 /**

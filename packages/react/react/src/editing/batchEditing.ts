@@ -20,73 +20,14 @@ import {
   readEditableCellValue,
   resolveCellEditor,
 } from "@adapttable/core";
+import type { BatchEditingState } from "@adapttable/core/binding";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 import { type EditEventHandler, observeEdit } from "./editingEvents";
 
 export type { BatchRowEdit } from "@adapttable/core";
-
-/**
- * Headless batch-editing state.
- *
- * @public
- */
-export interface BatchEditingState<TRow> {
-  /** How many rows are waiting — what a "3 unsaved rows" line reads. */
-  count: number;
-  /** Whether anything is waiting at all. */
-  pending: boolean;
-  /** Whether this row has pending changes. */
-  isPending: (rowId: string) => boolean;
-  /** This cell's draft, or the row's stored value when it has none. */
-  draftFor: (row: TRow, rowId: string, columnKey: string) => string;
-  /** Whether this cell has been changed. */
-  isChanged: (rowId: string, columnKey: string) => boolean;
-  /** Change one cell, without telling the host. */
-  setDraft: (
-    row: TRow,
-    rowId: string,
-    columnKey: string,
-    value: string
-  ) => void;
-  /** Hand the host every pending row, as one list, then forget them. */
-  saveAll: () => void;
-  /** Forget everything, restoring nothing — the drafts were never applied. */
-  cancelAll: () => void;
-  /** Forget one row's changes. */
-  cancelRow: (rowId: string) => void;
-  /** Every pending row, and what each changed field is measured against. */
-  entries: readonly {
-    readonly rowId: string;
-    /**
-     * The row as it read when the reader first changed it. Untyped because
-     * the chrome hands this state around as `BatchEditingState<never>`, and a
-     * row in an output position would stop it fitting there.
-     */
-    readonly openedRow: unknown;
-    readonly seeds: Readonly<Record<string, string>>;
-    readonly drafts: Readonly<Record<string, string>>;
-  }[];
-  /**
-   * Keep mine: these fields now read the incoming values, and the drafts
-   * stand — so the patch still carries what the reader typed.
-   */
-  acceptSeeds: (
-    row: TRow,
-    rowId: string,
-    columnKeys: readonly string[]
-  ) => void;
-  /**
-   * Take theirs: these fields stop being changes at all, so the cells fall
-   * back to what the row now reads.
-   */
-  takeSeeds: (row: TRow, rowId: string, columnKeys: readonly string[]) => void;
-  /** A digest of the pending drafts, for a row memo comparator. */
-  signature: string;
-  /** The table that owns these editors — never a sibling's host. */
-  featureHost?: FeatureHostState;
-}
+export type { BatchEditingState };
 
 /**
  * What {@link useBatchEditing} needs.

@@ -11,13 +11,19 @@
 import {
   type CellEditor,
   type CustomCellEditorConflict,
-  type DisplayValue,
   type EditableColumnLike,
   isCustomEditor,
   normalizeEditorOptions,
   resolveCellEditor,
   type TableLabels,
 } from "@adapttable/core";
+import type {
+  BatchEditBarProps,
+  BatchEditBarSlots as NeutralBatchEditBarSlots,
+  RowEditActionsProps,
+  RowEditActionsSlots as NeutralRowEditActionsSlots,
+  RowEditControlsOptions,
+} from "@adapttable/core/binding";
 import type { ReactElement, ReactNode } from "react";
 
 import type { BatchEditingState } from "./batchEditing";
@@ -40,6 +46,31 @@ export type {
   RowEditingState,
   TableLabels,
 };
+export type {
+  BatchEditBarProps,
+  BatchEditButtonProps,
+  RowEditActionsProps,
+  RowEditButtonProps,
+  RowEditConflict,
+  RowEditControlsOptions,
+  RowEditIcons,
+} from "@adapttable/core/binding";
+
+/**
+ * Adapter-supplied controls for {@link RowEditActionsChrome} —
+ * `@adapttable/core`'s `RowEditActionsSlots` drawing React nodes.
+ *
+ * @public
+ */
+export type RowEditActionsSlots = NeutralRowEditActionsSlots<ReactNode>;
+
+/**
+ * Adapter-supplied controls for {@link BatchEditBarChrome} —
+ * `@adapttable/core`'s `BatchEditBarSlots` drawing React nodes.
+ *
+ * @public
+ */
+export type BatchEditBarSlots = NeutralBatchEditBarSlots<ReactNode>;
 
 /**
  * Props for {@link RowEditCell}.
@@ -221,36 +252,6 @@ function selectOptionsFor(editor: CellEditor) {
 }
 
 /**
- * An incoming change to the row a form has open.
- *
- * The fields that moved carry the question themselves, each with the notice a
- * cell shows; this is what the row's own controls need to know — that an
- * answer is outstanding, so there is nothing to save yet.
- *
- * @public
- */
-export interface RowEditConflict {
-  /** Whether this row is waiting on an answer. */
-  readonly asking: boolean;
-}
-
-/**
- * Props for {@link rowEditControls}.
- *
- * @public
- */
-export interface RowEditControlsOptions<TRow> {
-  /** The row-editing state from the chrome. */
-  rowEditing: RowEditingState<TRow>;
-  /** The row this control set belongs to. */
-  row: TRow;
-  /** Its stable id. */
-  rowId: string;
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-}
-
-/**
  * What a kit needs to render the row's edit / save / cancel controls.
  *
  * @public
@@ -304,87 +305,6 @@ export function rowEditControls<TRow>({
     cancelLabel: labels?.cancel ?? "Cancel",
     dirty: rowEditing.isDirty,
   };
-}
-
-/**
- * Glyphs for the row-mode controls.
- *
- * Each kit draws its own pencil, check and cross, with `labels.editRow`,
- * `labels.saveRow` and `labels.cancel` as both the accessible name and the
- * hover title — an actions column is a narrow place, and three words per
- * control crowd out the row. Pass a node to use your own glyph instead, or
- * `false` to show the label as text.
- *
- * @public
- */
-export interface RowEditIcons {
-  /** The control that opens the row. */
-  readonly begin?: DisplayValue | false;
-  /** The control that hands the host the patch. */
-  readonly save?: DisplayValue | false;
-  /** The control that throws the drafts away. */
-  readonly cancel?: DisplayValue | false;
-}
-
-/**
- * Props for an adapter `RowEditActions` — no slots on the public API.
- *
- * @public
- */
-export interface RowEditActionsProps<
-  TRow,
-> extends RowEditControlsOptions<TRow> {
-  /** Class for the control group. */
-  className?: string;
-  /** Class for each button. */
-  buttonClassName?: string;
-  /** Glyph overrides — see {@link RowEditIcons}. */
-  icons?: RowEditIcons;
-  /**
-   * Whether an incoming change to this row is waiting on the reader, and what
-   * happens either way. The open form is measured against the row it opened
-   * on, so a change underneath is a question only the reader can answer.
-   */
-  conflict?: RowEditConflict;
-  /**
-   * Whether to draw the control that opens the row. `false` when a host row
-   * action carries `editsRow` and owns that trigger — see
-   * `resolveRowEditTrigger`. Save and cancel are unaffected: they belong to
-   * the open row, not to whatever opened it.
-   */
-  showBegin?: boolean;
-}
-
-/**
- * Kit button the row-edit chrome calls.
- *
- * @public
- */
-export interface RowEditButtonProps {
-  /** Accessible name for the control, and its hover title. */
-  readonly label: string;
-  /** Part name, so styling can target this element. */
-  readonly part: string;
-  /**
-   * What to draw inside the button. A node is the glyph to use; `false` asks
-   * for the label as text; `undefined` leaves the choice to the kit, which
-   * draws its own glyph for this part.
-   */
-  readonly icon?: DisplayValue | false;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Called when pressed. */
-  readonly onClick: (event: { stopPropagation: () => void }) => void;
-}
-
-/**
- * Adapter-supplied controls for {@link RowEditActionsChrome}.
- *
- * @public
- */
-export interface RowEditActionsSlots {
-  /** Renders a button. */
-  readonly Button: (props: RowEditButtonProps) => ReactNode;
 }
 
 /**
@@ -614,54 +534,6 @@ export function BatchEditCell<TRow>({
       ) : null}
     </span>
   );
-}
-
-/**
- * Props for an adapter `BatchEditBar` — no slots on the public API.
- *
- * @public
- */
-export interface BatchEditBarProps<TRow> {
-  /** The batch state from the chrome. */
-  batch: BatchEditingState<TRow>;
-  /**
-   * Whether any cell in the batch is waiting on an answer. Saving past one
-   * would write over a value the reader has not looked at, so the bar says
-   * what is holding it up instead of offering the save.
-   */
-  contested?: boolean;
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** Class for the bar. */
-  className?: string;
-  /** Class for each button. */
-  buttonClassName?: string;
-}
-
-/**
- * Kit button the batch-edit bar calls.
- *
- * @public
- */
-export interface BatchEditButtonProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Part name, so styling can target this element. */
-  readonly part: string;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Called when pressed. */
-  readonly onClick: () => void;
-}
-
-/**
- * Adapter-supplied controls for {@link BatchEditBarChrome}.
- *
- * @public
- */
-export interface BatchEditBarSlots {
-  /** Renders a button. */
-  readonly Button: (props: BatchEditButtonProps) => ReactNode;
 }
 
 /**

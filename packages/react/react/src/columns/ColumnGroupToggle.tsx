@@ -1,48 +1,23 @@
 import { type TableLabels } from "@adapttable/core";
-import { type HeaderGroupCell } from "@adapttable/core/binding";
+import {
+  type ColumnGroupToggleProps,
+  type ColumnGroupToggleSlots as NeutralColumnGroupToggleSlots,
+  type HeaderGroupCell,
+} from "@adapttable/core/binding";
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * Props for an adapter `ColumnGroupToggle` — no slots on the public API.
- *
- * @public
- */
-export interface ColumnGroupToggleProps {
-  /** The cell being rendered. */
-  cell: HeaderGroupCell;
-  /** Resolved labels, every key filled. */
-  labels: Required<TableLabels>;
-  /** Called with the new state. */
-  onToggle: (id: string) => void;
-  /** Class for the element. */
-  className?: string;
-}
+export type {
+  ColumnGroupToggleButtonProps,
+  ColumnGroupToggleProps,
+} from "@adapttable/core/binding";
 
 /**
- * Kit button the column-group chrome calls.
+ * Adapter-supplied controls for {@link ColumnGroupToggleChrome} —
+ * `@adapttable/core`'s `ColumnGroupToggleSlots` drawing React nodes.
  *
  * @public
  */
-export interface ColumnGroupToggleButtonProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Whether the section is open. */
-  readonly expanded: boolean;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Called when pressed. */
-  readonly onClick: () => void;
-}
-
-/**
- * Adapter-supplied controls for {@link ColumnGroupToggleChrome}.
- *
- * @public
- */
-export interface ColumnGroupToggleSlots {
-  /** Renders a button. */
-  readonly Button: (props: ColumnGroupToggleButtonProps) => ReactNode;
-}
+export type ColumnGroupToggleSlots = NeutralColumnGroupToggleSlots<ReactNode>;
 
 /**
  * Props for {@link ColumnGroupToggleChrome}.

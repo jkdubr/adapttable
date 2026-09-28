@@ -29,6 +29,13 @@ import {
   setMeasureAgg,
   type TableLabels,
 } from "@adapttable/core";
+import type {
+  PivotFieldProps as NeutralPivotFieldProps,
+  PivotPanelChromeProps as NeutralPivotPanelChromeProps,
+  PivotPanelSlots as NeutralPivotPanelSlots,
+  PivotPanelSurfaceProps as NeutralPivotPanelSurfaceProps,
+  PivotZoneProps as NeutralPivotZoneProps,
+} from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 export type { AggregateName, PivotConfig, PivotField, PivotZone };
@@ -42,129 +49,47 @@ const AGGREGATIONS: readonly AggregateName[] = [
   "max",
 ];
 
-/**
- * Props an adapter's panel surface receives.
- *
- * @public
- */
-export interface PivotPanelSurfaceProps {
-  /** Content rendered inside. */
-  readonly children: ReactNode;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Spread onto the surface — the public part name. */
-  readonly "data-adapttable-part": "pivot-panel";
-}
+export type { PivotAddProps, PivotAggProps } from "@adapttable/core/binding";
 
 /**
- * Props an adapter's zone receives — one titled list.
+ * Props an adapter's panel surface receives — `@adapttable/core`'s
+ * `PivotPanelSurfaceProps` drawing React nodes.
  *
  * @public
  */
-export interface PivotZoneProps {
-  /** Which zone this is, for styling and testing. */
-  readonly zone: PivotZone;
-  /** The zone's caption, already localized. */
-  readonly label: string;
-  /** Its entries, and the control that adds to it. */
-  readonly children: ReactNode;
-  /** Spread onto the zone — the public part name. */
-  readonly "data-adapttable-part": "pivot-zone";
-}
+export type PivotPanelSurfaceProps = NeutralPivotPanelSurfaceProps<ReactNode>;
 
 /**
- * Props an adapter's field row receives.
+ * Props an adapter's zone receives — `@adapttable/core`'s `PivotZoneProps`
+ * drawing React nodes.
  *
  * @public
  */
-export interface PivotFieldProps {
-  /** What to call the field. */
-  readonly label: string;
-  /** Move it one step towards the outside. `undefined` when it is first. */
-  readonly onMoveUp?: () => void;
-  /** Move it one step towards the inside. `undefined` when it is last. */
-  readonly onMoveDown?: () => void;
-  /** Take it off this zone. */
-  readonly onRemove: () => void;
-  /** Accessible names for the three controls. */
-  readonly moveUpLabel: string;
-  /** Accessible name for the move-down control. */
-  readonly moveDownLabel: string;
-  /** Accessible name for the remove control. */
-  readonly removeLabel: string;
-  /** The aggregation chooser, for a measure. Absent on a dimension. */
-  readonly aggregation?: ReactNode;
-  /** Spread onto the field row — the public part name. */
-  readonly "data-adapttable-part": "pivot-field";
-}
+export type PivotZoneProps = NeutralPivotZoneProps<ReactNode>;
 
 /**
- * Props an adapter's "add a field" control receives.
+ * Props an adapter's field row receives — `@adapttable/core`'s
+ * `PivotFieldProps` drawing React nodes.
  *
  * @public
  */
-export interface PivotAddProps {
-  /** Accessible name. */
-  readonly label: string;
-  /** The fields that can still be added. Empty means nothing is left. */
-  readonly options: readonly PivotField[];
-  /** Add one. */
-  readonly onAdd: (key: string) => void;
-}
+export type PivotFieldProps = NeutralPivotFieldProps<ReactNode>;
 
 /**
- * Props an adapter's aggregation chooser receives.
+ * The kit-native pieces the panel is built from — `@adapttable/core`'s
+ * `PivotPanelSlots` drawing React nodes.
  *
  * @public
  */
-export interface PivotAggProps {
-  /** Accessible name. */
-  readonly label: string;
-  /** The current aggregation. */
-  readonly value: AggregateName;
-  /** What it can be. */
-  readonly options: readonly AggregateName[];
-  /** Change it. */
-  readonly onChange: (next: AggregateName) => void;
-}
+export type PivotPanelSlots = NeutralPivotPanelSlots<ReactNode>;
 
 /**
- * The kit-native pieces the panel is built from.
+ * What the panel needs to render — `@adapttable/core`'s
+ * `PivotPanelChromeProps` with React's slots.
  *
  * @public
  */
-export interface PivotPanelSlots {
-  /** The panel body. */
-  readonly Surface: (props: PivotPanelSurfaceProps) => ReactNode;
-  /** One titled zone. */
-  readonly Zone: (props: PivotZoneProps) => ReactNode;
-  /** One field in a zone. */
-  readonly Field: (props: PivotFieldProps) => ReactNode;
-  /** The control that adds a field to a zone. */
-  readonly Add: (props: PivotAddProps) => ReactNode;
-  /** The aggregation chooser on a measure. */
-  readonly Agg: (props: PivotAggProps) => ReactNode;
-}
-
-/**
- * What the panel needs to render.
- *
- * @public
- */
-export interface PivotPanelChromeProps {
-  /** Every field the user can pivot on. */
-  fields: readonly PivotField[];
-  /** The configuration being edited. */
-  config: PivotConfig;
-  /** Report a change. The panel never holds the configuration itself. */
-  onChange: (next: PivotConfig) => void;
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** The kit's controls. */
-  slots: PivotPanelSlots;
-  /** Class for the element. */
-  className?: string;
-}
+export type PivotPanelChromeProps = NeutralPivotPanelChromeProps<ReactNode>;
 
 /** The caption for one zone. */
 function zoneLabel(zone: PivotZone, labels: Required<TableLabels>): string {

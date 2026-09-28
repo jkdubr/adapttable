@@ -30,9 +30,14 @@ import {
   commandListView,
   createCommandList,
   runCommand,
-  type TableLabels,
   tabTrapTarget,
 } from "@adapttable/core";
+import type {
+  CommandPaletteChromeProps as NeutralCommandPaletteChromeProps,
+  CommandPaletteInputProps as NeutralCommandPaletteInputProps,
+  CommandPaletteSlots as NeutralCommandPaletteSlots,
+  CommandPaletteSurfaceProps as NeutralCommandPaletteSurfaceProps,
+} from "@adapttable/core/binding";
 import {
   type KeyboardEvent,
   type ReactNode,
@@ -44,102 +49,48 @@ import {
 } from "react";
 
 export type { Command };
+export type { CommandPaletteItemProps } from "@adapttable/core/binding";
 
 /**
- * Props an adapter's palette surface receives.
+ * Props an adapter's palette surface receives — `@adapttable/core`'s
+ * `CommandPaletteSurfaceProps` drawing React nodes.
  *
  * @public
  */
-export interface CommandPaletteSurfaceProps {
-  /** Accessible name for the dialog. */
-  readonly label: string;
-  /** Close it — bind to the kit's own dismiss channel. */
-  readonly onClose: () => void;
-  /** Content rendered inside. */
-  readonly children: ReactNode;
-  /** Class for the element. */
-  readonly className?: string;
-}
+export type CommandPaletteSurfaceProps =
+  NeutralCommandPaletteSurfaceProps<ReactNode>;
 
 /**
- * Props an adapter's search input receives.
+ * Props an adapter's search input receives — `@adapttable/core`'s
+ * `CommandPaletteInputProps` with React's key event.
  *
  * @public
  */
-export interface CommandPaletteInputProps {
-  /** Spread onto the input: value, handlers, and the combobox wiring. */
-  readonly inputProps: {
-    readonly value: string;
-    readonly onChange: (next: string) => void;
-    readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
-    readonly ref: (element: HTMLInputElement | null) => void;
-    readonly role: "combobox";
-    readonly "aria-expanded": true;
-    readonly "aria-controls": string;
-    readonly "aria-activedescendant": string | undefined;
-    readonly "aria-label": string;
-    readonly placeholder: string;
-    readonly "data-adapttable-part": "command-input";
-  };
-}
+export type CommandPaletteInputProps = NeutralCommandPaletteInputProps<
+  KeyboardEvent<HTMLElement>
+>;
 
 /**
- * Props an adapter's command row receives.
+ * Adapter-owned rendering for {@link CommandPaletteChrome} —
+ * `@adapttable/core`'s `CommandPaletteSlots` drawing React nodes.
  *
  * @public
  */
-export interface CommandPaletteItemProps {
-  /** The command being rendered. */
-  readonly command: Command;
-  /** Whether this entry is the highlighted one. */
-  readonly active: boolean;
-  /** Spread onto the row: the option role, its id, and selection. */
-  readonly itemProps: {
-    readonly id: string;
-    readonly role: "option";
-    readonly "aria-selected": boolean;
-    readonly "aria-disabled": boolean | undefined;
-    readonly "data-adapttable-part": "command-item";
-    readonly onClick: () => void;
-    readonly onMouseEnter: () => void;
-  };
-}
+export type CommandPaletteSlots = NeutralCommandPaletteSlots<
+  ReactNode,
+  KeyboardEvent<HTMLElement>
+>;
 
 /**
- * Adapter-owned rendering for {@link CommandPaletteChrome}.
+ * What the palette needs to render — `@adapttable/core`'s
+ * `CommandPaletteChromeProps` with React's slots.
  *
  * @public
  */
-export interface CommandPaletteSlots {
-  /** The modal surface. */
-  readonly Surface: (props: CommandPaletteSurfaceProps) => ReactNode;
-  /** The search box. */
-  readonly Input: (props: CommandPaletteInputProps) => ReactNode;
-  /** One command. */
-  readonly Item: (props: CommandPaletteItemProps) => ReactNode;
-  /** Shown when nothing matches. */
-  readonly Empty: (props: { readonly message: string }) => ReactNode;
-}
-
-/**
- * What the palette needs to render.
- *
- * @public
- */
-export interface CommandPaletteChromeProps {
-  /** Every command available right now. */
-  commands: readonly Command[];
-  /** Whether it is showing. */
-  open: boolean;
-  /** Close it. */
-  onClose: () => void;
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** A kit's own class for the surface. */
-  className?: string;
-  /** Adapter-owned visible components. */
-  slots: CommandPaletteSlots;
-}
+export type CommandPaletteChromeProps = NeutralCommandPaletteChromeProps<
+  ReactNode,
+  KeyboardEvent<HTMLElement>
+>;
 
 /** Every element inside that can hold focus, for the Tab trap. */
 function focusablesIn(root: HTMLElement | null): HTMLElement[] {

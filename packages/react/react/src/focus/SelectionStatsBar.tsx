@@ -1,60 +1,34 @@
 /** Headless selection-stat formatting; adapters own the visible status bar. */
-import { type SelectionStats, type TableLabels } from "@adapttable/core";
+import type { SelectionStats } from "@adapttable/core";
+import type {
+  SelectionStatPart,
+  SelectionStatsChromeProps as NeutralSelectionStatsChromeProps,
+  SelectionStatsSlots as NeutralSelectionStatsSlots,
+} from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 export type { SelectionStats };
+export type {
+  SelectionStatPart,
+  SelectionStatsSlotProps,
+} from "@adapttable/core/binding";
 
 /**
- * Props for {@link SelectionStatsChrome}.
+ * Props for {@link SelectionStatsChrome} — `@adapttable/core`'s
+ * `SelectionStatsChromeProps` with React's slots.
  *
  * @public
  */
-export interface SelectionStatsChromeProps {
-  /** The statistics, straight from `shell.selectionStats`. */
-  stats: SelectionStats | null;
-  /** Labels for each figure; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** Locale tag for number formatting. The host's default when omitted. */
-  locale?: string;
-  /** A kit's own class for the strip. */
-  className?: string;
-  /** Adapter-owned visible component. */
-  slots: SelectionStatsSlots;
-}
+export type SelectionStatsChromeProps =
+  NeutralSelectionStatsChromeProps<ReactNode>;
 
 /**
- * One formatted statistic in display order.
+ * Adapter-owned rendering for {@link SelectionStatsChrome} —
+ * `@adapttable/core`'s `SelectionStatsSlots` drawing React nodes.
  *
  * @public
  */
-export interface SelectionStatPart {
-  /** Which statistic this part reports. */
-  readonly key: "count" | "sum" | "average" | "min" | "max";
-  /** The text to render. */
-  readonly text: string;
-}
-
-/**
- * Props passed to an adapter's selection-status component.
- *
- * @public
- */
-export interface SelectionStatsSlotProps {
-  /** The statistics to render, already formatted. */
-  readonly parts: readonly SelectionStatPart[];
-  /** Class for the element. */
-  readonly className?: string;
-}
-
-/**
- * Adapter-owned rendering for {@link SelectionStatsChrome}.
- *
- * @public
- */
-export interface SelectionStatsSlots {
-  /** Renders the selection statistics. */
-  readonly Stats: (props: SelectionStatsSlotProps) => ReactNode;
-}
+export type SelectionStatsSlots = NeutralSelectionStatsSlots<ReactNode>;
 
 /** One figure, or nothing when the selection has no numbers to describe. */
 function figure(

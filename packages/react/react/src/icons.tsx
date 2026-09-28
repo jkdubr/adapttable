@@ -1,10 +1,17 @@
+import {
+  expandChevronIcon,
+  FILTERS_ICON,
+  SEARCH_ICON,
+} from "@adapttable/core/binding";
 import type { ReactElement } from "react";
+
+import { IconSvg } from "./iconSvg";
 
 /**
  * Shared chrome glyphs (currentColor, no icon-lib dependency) used by the
  * toolbar across adapters — a funnel for the Filters button and a magnifier
- * for the search field. Centralising them keeps every adapter's toolbar
- * identical and avoids cross-adapter duplication of the SVG markup.
+ * for the search field. The shapes are `@adapttable/core`'s, so every binding
+ * draws the same glyph; these components draw them as React elements.
  */
 
 /**
@@ -13,22 +20,7 @@ import type { ReactElement } from "react";
  * @public
  */
 export function FiltersIcon(): ReactElement {
-  return (
-    <svg
-      width={16}
-      height={16}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M4 6h16M7 12h10M10 18h4" />
-    </svg>
-  );
+  return <IconSvg icon={FILTERS_ICON} />;
 }
 
 /**
@@ -37,23 +29,7 @@ export function FiltersIcon(): ReactElement {
  * @public
  */
 export function SearchIcon(): ReactElement {
-  return (
-    <svg
-      width={14}
-      height={14}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <circle cx={11} cy={11} r={7} />
-      <path d="M21 21l-4.35-4.35" />
-    </svg>
-  );
+  return <IconSvg icon={SEARCH_ICON} />;
 }
 
 /**
@@ -67,26 +43,5 @@ export function ExpandChevron({
   open,
   dir,
 }: Readonly<{ open: boolean; dir?: "rtl" | "ltr" }>): ReactElement {
-  let transform: string | undefined;
-  if (open) transform = "rotate(90deg)";
-  else if (dir === "rtl") transform = "rotate(180deg)";
-  return (
-    <svg
-      width="1em"
-      height="1em"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-      focusable="false"
-      style={{ transform, transition: "transform 0.2s ease" }}
-    >
-      <path
-        d="m9 6 6 6-6 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  return <IconSvg icon={expandChevronIcon({ open, dir })} />;
 }

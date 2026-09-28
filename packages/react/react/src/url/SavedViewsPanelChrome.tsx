@@ -27,7 +27,14 @@
  * here. Every visible control is a required slot the adapter fills with its
  * own kit's component.
  */
-import { resolveLabels, type TableLabels } from "@adapttable/core";
+import { resolveLabels } from "@adapttable/core";
+import type {
+  SavedViewRowControl as NeutralSavedViewRowControl,
+  SavedViewsPanelChromeProps as NeutralSavedViewsPanelChromeProps,
+  SavedViewsPanelRowProps as NeutralSavedViewsPanelRowProps,
+  SavedViewsPanelSlots as NeutralSavedViewsPanelSlots,
+  SavedViewsPanelSurfaceProps as NeutralSavedViewsPanelSurfaceProps,
+} from "@adapttable/core/binding";
 import { type CSSProperties, type ReactNode, useState } from "react";
 
 import type { SavedView } from "./useSavedViews";
@@ -133,194 +140,61 @@ const TRASH = [
   "M14 11v6",
 ];
 
-/**
- * Which control a cluster entry is. Stable across kits, and across renders.
- *
- * @public
- */
-export type SavedViewControlKey =
-  "rename" | "moveUp" | "moveDown" | "default" | "remove";
+export type {
+  SavedViewControlKey,
+  SavedViewsPanelEmptyProps,
+  SavedViewsPanelInputProps,
+} from "@adapttable/core/binding";
 
 /**
- * One control in a row's cluster.
- *
- * The adapter maps over these rather than hand-writing five buttons, so a kit
- * cannot render four of them, order them differently, or miss the disabled
- * state on the one control this reader may not use.
+ * One control in a row's cluster — `@adapttable/core`'s `SavedViewRowControl`
+ * drawing a React node for its glyph.
  *
  * @public
  */
-export interface SavedViewRowControl {
-  /** Which control this is — the React key, and what a test asks for. */
-  readonly key: SavedViewControlKey;
-  /** The accessible name, already localized. These controls are icon-only. */
-  readonly label: string;
-  /** The glyph to draw inside the kit's own icon button. */
-  readonly icon: ReactNode;
-  /**
-   * Run it, or `undefined` when this reader may not — a view someone else
-   * owns, or a move off the end of the list. The adapter renders the control
-   * disabled rather than dropping it: a button that vanishes on the last row
-   * makes every row jump as the list is reordered.
-   */
-  readonly onPress?: () => void;
-  /** Whether the toggle is currently on. Only the default control sets it. */
-  readonly pressed?: boolean;
-  /** Destructive, so the kit can reach for its own danger colour. */
-  readonly danger?: boolean;
-}
+export type SavedViewRowControl = NeutralSavedViewRowControl<ReactNode>;
 
 /**
- * Props an adapter's panel surface receives.
+ * Props an adapter's panel surface receives — `@adapttable/core`'s
+ * `SavedViewsPanelSurfaceProps` drawing React nodes.
  *
  * @public
  */
-export interface SavedViewsPanelSurfaceProps {
-  /** The card's heading, already localized. */
-  readonly title: string;
-  /** Content rendered inside. */
-  readonly children: ReactNode;
-  /**
-   * Anything the host wants inside the card, under the list — a note about
-   * where the views came from, a link to the docs. Outside the card it reads
-   * as a caption belonging to whatever follows it.
-   */
-  readonly footer?: ReactNode;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Spread onto the surface — the public part name. */
-  readonly "data-adapttable-part": "saved-views-panel";
-}
+export type SavedViewsPanelSurfaceProps =
+  NeutralSavedViewsPanelSurfaceProps<ReactNode>;
 
 /**
- * Props an adapter's row receives — one saved view and its controls.
+ * Props an adapter's row receives — `@adapttable/core`'s
+ * `SavedViewsPanelRowProps` with React's nodes and inline styles.
  *
  * @public
  */
-export interface SavedViewsPanelRowProps {
-  /** The view's name, or the rename input while it is being edited. */
-  readonly name: ReactNode;
-  /** That name as plain text — the apply control's accessible name. */
-  readonly viewName: string;
-  /** Whether the name slot currently holds the rename input. */
-  readonly isEditing: boolean;
-  /** Whether this is the view the table opens with. */
-  readonly isDefault: boolean;
-  /**
-   * Whether this reader may change it. A team view someone else owns is
-   * read-only, and the row must SHOW that: every control arrives without a
-   * handler, so a kit that renders them disabled says "not yours" rather than
-   * leaving a button that silently does nothing.
-   */
-  readonly readOnly: boolean;
-  /** The badge caption for the default view. */
-  readonly defaultLabel: string;
-  /** The badge caption for a view this reader cannot change. */
-  readonly readOnlyLabel: string;
-  /** Apply it — what clicking the name does. */
-  readonly onApply: () => void;
-  /** What applying is called, for the name control's tooltip. */
-  readonly applyLabel: string;
-  /** The cluster, in order: rename, up, down, default, delete. */
-  readonly controls: readonly SavedViewRowControl[];
-  /**
-   * The row's layout, owned by the chrome so a panel reads the same in every
-   * kit: `row` on the row itself, `caption` on the group holding the name and
-   * its badges, `controls` on the cluster, and `control` on each button. The
-   * kit supplies the components; these supply the shape.
-   */
-  readonly layout: {
-    readonly row: CSSProperties;
-    readonly caption: CSSProperties;
-    readonly controls: CSSProperties;
-    readonly control: CSSProperties;
-  };
-  /** Spread onto the row — the public part name. */
-  readonly "data-adapttable-part": "saved-view-row";
-}
+export type SavedViewsPanelRowProps = NeutralSavedViewsPanelRowProps<
+  ReactNode,
+  CSSProperties
+>;
 
 /**
- * Props an adapter's rename input receives.
+ * The kit-native pieces the panel is built from — `@adapttable/core`'s
+ * `SavedViewsPanelSlots` drawing React nodes.
  *
  * @public
  */
-export interface SavedViewsPanelInputProps {
-  /** Accessible name. */
-  readonly label: string;
-  /**
-   * Attach to the underlying input element. The panel takes focus through
-   * this rather than through `autoFocus`: the browser attribute fires once at
-   * mount whether or not the element was the point of the interaction, which
-   * is why it reads as an accessibility problem. Here the focus follows a
-   * deliberate click on Rename.
-   *
-   * Kits whose input component hands back something other than the DOM node —
-   * antd's `InputRef`, for one — unwrap it before calling this.
-   */
-  readonly ref: (element: HTMLInputElement | null) => void;
-  /** Current value. */
-  readonly value: string;
-  /** Called with the new value. */
-  readonly onChange: (next: string) => void;
-  /** Enter commits, Escape abandons — bind both. */
-  readonly onCommit: () => void;
-  /** Abandons the edit. */
-  readonly onCancel: () => void;
-}
+export type SavedViewsPanelSlots = NeutralSavedViewsPanelSlots<
+  ReactNode,
+  CSSProperties
+>;
 
 /**
- * Props an adapter's empty state receives.
+ * What the panel needs to render — `@adapttable/core`'s
+ * `SavedViewsPanelChromeProps` with React's nodes and slots.
  *
  * @public
  */
-export interface SavedViewsPanelEmptyProps {
-  /** Body text under the heading. */
-  readonly message: string;
-}
-
-/**
- * The kit-native pieces the panel is built from.
- *
- * @public
- */
-export interface SavedViewsPanelSlots {
-  /** The titled card. */
-  readonly Surface: (props: SavedViewsPanelSurfaceProps) => ReactNode;
-  /** One view. */
-  readonly Row: (props: SavedViewsPanelRowProps) => ReactNode;
-  /** The inline rename box. */
-  readonly Input: (props: SavedViewsPanelInputProps) => ReactNode;
-  /** Shown when nothing has been saved yet. */
-  readonly Empty: (props: SavedViewsPanelEmptyProps) => ReactNode;
-}
-
-/**
- * What the panel needs to render.
- *
- * @public
- */
-export interface SavedViewsPanelChromeProps {
-  /** The saved views, in list order. */
-  views: readonly SavedView[];
-  /** Apply one. */
-  onApply: (name: string) => void;
-  /** Rename one. */
-  onRename: (from: string, to: string) => void;
-  /** Move one a step. */
-  onMove: (name: string, delta: -1 | 1) => void;
-  /** Make one the default, or clear it. */
-  onSetDefault: (name: string) => void;
-  /** Delete one. */
-  onRemove: (name: string) => void;
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** Anything of yours that belongs inside the card, under the list. */
-  footer?: ReactNode;
-  /** The kit's controls. */
-  slots: SavedViewsPanelSlots;
-  /** Class for the element. */
-  className?: string;
-}
+export type SavedViewsPanelChromeProps = NeutralSavedViewsPanelChromeProps<
+  ReactNode,
+  CSSProperties
+>;
 
 /**
  * The saved-views management panel.

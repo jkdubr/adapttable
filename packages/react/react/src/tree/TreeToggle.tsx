@@ -2,54 +2,24 @@
  * Tree-toggle layout. The leaf spacer stays here (display only). Adapters
  * pass the chevron button the end user clicks.
  */
-import { type TableLabels, type TreeEntry } from "@adapttable/core";
+import type {
+  TreeToggleProps,
+  TreeToggleSlots as NeutralTreeToggleSlots,
+} from "@adapttable/core/binding";
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * Props for an adapter `TreeToggle` — no slots on the public API.
- *
- * @public
- */
-export interface TreeToggleProps<TRow> {
-  /** The row's place in the tree. */
-  entry: TreeEntry<TRow>;
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** Open or close this node. */
-  onToggle: (id: string) => void;
-  /** Class for the chevron — the unstyled kit's `treeToggle` hook. */
-  toggleClassName?: string;
-  /** Class for a leaf's placeholder — the unstyled kit's `treeSpacer` hook. */
-  spacerClassName?: string;
-}
+export type {
+  TreeToggleButtonProps,
+  TreeToggleProps,
+} from "@adapttable/core/binding";
 
 /**
- * Kit chevron the tree layout calls.
+ * Adapter-supplied controls for {@link TreeToggleChrome} —
+ * `@adapttable/core`'s `TreeToggleSlots` drawing React nodes.
  *
  * @public
  */
-export interface TreeToggleButtonProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Whether the section is open. */
-  readonly expanded: boolean;
-  /** Whether the node's children are still loading. */
-  readonly loading: boolean;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Called when pressed. */
-  readonly onClick: () => void;
-}
-
-/**
- * Adapter-supplied controls for {@link TreeToggleChrome}.
- *
- * @public
- */
-export interface TreeToggleSlots {
-  /** Renders a button. */
-  readonly Button: (props: TreeToggleButtonProps) => ReactNode;
-}
+export type TreeToggleSlots = NeutralTreeToggleSlots<ReactNode>;
 
 /**
  * Props for {@link TreeToggleChrome}.

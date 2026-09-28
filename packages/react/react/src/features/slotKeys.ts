@@ -1,27 +1,71 @@
 /**
  * The named positions a table asks features to fill.
  *
- * They live apart from every implementation so an adapter's root can name a
- * position without importing what draws there — the same separation that keeps
- * the row-reorder state key away from the reorder hook. This module holds ids
- * and types only; nothing here has a runtime cost worth measuring.
+ * The ids and `single` flags are `@adapttable/core`'s, so every binding names
+ * the same positions; this module types each one with React's render node and
+ * the React binding's own state. Each export is core's own key object, so a
+ * bundle carries one per position. Where the React props are core's own, the
+ * key is re-exported as is; where they are a narrower instantiation of core's,
+ * the key is annotated; where they fill a parameter
+ * core leaves open (the chrome, a hook's state) it is asserted, which is sound
+ * because the props marker is phantom and never read at runtime.
  */
 import {
-  type CellRange,
-  type ExportContext,
-  type ExportCsvOptions,
-  type FeatureHostState,
-  type GroupedFlatEntry,
-  type SelectionStats,
-  type TableLabels,
-  type TableSource,
-} from "@adapttable/core";
-import {
+  BULK_BAR as NEUTRAL_BULK_BAR,
+  CELL_NAV_LIVE as NEUTRAL_CELL_NAV_LIVE,
+  type CellNavLiveSlotProps as NeutralCellNavLiveSlotProps,
+  CHROME_BODY as NEUTRAL_CHROME_BODY,
+  type ChromeBodySlotProps as NeutralChromeBodySlotProps,
+  type ChromeExtraSlotProps as NeutralChromeExtraSlotProps,
   COLUMN_HEADER_RENAME as NEUTRAL_COLUMN_HEADER_RENAME,
+  COLUMN_LAYOUT_LIVE as NEUTRAL_COLUMN_LAYOUT_LIVE,
+  COLUMN_SELECT as NEUTRAL_COLUMN_SELECT,
   type ColumnHeaderRenameSlotProps as NeutralColumnHeaderRenameSlotProps,
+  COMMAND_PALETTE as NEUTRAL_COMMAND_PALETTE,
+  COMMAND_PALETTE_LIVE as NEUTRAL_COMMAND_PALETTE_LIVE,
+  CONTEXT_MENU as NEUTRAL_CONTEXT_MENU,
+  CONTEXT_MENU_LIVE as NEUTRAL_CONTEXT_MENU_LIVE,
+  EDIT_HISTORY_LIVE as NEUTRAL_EDIT_HISTORY_LIVE,
+  EDITABLE_CELL as NEUTRAL_EDITABLE_CELL,
+  type EditableCellSlotProps as NeutralEditableCellSlotProps,
+  type EditHistoryLiveSlotProps as NeutralEditHistoryLiveSlotProps,
+  EDITING_LIVE as NEUTRAL_EDITING_LIVE,
+  EXPANSION_LIVE as NEUTRAL_EXPANSION_LIVE,
+  EXPORT_LIVE as NEUTRAL_EXPORT_LIVE,
+  type ExportLiveSlotProps as NeutralExportLiveSlotProps,
+  type FeatureSlotKey,
+  FILL_HANDLE as NEUTRAL_FILL_HANDLE,
+  type FillHandleCellSlotProps as NeutralFillHandleCellSlotProps,
+  FILTER_CHIPS_LIVE as NEUTRAL_FILTER_CHIPS_LIVE,
   FILTER_DRAWER as NEUTRAL_FILTER_DRAWER,
   FILTER_POPOVER as NEUTRAL_FILTER_POPOVER,
   type FilterOverlaySlotProps as NeutralFilterOverlaySlotProps,
+  FIND_LIVE as NEUTRAL_FIND_LIVE,
+  FULLSCREEN_LIVE as NEUTRAL_FULLSCREEN_LIVE,
+  type FullscreenLiveSlotProps as NeutralFullscreenLiveSlotProps,
+  GRID_FOCUS_ANNOUNCER as NEUTRAL_GRID_FOCUS_ANNOUNCER,
+  GROUP_HEADER_CARD as NEUTRAL_GROUP_HEADER_CARD,
+  GROUP_HEADER_ROW as NEUTRAL_GROUP_HEADER_ROW,
+  type GroupHeaderCardSlotProps as NeutralGroupHeaderCardSlotProps,
+  type GroupHeaderRowSlotProps as NeutralGroupHeaderRowSlotProps,
+  GROUPING_LIVE as NEUTRAL_GROUPING_LIVE,
+  GROUPING_PANEL as NEUTRAL_GROUPING_PANEL,
+  KEYED_WINDOW as NEUTRAL_KEYED_WINDOW,
+  type KeyedWindowSlotProps as NeutralKeyedWindowSlotProps,
+  PINNING_LIVE as NEUTRAL_PINNING_LIVE,
+  ROW_ACTIONS_LIVE as NEUTRAL_ROW_ACTIONS_LIVE,
+  ROW_REORDER_BUTTONS as NEUTRAL_ROW_REORDER_BUTTONS,
+  ROW_REORDER_HANDLE as NEUTRAL_ROW_REORDER_HANDLE,
+  SAVED_VIEWS as NEUTRAL_SAVED_VIEWS,
+  type SavedViewsSlotProps as NeutralSavedViewsSlotProps,
+  SELECTION_LIVE as NEUTRAL_SELECTION_LIVE,
+  SELECTION_STATS_LIVE as NEUTRAL_SELECTION_STATS_LIVE,
+  type SelectionStatsLiveSlotProps as NeutralSelectionStatsLiveSlotProps,
+  SIDE_PANEL as NEUTRAL_SIDE_PANEL,
+  STATUS_BAR as NEUTRAL_STATUS_BAR,
+  TABLE_ASSISTANT as NEUTRAL_TABLE_ASSISTANT,
+  TREE_CELL as NEUTRAL_TREE_CELL,
+  TREE_LIVE as NEUTRAL_TREE_LIVE,
 } from "@adapttable/core/binding";
 import type { ReactNode, RefObject } from "react";
 
@@ -31,22 +75,9 @@ import type { UseCommandPaletteOptions } from "../actions/useCommandPalette";
 import type { TableContextMenuOptions } from "../actions/useTableContextMenu";
 import type { TableAssistantProps } from "../assistant/TableAssistantChrome";
 import type { ColumnDef } from "../columnDef";
-import type { ColumnGroupToggleProps } from "../columns/ColumnGroupToggle";
-import type { PinOffset } from "../columns/useColumnLayout";
-import type { AgentApprovalProps } from "../editing/AgentApprovalChrome";
 import type { EditableCellEditing } from "../editing/editableCellController";
 import type { EditHistoryState } from "../editing/editHistory";
-import type {
-  BatchEditBarProps,
-  RowEditActionsProps,
-} from "../editing/RowEditGate";
-import type {
-  ExportHandlerState,
-  ExportProgressState,
-} from "../export/useExportHandler";
-import type { FiltersFormSlotProps } from "../filters/filterForm";
-import type { FilterHeaderControlProps } from "../filters/FilterHeaderRow";
-import type { FindBarProps } from "../find/FindBar";
+import type { ExportHandlerState } from "../export/useExportHandler";
 import type {
   FindInTableState,
   UseFindInTableOptions,
@@ -67,20 +98,28 @@ import type {
 } from "../rows/RowReorderHandle";
 import type { SelectionState } from "../selection/useSelection";
 import type { TreeCellProps } from "../tree/TreeCell";
-import type { TreeToggleProps } from "../tree/TreeToggle";
 import type { UrlStateAdapter } from "../url/adapter";
 import type { UseSavedViewsOptions } from "../url/useSavedViews";
 import type { BulkBarChromeProps, TableChrome } from "../useTableChrome";
 import type { ChromeBodyData } from "../virtual/chromeBodyShared";
 import type { KeyedVirtualization } from "../virtual/useTableVirtualization";
-import { type FeatureSlotKey, featureSlotKey } from "./providers";
 
 export {
   ACTIVE_FILTER_CHIPS,
+  AGENT_APPROVAL,
+  BATCH_EDIT_BAR,
+  COLUMN_GROUP_TOGGLE,
   COLUMN_MENU,
   EXPAND_TOGGLE,
   type ExpandToggleSlotProps,
+  FILTER_HEADER,
+  FILTERS_FORM,
+  FIND_BAR,
+  ROW_EDIT_ACTIONS,
   ROW_REORDER_ANNOUNCER,
+  TOOLBAR_EXTRAS,
+  type ToolbarExtrasSlotProps,
+  TREE_TOGGLE,
 } from "@adapttable/core/binding";
 
 /**
@@ -136,121 +175,65 @@ export const FILTER_POPOVER: FeatureSlotKey<FilterOverlaySlotProps> =
  *
  * @public
  */
-export const STATUS_BAR = featureSlotKey<Omit<StatusBarChromeProps, "slots">>(
-  "status-bar",
-  { single: true }
-);
-
-/**
- * The find bar above the table.
- *
- * @public
- */
-export const FIND_BAR = featureSlotKey<FindBarProps>("find-bar", {
-  single: true,
-});
-
-/**
- * The bar that saves or discards a batch of edits.
- *
- * The row type is erased to `never` because a slot key is one module-level
- * constant serving every table. `BatchEditingState` mentions the row only in
- * parameter positions, so the erasure is sound: any table's state satisfies it.
- *
- * @public
- */
-export const BATCH_EDIT_BAR = featureSlotKey<BatchEditBarProps<never>>(
-  "batch-edit-bar",
-  { single: true }
-);
-
-/**
- * The strip that asks a reader to approve or reject an agent write.
- *
- * @public
- */
-export const AGENT_APPROVAL = featureSlotKey<AgentApprovalProps>(
-  "agent-approval",
-  { single: true }
-);
+export const STATUS_BAR: FeatureSlotKey<Omit<StatusBarChromeProps, "slots">> =
+  NEUTRAL_STATUS_BAR;
 
 /**
  * The assistant panel that sits beside the table.
  *
  * @public
  */
-export const TABLE_ASSISTANT = featureSlotKey<TableAssistantProps>(
-  "table-assistant",
-  { single: true }
-);
+export const TABLE_ASSISTANT: FeatureSlotKey<TableAssistantProps> =
+  NEUTRAL_TABLE_ASSISTANT;
 
 /**
  * The command palette overlay.
  *
  * @public
  */
-export const COMMAND_PALETTE = featureSlotKey<
+export const COMMAND_PALETTE: FeatureSlotKey<
   Omit<CommandPaletteChromeProps, "slots">
->("command-palette", { single: true });
+> = NEUTRAL_COMMAND_PALETTE;
 
 /**
  * The right-click menu.
  *
  * @public
  */
-export const CONTEXT_MENU = featureSlotKey<
+export const CONTEXT_MENU: FeatureSlotKey<
   Omit<ContextMenuChromeProps, "slots">
->("context-menu", { single: true });
+> = NEUTRAL_CONTEXT_MENU;
 
 /**
  * The docked side panel.
  *
  * @public
  */
-export const SIDE_PANEL = featureSlotKey<Omit<SidePanelChromeProps, "slots">>(
-  "side-panel",
-  { single: true }
-);
+export const SIDE_PANEL: FeatureSlotKey<Omit<SidePanelChromeProps, "slots">> =
+  NEUTRAL_SIDE_PANEL;
 
 /**
  * The selection bar with bulk actions.
  *
  * @public
  */
-export const BULK_BAR = featureSlotKey<BulkBarChromeProps>("bulk-bar", {
-  single: true,
-});
+export const BULK_BAR: FeatureSlotKey<BulkBarChromeProps> = NEUTRAL_BULK_BAR;
 
 /**
- * The filters panel body (tree builder + optional simple fields).
- *
- * The row type is erased to `never` because a slot key is one module-level
- * constant serving every table. Callers pass that table's defs and source;
- * the renderer only reads them.
- *
- * @public
- */
-export const FILTERS_FORM = featureSlotKey<FiltersFormSlotProps<never>>(
-  "filters-form",
-  { single: true }
-);
-
-/**
- * Props the virtualize feature's in-tree body receives.
+ * Props the virtualize feature's in-tree body receives —
+ * `@adapttable/core`'s `ChromeBodySlotProps` with React's chrome and nodes.
  *
  * The row type is erased to `never` because a slot key is one module-level
  * constant. The gate passes that table's chrome; the renderer only reads it.
  *
  * @public
  */
-export interface ChromeBodySlotProps<TRow = never> {
-  /** Chrome already computed by the shell — hooks here must not recompute it. */
-  chrome: TableChrome<TRow>;
-  /** The same props the shell handed the chrome. */
-  props: ComposedTableProps<TRow>;
-  /** Finish the table with the body data this slot produced. */
-  children: (body: ChromeBodyData<TRow>) => ReactNode;
-}
+export type ChromeBodySlotProps<TRow = never> = NeutralChromeBodySlotProps<
+  TableChrome<TRow>,
+  ComposedTableProps<TRow>,
+  ChromeBodyData<TRow>,
+  ReactNode
+>;
 
 /**
  * The scroll-window body. Filled only by `virtualize()`; the plain path
@@ -258,37 +241,9 @@ export interface ChromeBodySlotProps<TRow = never> {
  *
  * @public
  */
-export const CHROME_BODY = featureSlotKey<ChromeBodySlotProps<never>>(
-  "chrome-body",
-  { single: true }
-);
-
-/**
- * A window over an opaque keyed list, for a kit that assembles its own body.
- *
- * antd renders through its own `<Table>`, so it cannot take {@link CHROME_BODY}
- * — but it still has a grouped flat list to window, and windowing it means the
- * TanStack hooks. Asking for them here keeps them where every other kit keeps
- * them: behind `virtualize()`, out of the plain table's graph.
- *
- * @public
- */
-export interface KeyedWindowSlotProps {
-  /** One key per entry, in render order. */
-  keys: readonly string[];
-  /** Whether to window at all; false renders every entry. */
-  enabled: boolean;
-  /** Estimated pixel height of one entry. */
-  estimateSize: number;
-  /** Extra entries to render beyond the viewport. */
-  overscan?: number;
-  /** Where the list starts in the page, for a window-scrolled list. */
-  scrollMargin?: number;
-  /** The scroll box, when the list scrolls inside one rather than the page. */
-  getScrollElement?: () => Element | null;
-  /** Finish with the window this slot produced. */
-  children: (window: KeyedWindow) => ReactNode;
-}
+export const CHROME_BODY = NEUTRAL_CHROME_BODY as FeatureSlotKey<
+  ChromeBodySlotProps<never>
+>;
 
 /**
  * The window {@link KEYED_WINDOW} produces: the keyed virtualization, plus a
@@ -303,14 +258,28 @@ export interface KeyedWindow extends KeyedVirtualization {
 }
 
 /**
+ * A window over an opaque keyed list, for a kit that assembles its own body —
+ * `@adapttable/core`'s `KeyedWindowSlotProps` with React's window and nodes.
+ *
+ * antd renders through its own `<Table>`, so it cannot take {@link CHROME_BODY}
+ * — but it still has a grouped flat list to window, and windowing it means the
+ * TanStack hooks. Asking for them here keeps them where every other kit keeps
+ * them: behind `virtualize()`, out of the plain table's graph.
+ *
+ * @public
+ */
+export type KeyedWindowSlotProps = NeutralKeyedWindowSlotProps<
+  KeyedWindow,
+  ReactNode
+>;
+
+/**
  * The keyed window a kit that builds its own body asks for.
  *
  * @public
  */
-export const KEYED_WINDOW = featureSlotKey<KeyedWindowSlotProps>(
-  "keyed-window",
-  { single: true }
-);
+export const KEYED_WINDOW =
+  NEUTRAL_KEYED_WINDOW as FeatureSlotKey<KeyedWindowSlotProps>;
 
 /**
  * The saved-views toolbar control. The feature that fills it also owns
@@ -318,24 +287,16 @@ export const KEYED_WINDOW = featureSlotKey<KeyedWindowSlotProps>(
  *
  * @public
  */
-export interface SavedViewsSlotProps {
-  /** Storage + URL backend wiring. */
-  options: UseSavedViewsOptions;
-  /** Trigger, save-row, and delete labels. */
-  labels: Pick<
-    Required<TableLabels>,
-    "savedViews" | "saveView" | "viewName" | "deleteView"
-  >;
-}
+export type SavedViewsSlotProps =
+  NeutralSavedViewsSlotProps<UseSavedViewsOptions>;
 
 /**
  * The saved-views toolbar control.
  *
  * @public
  */
-export const SAVED_VIEWS = featureSlotKey<SavedViewsSlotProps>("saved-views", {
-  single: true,
-});
+export const SAVED_VIEWS: FeatureSlotKey<SavedViewsSlotProps> =
+  NEUTRAL_SAVED_VIEWS;
 
 /**
  * The command palette plus the hook that arms it.
@@ -346,10 +307,8 @@ export const SAVED_VIEWS = featureSlotKey<SavedViewsSlotProps>("saved-views", {
  *
  * @public
  */
-export const COMMAND_PALETTE_LIVE = featureSlotKey<UseCommandPaletteOptions>(
-  "command-palette-live",
-  { single: true }
-);
+export const COMMAND_PALETTE_LIVE: FeatureSlotKey<UseCommandPaletteOptions> =
+  NEUTRAL_COMMAND_PALETTE_LIVE;
 
 /**
  * Props the in-tree context-menu feature receives: hook inputs, the
@@ -373,9 +332,9 @@ export interface ContextMenuLiveSlotProps<
  *
  * @public
  */
-export const CONTEXT_MENU_LIVE = featureSlotKey<
+export const CONTEXT_MENU_LIVE: FeatureSlotKey<
   ContextMenuLiveSlotProps<never>
->("context-menu-live", { single: true });
+> = NEUTRAL_CONTEXT_MENU_LIVE;
 
 /**
  * Find-in-table plus the hook that arms it.
@@ -403,563 +362,337 @@ export interface FindLiveSlotProps<
  *
  * @public
  */
-export const FIND_LIVE = featureSlotKey<FindLiveSlotProps<never>>("find-live", {
-  single: true,
-});
+export const FIND_LIVE: FeatureSlotKey<FindLiveSlotProps<never>> =
+  NEUTRAL_FIND_LIVE;
 
 /**
- * Edit-history plus the hook that records gestures.
+ * Edit-history plus the hook that records gestures —
+ * `@adapttable/core`'s `EditHistoryLiveSlotProps` with React's history state.
  *
  * @public
  */
-export interface EditHistoryLiveSlotProps<TRow = never> {
-  /** History options from the composed feature / prop. */
-  editHistory: boolean | EditHistoryOptions | undefined;
-  /** Columns, for reading a cell's value before it changes. */
-  columns: readonly ColumnDef<TRow>[];
-  /** The host's commit channel. */
-  onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
-  /** The table; receives history and the recording commit channel. */
-  children: (result: {
-    history: EditHistoryState<TRow>;
-    onCellEdit:
-      ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
-  }) => ReactNode;
-}
+export type EditHistoryLiveSlotProps<TRow = never> =
+  NeutralEditHistoryLiveSlotProps<
+    TRow,
+    EditHistoryState<TRow>,
+    EditHistoryOptions,
+    ColumnDef<TRow>,
+    ReactNode
+  >;
 
 /**
  * The undo/redo hook.
  *
  * @public
  */
-export const EDIT_HISTORY_LIVE = featureSlotKey<
+export const EDIT_HISTORY_LIVE = NEUTRAL_EDIT_HISTORY_LIVE as FeatureSlotKey<
   EditHistoryLiveSlotProps<never>
->("edit-history-live", { single: true });
+>;
 
 /**
- * Cell navigation plus the hook that arms the grid.
+ * Cell navigation plus the hook that arms the grid —
+ * `@adapttable/core`'s `CellNavLiveSlotProps` with React's grid state.
  *
  * @public
  */
-export interface CellNavLiveSlotProps<TRow = never> {
-  /** Inputs the grid hook needs after chrome has run. `enabled` is implied. */
-  options: Omit<
+export type CellNavLiveSlotProps<TRow = never> = NeutralCellNavLiveSlotProps<
+  Omit<
     UseGridFocusOptions<TRow>,
     "enabled" | "onPaste" | "onFill" | "onUndo" | "onRedo" | "onFind"
-  >;
-  /** Host props the paste/fill channels read. */
-  hostProps: ComposedTableProps<TRow>;
-  /** Record a paste/fill as one undo gesture. */
-  record: (edits: readonly unknown[]) => void;
-  /** Undo the last paste/fill gesture. */
-  undo: () => number;
-  /** Redo the last undone gesture. */
-  redo: () => number;
-  /** Open the find bar, when find is composed. */
-  onFind?: () => void;
-  /** Column keys the find bar highlights. */
-  matchKeys: ReadonlySet<string>;
-  /** The active find match, when find is composed. */
-  currentMatch: UseGridFocusOptions<TRow>["currentMatch"];
-  /** Pin boundary the span-coverage walk respects. */
-  pinOffset?: (key: string) => PinOffset | undefined;
-  /** The table; receives grid focus. */
-  children: (gridFocus: GridFocusState) => ReactNode;
-}
+  >,
+  ComposedTableProps<TRow>,
+  GridFocusState,
+  ReactNode
+>;
 
 /**
  * The cell-navigation hook.
  *
  * @public
  */
-export const CELL_NAV_LIVE = featureSlotKey<CellNavLiveSlotProps<never>>(
-  "cell-nav-live",
-  { single: true }
-);
+export const CELL_NAV_LIVE = NEUTRAL_CELL_NAV_LIVE as FeatureSlotKey<
+  CellNavLiveSlotProps<never>
+>;
 
 /**
- * Export plus the hook that single-flights the write.
+ * Export plus the hook that single-flights the write —
+ * `@adapttable/core`'s `ExportLiveSlotProps` with React's export state.
  *
  * @public
  */
-export interface ExportLiveSlotProps<TRow = never> {
-  /** Configuration applied by the composed export feature. */
-  exportCsv: boolean | ExportCsvOptions<TRow> | undefined;
-  /** Rows the file is built from. */
-  source: TableSource<TRow>;
-  /** Visible columns in the current view. */
-  columns: readonly ColumnDef<TRow>[];
-  /** Selection, range, grouping and tree the writer reads. */
-  context: ExportContext<TRow>;
-  /** This table's plugin host, for registered writers. */
-  featureHost?: FeatureHostState;
-  /** Resolved labels. */
-  labels: TableLabels;
-  /** Whether the handler can only write the current page. */
-  pageOnly: boolean;
-  /** The table; receives export button state. */
-  children: (exportHandler: ExportHandlerState) => ReactNode;
-}
+export type ExportLiveSlotProps<TRow = never> = NeutralExportLiveSlotProps<
+  TRow,
+  ExportHandlerState,
+  ColumnDef<TRow>,
+  ReactNode
+>;
 
 /**
  * The export hook.
  *
  * @public
  */
-export const EXPORT_LIVE = featureSlotKey<ExportLiveSlotProps>("export-live", {
-  single: true,
-});
+export const EXPORT_LIVE =
+  NEUTRAL_EXPORT_LIVE as FeatureSlotKey<ExportLiveSlotProps>;
 
 /**
- * Fullscreen plus the hook that names the portal container.
+ * Fullscreen plus the hook that names the portal container —
+ * `@adapttable/core`'s `FullscreenLiveSlotProps` with React's state.
  *
  * @public
  */
-export interface FullscreenLiveSlotProps {
-  /** The table root. */
-  element: HTMLElement | null;
-  /** The table; receives fullscreen state. */
-  children: (fullscreen: FullscreenState) => ReactNode;
-}
+export type FullscreenLiveSlotProps = NeutralFullscreenLiveSlotProps<
+  FullscreenState,
+  ReactNode
+>;
 
 /**
  * The fullscreen hook.
  *
  * @public
  */
-export const FULLSCREEN_LIVE = featureSlotKey<FullscreenLiveSlotProps>(
-  "fullscreen-live",
-  { single: true }
-);
+export const FULLSCREEN_LIVE =
+  NEUTRAL_FULLSCREEN_LIVE as FeatureSlotKey<FullscreenLiveSlotProps>;
 
 /**
- * Optional chrome that transforms the row model or editing bundle.
+ * Optional chrome that transforms the row model or editing bundle —
+ * `@adapttable/core`'s `ChromeExtraSlotProps` with React's chrome.
  *
  * Grouping, tree, expansion and editing run here — after base chrome,
  * before the body gate — so their hooks never sit in the lean graph.
  *
  * @public
  */
-export interface ChromeExtraSlotProps<TRow = never> {
-  /** Base chrome, before this extra runs. */
-  chrome: TableChrome<TRow>;
-  /**
-   * The same props the shell handed the chrome, plus the resolved URL
-   * backend so extras that own URL state (pin lists) share one adapter.
-   */
-  props: ComposedTableProps<TRow> & {
+export type ChromeExtraSlotProps<TRow = never> = NeutralChromeExtraSlotProps<
+  TableChrome<TRow>,
+  ComposedTableProps<TRow> & {
     urlAdapter?: UrlStateAdapter;
     urlSync?: boolean;
     urlKey?: string;
-  };
-  /** Continue with the overlaid chrome. */
-  children: (chrome: TableChrome<TRow>) => ReactNode;
-}
+  },
+  ReactNode
+>;
 
 /**
  * Grouping row-model + collapse/paging hooks.
  *
  * @public
  */
-export const GROUPING_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
-  "grouping-live",
-  { single: true }
-);
+export const GROUPING_LIVE = NEUTRAL_GROUPING_LIVE as FeatureSlotKey<
+  ChromeExtraSlotProps<never>
+>;
 
 /** Adapter-owned interactive grouping strip above the table body. @public */
-export const GROUPING_PANEL = featureSlotKey<GroupingPanelSlotProps<never>>(
-  "grouping-panel",
-  { single: true }
-);
+export const GROUPING_PANEL: FeatureSlotKey<GroupingPanelSlotProps<never>> =
+  NEUTRAL_GROUPING_PANEL;
 
 /**
  * Tree walk + expansion/lazy-load hooks.
  *
  * @public
  */
-export const TREE_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
-  "tree-live",
-  { single: true }
-);
+export const TREE_LIVE = NEUTRAL_TREE_LIVE as FeatureSlotKey<
+  ChromeExtraSlotProps<never>
+>;
 
 /**
  * Row-detail / nested-table expansion hooks.
  *
  * @public
  */
-export const EXPANSION_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
-  "expansion-live",
-  { single: true }
-);
+export const EXPANSION_LIVE = NEUTRAL_EXPANSION_LIVE as FeatureSlotKey<
+  ChromeExtraSlotProps<never>
+>;
 
 /**
  * Cell/row/batch editing hooks.
  *
  * @public
  */
-export const EDITING_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
-  "editing-live",
-  { single: true }
-);
+export const EDITING_LIVE = NEUTRAL_EDITING_LIVE as FeatureSlotKey<
+  ChromeExtraSlotProps<never>
+>;
 
 /**
  * Row-pin state machine.
  *
  * @public
  */
-export const PINNING_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
-  "pinning-live",
-  { single: true }
-);
+export const PINNING_LIVE = NEUTRAL_PINNING_LIVE as FeatureSlotKey<
+  ChromeExtraSlotProps<never>
+>;
 
 /**
  * Filter-tree chips merged onto chrome.
  *
  * @public
  */
-export const FILTER_CHIPS_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
-  "filter-chips-live",
-  { single: true }
-);
+export const FILTER_CHIPS_LIVE = NEUTRAL_FILTER_CHIPS_LIVE as FeatureSlotKey<
+  ChromeExtraSlotProps<never>
+>;
 
 /**
  * User column-layout hook (hide / order / pin / resize).
  *
  * @public
  */
-export const COLUMN_LAYOUT_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
-  "column-layout-live",
-  { single: true }
-);
+export const COLUMN_LAYOUT_LIVE = NEUTRAL_COLUMN_LAYOUT_LIVE as FeatureSlotKey<
+  ChromeExtraSlotProps<never>
+>;
 
 /**
  * Add / duplicate / delete and host row actions.
  *
  * @public
  */
-export const ROW_ACTIONS_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
-  "row-actions-live",
-  { single: true }
-);
+export const ROW_ACTIONS_LIVE = NEUTRAL_ROW_ACTIONS_LIVE as FeatureSlotKey<
+  ChromeExtraSlotProps<never>
+>;
 
 /**
  * Row selection state machine.
  *
  * @public
  */
-export const SELECTION_LIVE = featureSlotKey<ChromeExtraSlotProps<never>>(
-  "selection-live",
-  { single: true }
-);
+export const SELECTION_LIVE = NEUTRAL_SELECTION_LIVE as FeatureSlotKey<
+  ChromeExtraSlotProps<never>
+>;
 
 /**
- * Selection aggregates. Computed only when the feature is composed.
+ * Selection aggregates — `@adapttable/core`'s `SelectionStatsLiveSlotProps`
+ * with React's columns and nodes. Computed only when the feature is composed.
  *
  * @public
  */
-export interface SelectionStatsLiveSlotProps<TRow = never> {
-  /** Selected cell rectangle, if any. */
-  range: CellRange | null;
-  /** Rows the stats cover. */
-  rows: readonly TRow[];
-  /** Columns the stats cover. */
-  columns: readonly ColumnDef<TRow>[];
-  /** Dataset index of the range's first row. */
-  firstRowIndex: number;
-  /** Finish with the computed stats. */
-  children: (stats: SelectionStats | null) => ReactNode;
-}
+export type SelectionStatsLiveSlotProps<TRow = never> =
+  NeutralSelectionStatsLiveSlotProps<TRow, ColumnDef<TRow>, ReactNode>;
 
 /**
  * Selection-stats compute.
  *
  * @public
  */
-export const SELECTION_STATS_LIVE = featureSlotKey<
-  SelectionStatsLiveSlotProps<never>
->("selection-stats-live", { single: true });
+export const SELECTION_STATS_LIVE =
+  NEUTRAL_SELECTION_STATS_LIVE as FeatureSlotKey<
+    SelectionStatsLiveSlotProps<never>
+  >;
 
 /**
  * Header checkbox that selects a column.
  *
  * @public
  */
-export const COLUMN_SELECT =
-  featureSlotKey<Omit<ColumnSelectCheckboxChromeProps, "slots">>(
-    "column-select"
-  );
+export const COLUMN_SELECT: FeatureSlotKey<
+  Omit<ColumnSelectCheckboxChromeProps, "slots">
+> = NEUTRAL_COLUMN_SELECT;
 
 /**
  * Live region for keyboard-grid focus.
  *
  * @public
  */
-export const GRID_FOCUS_ANNOUNCER = featureSlotKey<{
+export const GRID_FOCUS_ANNOUNCER: FeatureSlotKey<{
   focus: GridFocusState;
-}>("grid-focus-announcer", { single: true });
+}> = NEUTRAL_GRID_FOCUS_ANNOUNCER;
 
 /**
- * Per-column header filter trigger.
+ * In-place cell editor — `@adapttable/core`'s `EditableCellSlotProps` with
+ * React's edit session, columns and nodes. Empty means the cell is
+ * display-only.
  *
  * @public
  */
-export const FILTER_HEADER = featureSlotKey<FilterHeaderControlProps<never>>(
-  "filter-header",
-  { single: true }
-);
-
-/**
- * In-place cell editor. Empty means the cell is display-only.
- *
- * @public
- */
-export interface EditableCellSlotProps<TRow = never> {
-  /** Active edit session for this cell, if any. */
-  editing: EditableCellEditing<TRow> | undefined;
-  /** The row being edited. */
-  row: TRow;
-  /** The column being edited. */
-  column: ColumnDef<TRow>;
-  /** Stable row id. */
-  rowId: string;
-  /** Index in the current page. */
-  rowIndex: number;
-  /** All rows on the current page. */
-  rows: readonly TRow[];
-  /** Visible columns in the current view. */
-  columns: readonly ColumnDef<TRow>[];
-  /** Resolve a row's stable key. */
-  rowKey: (row: TRow) => string;
-  /** Accessible label for the editor. */
-  editLabel: string;
-  /** Accessible undo label. */
-  undoLabel?: string;
-  /**
-   * The cell's display content, computed by the adapter's cell wrapper so the
-   * accessor call sits in that cell's own memo scope — re-rendering a row for
-   * selection or expansion must not re-run its data accessors. Empty means the
-   * slot renderer reads the column itself.
-   */
-  display?: ReactNode;
-}
+export type EditableCellSlotProps<TRow = never> = NeutralEditableCellSlotProps<
+  TRow,
+  EditableCellEditing<TRow>,
+  ColumnDef<TRow>,
+  ReactNode
+>;
 
 /**
  * The kit's editable cell. One renderer — dirty marks ride the same cell.
  *
  * @public
  */
-export const EDITABLE_CELL = featureSlotKey<EditableCellSlotProps<never>>(
-  "editable-cell",
-  { single: true }
-);
+export const EDITABLE_CELL = NEUTRAL_EDITABLE_CELL as FeatureSlotKey<
+  EditableCellSlotProps<never>
+>;
 
 /**
- * Fill handle on a selected cell.
+ * Fill handle on a selected cell — `@adapttable/core`'s
+ * `FillHandleCellSlotProps` with React's grid state.
  *
  * @public
  */
-export interface FillHandleCellSlotProps {
-  /** Grid focus state for the selected cell. */
-  focus: GridFocusState | undefined;
-  /** Row index in the virtual window. */
-  windowIndex: number;
-  /** Column index in the visible set. */
-  col: number;
-}
+export type FillHandleCellSlotProps =
+  NeutralFillHandleCellSlotProps<GridFocusState>;
 
 /**
  * The fill handle.
  *
  * @public
  */
-export const FILL_HANDLE =
-  featureSlotKey<FillHandleCellSlotProps>("fill-handle");
-
-/**
- * Toolbar extras (export, undo, print, density, fullscreen).
- *
- * Several features may fill this; it is a list, not a single element.
- *
- * @public
- */
-export interface ToolbarExtrasSlotProps {
-  /** Undo the last edit. */
-  onUndo?: () => void;
-  /** Redo the last undone edit. */
-  onRedo?: () => void;
-  /** Whether undo is available. */
-  canUndo?: boolean;
-  /** Whether redo is available. */
-  canRedo?: boolean;
-  /** Accessible undo label. */
-  undoLabel?: string;
-  /** Accessible redo label. */
-  redoLabel?: string;
-  /** Print the table. */
-  onPrint?: () => void;
-  /** Accessible print label. */
-  printLabel?: string;
-  /** Current row density. */
-  density: "comfortable" | "compact";
-  /** Request a density change. */
-  onDensityChange: (next: "comfortable" | "compact") => void;
-  /** Enter or exit fullscreen. */
-  onToggleFullscreen?: () => void;
-  /** Whether the table is fullscreen. */
-  isFullscreen?: boolean;
-  /** Export the current view to CSV. */
-  onExportCsv?: () => void;
-  /** Whether an export is in flight. */
-  exportBusy?: boolean;
-  /** Live-region text while exporting. */
-  exportAnnouncement?: string;
-  /** Server-built progress surface state. */
-  exportProgressState?: ExportProgressState | null;
-  /** Accessible export label. */
-  exportLabel?: string;
-  /** The source cannot cover the export the host asked for. */
-  exportDisabled?: boolean;
-  /** Why the Export button is disabled, localized; empty while it is not. */
-  exportDisabledReason?: string;
-  /**
-   * The table's class map, for a kit whose controls are styled through one
-   * (`unstyled` and everything built on it). A kit with its own components
-   * ignores it — the documented `classNames` keys are the same either way.
-   */
-  classNames?: Readonly<Record<string, string | undefined>>;
-  /** Kit accent token some controls paint with. */
-  accentColor?: string;
-  /** Resolved labels for density and fullscreen controls. */
-  labels: Required<TableLabels>;
-}
-
-/**
- * Optional toolbar controls.
- *
- * @public
- */
-export const TOOLBAR_EXTRAS =
-  featureSlotKey<ToolbarExtrasSlotProps>("toolbar-extras");
+export const FILL_HANDLE: FeatureSlotKey<FillHandleCellSlotProps> =
+  NEUTRAL_FILL_HANDLE;
 
 /**
  * Tree-column cell wrapper. Empty means render the cell contents alone.
  *
  * @public
  */
-export const TREE_CELL = featureSlotKey<TreeCellProps<never>>("tree-cell");
-
-/**
- * Mobile tree disclosure control.
- *
- * @public
- */
-export const TREE_TOGGLE =
-  featureSlotKey<TreeToggleProps<never>>("tree-toggle");
-
-/**
- * Save / cancel for a row being edited. One renderer: `editing()` and
- * `rowEditing()` contribute the same kit chrome, and a table that composes
- * both would otherwise draw two identical sets of controls on the open row.
- *
- * @public
- */
-export const ROW_EDIT_ACTIONS = featureSlotKey<RowEditActionsProps<never>>(
-  "row-edit-actions",
-  { single: true }
-);
+export const TREE_CELL: FeatureSlotKey<TreeCellProps<never>> =
+  NEUTRAL_TREE_CELL;
 
 /**
  * Desktop row-reorder grip.
  *
  * @public
  */
-export const ROW_REORDER_HANDLE =
-  featureSlotKey<RowReorderHandleProps<never>>("row-reorder-handle");
+export const ROW_REORDER_HANDLE: FeatureSlotKey<RowReorderHandleProps<never>> =
+  NEUTRAL_ROW_REORDER_HANDLE;
 
 /**
  * Mobile row-reorder buttons.
  *
  * @public
  */
-export const ROW_REORDER_BUTTONS = featureSlotKey<
+export const ROW_REORDER_BUTTONS: FeatureSlotKey<
   RowReorderButtonsProps<never>
->("row-reorder-buttons");
+> = NEUTRAL_ROW_REORDER_BUTTONS;
 
 /**
- * Collapse a header group.
+ * Group header / footer / more row on the desktop table —
+ * `@adapttable/core`'s `GroupHeaderRowSlotProps` with React's selection and
+ * columns.
  *
  * @public
  */
-export const COLUMN_GROUP_TOGGLE = featureSlotKey<ColumnGroupToggleProps>(
-  "column-group-toggle"
-);
-
-/**
- * Group header / footer / more row on the desktop table.
- *
- * @public
- */
-export interface GroupHeaderRowSlotProps<TRow = never> {
-  /** Group header, footer, or show-more row. */
-  entry: Extract<
-    GroupedFlatEntry<TRow>,
-    { kind: "group" | "groupFooter" | "groupMore" }
-  >;
-  /** Visible columns in the current view. */
-  columns: readonly ColumnDef<TRow>[];
-  /** Leading utility columns before data cells. */
-  leadingCells: number;
-  /** Whether the actions column is shown. */
-  showActions: boolean;
-  /** Cell props for a column in this row. */
-  getCellProps: (column: ColumnDef<TRow>) => Record<string, unknown>;
-  /** Current row selection, if any. */
-  selection: SelectionState | null;
-  /** Resolved table labels. */
-  labels: Required<TableLabels>;
-  /** Collapse or expand a group. */
-  onToggleCollapse: (groupKey: string) => void;
-  /** Load the next page of groups or rows. */
-  onShowMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
-}
+export type GroupHeaderRowSlotProps<TRow = never> =
+  NeutralGroupHeaderRowSlotProps<TRow, SelectionState, ColumnDef<TRow>>;
 
 /**
  * Desktop group header row.
  *
  * @public
  */
-export const GROUP_HEADER_ROW =
-  featureSlotKey<GroupHeaderRowSlotProps<never>>("group-header-row");
+export const GROUP_HEADER_ROW = NEUTRAL_GROUP_HEADER_ROW as FeatureSlotKey<
+  GroupHeaderRowSlotProps<never>
+>;
 
 /**
- * Group header card on the mobile list.
+ * Group header card on the mobile list — `@adapttable/core`'s
+ * `GroupHeaderCardSlotProps` with React's selection and columns.
  *
  * @public
  */
-export interface GroupHeaderCardSlotProps<TRow = never> {
-  /** Group header, footer, or show-more card. */
-  entry: Extract<
-    GroupedFlatEntry<TRow>,
-    { kind: "group" | "groupFooter" | "groupMore" }
-  >;
-  /** Visible columns in the current view. */
-  columns: readonly ColumnDef<TRow>[];
-  /** Current row selection, if any. */
-  selection: SelectionState | null;
-  /** Resolved table labels. */
-  labels: Required<TableLabels>;
-  /** Whether the mobile list is compact. */
-  compact: boolean;
-  /** Collapse or expand a group. */
-  onToggleCollapse: (groupKey: string) => void;
-  /** Load the next page of groups or rows. */
-  onShowMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
-}
+export type GroupHeaderCardSlotProps<TRow = never> =
+  NeutralGroupHeaderCardSlotProps<TRow, SelectionState, ColumnDef<TRow>>;
 
 /**
  * Mobile group header card.
  *
  * @public
  */
-export const GROUP_HEADER_CARD =
-  featureSlotKey<GroupHeaderCardSlotProps<never>>("group-header-card");
+export const GROUP_HEADER_CARD = NEUTRAL_GROUP_HEADER_CARD as FeatureSlotKey<
+  GroupHeaderCardSlotProps<never>
+>;

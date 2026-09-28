@@ -17,70 +17,13 @@ import {
   readEditableCellValue,
   resolveCellEditor,
 } from "@adapttable/core";
+import type { RowEditDrafts, RowEditingState } from "@adapttable/core/binding";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
 import { type EditEventHandler, observeEdit } from "./editingEvents";
 
-/**
- * The drafts a row edit holds, by column key.
- *
- * @public
- */
-export type RowEditDrafts = Readonly<Record<string, string>>;
-
-/**
- * Headless row-editing state.
- *
- * @public
- */
-export interface RowEditingState<TRow> {
-  /** The row being edited, or `null` when none is. */
-  activeRowId: string | null;
-  /** Whether this row is the one being edited. */
-  isEditing: (rowId: string) => boolean;
-  /** Every draft in the open row, by column key. */
-  drafts: RowEditDrafts;
-  /** One column's draft in the open row. */
-  draftFor: (columnKey: string) => string;
-  /** Open a row, seeding every editable column from its current value. */
-  begin: (row: TRow, rowId: string) => void;
-  /** Replace one column's draft. */
-  setDraft: (columnKey: string, value: string) => void;
-  /**
-   * Hand the host everything the reader changed, as one patch, then close.
-   * A no-op when nothing is open, and it reports nothing when nothing changed —
-   * saving an untouched row is a write the host never asked for.
-   */
-  save: () => void;
-  /** Throw every draft away and close. */
-  cancel: () => void;
-  /** Whether any draft differs from the row's stored value. */
-  isDirty: boolean;
-  /** A digest of the open row's drafts, for a row memo comparator. */
-  signature: string;
-  /** The row the form opened against, or `undefined` when none is open. */
-  openedRow: () => TRow | undefined;
-  /**
-   * What each field read when the form opened, or last accepted. This — not
-   * the row — is what an incoming change is measured against, field by field.
-   */
-  seeds: () => RowEditDrafts | undefined;
-  /**
-   * Accept an incoming row's values for these fields as what they now read,
-   * leaving the drafts alone: the reader keeps what they typed, and the patch
-   * still carries it.
-   */
-  acceptSeeds: (row: TRow, columnKeys: readonly string[]) => void;
-  /**
-   * Take an incoming row's values for these fields, into both the drafts and
-   * what they are measured against — nothing of the reader's is lost, because
-   * these are fields they had not typed in, or chose to give up.
-   */
-  takeSeeds: (row: TRow, columnKeys: readonly string[]) => void;
-  /** The table that owns these editors — never a sibling's host. */
-  featureHost?: FeatureHostState;
-}
+export type { RowEditDrafts, RowEditingState };
 
 /**
  * What {@link useRowEditing} needs.

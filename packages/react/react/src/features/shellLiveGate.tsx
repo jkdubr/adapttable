@@ -1,4 +1,17 @@
 import type { EditableColumnLike } from "@adapttable/core";
+import {
+  CELL_NAV_LIVE,
+  type CellNavLiveSlotProps,
+  EDIT_HISTORY_LIVE,
+  type EditHistoryLiveSlotProps,
+  EXPORT_LIVE,
+  type ExportLiveSlotProps,
+  FIND_LIVE,
+  FULLSCREEN_LIVE,
+  type FullscreenLiveSlotProps,
+  SELECTION_STATS_LIVE,
+  type SelectionStatsLiveSlotProps,
+} from "@adapttable/core/binding";
 /**
  * Mount shell interaction hooks in-tree: history, find, grid, export, fullscreen.
  *
@@ -23,20 +36,7 @@ import {
   disabledHistory,
   windowedTableAria,
 } from "./shellLiveStubs";
-import {
-  CELL_NAV_LIVE,
-  type CellNavLiveSlotProps,
-  EDIT_HISTORY_LIVE,
-  type EditHistoryLiveSlotProps,
-  EXPORT_LIVE,
-  type ExportLiveSlotProps,
-  FIND_LIVE,
-  type FindLiveSlotProps,
-  FULLSCREEN_LIVE,
-  type FullscreenLiveSlotProps,
-  SELECTION_STATS_LIVE,
-  type SelectionStatsLiveSlotProps,
-} from "./slotKeys";
+import { type FindLiveSlotProps } from "./slotKeys";
 
 interface HistoryResult<TRow> {
   history: DataTableShellResult<TRow>["editHistory"];
@@ -201,7 +201,7 @@ function CellNavStage<TRow>({
     currentMatch: live.find.current,
     children: (gridFocus: ReturnType<typeof disabledGridFocus>) =>
       children({ ...live, gridFocus }),
-  } as unknown as CellNavLiveSlotProps<never>;
+  } as unknown as CellNavLiveSlotProps;
   return filled ? (
     <FeatureSlot slot={CELL_NAV_LIVE} props={navProps} />
   ) : (
@@ -274,7 +274,7 @@ function FullscreenStage<TRow>({
     element: shell.chrome.rootRef.current,
     children: (fullscreen: typeof DISABLED_FULLSCREEN) =>
       children({ ...live, fullscreen }),
-  } as FullscreenLiveSlotProps;
+  } as unknown as FullscreenLiveSlotProps;
   return filled ? (
     <FeatureSlot slot={FULLSCREEN_LIVE} props={fullscreenProps} />
   ) : (

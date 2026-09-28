@@ -2,122 +2,60 @@
  * Row-reorder layout. The live region stays here. Adapters pass the grip
  * and the mobile up/down buttons the end user clicks.
  */
-import type { KeyboardEvent, ReactElement, ReactNode } from "react";
+import type {
+  RowMoveMenuSlotProps,
+  RowReorderButtonsProps as NeutralRowReorderButtonsProps,
+  RowReorderButtonsSlots as NeutralRowReorderButtonsSlots,
+  RowReorderHandleProps as NeutralRowReorderHandleProps,
+  RowReorderHandleSlotProps as NeutralRowReorderHandleSlotProps,
+  RowReorderHandleSlots as NeutralRowReorderHandleSlots,
+} from "@adapttable/core/binding";
+import type { DragEvent, KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
 import type { RowReorderLabels, RowReorderState } from "./rowReorder";
 
 export type { RowReorderLabels };
+export type {
+  RowMoveConfirmationProps,
+  RowMoveMenuItemProps,
+  RowMoveMenuSlotProps,
+  RowReorderMoveButtonProps,
+} from "@adapttable/core/binding";
 
 /**
- * Props for an adapter `RowReorderHandle` — no slots on the public API.
+ * Props for an adapter `RowReorderHandle` — `@adapttable/core`'s
+ * `RowReorderHandleProps` over React's row-reorder state.
  *
  * @public
  */
-export interface RowReorderHandleProps<TRow> {
-  /** Row-reorder state: what is being dragged and where it may land. */
-  reorder: RowReorderState<TRow>;
-  /** Resolved labels, every key filled. */
-  labels: RowReorderLabels;
-  /** Identity of the row this control moves. */
-  rowId: string;
-  /** The row's index within the rendered window. */
-  localIndex: number;
-  /** The row being rendered. */
-  row: TRow;
-  /** Index of the first rendered row, so a windowed index maps back. */
-  windowStart: number;
-  /** Rows in the whole dataset, for the move bounds. */
-  rowCount: number;
-  /** Class for the element. */
-  className?: string;
-}
+export type RowReorderHandleProps<TRow> = NeutralRowReorderHandleProps<
+  TRow,
+  RowReorderState<TRow>
+>;
 
 /**
- * Kit grip the reorder chrome calls.
+ * Kit grip the reorder chrome calls — `@adapttable/core`'s
+ * `RowReorderHandleSlotProps` with React's key and drag events.
  *
  * @public
  */
-export interface RowReorderHandleSlotProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Whether the grip is held. */
-  readonly pressed: boolean;
-  /** Whether a drag is in progress. */
-  readonly dragging: boolean;
-  /** Whether another move already owns confirmation. */
-  readonly disabled: boolean;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Pointer bindings that start and track the drag. */
-  readonly dragProps: ReturnType<RowReorderState<unknown>["dragProps"]>;
-  /** Handles the keyboard move keys. */
-  readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
-}
+export type RowReorderHandleSlotProps = NeutralRowReorderHandleSlotProps<
+  KeyboardEvent<HTMLElement>,
+  DragEvent<HTMLElement>
+>;
 
 /**
- * Adapter-supplied controls for {@link RowReorderHandleChrome}.
+ * Adapter-supplied controls for {@link RowReorderHandleChrome} —
+ * `@adapttable/core`'s `RowReorderHandleSlots` drawing React nodes.
  *
  * @public
  */
-export interface RowReorderHandleSlots {
-  /** Renders the drag grip. */
-  readonly Handle: (props: RowReorderHandleSlotProps) => ReactNode;
-  /** Renders the nested-row destination menu and confirmation. */
-  readonly Menu: (props: RowMoveMenuSlotProps) => ReactNode;
-}
-
-/**
- * One option in the adapter-owned row destination menu.
- *
- * @public
- */
-export interface RowMoveMenuItemProps {
-  /** Stable destination id. */
-  readonly id: string;
-  /** Human-readable destination. */
-  readonly label: string;
-  /** Whether the destination is unavailable. */
-  readonly disabled: boolean;
-  /** Explanation exposed for an unavailable destination. */
-  readonly disabledReason?: string;
-  /** Selects this destination. */
-  readonly onSelect: () => void;
-}
-
-/**
- * Pending move shown inside the adapter-owned menu surface.
- *
- * @public
- */
-export interface RowMoveConfirmationProps {
-  /** Confirmation heading. */
-  readonly title: string;
-  /** Concrete source-to-destination change. */
-  readonly description: string;
-  /** Approval button label. */
-  readonly confirmLabel: string;
-  /** Cancellation button label. */
-  readonly cancelLabel: string;
-  /** Commits the pending move. */
-  readonly onConfirm: () => void;
-  /** Discards the pending move. */
-  readonly onCancel: () => void;
-}
-
-/**
- * Props for an adapter-owned nested row destination menu.
- *
- * @public
- */
-export interface RowMoveMenuSlotProps {
-  /** Accessible menu trigger and content label. */
-  readonly label: string;
-  /** Loaded move destinations. */
-  readonly items: readonly RowMoveMenuItemProps[];
-  /** Pending move to approve, when confirm policy is active. */
-  readonly confirmation?: RowMoveConfirmationProps;
-}
+export type RowReorderHandleSlots = NeutralRowReorderHandleSlots<
+  ReactNode,
+  KeyboardEvent<HTMLElement>,
+  DragEvent<HTMLElement>
+>;
 
 /**
  * Props for {@link RowReorderHandleChrome}.
@@ -245,60 +183,23 @@ export function RowReorderHandleChrome<TRow>({
 }
 
 /**
- * Props for an adapter `RowReorderButtons` — no slots on the public API.
+ * Props for an adapter `RowReorderButtons` — `@adapttable/core`'s
+ * `RowReorderButtonsProps` over React's row-reorder state.
  *
  * @public
  */
-export interface RowReorderButtonsProps<TRow> {
-  /** Row-reorder state: what is being dragged and where it may land. */
-  reorder: RowReorderState<TRow>;
-  /** Resolved labels, every key filled. */
-  labels: RowReorderLabels;
-  /** The row's index within the rendered window. */
-  localIndex: number;
-  /** The row being rendered. */
-  row: TRow;
-  /** Index of the first rendered row, so a windowed index maps back. */
-  windowStart: number;
-  /** Rows in the whole dataset, for the move bounds. */
-  rowCount: number;
-  /** Class for the element. */
-  className?: string;
-  /** Class for the move-up button. */
-  upClassName?: string;
-  /** Class for the move-down button. */
-  downClassName?: string;
-}
+export type RowReorderButtonsProps<TRow> = NeutralRowReorderButtonsProps<
+  TRow,
+  RowReorderState<TRow>
+>;
 
 /**
- * Kit button the mobile reorder chrome calls.
+ * Adapter-supplied controls for {@link RowReorderButtonsChrome} —
+ * `@adapttable/core`'s `RowReorderButtonsSlots` drawing React nodes.
  *
  * @public
  */
-export interface RowReorderMoveButtonProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Part name, so styling can target this element. */
-  readonly part: string;
-  /** Whether the control is offered but not available. */
-  readonly disabled: boolean;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Called when pressed. */
-  readonly onClick: () => void;
-}
-
-/**
- * Adapter-supplied controls for {@link RowReorderButtonsChrome}.
- *
- * @public
- */
-export interface RowReorderButtonsSlots {
-  /** Renders one move button. */
-  readonly Button: (props: RowReorderMoveButtonProps) => ReactNode;
-  /** Renders the nested-row destination menu and confirmation. */
-  readonly Menu: (props: RowMoveMenuSlotProps) => ReactNode;
-}
+export type RowReorderButtonsSlots = NeutralRowReorderButtonsSlots<ReactNode>;
 
 /**
  * Props for {@link RowReorderButtonsChrome}.

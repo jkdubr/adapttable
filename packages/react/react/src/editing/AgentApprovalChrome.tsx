@@ -6,10 +6,10 @@
  * announcements are the one thing this chrome owns itself.
  */
 import type {
-  AgentApprovalPending,
-  AgentProgress,
-  TableLabels,
-} from "@adapttable/core";
+  AgentApprovalListProps as NeutralAgentApprovalListProps,
+  AgentApprovalProps,
+  AgentApprovalSlots as NeutralAgentApprovalSlots,
+} from "@adapttable/core/binding";
 import {
   type ReactElement,
   type ReactNode,
@@ -19,7 +19,6 @@ import {
 } from "react";
 
 import { LiveRegion } from "../a11y/LiveRegion";
-import { featureStateKey } from "../features/providers";
 import { approvalReview } from "./approvalReview";
 import { ApprovalReviewChrome } from "./ApprovalReviewChrome";
 
@@ -34,135 +33,34 @@ export type {
   AgentProgress,
 } from "@adapttable/core";
 
-/** Feature-state key for a pending agent approval. @public */
-export const AGENT_APPROVAL_STATE =
-  featureStateKey<AgentApprovalPending | null>("agent-approval-pending");
+// The feature-state keys and plain contracts live in core too, so every
+// binding publishes and reads the same ids.
+export {
+  AGENT_ALWAYS_ALLOW_STATE,
+  AGENT_APPROVAL_STATE,
+  AGENT_PROGRESS_STATE,
+  AGENT_VIEW_STATE,
+  type AgentAlwaysAllowState,
+  type AgentApprovalButtonProps,
+  type AgentApprovalProps,
+  type AgentViewState,
+} from "@adapttable/core/binding";
 
 /**
- * Feature-state key for how far a running capability has got.
- *
- * Published by the agent feature and read by a panel inside the table, the
- * same way a pending approval is: both happen inside a call the panel is
- * waiting on, and neither is visible from outside the table.
+ * Kit region that wraps the proposal list — `@adapttable/core`'s
+ * `AgentApprovalListProps` with React's node.
  *
  * @public
  */
-export const AGENT_PROGRESS_STATE = featureStateKey<AgentProgress | null>(
-  "agent-progress"
-);
+export type AgentApprovalListProps = NeutralAgentApprovalListProps<ReactNode>;
 
 /**
- * What the reader has waved through, and how to take it back.
- *
- * Separate from the pending approval because it outlives one: the list has to
- * be visible — and revocable — when nothing is waiting, which is exactly when
- * a reader goes looking for what they agreed to.
+ * Adapter-supplied controls for {@link AgentApprovalChrome} —
+ * `@adapttable/core`'s `AgentApprovalSlots` drawing React nodes.
  *
  * @public
  */
-export interface AgentAlwaysAllowState {
-  /** Capability keys the reader said not to ask about again. */
-  readonly capabilities: readonly string[];
-  /** Ask about this capability again from now on. */
-  readonly revoke: (capability: string) => void;
-}
-
-/** Feature-state key for the remembered "don't ask again" set. @public */
-export const AGENT_ALWAYS_ALLOW_STATE =
-  featureStateKey<AgentAlwaysAllowState | null>("agent-always-allow");
-
-/**
- * The live view and filter data the manifest does not carry.
- *
- * A reader rather than a value: it is read when a turn starts and again when
- * it settles, and a value captured a render earlier would report that nothing
- * moved — which is precisely what per-turn undo has to be able to tell.
- *
- * @public
- */
-export interface AgentViewState {
-  /** Read the table's live view and filter catalog, right now. */
-  readonly read: () => unknown;
-}
-
-/** Feature-state key for that reader. @public */
-export const AGENT_VIEW_STATE = featureStateKey<AgentViewState | null>(
-  "agent-view-state"
-);
-
-/**
- * Kit button the approval chrome calls.
- *
- * @public
- */
-export interface AgentApprovalButtonProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Part name, so styling can target this element. */
-  readonly part: string;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Called when pressed. */
-  readonly onClick: () => void;
-}
-
-/**
- * Kit region that wraps the proposal list.
- *
- * @public
- */
-export interface AgentApprovalListProps {
-  /** Part name for the list. */
-  readonly part: string;
-  /** Accessible name for the list. */
-  readonly label: string;
-  /** Class for the list. */
-  readonly className?: string;
-  /** The proposal rows. */
-  readonly children: ReactNode;
-}
-
-/**
- * Adapter-supplied controls for {@link AgentApprovalChrome}.
- *
- * @public
- */
-export interface AgentApprovalSlots {
-  /** Renders the approve control. */
-  readonly Approve: (props: AgentApprovalButtonProps) => ReactNode;
-  /** Renders the reject control. */
-  readonly Reject: (props: AgentApprovalButtonProps) => ReactNode;
-  /** Renders the proposal list region. */
-  readonly List: (props: AgentApprovalListProps) => ReactNode;
-  /**
-   * Renders a quiet control that decides nothing — opening the full list of
-   * changes, or leaving it. A link or tertiary button, never a third
-   * decision beside Approve and Reject.
-   */
-  readonly Action: (props: AgentApprovalButtonProps) => ReactNode;
-}
-
-/**
- * Props for an adapter `AgentApproval` — no slots on the public API.
- *
- * @public
- */
-export interface AgentApprovalProps {
-  /**
-   * The live approval, or nothing.
-   *
-   * The strip draws only when this is set AND the approval's presentation
-   * names the table. Exactly one surface owns a decision: the others may say
-   * a write is waiting, but must not offer a second set of buttons for it.
-   */
-  readonly pending?: AgentApprovalPending | null;
-  /** Labels; falls back to the built-in English. */
-  readonly labels?: TableLabels;
-  /** Class for the strip. */
-  readonly className?: string;
-  /** Class for each button. */
-  readonly buttonClassName?: string;
-}
+export type AgentApprovalSlots = NeutralAgentApprovalSlots<ReactNode>;
 
 /**
  * Props for {@link AgentApprovalChrome}.

@@ -26,8 +26,15 @@
  * the same chrome hold a filter form, a column list, or a pivot builder
  * without knowing what any of them are.
  */
-import type { TableLabels } from "@adapttable/core";
+import type {
+  SidePanelChromeProps as NeutralSidePanelChromeProps,
+  SidePanelFrameProps as NeutralSidePanelFrameProps,
+  SidePanelSlots as NeutralSidePanelSlots,
+  SidePanelTabProps as NeutralSidePanelTabProps,
+} from "@adapttable/core/binding";
 import { type KeyboardEvent, type ReactNode, useCallback, useRef } from "react";
+
+export type { SidePanelCloseProps } from "@adapttable/core/binding";
 
 /**
  * One panel in the side panel's strip.
@@ -44,94 +51,47 @@ export interface SidePanelEntry {
 }
 
 /**
- * Props an adapter's panel frame receives.
+ * Props an adapter's panel frame receives — `@adapttable/core`'s
+ * `SidePanelFrameProps` drawing React nodes.
  *
  * @public
  */
-export interface SidePanelFrameProps {
-  /** The tab strip and the panel body, in order. */
-  readonly children: ReactNode;
-  /** Which edge the panel is docked to, already resolved for direction. */
-  readonly side: "start" | "end";
-  /** Class for the element. */
-  readonly className?: string;
-}
+export type SidePanelFrameProps = NeutralSidePanelFrameProps<ReactNode>;
 
 /**
- * Props an adapter's tab button receives.
+ * Props an adapter's tab button receives — `@adapttable/core`'s
+ * `SidePanelTabProps` with React's panel entry and key event.
  *
  * @public
  */
-export interface SidePanelTabProps {
-  /** The side-panel tab being rendered. */
-  readonly panel: SidePanelEntry;
-  /** Whether this item is selected. */
-  readonly selected: boolean;
-  /** Spread onto the button: role, tabindex, aria wiring, id and keys. */
-  readonly buttonProps: {
-    readonly id: string;
-    readonly role: "tab";
-    readonly type: "button";
-    readonly tabIndex: number;
-    readonly "aria-selected": boolean;
-    readonly "aria-controls": string;
-    readonly "data-adapttable-part": "side-panel-tab";
-    readonly onClick: () => void;
-    readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
-  };
-}
+export type SidePanelTabProps = NeutralSidePanelTabProps<
+  SidePanelEntry,
+  KeyboardEvent<HTMLElement>
+>;
 
 /**
- * Props an adapter's close control receives.
+ * Adapter-owned rendering for {@link SidePanelChrome} — `@adapttable/core`'s
+ * `SidePanelSlots` drawing React nodes.
  *
  * @public
  */
-export interface SidePanelCloseProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Closes the panel. */
-  readonly onClose: () => void;
-}
+export type SidePanelSlots = NeutralSidePanelSlots<
+  ReactNode,
+  SidePanelEntry,
+  KeyboardEvent<HTMLElement>
+>;
 
 /**
- * Adapter-owned rendering for {@link SidePanelChrome}.
+ * What the side panel needs to render — `@adapttable/core`'s
+ * `SidePanelChromeProps` with React's panel entry and slots.
  *
  * @public
  */
-export interface SidePanelSlots {
-  /** The docked frame around everything. */
-  readonly Frame: (props: SidePanelFrameProps) => ReactNode;
-  /** One tab in the strip. Omitted when there is only one panel. */
-  readonly Tab: (props: SidePanelTabProps) => ReactNode;
-  /** The control that closes the panel. */
-  readonly Close: (props: SidePanelCloseProps) => ReactNode;
-}
-
-/**
- * What the side panel needs to render.
- *
- * @public
- */
-export interface SidePanelChromeProps {
-  /** The panels, in tab order. Rendering nothing when empty. */
-  panels: readonly SidePanelEntry[];
-  /** Which panel is showing. */
-  openPanel: string;
-  /** Show a different panel. */
-  onOpenPanel: (key: string) => void;
-  /** Close the panel entirely. */
-  onClose: () => void;
-  /** Which edge to dock to. Defaults to `"end"`. */
-  side?: "start" | "end";
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** A unique id root, so two tables on a page do not collide. */
-  idPrefix?: string;
-  /** A kit's own class for the frame. */
-  className?: string;
-  /** Adapter-owned visible components. */
-  slots: SidePanelSlots;
-}
+export type SidePanelChromeProps = NeutralSidePanelChromeProps<
+  ReactNode,
+  SidePanelEntry,
+  KeyboardEvent<HTMLElement>
+>;
 
 /**
  * Move the roving tab stop.

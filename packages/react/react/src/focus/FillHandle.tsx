@@ -4,33 +4,20 @@
  * visible handle with its own component and styling.
  */
 import { sameGridCell } from "@adapttable/core";
+import type { FillHandleSlots as NeutralFillHandleSlots } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import type { GridFocusState } from "./useGridFocus";
 
-/**
- * Props passed to an adapter's visible fill-handle component.
- *
- * @public
- */
-export interface FillHandleSlotProps {
-  /** Localized accessible title for the pointer affordance. */
-  readonly label: string;
-  /** Event handlers and drag metadata from the grid-focus engine. */
-  readonly handleProps: Readonly<Record<string, unknown>>;
-  /** Adapter-defined class supplied by its table component. */
-  readonly className?: string;
-}
+export type { FillHandleSlotProps } from "@adapttable/core/binding";
 
 /**
- * Adapter-owned rendering for {@link FillHandleChrome}.
+ * Adapter-owned rendering for {@link FillHandleChrome} — `@adapttable/core`'s
+ * `FillHandleSlots` drawing React nodes.
  *
  * @public
  */
-export interface FillHandleSlots {
-  /** Renders the drag handle. */
-  readonly Handle: (props: FillHandleSlotProps) => ReactNode;
-}
+export type FillHandleSlots = NeutralFillHandleSlots<ReactNode>;
 
 /**
  * Props for {@link FillHandleChrome}.

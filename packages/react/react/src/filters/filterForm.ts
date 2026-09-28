@@ -4,7 +4,6 @@ import {
   type FilterDef,
   filterLabel,
   filterOpKey,
-  type FilterTypeRegistry,
   type FilterValue,
   isBetweenFilterOp,
   isListFilterOp,
@@ -17,12 +16,12 @@ import {
   type RangeOp,
   readRangeWidget,
   type TableLabels,
-  type TableSource,
   TEXT_OP_LABEL_KEYS,
   TEXT_OPS,
   type TextOp,
   writeRangeFilter,
 } from "@adapttable/core";
+import type { FilterFormSource } from "@adapttable/core/binding";
 import { useState } from "react";
 
 /**
@@ -38,40 +37,10 @@ import { useState } from "react";
  */
 export type RangeOpArity = "none" | "one" | "two" | "list";
 
-/**
- * The slice of the table source the auto-built filter form reads and writes:
- * the extra-filter bag and its single/bulk setters. Every batteries-included
- * adapter renders its own kit controls over this same contract.
- *
- * @public
- */
-export type FilterFormSource<TRow> = Pick<
-  TableSource<TRow>,
-  "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets"
->;
-
-/**
- * What the filters panel (tree builder + optional simple fields) needs.
- *
- * The table asks through a feature slot so the kit form stays behind
- * `@adapttable/<kit>/filters` instead of the adapter root.
- *
- * @public
- */
-export interface FiltersFormSlotProps<TRow> {
-  /** Resolved declarative definitions, in render order. */
-  readonly defs: readonly FilterDef<TRow>[];
-  /** Source the tree and the simple fields read and write. */
-  readonly source: TableSource<TRow>;
-  /** Type registry; kits pass it through to both surfaces. */
-  readonly registry: FilterTypeRegistry;
-  /** Fully resolved labels for every control. */
-  readonly labels: Required<TableLabels>;
-  /** Open Advanced on first paint. */
-  readonly defaultExpanded?: boolean;
-  /** When true, also draw the simple AutoFilterForm fields. */
-  readonly showSimpleFields: boolean;
-}
+export type {
+  FilterFormSource,
+  FiltersFormSlotProps,
+} from "@adapttable/core/binding";
 
 /**
  * A scalar filter value as input text ("" when unset; numbers stringify).

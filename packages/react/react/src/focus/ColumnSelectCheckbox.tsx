@@ -1,6 +1,12 @@
+import type {
+  ColumnSelectCheckboxChromeProps as NeutralColumnSelectCheckboxChromeProps,
+  ColumnSelectSlots as NeutralColumnSelectSlots,
+} from "@adapttable/core/binding";
 import { type ReactNode, useState } from "react";
 
 import { useMediaQuery } from "../hooks/useMediaQuery";
+
+export type { ColumnSelectCheckboxProps } from "@adapttable/core/binding";
 
 /**
  * A pointer that can hover — a mouse or a trackpad.
@@ -13,43 +19,20 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 const HOVER_QUERY = "(hover: hover) and (pointer: fine)";
 
 /**
- * The kit checkbox {@link ColumnSelectCheckboxChrome} calls.
+ * Adapter-supplied control for {@link ColumnSelectCheckboxChrome} —
+ * `@adapttable/core`'s `ColumnSelectSlots` drawing React nodes.
  *
  * @public
  */
-export interface ColumnSelectCheckboxProps {
-  /** Accessible name, already localized and already naming the column. */
-  readonly label: string;
-  /** Whether this column is the selection. */
-  readonly checked: boolean;
-  /** Select this column, or clear the selection when it already is. */
-  readonly onToggle: () => void;
-}
+export type ColumnSelectSlots = NeutralColumnSelectSlots<ReactNode>;
 
 /**
- * Adapter-supplied control for {@link ColumnSelectCheckboxChrome}.
+ * Props for {@link ColumnSelectCheckboxChrome} — `@adapttable/core`'s
+ * `ColumnSelectCheckboxChromeProps` plus the kit's React checkbox.
  *
  * @public
  */
-export interface ColumnSelectSlots {
-  /** Renders a checkbox. */
-  readonly Checkbox: (props: ColumnSelectCheckboxProps) => ReactNode;
-}
-
-/**
- * Props for {@link ColumnSelectCheckboxChrome}.
- *
- * @public
- */
-export interface ColumnSelectCheckboxChromeProps {
-  /** Accessible name for the control, already localized. */
-  readonly label: string;
-  /** Whether this column is the selection. */
-  readonly checked: boolean;
-  /** Select this column, or clear the selection when it already is. */
-  readonly onToggle: () => void;
-  /** `classNames.columnSelect`, for the kits that carry per-part classes. */
-  readonly className?: string;
+export interface ColumnSelectCheckboxChromeProps extends NeutralColumnSelectCheckboxChromeProps {
   /** The kit's checkbox. */
   readonly slots: ColumnSelectSlots;
 }

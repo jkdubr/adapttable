@@ -1,11 +1,8 @@
+import { CONTEXT_MENU_LIVE, SIDE_PANEL } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { FeatureSlot, useFeatureSlotFilled } from "../features/providers";
-import {
-  CONTEXT_MENU_LIVE,
-  type ContextMenuLiveSlotProps,
-  SIDE_PANEL,
-} from "../features/slotKeys";
+import { type ContextMenuLiveSlotProps } from "../features/slotKeys";
 
 /**
  * Mount a composed context-menu feature around an adapter's table region.
