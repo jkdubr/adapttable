@@ -22,10 +22,17 @@ import {
   type ContextMenuTarget,
   type CustomCellEditorRender,
   type ExportWriter,
-  type FeatureRegistration,
   type FilterTypeSpec,
   type NeutralFeatureHost,
 } from "@adapttable/core";
+import {
+  applyTableFeatures,
+  type FeatureApplyInput,
+  type FeaturePatch,
+  getAppliedFeatures as coreGetAppliedFeatures,
+  type PatchFeature,
+  rememberAppliedFeatures,
+} from "@adapttable/core/binding";
 
 import type { SidePanelEntry } from "../layout/SidePanelChrome";
 import type { FeatureProviderContribution, FeatureRender } from "./providers";
@@ -43,40 +50,7 @@ export type {
 export type { CustomCellEditorRender } from "@adapttable/core";
 export type { ExportWriter } from "@adapttable/core";
 export type { FilterTypeSpec } from "@adapttable/core";
-
-/**
- * Internal table configuration a composed feature may write.
- *
- * @public
- */
-export interface FeaturePatch<TRow = unknown> {
-  /** Any other prop a feature wants to set on the table. */
-  readonly [key: string]: unknown;
-  /**
-   * Phantom marker that pins the row type; never read at runtime.
-   *
-   * A FUNCTION of the row rather than the row itself, and that is the whole
-   * of why `features={[grouping("team")]}` compiles. A feature whose
-   * configuration says nothing about rows produces `TRow = unknown`, and a
-   * marker in a return position would make that patch incompatible with the
-   * table's own row type — the reason every documented example used to need
-   * an explicit `grouping("team")`. Read contravariantly instead,
-   * `unknown` is the row type that fits every table, while a genuinely wrong
-   * one (`TableFeature<Other>` into a `DataTable<Row>`) still fails, and the
-   * error still names the feature.
-   */
-  readonly __row?: (row: TRow) => void;
-}
-
-/**
- * The table props a feature may read while applying.
- *
- * @public
- */
-export type FeatureApplyInput<TRow = unknown> = object & {
-  /** Phantom marker that pins the row type; never read at runtime. */
-  readonly __row?: TRow;
-};
+export type { FeatureApplyInput, FeaturePatch } from "@adapttable/core/binding";
 
 /**
  * One composed feature — a built-in factory or a host plugin.
@@ -87,9 +61,7 @@ export type FeatureApplyInput<TRow = unknown> = object & {
  *
  * @public
  */
-export interface TableFeature<
-  TRow = unknown,
-> extends FeatureRegistration<TRow> {
+export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
   /** Stable id (`"row-reorder"`, `"grouping"`, a host plugin's name). */
   readonly id: string;
   /** Merge this feature's configuration into the table. Later features win. */
@@ -219,99 +191,11 @@ export interface TableFeatureHost<
   readonly __row?: (row: TRow) => void;
 }
 
-const applied = new WeakSet<object>();
-const appliedFeatures = new WeakMap<object, readonly TableFeature[]>();
-
 /** Features that produced this resolved props object, if any. */
 export function getAppliedFeatures(
   props: object
 ): readonly TableFeature[] | undefined {
-  return appliedFeatures.get(props);
+  return coreGetAppliedFeatures<TableFeature>(props);
 }
 
-/** Remember the feature list on a resolved (or overlaid) props object. */
-export function rememberAppliedFeatures(
-  props: object,
-  list: readonly TableFeature[]
-): void {
-  appliedFeatures.set(props, list);
-}
-
-function definedEntries(value: object): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const [key, entry] of Object.entries(value)) {
-    if (entry !== undefined && key !== "__row") out[key] = entry;
-  }
-  return out;
-}
-
-function omitFeatures<P extends object>(props: P): P {
-  const rest: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(props)) {
-    if (key !== "features") rest[key] = value;
-  }
-  return rest as P;
-}
-
-function featuresOf(props: object): readonly TableFeature[] | undefined {
-  if (!("features" in props)) return undefined;
-  const list = props.features;
-  if (!Array.isArray(list)) return [];
-  return list as readonly TableFeature[];
-}
-
-/**
- * Resolve `features` onto the existing prop surface.
- *
- * Later features win; defined host props win over both. `features` is
- * stripped from the result. Calling twice on the same object is a no-op
- * so adapters and `useDataTableShell` can both apply.
- *
- * @public
- */
-export function applyTableFeatures<P extends object>(props: P): P {
-  if (applied.has(props)) {
-    return props;
-  }
-
-  const list = featuresOf(props);
-  if (list == null) {
-    applied.add(props);
-    return props;
-  }
-  if (list.length === 0) {
-    const rest = omitFeatures(props);
-    applied.add(rest);
-    rememberAppliedFeatures(rest, list);
-    return rest;
-  }
-
-  let fromFeatures: Record<string, unknown> = {};
-  for (const next of list) {
-    const patch = next.apply?.(fromFeatures);
-    if (!patch) continue;
-    const entries = definedEntries(patch);
-    const prevAssembly = fromFeatures.assembly;
-    const nextAssembly = entries.assembly;
-    fromFeatures = { ...fromFeatures, ...entries };
-    if (
-      prevAssembly &&
-      nextAssembly &&
-      typeof prevAssembly === "object" &&
-      typeof nextAssembly === "object"
-    ) {
-      fromFeatures.assembly = {
-        ...prevAssembly,
-        ...nextAssembly,
-      };
-    }
-  }
-
-  const resolved = {
-    ...fromFeatures,
-    ...definedEntries(omitFeatures(props)),
-  } as P;
-  applied.add(resolved);
-  rememberAppliedFeatures(resolved, list);
-  return resolved;
-}
+export { applyTableFeatures, rememberAppliedFeatures };

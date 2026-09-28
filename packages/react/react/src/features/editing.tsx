@@ -9,6 +9,7 @@
  * the same slot; apply() sets the channel each one owns.
  */
 import { devWarn } from "@adapttable/core";
+import { coreFeatures } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { type BatchRowEdit, useBatchEditing } from "../editing/batchEditing";
@@ -310,8 +311,7 @@ export function editing<TRow>(
   extras?: FeaturePatch<TRow>
 ): TableFeature<TRow> {
   return {
-    id: "editing",
-    apply: () => ({ onCellEdit, ...extras }),
+    ...coreFeatures.editing(onCellEdit, extras),
     renders: [editingRender],
   };
 }
@@ -326,8 +326,7 @@ export function rowEditing<TRow>(
   extras?: FeaturePatch<TRow>
 ): TableFeature<TRow> {
   return {
-    id: "row-editing",
-    apply: () => ({ rowEditing: true, onRowEdit, ...extras }),
+    ...coreFeatures.rowEditing(onRowEdit, extras),
     renders: [editingRender],
   };
 }
@@ -342,8 +341,7 @@ export function batchEditing<TRow>(
   extras?: FeaturePatch<TRow>
 ): TableFeature<TRow> {
   return {
-    id: "batch-editing",
-    apply: () => ({ batchEditing: true, onBatchEdit, ...extras }),
+    ...coreFeatures.batchEditing(onBatchEdit, extras),
     renders: [editingRender],
   };
 }
@@ -355,8 +353,7 @@ export function batchEditing<TRow>(
  */
 export function dirtyIndicators(): StaticTableFeature {
   return {
-    id: "dirty-indicators",
-    apply: () => ({ dirtyIndicators: true }),
+    ...coreFeatures.dirtyIndicators(),
     renders: [editingRender],
   };
 }

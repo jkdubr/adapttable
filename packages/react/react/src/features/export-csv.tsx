@@ -10,6 +10,7 @@ import {
   makeExportCsvHandler,
   resolveExportCsv,
 } from "@adapttable/core";
+import { coreFeatures } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { useExportHandler } from "../export/useExportHandler";
@@ -56,11 +57,8 @@ function LiveExport({
 export function exportCsv<TRow>(
   options: boolean | ExportCsvOptions<TRow> = true
 ): TableFeature<TRow> {
-  const writer = typeof options === "object" ? options.writer : undefined;
   return {
-    id: "export-csv",
-    apply: () => ({ exportCsv: options }),
-    setup: writer ? (host) => host.registerWriter(writer) : undefined,
+    ...coreFeatures.exportCsv<TRow>(options),
     renders: [slotRender(EXPORT_LIVE, (props) => <LiveExport {...props} />)],
   };
 }

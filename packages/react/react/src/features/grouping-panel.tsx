@@ -31,6 +31,7 @@ import {
   resolveAggregatable,
   restoreAggregationDefaults,
 } from "@adapttable/core";
+import { coreFeatures } from "@adapttable/core/binding";
 import {
   type DragEvent as ReactDragEvent,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -661,15 +662,9 @@ export function groupingPanel<TRow = unknown>(
   const base = grouping(groupBy ?? [], extras);
   return {
     ...base,
-    id: "grouping-panel",
+    ...coreFeatures.groupingPanel<TRow>(groupBy, extras),
     initialGroupBy: groupBy,
     extras,
-    apply(input) {
-      const patch = base.apply?.(input) ?? {};
-      const withoutInitialGroup = { ...patch };
-      delete withoutInitialGroup.groupBy;
-      return withoutInitialGroup;
-    },
     provider: { Provider: GroupingPanelProvider },
   } as GroupingPanelFeature<TRow>;
 }

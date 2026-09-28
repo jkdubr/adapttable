@@ -6,6 +6,7 @@
  * {@link SELECTION_STATS_LIVE}.
  */
 import { selectionStats as compute } from "@adapttable/core";
+import { coreFeatures } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { slotRender } from "./providers";
@@ -41,8 +42,7 @@ function LiveSelectionStats({
  */
 export function selectionStats(): StaticTableFeature {
   return {
-    id: "selection-stats",
-    apply: () => ({ selectionStats: true }),
+    ...coreFeatures.selectionStats(),
     renders: [
       SELECTION_LIVE_RENDER,
       slotRender(SELECTION_STATS_LIVE, (props) => (

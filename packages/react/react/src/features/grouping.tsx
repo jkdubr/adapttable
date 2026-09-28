@@ -24,7 +24,7 @@ import {
   sourceCapabilities,
   withGroupAggregateOverrides,
 } from "@adapttable/core";
-import { insertExtraRows } from "@adapttable/core/binding";
+import { coreFeatures, insertExtraRows } from "@adapttable/core/binding";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
 import { useGroupCollapse } from "../grouping/useGroupCollapse";
@@ -376,8 +376,7 @@ export function grouping<TRow>(
   extras?: GroupingExtras<TRow>
 ): TableFeature<TRow> {
   return {
-    id: "grouping",
-    apply: () => ({ groupBy, ...extras }),
+    ...coreFeatures.grouping<TRow>(groupBy, extras),
     renders: [
       slotRender(GROUPING_LIVE, (props) => <LiveGrouping {...props} />),
     ],

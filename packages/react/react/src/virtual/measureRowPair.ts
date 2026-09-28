@@ -13,8 +13,11 @@
  * virtualizer keeps owning the layout; it is simply told the truth about how
  * tall the item is.
  */
-import type { RowPairMeasurer } from "@adapttable/core/binding";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  RowPairMeasureController,
+  type RowPairMeasurer,
+} from "@adapttable/core/binding";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * What a virtualizer must offer for a pair to be measurable.
@@ -27,12 +30,6 @@ export interface ResizableVirtualizer {
 }
 
 export type { RowPairMeasurer } from "@adapttable/core/binding";
-
-/** The two elements of one item, either of which may be absent. */
-interface Pair {
-  row: Element | null;
-  detail: Element | null;
-}
 
 /**
  * Measure each row together with its open detail panel.
@@ -52,66 +49,27 @@ export function useRowPairMeasurer(
   virtualizer: ResizableVirtualizer | undefined,
   enabled: boolean
 ): RowPairMeasurer {
-  const pairs = useRef(new Map<number, Pair>());
-  const observer = useRef<ResizeObserver | null>(null);
-  const owners = useRef(new Map<Element, number>());
-
-  const report = useCallback(
-    (index: number) => {
-      if (!virtualizer) return;
-      const pair = pairs.current.get(index);
-      if (!pair?.row) return;
-      const rowHeight = pair.row.getBoundingClientRect().height;
-      const detailHeight = pair.detail?.getBoundingClientRect().height ?? 0;
-      const total = rowHeight + detailHeight;
-      if (total > 0) virtualizer.resizeItem(index, total);
-    },
-    [virtualizer]
+  // One controller for the table's life: the pairs it tracks outlive a
+  // virtualizer swap (page to box scrolling), which reads through the ref.
+  const latest = useRef(virtualizer);
+  latest.current = virtualizer;
+  const [controller] = useState(
+    () =>
+      new RowPairMeasureController((index, size) =>
+        latest.current?.resizeItem(index, size)
+      )
   );
 
-  useEffect(() => {
-    if (!enabled || typeof ResizeObserver === "undefined") return undefined;
-    const seen = owners.current;
-    const instance = new ResizeObserver((entries) => {
-      const touched = new Set<number>();
-      for (const entry of entries) {
-        const index = seen.get(entry.target);
-        if (index !== undefined) touched.add(index);
-      }
-      for (const index of touched) report(index);
-    });
-    observer.current = instance;
-    // Refs run during commit and effects after it, so by the time the observer
-    // exists the first rows are already attached. Pick them up rather than
-    // waiting for a re-render that may never come.
-    for (const element of seen.keys()) instance.observe(element);
-    return () => {
-      instance.disconnect();
-      observer.current = null;
-    };
-  }, [enabled, report]);
+  useEffect(
+    () => (enabled ? controller.connect() : undefined),
+    [controller, enabled]
+  );
 
   const attach = useCallback(
-    (index: number, half: keyof Pair) => (node: Element | null) => {
-      if (!enabled) return;
-      const pair = pairs.current.get(index) ?? { row: null, detail: null };
-      const previous = pair[half];
-      if (previous && previous !== node) {
-        observer.current?.unobserve(previous);
-        owners.current.delete(previous);
-      }
-      pair[half] = node;
-      pairs.current.set(index, pair);
-      if (node) {
-        owners.current.set(node, index);
-        observer.current?.observe(node);
-      }
-      // Report straight away: the first paint is when a wrong height is most
-      // visible, and waiting for a resize would mean waiting for a change that
-      // may never come.
-      report(index);
+    (index: number, half: "row" | "detail") => (node: Element | null) => {
+      if (enabled) controller.attach(index, half, node);
     },
-    [enabled, report]
+    [controller, enabled]
   );
 
   return useMemo(

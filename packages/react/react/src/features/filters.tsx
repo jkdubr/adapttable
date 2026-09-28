@@ -6,6 +6,7 @@
  * {@link FILTER_CHIPS_LIVE}.
  */
 import { FILTER_ENGINE_IMPL, type FilterDef } from "@adapttable/core";
+import { coreFeatures } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
 import {
@@ -91,8 +92,7 @@ export function filters<TRow>(
   defs: readonly FilterDef<TRow>[] | ReactNode
 ): TableFeature<TRow> {
   return {
-    id: "filters",
-    apply: () => ({ filters: defs }),
+    ...coreFeatures.filters<TRow>(defs),
     provider: { Provider: FiltersEngineProvider },
     renders: [
       slotRender(FILTER_CHIPS_LIVE, (props) => <LiveFilterChips {...props} />),

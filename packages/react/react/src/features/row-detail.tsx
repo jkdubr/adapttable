@@ -4,6 +4,7 @@
  * The expansion hook and the nested-table renderer live on this entry.
  * Both {@link rowDetail} and {@link nestedTable} fill {@link EXPANSION_LIVE}.
  */
+import { coreFeatures } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
 import { useRowExpansion } from "../rows/useRowExpansion";
@@ -53,8 +54,7 @@ export function rowDetail<TRow>(
   defaultExpandedRowIds?: readonly string[]
 ): TableFeature<TRow> {
   return {
-    id: "row-detail",
-    apply: () => ({ renderRowDetail, defaultExpandedRowIds }),
+    ...coreFeatures.rowDetail<TRow>(renderRowDetail, defaultExpandedRowIds),
     renders: [expansionRender],
   };
 }
@@ -69,8 +69,7 @@ export function nestedTable<TRow>(
   defaultExpandedRowIds?: readonly string[]
 ): TableFeature<TRow> {
   return {
-    id: "nested-table",
-    apply: () => ({ nestedTable: nested, defaultExpandedRowIds }),
+    ...coreFeatures.nestedTable<TRow>(nested, defaultExpandedRowIds),
     renders: [expansionRender],
   };
 }
