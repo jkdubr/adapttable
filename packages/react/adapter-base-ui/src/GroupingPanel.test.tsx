@@ -8,6 +8,7 @@ import { columnMenu } from "./column-menu";
 import { GroupingPanel } from "./components/GroupingPanel";
 import { DataTable } from "./DataTable";
 import { groupingPanel } from "./grouping-panel";
+import { ADAPTTABLE_BASE_UI_GROUPING_CSS } from "./injectStyles";
 import { renderBaseUi } from "./test-utils";
 
 interface Row {
@@ -79,6 +80,16 @@ function renderPanel(state = panelState(), mobile = false) {
 }
 
 describe("GroupingPanel (base-ui)", () => {
+  it("brings the grouping strip's styles, injected once", () => {
+    renderPanel();
+    renderPanel();
+    const sheets = document.head.querySelectorAll(
+      "style[data-adapttable-base-ui-grouping]"
+    );
+    expect(sheets).toHaveLength(1);
+    expect(sheets[0]!.textContent).toBe(ADAPTTABLE_BASE_UI_GROUPING_CSS);
+  });
+
   it("renders kit controls with accessible move and remove actions", () => {
     const onMoveKey = vi.fn();
     const state = panelState({

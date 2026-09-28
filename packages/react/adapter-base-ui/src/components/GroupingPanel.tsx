@@ -15,6 +15,7 @@ import {
   type GroupingPanelSurfaceProps,
 } from "@adapttable/react/adapter";
 
+import { ensureBaseUiGroupingStyles } from "../injectStyles";
 import { Button, IconButton, Text } from "../ui";
 import { NativeSelect } from "./primitives";
 
@@ -206,5 +207,6 @@ const slots: GroupingPanelSlots = {
 export function GroupingPanel<TRow>(
   props: Readonly<Omit<GroupingPanelChromeProps<TRow>, "slots">>
 ) {
+  ensureBaseUiGroupingStyles();
   return <GroupingPanelChrome {...props} slots={slots} />;
 }

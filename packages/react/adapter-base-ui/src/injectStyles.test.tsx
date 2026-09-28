@@ -13,7 +13,10 @@ import { describe, expect, it } from "vitest";
 
 import { DataTable } from "./data-table.test-utils";
 import type { ColumnDef } from "./index";
-import { ADAPTTABLE_BASE_UI_CSS } from "./injectStyles";
+import {
+  ADAPTTABLE_BASE_UI_CSS,
+  ADAPTTABLE_BASE_UI_GROUPING_CSS,
+} from "./injectStyles";
 
 interface Row {
   id: string;
@@ -57,6 +60,21 @@ describe("base-ui chrome styles", () => {
       .replace(/\s+/g, " ")
       .replace(/ ?([{};,>]) ?/g, "$1")
       .trim();
-    expect(ADAPTTABLE_BASE_UI_CSS).toBe(rules);
+    expect(ADAPTTABLE_BASE_UI_CSS + ADAPTTABLE_BASE_UI_GROUPING_CSS).toBe(
+      rules
+    );
+    expect(
+      ADAPTTABLE_BASE_UI_GROUPING_CSS.startsWith(".adapttable-grouping-panel{")
+    ).toBe(true);
+  });
+
+  it("a plain table carries no grouping-strip rules", () => {
+    render(<Harness />);
+    expect(
+      document.head.querySelector("style[data-adapttable-base-ui-grouping]")
+    ).toBeNull();
+    expect(
+      document.head.querySelector("style[data-adapttable-base-ui]")?.textContent
+    ).not.toContain(".adapttable-grouping-panel");
   });
 });
