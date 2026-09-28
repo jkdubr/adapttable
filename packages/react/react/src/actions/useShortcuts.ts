@@ -11,93 +11,18 @@
  * defaults are the ones people already know, and any of them can be
  * replaced or removed by passing a different list.
  *
- * Matching deliberately ignores the physical key's layout — `event.key` is
- * the character the user's layout produces, which is what they typed and
- * what the shortcut was written as. It is compared case-insensitively,
- * because Shift is part of the chord rather than part of the letter.
+ * The parser and matcher live in core (`createShortcutHandler`); this hook
+ * binds them to a DOM target for the life of the component.
  */
+import {
+  createShortcutHandler,
+  DEFAULT_SHORTCUTS,
+  type Shortcut,
+} from "@adapttable/core";
 import { useEffect } from "react";
 
-/**
- * One shortcut: the chord, and what it runs.
- *
- * @public
- */
-export interface Shortcut {
-  /**
-   * The chord, as `"mod+k"`. `mod` is Cmd on a Mac and Ctrl elsewhere,
-   * which is the only way to write one shortcut that is right on both.
-   * Also accepts `ctrl`, `meta`, `alt` and `shift`.
-   */
-  chord: string;
-  /** The key of the command it runs. */
-  command: string;
-}
-
-/**
- * The shortcuts a table has unless the host says otherwise.
- *
- * @public
- */
-export const DEFAULT_SHORTCUTS: readonly Shortcut[] = [
-  { chord: "mod+k", command: "command-palette" },
-];
-
-interface Chord {
-  key: string;
-  mod: boolean;
-  ctrl: boolean;
-  meta: boolean;
-  alt: boolean;
-  shift: boolean;
-}
-
-function parseChord(chord: string): Chord {
-  const parts = chord.toLowerCase().split("+");
-  const key = parts.at(-1) ?? "";
-  return {
-    key,
-    mod: parts.includes("mod"),
-    ctrl: parts.includes("ctrl"),
-    meta: parts.includes("meta"),
-    alt: parts.includes("alt"),
-    shift: parts.includes("shift"),
-  };
-}
-
-/** Whether an event is this chord. */
-function matches(chord: Chord, event: KeyboardEvent): boolean {
-  if (event.key.toLowerCase() !== chord.key) return false;
-  // `mod` is satisfied by either, so one chord is right on every platform
-  // without the host writing two.
-  const mod = event.metaKey || event.ctrlKey;
-  if (chord.mod ? !mod : false) return false;
-  if (chord.ctrl && !event.ctrlKey) return false;
-  if (chord.meta && !event.metaKey) return false;
-  if (chord.alt !== event.altKey) return false;
-  if (chord.shift !== event.shiftKey) return false;
-  // A chord with no modifier must not fire while a modifier is held, or
-  // "e" would trigger inside Ctrl+E.
-  return chord.mod || chord.ctrl || chord.meta ? true : !mod;
-}
-
-/**
- * True while the event came from somewhere text is being typed.
- *
- * A single-key shortcut must not fire while someone is filling in the
- * search box or a cell editor. Chords with a modifier still work there,
- * because that is what a modifier is for.
- */
-function inTextEntry(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  const tag = target.tagName;
-  return (
-    tag === "INPUT" ||
-    tag === "TEXTAREA" ||
-    tag === "SELECT" ||
-    target.isContentEditable
-  );
-}
+export type { Shortcut } from "@adapttable/core";
+export { DEFAULT_SHORTCUTS } from "@adapttable/core";
 
 /**
  * What {@link useShortcuts} needs.
@@ -132,21 +57,10 @@ export function useShortcuts(options: UseShortcutsOptions): void {
   const getTarget = options.target;
   useEffect(() => {
     if (!enabled || shortcuts.length === 0) return;
-    const parsed = shortcuts.map((shortcut) => ({
-      chord: parseChord(shortcut.chord),
-      command: shortcut.command,
-    }));
+    const handle = createShortcutHandler(shortcuts, onCommand);
     const node = getTarget?.() ?? document;
     const onKeyDown = (event: Event) => {
-      if (!(event instanceof KeyboardEvent)) return;
-      for (const { chord, command } of parsed) {
-        const bare = !chord.mod && !chord.ctrl && !chord.meta;
-        if (bare && inTextEntry(event.target)) continue;
-        if (!matches(chord, event)) continue;
-        event.preventDefault();
-        onCommand(command);
-        return;
-      }
+      if (event instanceof KeyboardEvent) handle(event);
     };
     node.addEventListener("keydown", onKeyDown);
     return () => {

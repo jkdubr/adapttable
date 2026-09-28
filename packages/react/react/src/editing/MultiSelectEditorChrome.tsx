@@ -13,6 +13,10 @@
  * "group">` is the defect this exists to avoid.
  */
 import { formatMultiDraft, readMultiDraft } from "@adapttable/core";
+import type {
+  MultiSelectEditorCheckboxProps as NeutralMultiSelectEditorCheckboxProps,
+  MultiSelectEditorSlots as NeutralMultiSelectEditorSlots,
+} from "@adapttable/core/binding";
 import type { KeyboardEvent, ReactNode } from "react";
 
 import {
@@ -21,42 +25,25 @@ import {
 } from "./EditableCellGate";
 
 /**
- * One option's checkbox, rendered by the adapter with its kit's control.
+ * One option's checkbox, rendered by the adapter with its kit's control —
+ * `@adapttable/core`'s `MultiSelectEditorCheckboxProps` with React's node and
+ * key event.
  *
  * @public
  */
-export interface MultiSelectEditorCheckboxProps {
-  /** The option's visible text. */
-  readonly label: ReactNode;
-  /** The option's value — unique within the editor. */
-  readonly value: string;
-  /** Whether the draft currently holds this value. */
-  readonly checked: boolean;
-  /** Add or remove this value from the draft. */
-  readonly onToggle: () => void;
-  /**
-   * Present on the FIRST option only. Attach it to the kit's control so the
-   * editor takes focus when the cell opens, exactly as a single-control editor
-   * does through {@link EditableCellEditorCtrl.focusRef}.
-   */
-  readonly focusRef?: (node: { focus: () => void } | null) => void;
-  /**
-   * The editor's key handling — Enter commits, Escape cancels. It belongs on
-   * the controls themselves rather than the group: a group is not an
-   * interactive element, and keys arrive at whichever option has focus.
-   */
-  readonly onKeyDown: (event: KeyboardEvent) => void;
-}
+export type MultiSelectEditorCheckboxProps =
+  NeutralMultiSelectEditorCheckboxProps<ReactNode, KeyboardEvent>;
 
 /**
- * Adapter-supplied controls for {@link MultiSelectEditorChrome}.
+ * Adapter-supplied controls for {@link MultiSelectEditorChrome} —
+ * `@adapttable/core`'s `MultiSelectEditorSlots` drawing React nodes.
  *
  * @public
  */
-export interface MultiSelectEditorSlots {
-  /** Renders a checkbox. */
-  readonly Checkbox: (props: MultiSelectEditorCheckboxProps) => ReactNode;
-}
+export type MultiSelectEditorSlots = NeutralMultiSelectEditorSlots<
+  ReactNode,
+  KeyboardEvent
+>;
 
 /**
  * Props for {@link MultiSelectEditorChrome}.

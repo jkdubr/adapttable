@@ -5,16 +5,6 @@
  * Empty slots pass chrome through unchanged, so the lean table never
  * imports those modules.
  */
-import { TableRuntimePublisher } from "@adapttable/core/binding";
-import { type ReactNode, useState } from "react";
-
-import type { ComposedTableProps } from "../props";
-import type { TableChrome } from "../useTableChrome";
-import {
-  FeatureSlot,
-  useFeatureSlotFilled,
-  usePublishTableRuntime,
-} from "./providers";
 import {
   type ChromeExtraSlotProps,
   COLUMN_LAYOUT_LIVE,
@@ -25,8 +15,18 @@ import {
   PINNING_LIVE,
   ROW_ACTIONS_LIVE,
   SELECTION_LIVE,
+  TableRuntimePublisher,
   TREE_LIVE,
-} from "./slotKeys";
+} from "@adapttable/core/binding";
+import { type ReactNode, useState } from "react";
+
+import type { ComposedTableProps } from "../props";
+import type { TableChrome } from "../useTableChrome";
+import {
+  FeatureSlot,
+  useFeatureSlotFilled,
+  usePublishTableRuntime,
+} from "./providers";
 
 function ExtraGate<TRow>({
   slot,
@@ -44,7 +44,7 @@ function ExtraGate<TRow>({
     chrome,
     props,
     children,
-  } as unknown as ChromeExtraSlotProps<never>;
+  } as unknown as ChromeExtraSlotProps;
   return filled ? (
     <FeatureSlot slot={slot} props={slotProps} />
   ) : (

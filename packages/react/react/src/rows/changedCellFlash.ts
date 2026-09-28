@@ -11,15 +11,22 @@
  * already works. And it never animates against
  * `prefers-reduced-motion` — a flash nobody asked for is a bug, not a feature.
  */
-import type { RowPatchEvent } from "@adapttable/core";
-import { useCallback, useDebugValue, useEffect, useRef, useState } from "react";
+import {
+  CHANGED_CELL_FLASH_MS,
+  createChangedCellFlashStore,
+  type RowPatchEvent,
+} from "@adapttable/core";
+import {
+  useCallback,
+  useDebugValue,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 
 export type { RowPatchEvent };
-
-/** How long a mark lasts, in milliseconds. */
-const DEFAULT_DURATION_MS = 1200;
 
 /**
  * What {@link useChangedCellFlash} needs.
@@ -60,28 +67,6 @@ export interface ChangedCellFlashState {
   clear: () => void;
 }
 
-/** Fields whose value actually differs between the two rows. */
-function changedFields(prev: unknown, next: unknown): readonly string[] {
-  if (typeof prev !== "object" || prev === null) return [];
-  if (typeof next !== "object" || next === null) return [];
-  const before = prev as Record<string, unknown>;
-  const after = next as Record<string, unknown>;
-  const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
-  return [...keys].filter((key) => !Object.is(before[key], after[key]));
-}
-
-/**
- * Which column keys one event touched, or `null` for the whole row.
- *
- * An update is diffed rather than trusted: a patch that sends a field back
- * unchanged should not light a cell that did not move.
- */
-function touchedKeys(event: RowPatchEvent<unknown>): readonly string[] | null {
-  if (event.type === "update") return changedFields(event.prev, event.next);
-  // An insert is the whole row arriving; a remove has no cells left to mark.
-  return event.type === "remove" ? [] : null;
-}
-
 /**
  * Track the cells a patch changed, briefly.
  *
@@ -93,84 +78,39 @@ function touchedKeys(event: RowPatchEvent<unknown>): readonly string[] | null {
 export function useChangedCellFlash(
   options: UseChangedCellFlashOptions = {}
 ): ChangedCellFlashState {
-  const { enabled = false, durationMs = DEFAULT_DURATION_MS } = options;
+  const { enabled = false, durationMs = CHANGED_CELL_FLASH_MS } = options;
   const reduced = usePrefersReducedMotion();
   const live = enabled && !reduced;
 
-  // `version` only exists to repaint; the marks themselves live in the ref so
-  // a burst of patches does not queue a render per patch.
-  const [generation, setGeneration] = useState(0);
-  useDebugValue(generation);
-  const marks = useRef(new Map<string, Set<string>>());
-  const rowMarks = useRef(new Set<string>());
-  const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
-
-  const forget = useCallback((rowId: string) => {
-    marks.current.delete(rowId);
-    rowMarks.current.delete(rowId);
-    timers.current.delete(rowId);
-    setGeneration((n) => n + 1);
-  }, []);
-
-  const clear = useCallback(() => {
-    for (const timer of timers.current.values()) clearTimeout(timer);
-    timers.current.clear();
-    marks.current.clear();
-    rowMarks.current.clear();
-    setGeneration((n) => n + 1);
-  }, []);
-
-  const mark = useCallback(
-    (events: readonly RowPatchEvent<unknown>[]) => {
-      if (!live || events.length === 0) return;
-      let touched = false;
-      for (const event of events) {
-        const keys = touchedKeys(event);
-        if (keys?.length === 0) continue;
-        touched = true;
-        if (keys === null) {
-          rowMarks.current.add(event.id);
-        } else {
-          const set = marks.current.get(event.id) ?? new Set<string>();
-          for (const key of keys) set.add(key);
-          marks.current.set(event.id, set);
-        }
-        // One timer per row, restarted by a later change to the same row:
-        // a cell that keeps moving keeps its mark rather than flickering.
-        const existing = timers.current.get(event.id);
-        if (existing) clearTimeout(existing);
-        timers.current.set(
-          event.id,
-          setTimeout(() => {
-            forget(event.id);
-          }, durationMs)
-        );
-      }
-      if (touched) setGeneration((n) => n + 1);
-    },
-    [live, durationMs, forget]
+  // The generation only exists to repaint; the marks live in the store so a
+  // burst of patches does not queue a render per patch.
+  const storeOptions = { live, durationMs };
+  const [store] = useState(() => createChangedCellFlashStore(storeOptions));
+  store.configure(storeOptions);
+  const generation = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot
   );
+  useDebugValue(generation);
 
   // Timers must not outlive the table.
-  useEffect(() => clear, [clear]);
+  useEffect(() => store.clear, [store]);
   // Turning it off (or a reduced-motion preference arriving) drops what is
   // already on screen rather than leaving it lit.
   useEffect(() => {
-    if (!live) clear();
-  }, [live, clear]);
+    if (!live) store.clear();
+  }, [live, store]);
 
   const isRowFlashing = useCallback(
-    (rowId: string) =>
-      live && (rowMarks.current.has(rowId) || marks.current.has(rowId)),
-    [live]
+    (rowId: string) => live && store.isRowFlashing(rowId),
+    [live, store]
   );
 
   const isFlashing = useCallback(
     (rowId: string, columnKey: string) =>
-      live &&
-      (rowMarks.current.has(rowId) ||
-        (marks.current.get(rowId)?.has(columnKey) ?? false)),
-    [live]
+      live && store.isFlashing(rowId, columnKey),
+    [live, store]
   );
 
   const flashProps = useCallback(
@@ -179,5 +119,11 @@ export function useChangedCellFlash(
     [isFlashing]
   );
 
-  return { isFlashing, isRowFlashing, flashProps, mark, clear };
+  return {
+    isFlashing,
+    isRowFlashing,
+    flashProps,
+    mark: store.mark,
+    clear: store.clear,
+  };
 }

@@ -6,7 +6,11 @@
  * paint already knows which child to mount — features are static — so SSR
  * and hydration see the same tree.
  */
-import { overlayChromeExtras } from "@adapttable/core/binding";
+import {
+  CHROME_BODY,
+  type ChromeBodySlotProps,
+  overlayChromeExtras,
+} from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { ForcedColorsStyle } from "../a11y/forcedColors";
@@ -21,7 +25,6 @@ import { usePlainChromeBodyData } from "../virtual/usePlainChromeBodyData";
 import { ChromeExtrasGate } from "./chromeExtrasGate";
 import { FeatureSlot, useFeatureSlotFilled } from "./providers";
 import { HistoryLiveGate, ShellLiveGate } from "./shellLiveGate";
-import { CHROME_BODY, type ChromeBodySlotProps } from "./slotKeys";
 
 /**
  * Resolve chrome-body data, then finish the table.
@@ -43,7 +46,7 @@ export function ChromeBodyGate<TRow>({
       chrome,
       props,
       children,
-    } as unknown as ChromeBodySlotProps<never>;
+    } as unknown as ChromeBodySlotProps;
     return <FeatureSlot slot={CHROME_BODY} props={slotProps} />;
   }
   return (

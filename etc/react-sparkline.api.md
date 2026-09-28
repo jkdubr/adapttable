@@ -22,9 +22,13 @@ import { FilterDef } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
 import { FilterType } from '@adapttable/core';
+import { finiteSparklineValues } from '@adapttable/core';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { SortableValue } from '@adapttable/core';
+import { sparklineExportValue } from '@adapttable/core';
+import { SparklineKind } from '@adapttable/core';
+import { sparklineSummary } from '@adapttable/core';
 
 export { CellEditor }
 
@@ -67,8 +71,7 @@ export { FilterOptionsSource }
 
 export { FilterType }
 
-// @public
-export function finiteSparklineValues(values: readonly number[]): number[];
+export { finiteSparklineValues }
 
 export { SortableValue }
 
@@ -91,11 +94,9 @@ export interface SparklineColumnSpec<TRow> {
     width?: number;
 }
 
-// @public
-export function sparklineExportValue(values: readonly number[]): string;
+export { sparklineExportValue }
 
-// @public
-export type SparklineKind = "bar" | "line" | "area";
+export { SparklineKind }
 
 // @public
 export interface SparklineProps {
@@ -107,8 +108,7 @@ export interface SparklineProps {
     width?: number;
 }
 
-// @public
-export function sparklineSummary(values: readonly number[]): string;
+export { sparklineSummary }
 
 // (No @packageDocumentation comment for this package)
 

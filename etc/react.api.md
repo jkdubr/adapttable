@@ -15,8 +15,11 @@ import { asBatchGesture } from '@adapttable/core';
 import { asGesture } from '@adapttable/core';
 import { BatchEditingState } from '@adapttable/core';
 import { BatchRowEdit } from '@adapttable/core';
+import { BooleanChoice } from '@adapttable/core';
+import { BooleanFieldWidget } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
+import { BulkActionOutcome } from '@adapttable/core';
 import { CellEditingState } from '@adapttable/core';
 import { CellEditKeyAction } from '@adapttable/core';
 import { CellEditKeyOutcome } from '@adapttable/core';
@@ -27,10 +30,14 @@ import { CellSaveState } from '@adapttable/core';
 import { CellSaveStatus } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
 import { CellValidator } from '@adapttable/core';
+import { CHECKLIST_ITEM_HEIGHT } from '@adapttable/core';
+import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
+import { CHECKLIST_VIRTUALIZE_AT } from '@adapttable/core';
 import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
 import { collectChecklistValues } from '@adapttable/core';
 import { ColorScheme } from '@adapttable/core';
+import { ColumnDragRowAttrs } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
 import { ColumnGroupDef } from '@adapttable/core';
 import { ColumnGroupRecord } from '@adapttable/core';
@@ -52,17 +59,22 @@ import { CreateTableEngineOptions } from '@adapttable/core';
 import { CSSProperties } from 'react';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { datasetIndex } from '@adapttable/core';
-import { DATE_OP_LABEL_KEYS } from '@adapttable/core';
 import { DateOp } from '@adapttable/core';
+import { DEFAULT_SHORTCUTS } from '@adapttable/core';
 import { defaultFrontendRowId } from '@adapttable/core';
 import { defaultSearchText } from '@adapttable/core';
+import { DELETE_ROW_ACTION_KEY } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
+import { DUPLICATE_ROW_ACTION_KEY } from '@adapttable/core';
 import { edgePinStyle } from '@adapttable/core';
+import { EditableCellActivateProps } from '@adapttable/core/binding';
+import { EditableCellButtonProps as EditableCellConflictButtonProps } from '@adapttable/core/binding';
 import { EditableCellController } from '@adapttable/core';
 import { EditableCellMode } from '@adapttable/core';
+import { EditableCellSlots } from '@adapttable/core/binding';
 import { EditableColumnLike } from '@adapttable/core';
 import { EditConflict } from '@adapttable/core';
 import { EditConflictChange } from '@adapttable/core';
@@ -78,6 +90,7 @@ import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
 import { EditUnit } from '@adapttable/core';
 import { EditValidationState } from '@adapttable/core';
+import { EMPTY_ROW_PIN_STATE } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportWriter } from '@adapttable/core';
 import { ExtraFilters } from '@adapttable/core';
@@ -92,12 +105,17 @@ import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
+import { filterDefForColumn } from '@adapttable/core';
+import { FilterFormSource } from '@adapttable/core/binding';
+import { filterOpLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterRuntime } from '@adapttable/core';
+import { filterTreeChipLabel } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
+import { FindInTableState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { getHistoryAdapter } from '@adapttable/core';
 import { GRID_CELL_ATTR } from '@adapttable/core';
@@ -112,22 +130,29 @@ import { GroupingPanelState } from '@adapttable/core';
 import { GroupPaging } from '@adapttable/core';
 import { headerFilterFieldIsComplete } from '@adapttable/core';
 import { HeaderFilterOpenHost } from '@adapttable/core';
+import { HighlightedCell } from '@adapttable/core';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { isDeclarativeFilters } from '@adapttable/core';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
 import { LayoutStorage } from '@adapttable/core';
+import { listFilterValues } from '@adapttable/core';
 import { liveRowChanged } from '@adapttable/core';
 import { MobileCardField } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
+import { MultiSelectEditorCheckboxProps as MultiSelectEditorCheckboxProps_2 } from '@adapttable/core/binding';
+import { MultiSelectEditorSlots as MultiSelectEditorSlots_2 } from '@adapttable/core/binding';
+import { NestedTableDefaults } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
-import { NUMBER_OP_LABEL_KEYS } from '@adapttable/core';
 import { NumberOp } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
+import { parseBooleanChoice } from '@adapttable/core';
 import { partitionPinnedRows } from '@adapttable/core';
 import { PatchFeature } from '@adapttable/core/binding';
+import { PIN_BOTTOM_ACTION_KEY } from '@adapttable/core';
+import { PIN_TOP_ACTION_KEY } from '@adapttable/core';
 import { PIN_Z } from '@adapttable/core';
 import { PinLeads } from '@adapttable/core';
 import { PinnedCellStyle } from '@adapttable/core';
@@ -137,10 +162,11 @@ import { PinOffset } from '@adapttable/core';
 import { PinSide } from '@adapttable/core';
 import { Props } from '@adapttable/core';
 import { QueryAggregate } from '@adapttable/core';
-import { QueryCondition } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
-import { RangeOp } from '@adapttable/core';
+import { RangeFieldWidget } from '@adapttable/core';
+import { RangeOpArity } from '@adapttable/core';
+import { RangeOpLabelKeys } from '@adapttable/core';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { ReconcileLiveBatchEdit } from '@adapttable/core';
@@ -151,12 +177,16 @@ import { RefObject } from 'react';
 import { RowAction } from '@adapttable/core';
 import { RowDropPosition } from '@adapttable/core';
 import { RowEditDrafts } from '@adapttable/core';
+import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowHeight } from '@adapttable/core';
 import { RowMoveMenuModel } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
 import { RowPairMeasurer } from '@adapttable/core/binding';
+import { RowPinLabels } from '@adapttable/core';
+import { RowPinSide } from '@adapttable/core';
+import { RowPinState } from '@adapttable/core';
 import { RowReorderControllerOptions } from '@adapttable/core';
 import { RowReorderDecision } from '@adapttable/core';
 import { RowReorderHandler } from '@adapttable/core';
@@ -169,7 +199,9 @@ import { SavedViewMigration } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
+import { scalarFilterText } from '@adapttable/core';
 import { HEADER_FILTER_SESSION_ATTR as SESSION_ATTR } from '@adapttable/core';
+import { Shortcut } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
@@ -185,9 +217,10 @@ import { TableSource } from '@adapttable/core';
 import { TableStateMutators } from '@adapttable/core';
 import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
-import { TEXT_OP_LABEL_KEYS } from '@adapttable/core';
+import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
 import { TreeEntry } from '@adapttable/core';
+import { UNPIN_ROW_ACTION_KEY } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { ValidationCheckResult } from '@adapttable/core';
@@ -225,23 +258,11 @@ export function bindHeaderFilterDismiss<TRow>(source: FilterFormSource<TRow>, op
     registry?: FilterTypeRegistry;
 }): FilterFormSource<TRow>;
 
-// @public
-export type BooleanChoice = "" | "true" | "false";
+export { BooleanChoice }
 
-// @public
-export interface BooleanFieldWidget {
-    choice: BooleanChoice;
-    label: string;
-    write: (next: BooleanChoice) => void;
-}
+export { BooleanFieldWidget }
 
-// @public
-export type BulkActionOutcome = {
-    status: "success";
-} | {
-    status: "error";
-    error: unknown;
-};
+export { BulkActionOutcome }
 
 // @public
 export interface BulkActionRunner {
@@ -277,14 +298,11 @@ export { CellSaveStatus }
 
 export { CellValidator }
 
-// @public
-export const CHECKLIST_ITEM_HEIGHT = 28;
+export { CHECKLIST_ITEM_HEIGHT }
 
-// @public
-export const CHECKLIST_LIST_HEIGHT = 240;
+export { CHECKLIST_LIST_HEIGHT }
 
-// @public
-export const CHECKLIST_VIRTUALIZE_AT = 40;
+export { CHECKLIST_VIRTUALIZE_AT }
 
 // @public
 export interface ChecklistFilterState {
@@ -334,11 +352,7 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
     renderHeader?: (ctx: ColumnHeaderContext<TRow>) => ReactNode;
 }
 
-// @public
-export interface ColumnDragRowAttrs {
-    "data-dragging"?: "";
-    "data-drop"?: "before" | "after";
-}
+export { ColumnDragRowAttrs }
 
 // @public
 export interface ColumnDragState {
@@ -456,15 +470,13 @@ export { datasetIndex }
 
 export { DateOp }
 
-// @public
-export const DEFAULT_SHORTCUTS: readonly Shortcut[];
+export { DEFAULT_SHORTCUTS }
 
 export { defaultFrontendRowId }
 
 export { defaultSearchText }
 
-// @public
-export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
+export { DELETE_ROW_ACTION_KEY }
 
 // @public
 export type Density = TableDensity;
@@ -479,45 +491,14 @@ export interface DirtyEdits {
     readonly count: number;
 }
 
-// @public
-export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
+export { DUPLICATE_ROW_ACTION_KEY }
 
 export { edgePinStyle }
 
 // @public
-export interface EditableCellActivateControlProps {
-    readonly activateRef: (node: HTMLButtonElement | null) => void;
-    readonly className?: string;
-    readonly dirty: boolean;
-    readonly display: ReactNode;
-    readonly onClick: (event: {
-        stopPropagation: () => void;
-    }) => void;
-    readonly onDoubleClick: (event: {
-        preventDefault: () => void;
-        stopPropagation: () => void;
-    }) => void;
-    readonly onKeyDown: (event: {
-        key: string;
-        preventDefault: () => void;
-        stopPropagation: () => void;
-    }) => void;
-    readonly saveStatus: string | undefined;
-    readonly title: string;
-}
+export type EditableCellActivateControlProps = EditableCellActivateProps<ReactNode>;
 
-// @public
-export interface EditableCellConflictButtonProps {
-    readonly className?: string;
-    readonly label: string;
-    readonly onClick: (event: {
-        stopPropagation: () => void;
-    }) => void;
-    readonly onMouseDown?: (event: {
-        preventDefault: () => void;
-    }) => void;
-    readonly part: string;
-}
+export { EditableCellConflictButtonProps }
 
 export { EditableCellController }
 
@@ -533,10 +514,7 @@ export function editableCellController<TRow>(options: {
 }): EditableCellController;
 
 // @public
-export interface EditableCellControls {
-    readonly Activate: (props: EditableCellActivateControlProps) => ReactNode;
-    readonly Button: (props: EditableCellConflictButtonProps) => ReactNode;
-}
+export type EditableCellControls = EditableCellSlots<ReactNode>;
 
 // @public
 export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
@@ -631,8 +609,7 @@ export { EditUnit }
 
 export { EditValidationState }
 
-// @public
-export const EMPTY_ROW_PIN_STATE: RowPinState;
+export { EMPTY_ROW_PIN_STATE }
 
 export { FailedCellSave }
 
@@ -723,17 +700,13 @@ export type FeatureRender<TProps> = FeatureRender_2<TProps, ReactNode>;
 
 export { FeatureSlotKey }
 
-// @public
-export function filterDefForColumn<TRow>(defs: readonly FilterDef<TRow>[], key: string): FilterDef<TRow> | undefined;
+export { filterDefForColumn }
 
-// @public
-export type FilterFormSource<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">;
+export { FilterFormSource }
 
-// @public
-export function filterOpLabel(labels: Required<TableLabels>, key: keyof TableLabels): string;
+export { filterOpLabel }
 
-// @public
-export function filterTreeChipLabel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], labels: Required<TableLabels>): string;
+export { filterTreeChipLabel }
 
 // @public
 export interface FilterTriggerToggle {
@@ -743,20 +716,7 @@ export interface FilterTriggerToggle {
 
 export { FIND_URL_WRITE_DEBOUNCE_MS }
 
-// @public
-export interface FindInTableState {
-    current: GridCell | null;
-    index: number;
-    matches: readonly GridCell[];
-    matchKeys: ReadonlySet<string>;
-    next: () => void;
-    open: boolean;
-    openBar?: () => void;
-    previous: () => void;
-    query: string;
-    setOpen: (open: boolean) => void;
-    setQuery: (query: string) => void;
-}
+export { FindInTableState }
 
 export { getHistoryAdapter }
 
@@ -835,11 +795,7 @@ export function headerFilterStickTop(sticky: boolean, base: CSSProperties | unde
 // @public
 export type HeaderSelectionState = "all" | "some" | "none";
 
-// @public
-export interface HighlightedCell {
-    columnKey: string;
-    rowId: string;
-}
+export { HighlightedCell }
 
 // @public
 export interface HighlightState {
@@ -870,22 +826,12 @@ export interface LazyChildrenState<TRow> {
     loadingIds: ReadonlySet<string>;
 }
 
-// @public
-export function listFilterValues(value: FilterValue): string[];
+export { listFilterValues }
 
 export { liveRowChanged }
 
 // @public
-export interface MultiSelectEditorCheckboxProps {
-    readonly checked: boolean;
-    readonly focusRef?: (node: {
-        focus: () => void;
-    } | null) => void;
-    readonly label: ReactNode;
-    readonly onKeyDown: (event: KeyboardEvent_2) => void;
-    readonly onToggle: () => void;
-    readonly value: string;
-}
+export type MultiSelectEditorCheckboxProps = MultiSelectEditorCheckboxProps_2<ReactNode, KeyboardEvent_2>;
 
 // @public
 export function MultiSelectEditorChrome(input: Readonly<MultiSelectEditorChromeProps>): ReactNode;
@@ -899,9 +845,7 @@ export interface MultiSelectEditorChromeProps {
 }
 
 // @public
-export interface MultiSelectEditorSlots {
-    readonly Checkbox: (props: MultiSelectEditorCheckboxProps) => ReactNode;
-}
+export type MultiSelectEditorSlots = MultiSelectEditorSlots_2<ReactNode, KeyboardEvent_2>;
 
 // @public
 export interface NestedTable {
@@ -909,14 +853,7 @@ export interface NestedTable {
     table: (defaults: NestedTableDefaults) => ReactNode;
 }
 
-// @public
-export interface NestedTableDefaults {
-    density: Density | undefined;
-    labels: TableLabels | undefined;
-    searchable: boolean;
-    tableLabel: string;
-    urlSync: false;
-}
+export { NestedTableDefaults }
 
 // @public
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
@@ -928,16 +865,13 @@ export function offersAllMatching(selection: Pick<SelectionState, "acrossPages" 
 
 export { PageSelector }
 
-// @public
-export function parseBooleanChoice(value: FilterValue): BooleanChoice;
+export { parseBooleanChoice }
 
 export { partitionPinnedRows }
 
-// @public
-export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
+export { PIN_BOTTOM_ACTION_KEY }
 
-// @public
-export const PIN_TOP_ACTION_KEY = "adapttable:pin-row-top";
+export { PIN_TOP_ACTION_KEY }
 
 export { PIN_Z }
 
@@ -951,27 +885,11 @@ export { PinOffset }
 
 export { PinSide }
 
-// @public
-export interface RangeFieldWidget {
-    a: string;
-    arity: RangeOpArity;
-    b: string;
-    inputType: "date" | "number" | "text";
-    label: string;
-    op: RangeOp | undefined;
-    opLabelKeys: RangeOpLabelKeys;
-    ops: readonly RangeOp[];
-    setOp: (op: RangeOp | undefined) => void;
-    write: (nextOp: RangeOp | undefined, nextA: string, nextB: string) => void;
-}
+export { RangeFieldWidget }
 
-// @public
-export type RangeOpArity = "none" | "one" | "two" | "list";
+export { RangeOpArity }
 
-// @public
-export type RangeOpLabelKeys = typeof NUMBER_OP_LABEL_KEYS | (typeof DATE_OP_LABEL_KEYS & {
-    readonly eq: "opOn";
-});
+export { RangeOpLabelKeys }
 
 // @public
 export interface ReactColumnGroupDef<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
@@ -1033,12 +951,7 @@ export function resolveNeutralColumnHeaders<TRow>(columns: readonly ColumnMetada
 
 export { RowEditDrafts }
 
-// @public
-export interface RowEditIcons {
-    readonly begin?: DisplayValue | false;
-    readonly cancel?: DisplayValue | false;
-    readonly save?: DisplayValue | false;
-}
+export { RowEditIcons }
 
 export { RowEditingState }
 
@@ -1075,12 +988,7 @@ export interface RowMutationsState<TRow> {
 
 export { RowPairMeasurer }
 
-// @public
-export interface RowPinLabels {
-    pinToBottom: string;
-    pinToTop: string;
-    unpinRow: string;
-}
+export { RowPinLabels }
 
 // @public
 export interface RowPinningState<TRow> {
@@ -1091,14 +999,9 @@ export interface RowPinningState<TRow> {
     unpin: (rowId: string) => void;
 }
 
-// @public
-export type RowPinSide = "top" | "bottom";
+export { RowPinSide }
 
-// @public
-export interface RowPinState {
-    readonly bottom: readonly string[];
-    readonly top: readonly string[];
-}
+export { RowPinState }
 
 export { RowReorderDecision }
 
@@ -1118,8 +1021,7 @@ export { SavedViewsStore }
 
 export { SavedViewVisibility }
 
-// @public
-export function scalarFilterText(value: FilterValue): string;
+export { scalarFilterText }
 
 // @public
 export interface SearchInputElementProps extends Props {
@@ -1160,11 +1062,7 @@ export interface SelectionState {
 
 export { SESSION_ATTR }
 
-// @public
-export interface Shortcut {
-    chord: string;
-    command: string;
-}
+export { Shortcut }
 
 // @public
 export interface SidePanelEntry {
@@ -1354,17 +1252,7 @@ export interface TableRowReorderState<TRow> {
     selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
 }
 
-// @public
-export interface TextFieldWidget {
-    label: string;
-    needsValue: boolean;
-    op: TextOp;
-    opLabelKeys: typeof TEXT_OP_LABEL_KEYS;
-    ops: readonly TextOp[];
-    setOp: (op: TextOp) => void;
-    value: string;
-    write: (nextOp: TextOp, nextValue: string) => void;
-}
+export { TextFieldWidget }
 
 export { TextOp }
 
@@ -1381,8 +1269,7 @@ export interface TreeExpansionState {
     toggle: (id: string) => void;
 }
 
-// @public
-export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
+export { UNPIN_ROW_ACTION_KEY }
 
 export { UrlStateAdapter }
 
@@ -1621,6 +1508,7 @@ export function useFilterTreeChips<TRow>(options: UseFilterTreeChipsOptions<TRow
 export interface UseFilterTreeChipsOptions<TRow> {
     readonly defs: readonly FilterDef<TRow>[];
     readonly labels: Required<TableLabels>;
+    readonly registry?: FilterTypeRegistry;
     readonly setFilterTree?: (tree: QueryFilterGroup | undefined) => void;
     readonly tree: QueryFilterGroup | undefined;
 }

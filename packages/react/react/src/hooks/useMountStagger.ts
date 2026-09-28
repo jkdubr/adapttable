@@ -1,3 +1,4 @@
+import { MOUNT_STAGGER } from "@adapttable/core/binding";
 import { type DependencyList, type RefObject, useEffect } from "react";
 
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
@@ -37,7 +38,11 @@ export function useMountStagger(
   options: MountStaggerOptions
 ): void {
   const reduced = usePrefersReducedMotion();
-  const { enabled, step = 40, duration = 320 } = options;
+  const {
+    enabled,
+    step = MOUNT_STAGGER.stepMs,
+    duration = MOUNT_STAGGER.durationMs,
+  } = options;
   // Collapse the caller's deps to a primitive key so the effect's dependency
   // array stays a literal (no spread) and `exhaustive-deps` can verify it.
   // Pass primitive deps (e.g. a row count), not large objects.
@@ -47,21 +52,15 @@ export function useMountStagger(
     if (!enabled || reduced) return;
     const root = ref.current;
     if (!root) return;
-    const items = root.querySelectorAll<HTMLElement>("[data-stagger]");
+    const items = root.querySelectorAll<HTMLElement>(MOUNT_STAGGER.selector);
     items.forEach((el, index) => {
       if (typeof el.animate !== "function") return;
-      el.animate(
-        [
-          { opacity: 0, transform: "translateY(8px)" },
-          { opacity: 1, transform: "translateY(0)" },
-        ],
-        {
-          duration,
-          delay: index * step,
-          easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-          fill: "both",
-        }
-      );
+      el.animate([...MOUNT_STAGGER.keyframes], {
+        duration,
+        delay: index * step,
+        easing: MOUNT_STAGGER.easing,
+        fill: "both",
+      });
     });
   }, [enabled, reduced, step, duration, ref, depsKey]);
 }

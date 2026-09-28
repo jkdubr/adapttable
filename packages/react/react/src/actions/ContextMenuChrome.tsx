@@ -20,99 +20,42 @@
  * the menu is still mounted otherwise, and the menu's own focus restoration
  * then fights whatever the action just did.
  */
-import { type ContextMenuItem, type TableLabels } from "@adapttable/core";
-import { Fragment, type ReactNode, type RefObject, useRef } from "react";
+import type { ContextMenuItem } from "@adapttable/core";
+import type {
+  ContextMenuChromeProps as NeutralContextMenuChromeProps,
+  ContextMenuSlots as NeutralContextMenuSlots,
+  ContextMenuSurfaceProps as NeutralContextMenuSurfaceProps,
+} from "@adapttable/core/binding";
+import { Fragment, type ReactNode, useRef } from "react";
 
 import type { ContextMenuPoint } from "./useContextMenu";
 
 export type { ContextMenuItem, ContextMenuPoint };
+export type { ContextMenuItemProps } from "@adapttable/core/binding";
 
 /**
- * Props an adapter's menu surface receives.
+ * Props an adapter's menu surface receives — `@adapttable/core`'s
+ * `ContextMenuSurfaceProps` drawing React nodes.
  *
  * @public
  */
-export interface ContextMenuSurfaceProps {
-  /** Where the menu was opened, in viewport coordinates. */
-  readonly at: ContextMenuPoint;
-  /**
-   * A zero-size element sitting at exactly that point.
-   *
-   * Every kit's menu anchors to an ELEMENT, not to coordinates — that is
-   * how it decides which way to flip near an edge and where to portal to.
-   * A right-click has coordinates and no element, so core puts one there.
-   * Anchor the kit's menu to this and its positioning, flipping and
-   * collision handling all work the way that kit's users expect.
-   */
-  readonly anchorRef: RefObject<HTMLElement | null>;
-  /** The accessible name for the menu. */
-  readonly label: string;
-  /** Close it — bind to the kit's own dismiss channel. */
-  readonly onClose: () => void;
-  /** Where the kit must portal while fullscreen; `undefined` otherwise. */
-  readonly container?: HTMLElement;
-  /** The entries, already rendered through the Item and Separator slots. */
-  readonly children: ReactNode;
-  /** Class for the element. */
-  readonly className?: string;
-}
+export type ContextMenuSurfaceProps = NeutralContextMenuSurfaceProps<ReactNode>;
 
 /**
- * Props an adapter's menu entry receives.
+ * Adapter-owned rendering for {@link ContextMenuChrome} —
+ * `@adapttable/core`'s `ContextMenuSlots` drawing React nodes.
  *
  * @public
  */
-export interface ContextMenuItemProps {
-  /** The entry being rendered. */
-  readonly item: ContextMenuItem;
-  /**
-   * Bind this rather than `item.onSelect`: it closes the menu first, which
-   * an entry that opens a dialog or moves focus depends on.
-   */
-  readonly onSelect: () => void;
-}
+export type ContextMenuSlots = NeutralContextMenuSlots<ReactNode>;
 
 /**
- * Adapter-owned rendering for {@link ContextMenuChrome}.
+ * What the context menu needs to render — `@adapttable/core`'s
+ * `ContextMenuChromeProps` with React's slots.
  *
  * @public
  */
-export interface ContextMenuSlots {
-  /** The kit's menu, positioned at the point it was opened from. */
-  readonly Surface: (props: ContextMenuSurfaceProps) => ReactNode;
-  /** One entry. */
-  readonly Item: (props: ContextMenuItemProps) => ReactNode;
-  /** The divider between groups of entries. */
-  readonly Separator: () => ReactNode;
-}
-
-/**
- * What the context menu needs to render.
- *
- * @public
- */
-export interface ContextMenuChromeProps {
-  /** The entries. Nothing renders when this is empty. */
-  items: readonly ContextMenuItem[];
-  /** Where it was opened, or `null` when it is closed. */
-  at: ContextMenuPoint | null;
-  /** Close it, putting focus back where it came from. */
-  onClose: () => void;
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** A kit's own class for the menu. */
-  className?: string;
-  /**
-   * Where to portal while the table is fullscreen.
-   *
-   * The Fullscreen API hides everything outside the promoted element, so a
-   * menu portalled to `document.body` is mounted, focused and invisible.
-   * `shell.fullscreen.container` is that element while it is on.
-   */
-  container?: HTMLElement;
-  /** Adapter-owned visible components. */
-  slots: ContextMenuSlots;
-}
+export type ContextMenuChromeProps = NeutralContextMenuChromeProps<ReactNode>;
 
 /**
  * Renders the open context menu, or nothing.

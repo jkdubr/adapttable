@@ -20,6 +20,7 @@ import {
   withColumnOrder,
   withColumnPinned,
   withColumnWidth,
+  writeStoredColumnLayout,
 } from "./tableStores";
 
 afterEach(() => {
@@ -199,5 +200,27 @@ describe("stored column layout", () => {
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('stored column layout under "t"')
     );
+  });
+
+  it("saves a layout, removes one equal to the default, and survives a failed write", () => {
+    const storage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    };
+    const hidden = { ...EMPTY_COLUMN_LAYOUT, hidden: ["a"] };
+    writeStoredColumnLayout(storage, "t", hidden, EMPTY_COLUMN_LAYOUT);
+    expect(storage.setItem).toHaveBeenCalledWith("t", JSON.stringify(hidden));
+    writeStoredColumnLayout(storage, "t", EMPTY_COLUMN_LAYOUT, {
+      ...EMPTY_COLUMN_LAYOUT,
+    });
+    expect(storage.removeItem).toHaveBeenCalledWith("t");
+    storage.setItem.mockImplementation(() => {
+      throw new Error("quota");
+    });
+    expect(() => {
+      writeStoredColumnLayout(storage, "t", hidden, EMPTY_COLUMN_LAYOUT);
+    }).not.toThrow();
+    writeStoredColumnLayout(undefined, "t", hidden, EMPTY_COLUMN_LAYOUT);
   });
 });

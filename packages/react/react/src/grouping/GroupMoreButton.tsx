@@ -4,48 +4,24 @@
  * Wording and the part name stay here so they cannot drift. Adapters pass
  * the button the end user clicks.
  */
-import type { TableLabels } from "@adapttable/core";
+import type {
+  GroupMoreButtonProps,
+  GroupMoreButtonSlots as NeutralGroupMoreButtonSlots,
+} from "@adapttable/core/binding";
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * Props for an adapter `GroupMoreButton` — no slots on the public API.
- *
- * @public
- */
-export interface GroupMoreButtonProps {
-  /** Whether this offers more groups or more rows inside one. */
-  scope: "groups" | "rows";
-  /** How many are still hidden. */
-  remaining: number;
-  /** The group whose rows are being revealed, for a `"rows"` offer. */
-  groupKey?: string;
-  /** Labels; falls back to the built-in English. */
-  labels: Required<TableLabels>;
-  /** Reveal the next page. */
-  onShowMore: (entry: { scope: "groups" | "rows"; groupKey?: string }) => void;
-}
+export type {
+  GroupMoreButtonProps,
+  GroupMoreButtonSlotProps,
+} from "@adapttable/core/binding";
 
 /**
- * Kit button the group-more chrome calls.
+ * Adapter-supplied controls for {@link GroupMoreButtonChrome} —
+ * `@adapttable/core`'s `GroupMoreButtonSlots` drawing React nodes.
  *
  * @public
  */
-export interface GroupMoreButtonSlotProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Called when pressed. */
-  readonly onClick: () => void;
-}
-
-/**
- * Adapter-supplied controls for {@link GroupMoreButtonChrome}.
- *
- * @public
- */
-export interface GroupMoreButtonSlots {
-  /** Renders a button. */
-  readonly Button: (props: GroupMoreButtonSlotProps) => ReactNode;
-}
+export type GroupMoreButtonSlots = NeutralGroupMoreButtonSlots<ReactNode>;
 
 /**
  * Props for {@link GroupMoreButtonChrome}.

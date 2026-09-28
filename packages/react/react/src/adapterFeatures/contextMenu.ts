@@ -1,4 +1,4 @@
-import { clipboardRangeText, writeClipboardText } from "@adapttable/core";
+import { withContextMenuCellCopy } from "@adapttable/core";
 import { createElement, Fragment, type ReactNode } from "react";
 
 import type { ContextMenuChromeProps } from "../actions/ContextMenuChrome";
@@ -24,29 +24,6 @@ type MenuOptions = Omit<
   ContextMenuLiveSlotProps<never>,
   "children" | "container"
 >;
-type MenuTarget = Parameters<NonNullable<MenuOptions["actions"]["onCopy"]>>[0];
-
-/**
- * Copy the one cell a context menu was opened over.
- *
- * Without cell navigation there is no grid address and no range, but the
- * target already names the row and the column, which is all a single cell
- * needs. The text is the cell's export value, as a range copy writes it.
- */
-function copyTargetCell(options: MenuOptions, target: MenuTarget): void {
-  if (target.kind !== "cell") return;
-  const column = options.columns.find((item) => item.key === target.columnKey);
-  if (!column) return;
-  const text = clipboardRangeText({
-    range: { anchor: { row: 0, col: 0 }, head: { row: 0, col: 0 } },
-    rows: [target.row],
-    columns: [column],
-  });
-  // The menu has closed and nothing announces a result without cell
-  // navigation; a refused clipboard leaves the clipboard as it was.
-  void writeClipboardText(text);
-}
-
 /**
  * The menu's options, with Copy acting on the right-clicked cell when there
  * is no grid selection for it to act on.
@@ -55,16 +32,12 @@ function withCellCopy(
   options: MenuOptions,
   gridNavigation: boolean
 ): MenuOptions {
-  if (gridNavigation || !options.actions.onCopy) return options;
-  return {
-    ...options,
-    actions: {
-      ...options.actions,
-      onCopy: (target) => {
-        copyTargetCell(options, target);
-      },
-    },
-  };
+  const actions = withContextMenuCellCopy(
+    options.actions,
+    options.columns,
+    gridNavigation
+  );
+  return actions === options.actions ? options : { ...options, actions };
 }
 
 /**

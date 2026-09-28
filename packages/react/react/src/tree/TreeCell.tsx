@@ -11,40 +11,19 @@
  * is what lets an adapter wrap its existing cell in one place rather than
  * duplicating it behind a condition.
  */
-import {
-  type TableLabels,
-  type TreeEntry,
-  treeIndentStyle,
-} from "@adapttable/core";
+import { treeIndentStyle } from "@adapttable/core";
+import type { TreeCellProps as NeutralTreeCellProps } from "@adapttable/core/binding";
 import type { ReactElement, ReactNode } from "react";
 
 import { TreeToggleChrome, type TreeToggleSlots } from "./TreeToggle";
 
 /**
- * Props for an adapter `TreeCell` — no slots on the public API.
+ * Props for an adapter `TreeCell` — `@adapttable/core`'s `TreeCellProps`
+ * with React content.
  *
  * @public
  */
-export interface TreeCellProps<TRow> {
-  /** The row's place in the tree; absent on a flat table. */
-  entry: TreeEntry<TRow> | undefined;
-  /** This cell's column. */
-  columnKey: string;
-  /** The column that carries the chevron. */
-  treeColumnKey: string | undefined;
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** Open or close this node. */
-  onToggle?: (id: string) => void;
-  /** Class for the wrapper — the unstyled kit's `treeCell` hook. */
-  className?: string;
-  /** Class for the chevron. */
-  toggleClassName?: string;
-  /** Class for a leaf's placeholder. */
-  spacerClassName?: string;
-  /** The cell's own content. */
-  children: ReactNode;
-}
+export type TreeCellProps<TRow> = NeutralTreeCellProps<TRow, ReactNode>;
 
 /**
  * Props for {@link TreeCellChrome}.

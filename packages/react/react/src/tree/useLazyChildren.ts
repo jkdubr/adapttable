@@ -1,22 +1,10 @@
 /**
- * Children fetched when a node is opened.
- *
- * A tree of any size cannot arrive whole: an org chart of ten thousand people
- * is one request per branch the reader actually opens. What that costs the host
- * is one callback; what it costs the reader is a spinner on the node they
- * clicked — never a table-wide loading state, because the rest of the tree is
- * still perfectly readable while one branch fills.
- *
- * The set of loading ids lives here rather than in the host's state so the
- * chevron can show it without the host wiring anything: opening a node with
- * unfetched children marks it, and it clears when the rows arrive or the fetch
- * rejects. A node whose fetch failed is closed again through `onLoadFailed`
- * and stays clickable, so the reader's retry is the same gesture as the first
- * attempt.
+ * Children fetched when a node is opened — the React side of core's
+ * lazy-children controller, which owns the loading and failed sets and the
+ * fetch-once rule.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
-
-import { useEventCallback } from "../hooks/useEventCallback";
+import { createLazyChildrenController } from "@adapttable/core";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 /**
  * What {@link useLazyChildren} needs.
@@ -72,69 +60,18 @@ export interface LazyChildrenState<TRow> {
 export function useLazyChildren<TRow>(
   options: UseLazyChildrenOptions<TRow>
 ): LazyChildrenState<TRow> {
-  const [loadingIds, setLoadingIds] = useState<ReadonlySet<string>>(
-    () => new Set()
+  const [controller] = useState(() => createLazyChildrenController(options));
+  controller.configure(options);
+  const { loadingIds, failedIds } = useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot,
+    controller.getSnapshot
   );
-  const [failedIds, setFailedIds] = useState<ReadonlySet<string>>(
-    () => new Set()
-  );
-  // Ids already asked for, so a second click while a fetch is in flight — or
-  // after one that returned nothing — does not ask again.
-  const asked = useRef(new Set<string>());
-  const alive = useRef(true);
-  useEffect(() => {
-    alive.current = true;
-    return () => {
-      alive.current = false;
-    };
-  }, []);
-
-  const settle = useEventCallback((row: TRow, id: string, failed: boolean) => {
-    if (!alive.current) return;
-    setLoadingIds((current) => {
-      const next = new Set(current);
-      next.delete(id);
-      return next;
-    });
-    if (failed) {
-      asked.current.delete(id);
-      setFailedIds((current) => new Set(current).add(id));
-      options.onLoadFailed?.(row, id);
-    }
-  });
-
-  const loadIfNeeded = useEventCallback((row: TRow) => {
-    const { onLoadChildren, hasLoadedChildren, getRowId } = options;
-    if (!onLoadChildren) return;
-    const id = getRowId(row);
-    if (hasLoadedChildren(row) || asked.current.has(id)) return;
-    asked.current.add(id);
-    setFailedIds((current) => {
-      if (!current.has(id)) return current;
-      const next = new Set(current);
-      next.delete(id);
-      return next;
-    });
-    setLoadingIds((current) => new Set(current).add(id));
-    // A synchronous handler that throws must settle the node too, or the
-    // spinner outlives the attempt.
-    try {
-      void Promise.resolve(onLoadChildren(row)).then(
-        () => {
-          settle(row, id, false);
-        },
-        () => {
-          settle(row, id, true);
-        }
-      );
-    } catch {
-      settle(row, id, true);
-    }
-  });
+  useEffect(() => controller.connect(), [controller]);
 
   return {
     loadingIds,
     failedIds,
-    loadIfNeeded: useCallback(loadIfNeeded, [loadIfNeeded]),
+    loadIfNeeded: controller.loadIfNeeded,
   };
 }

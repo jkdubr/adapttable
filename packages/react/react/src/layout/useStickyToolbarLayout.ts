@@ -1,4 +1,9 @@
 import {
+  measuredToolbarHeight,
+  stickyHeaderOffset,
+  stickyToolbarStyle,
+} from "@adapttable/core";
+import {
   type CSSProperties,
   type RefCallback,
   useCallback,
@@ -7,25 +12,7 @@ import {
   useState,
 } from "react";
 
-/**
- * Whether the toolbar should pin with the sticky header.
- *
- * Inside a table that already scrolls in a box (`maxHeight`, or antd's
- * native virtual scroller) the toolbar sits *outside* that box — it stays
- * on screen without `position: sticky`. Pinning it to the page anyway
- * detaches search from the card while the rows still scroll inside, which
- * is the ugly double-scroller.
- *
- * @public
- */
-export function resolveStickyToolbar(
-  stickyHeader?: boolean,
-  stickyToolbar?: boolean,
-  inScrollBox = false
-): boolean {
-  if (inScrollBox) return false;
-  return stickyToolbar ?? Boolean(stickyHeader);
-}
+export { resolveStickyToolbar } from "@adapttable/core";
 
 /**
  * Measure the toolbar and return the styles that park it at `stickyTop`,
@@ -50,7 +37,7 @@ export function useStickyToolbarLayout(
       setHeight(0);
       return;
     }
-    const next = Math.ceil(node.getBoundingClientRect().height);
+    const next = measuredToolbarHeight(node);
     setHeight((prev) => (prev === next ? prev : next));
   }, [enabled]);
 
@@ -77,18 +64,14 @@ export function useStickyToolbarLayout(
     };
   }, [enabled, read]);
 
-  const toolbarStyle: CSSProperties | undefined = enabled
-    ? {
-        position: "sticky",
-        top: stickyTop,
-        zIndex: 3,
-        background: "var(--adapttable-surface, Canvas)",
-      }
-    : undefined;
+  const toolbarStyle: CSSProperties | undefined = stickyToolbarStyle(
+    enabled,
+    stickyTop
+  );
 
   return {
     toolbarRef,
     toolbarStyle,
-    headerOffset: enabled ? stickyTop + height : stickyTop,
+    headerOffset: stickyHeaderOffset(enabled, stickyTop, height),
   };
 }

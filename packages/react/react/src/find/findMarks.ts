@@ -7,7 +7,12 @@
  * view itself — the same `data-cell-match` attributes, so a kit's styling and
  * a host's tests read one contract either way.
  */
-import { type GridCell, sameGridCell } from "@adapttable/core";
+import {
+  createFindShortcutScope,
+  type GridCell,
+  sameGridCell,
+  scrollCurrentMatchIntoView,
+} from "@adapttable/core";
 import { createContext, type RefObject, useContext, useEffect } from "react";
 
 import { gridCellAttr, type GridFocusState } from "../focus/useGridFocus";
@@ -78,23 +83,19 @@ export function useFindShortcut(
 ): void {
   useEffect(() => {
     if (!root || !openBar || typeof document === "undefined") return;
-    const inside = (target: EventTarget | null) =>
-      target instanceof Node && root.current?.contains(target) === true;
-    let pressedInside = false;
+    const scope = createFindShortcutScope({
+      contains: (target) =>
+        target instanceof Node && root.current?.contains(target) === true,
+      openBar,
+    });
     const onPointerDown = (event: Event) => {
-      pressedInside = inside(event.target);
+      scope.pointerDown(event.target);
     };
     const onFocusIn = (event: FocusEvent) => {
-      if (!inside(event.target)) pressedInside = false;
+      scope.focusIn(event.target);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() !== "f") return;
-      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
-        return;
-      }
-      if (!inside(event.target) && !pressedInside) return;
-      event.preventDefault();
-      openBar();
+      scope.keyDown(event);
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     document.addEventListener("focusin", onFocusIn, true);
@@ -120,9 +121,6 @@ export function useFindScroll(
 ): void {
   useEffect(() => {
     if (!enabled || !current || !root?.current) return;
-    const cell = root.current.querySelector("[data-cell-match-current]");
-    if (cell instanceof HTMLElement) {
-      cell.scrollIntoView?.({ block: "nearest", inline: "nearest" });
-    }
+    scrollCurrentMatchIntoView(root.current);
   }, [root, current, enabled]);
 }

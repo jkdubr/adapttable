@@ -18,166 +18,43 @@
  * a row of text is still that kit's text — its muted colour, its numeric
  * font, its spacing — so core supplies no markup for it.
  */
-import {
-  computePagination,
-  type FeatureNotice,
-  type FeatureNoticeKind,
-  type SelectionStats,
-  type TableLabels,
-} from "@adapttable/core";
+import { statusBarItems } from "@adapttable/core";
+import type {
+  StatusBarChromeProps as NeutralStatusBarChromeProps,
+  StatusBarItem,
+  StatusBarSlotProps as NeutralStatusBarSlotProps,
+  StatusBarSlots as NeutralStatusBarSlots,
+} from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 export type { FeatureNotice, FeatureNoticeKind } from "@adapttable/core";
+export type { StatusBarItem };
 
-import {
-  SelectionStatsChrome,
-  type SelectionStatsSlots,
-} from "./SelectionStatsBar";
+import { SelectionStatsChrome } from "./SelectionStatsBar";
 
 /**
- * One piece of the status bar, in display order.
+ * Props an adapter's status-bar component receives — `@adapttable/core`'s
+ * `StatusBarSlotProps` drawing React nodes.
  *
  * @public
  */
-export interface StatusBarItem {
-  /** What this figure is, for a kit that styles them differently. */
-  readonly key: "rows" | "selected" | FeatureNoticeKind;
-  /** The text to show, already localized and formatted. */
-  readonly text: string;
-  /**
-   * How the matching feature looks at the table: off, disabled, or
-   * one page. Present on notices; omitted on the row/selected counts.
-   */
-  readonly appearance?: FeatureNotice["appearance"];
-}
+export type StatusBarSlotProps = NeutralStatusBarSlotProps<ReactNode>;
 
 /**
- * Props an adapter's status-bar component receives.
+ * Adapter-owned rendering for {@link StatusBarChrome} — `@adapttable/core`'s
+ * `StatusBarSlots` drawing React nodes.
  *
  * @public
  */
-export interface StatusBarSlotProps {
-  /** The figures, in the order they should read. */
-  readonly items: readonly StatusBarItem[];
-  /** The selection statistics, when there are any; render after the items. */
-  readonly stats: ReactNode;
-  /** Class for the element. */
-  readonly className?: string;
-}
+export type StatusBarSlots = NeutralStatusBarSlots<ReactNode>;
 
 /**
- * Adapter-owned rendering for {@link StatusBarChrome}.
+ * What the status bar needs to describe the table — `@adapttable/core`'s
+ * `StatusBarChromeProps` with React's slots.
  *
  * @public
  */
-export interface StatusBarSlots {
-  /** The strip itself. */
-  readonly Bar: (props: StatusBarSlotProps) => ReactNode;
-  /** The selection-stats strip, the same slots that component takes. */
-  readonly stats: SelectionStatsSlots;
-}
-
-/**
- * What the status bar needs to describe the table.
- *
- * @public
- */
-export interface StatusBarChromeProps {
-  /**
-   * Whether the host asked for the strip.
-   *
-   * Off, this still renders the selection statistics on their own — the
-   * bar HOSTS those figures, so an adapter that chose between the two
-   * itself would carry the same "or they print twice" rule seven times
-   * over. One element, one place that knows.
-   */
-  enabled: boolean;
-  /** How many rows are rendered right now. */
-  shown: number;
-  /** The page being shown, for the row range. Defaults to the first. */
-  page?: number;
-  /** The page size, for the row range. Defaults to `shown`. */
-  limit?: number;
-  /** How many rows the whole filtered set holds, when the source knows. */
-  total?: number;
-  /** How many rows are selected. */
-  selected: number;
-  /** The multi-cell selection's figures, straight from `shell.selectionStats`. */
-  stats: SelectionStats | null;
-  /** Labels for each figure; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** Locale tag for number formatting. The host's default when omitted. */
-  locale?: string;
-  /** A kit's own class for the strip. */
-  className?: string;
-  /**
-   * Opted-in features that cannot run. Always shown — the person at the
-   * table must see them even when the host did not ask for `statusBar`.
-   * Row/selected counts still require `enabled`.
-   */
-  notices?: readonly FeatureNotice[];
-  /** Adapter-owned visible components. */
-  slots: StatusBarSlots;
-}
-
-/**
- * The figures, in reading order.
- *
- * The row range comes from the same arithmetic the pagination footer
- * uses, so the two never disagree — a status bar reading "1–10" under a
- * footer reading "51–60" is worse than no status bar at all.
- *
- * A count of zero selected rows is left out rather than shown as "0
- * selected": the strip is a status line, and a line that reports the
- * absence of a thing on every render is noise the eye learns to skip.
- */
-function itemsFor(
-  props: Pick<
-    StatusBarChromeProps,
-    | "enabled"
-    | "shown"
-    | "page"
-    | "limit"
-    | "total"
-    | "selected"
-    | "labels"
-    | "notices"
-  >
-): StatusBarItem[] {
-  const labels = props.labels;
-  const items: StatusBarItem[] = [];
-  for (const notice of props.notices ?? []) {
-    items.push({
-      key: notice.kind,
-      text: notice.message,
-      appearance: notice.appearance,
-    });
-  }
-  if (!props.enabled) return items;
-  const total = props.total ?? props.shown;
-  const { fromIndex, toIndex } = computePagination({
-    page: props.page ?? 1,
-    limit: props.limit ?? Math.max(props.shown, 1),
-    total,
-  });
-  const showing = labels?.showing;
-  items.push({
-    key: "rows",
-    text: showing
-      ? showing({ from: fromIndex, to: toIndex, total })
-      : `Showing ${String(fromIndex)}\u2013${String(toIndex)} of ${String(total)}`,
-  });
-  if (props.selected > 0) {
-    const selectedCount = labels?.selectedCount;
-    items.push({
-      key: "selected",
-      text: selectedCount
-        ? selectedCount(props.selected)
-        : `${String(props.selected)} selected`,
-    });
-  }
-  return items;
-}
+export type StatusBarChromeProps = NeutralStatusBarChromeProps<ReactNode>;
 
 /**
  * Renders the status bar.
@@ -197,7 +74,7 @@ export function StatusBarChrome(props: Readonly<StatusBarChromeProps>) {
       slots={props.slots.stats}
     />
   );
-  const items = itemsFor(props);
+  const items = statusBarItems(props);
   const showBar = props.enabled || items.length > 0;
   if (!showBar) return stats;
   // A notice brings the strip up without `statusBar()`; the selection figures

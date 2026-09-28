@@ -1,8 +1,4 @@
-import {
-  groupsCollapsedToDepth,
-  idSetReader,
-  toggleId,
-} from "@adapttable/core";
+import { groupCollapseActions, idSetReader } from "@adapttable/core";
 import { useCallback, useMemo, useState } from "react";
 
 import { useControllableStore } from "../hooks/useControllableStore";
@@ -64,22 +60,8 @@ export function useGroupCollapse(controlled?: {
     [collapsedGroupIds]
   );
 
-  const toggle = useCallback(
-    (groupKey: string) => store.update((prev) => toggleId(prev, groupKey)),
-    [store]
-  );
-
-  const expandAll = useCallback(() => store.commit(new Set()), [store]);
-
-  const collapseAll = useCallback(
-    (groupKeys: readonly string[]) => store.commit(new Set(groupKeys)),
-    [store]
-  );
-
-  const collapseToDepth = useCallback(
-    (depth: number, groups: readonly { key: string; level: number }[]) =>
-      store.commit(groupsCollapsedToDepth(groups, depth)),
-    [store]
+  const [{ toggle, expandAll, collapseAll, collapseToDepth }] = useState(() =>
+    groupCollapseActions(store)
   );
 
   return useMemo(

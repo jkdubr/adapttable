@@ -18,7 +18,10 @@ import {
   type RowReorderControllerOptions,
   rowReorderRowAttributes,
 } from "@adapttable/core";
-import { rowReorderSignature as coreRowReorderSignature } from "@adapttable/core/binding";
+import {
+  rowReorderDropStyle as coreRowReorderDropStyle,
+  rowReorderSignature as coreRowReorderSignature,
+} from "@adapttable/core/binding";
 import {
   type CSSProperties,
   type DragEvent,
@@ -38,14 +41,8 @@ export {
   type RowReorderHandler,
   type RowReorderLabels,
 } from "@adapttable/core";
+export { REORDER_COLUMN_WIDTH } from "@adapttable/core/binding";
 export { ROW_DND_MIME } from "@adapttable/core/binding";
-
-/**
- * Width (px) of the injected reorder column — shared so pin leads agree.
- *
- * @public
- */
-export const REORDER_COLUMN_WIDTH = 64;
 
 /** How far a lifted row is dimmed while it is being dragged. */
 export const ROW_REORDER_LIFTED_OPACITY = 0.45;
@@ -60,17 +57,7 @@ export const ROW_REORDER_LIFTED_OPACITY = 0.45;
 export function rowReorderDropStyle(
   attrs: { "data-dragging"?: ""; "data-drop"?: RowDropPosition } | undefined
 ): CSSProperties {
-  if (attrs === undefined) return {};
-  const edge = attrs["data-drop"];
-  const offset = edge === "before" ? "2px" : "-2px";
-  let boxShadow: string | undefined;
-  if (edge === "inside") boxShadow = "inset 0 0 0 2px currentColor";
-  else if (edge) boxShadow = `inset 0 ${offset} 0 0 currentColor`;
-  return {
-    opacity:
-      attrs["data-dragging"] === "" ? ROW_REORDER_LIFTED_OPACITY : undefined,
-    boxShadow,
-  };
+  return coreRowReorderDropStyle(attrs);
 }
 
 /**

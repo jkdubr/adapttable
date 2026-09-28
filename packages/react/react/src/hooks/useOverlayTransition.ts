@@ -1,32 +1,9 @@
+import { OVERLAY_MOTION } from "@adapttable/core/binding";
 import { useEffect, useState } from "react";
 
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
-/**
- * The motion every AdaptTable overlay shares.
- *
- * One pair of curves, used by the drawers in `@adapttable/unstyled` (and so
- * `@adapttable/shadcn`), `@adapttable/base-ui` and `@adapttable/radix`, so a
- * reader who switches kits does not get a different feel for the same gesture.
- * The kits with their own drawer primitive — Mantine, MUI, Chakra, Ant Design —
- * keep theirs.
- *
- * Arriving decelerates: the panel is new information and lands softly. Leaving
- * accelerates and takes less time, because a dismissal the reader already
- * decided on should not be waited on.
- *
- * @public
- */
-export const OVERLAY_MOTION = {
-  /** Milliseconds for an overlay to arrive. */
-  enterMs: 340,
-  /** Milliseconds for an overlay to leave. Shorter on purpose. */
-  exitMs: 240,
-  /** Deceleration curve for arriving — the side-sheet easing. */
-  enterEasing: "cubic-bezier(0.32, 0.72, 0, 1)",
-  /** Acceleration curve for leaving. */
-  exitEasing: "cubic-bezier(0.4, 0, 1, 1)",
-} as const;
+export { OVERLAY_MOTION };
 
 /**
  * Result of {@link useOverlayTransition}.

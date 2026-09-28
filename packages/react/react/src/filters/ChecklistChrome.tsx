@@ -10,131 +10,40 @@
  * kit renders, there are just fewer of them at a time.
  */
 import {
+  CHECKLIST_ITEM_WIDTH,
+  CHECKLIST_LIST_HEIGHT,
+  CHECKLIST_OPTION_GAP,
   type FilterDef,
   filterLabel,
   resolveLabels,
-  type TableLabels,
   type TableSource,
 } from "@adapttable/core";
+import type {
+  ChecklistFilterProps,
+  ChecklistSlots as NeutralChecklistSlots,
+} from "@adapttable/core/binding";
 import { type CSSProperties, type ReactNode } from "react";
 
-import { CHECKLIST_LIST_HEIGHT, useChecklistFilter } from "./checklist";
-import {
-  CHECKLIST_ITEM_WIDTH,
-  CHECKLIST_OPTION_GAP,
-  useChecklistWindow,
-} from "./checklistWindow";
+import { useChecklistFilter } from "./checklist";
+import { useChecklistWindow } from "./checklistWindow";
 
 export type { FilterDef, TableSource };
 
-/**
- * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
- *
- * @public
- */
-export interface ChecklistClassNames {
-  /** Class for the checklist as a whole. */
-  filterChecklist?: string;
-  /** Class for its search box. */
-  filterChecklistSearch?: string;
-  /** Class for its select-all and clear actions. */
-  filterChecklistActions?: string;
-  /** Class for the list of options. */
-  filterChecklistList?: string;
-  /** Class for an option's match count. */
-  filterChecklistCount?: string;
-  /** Class for one field wrapper. */
-  filterField?: string;
-  /** Class for a field's label. */
-  filterLabel?: string;
-  /** Class for a text input. */
-  filterInput?: string;
-  /** Class for the checkbox group. */
-  filterCheckboxGroup?: string;
-  /** Class for one checkbox. */
-  filterCheckbox?: string;
-}
+export type {
+  ChecklistButtonProps,
+  ChecklistCheckboxProps,
+  ChecklistClassNames,
+  ChecklistFilterProps,
+  ChecklistSearchProps,
+} from "@adapttable/core/binding";
 
 /**
- * Props for an adapter `ChecklistFilter` — no slots on the public API.
+ * Adapter-supplied controls for {@link ChecklistChrome} — `@adapttable/core`'s
+ * `ChecklistSlots` drawing React nodes.
  *
  * @public
  */
-export interface ChecklistFilterProps<TRow> {
-  /** The checklist filter to render. */
-  readonly def: FilterDef<TRow>;
-  /** Reads and writes the table's state. */
-  readonly source: Pick<
-    TableSource<TRow>,
-    "allFilteredRows" | "extra" | "setExtra" | "facets"
-  >;
-  /** Label overrides; gaps fall back to English. */
-  readonly labels?: TableLabels;
-  /** Per-part classes. */
-  readonly classNames?: ChecklistClassNames;
-}
-
-/**
- * Kit search field the checklist layout calls.
- *
- * @public
- */
-export interface ChecklistSearchProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Current value. */
-  readonly value: string;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Called with the new value. */
-  readonly onChange: (value: string) => void;
-}
-
-/**
- * Kit button the checklist layout calls.
- *
- * @public
- */
-export interface ChecklistButtonProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Called when pressed. */
-  readonly onClick: () => void;
-}
-
-/**
- * Kit checkbox row the checklist layout calls.
- *
- * @public
- */
-export interface ChecklistCheckboxProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** The count as text, already formatted. */
-  readonly count: string;
-  /** Whether the box is ticked. */
-  readonly checked: boolean;
-  /** Class for the element. */
-  readonly className?: string;
-  /** Class for the match count. */
-  readonly countClassName?: string;
-  /** Called with the new value. */
-  readonly onChange: (checked: boolean) => void;
-}
-
-/**
- * Adapter-supplied controls for {@link ChecklistChrome}.
- *
- * @public
- */
-export interface ChecklistSlots {
-  /** Renders the search box. */
-  readonly Search: (props: ChecklistSearchProps) => ReactNode;
-  /** Renders one action button. */
-  readonly Button: (props: ChecklistButtonProps) => ReactNode;
-  /** Renders one option's checkbox. */
-  readonly Checkbox: (props: ChecklistCheckboxProps) => ReactNode;
-}
+export type ChecklistSlots = NeutralChecklistSlots<ReactNode>;
 
 /**
  * Props for {@link ChecklistChrome}.

@@ -2,84 +2,44 @@
  * Find-bar layout. Structure only — adapters pass the search field and
  * the previous / next / close buttons the end user clicks.
  */
-import type { TableLabels } from "@adapttable/core";
+import { findMatchCountText, handleFindBarKey } from "@adapttable/core";
+import type {
+  FindBarProps,
+  FindBarSlots as NeutralFindBarSlots,
+  FindSearchProps as NeutralFindSearchProps,
+} from "@adapttable/core/binding";
 import type { KeyboardEvent, ReactElement, ReactNode } from "react";
 
 import { focusEditorOnMount } from "../editing/editableCellController";
 import type { FindInTableState } from "./useFindInTable";
 
 export type { FindInTableState };
+export type {
+  FindBarProps,
+  FindButtonKind,
+  FindButtonProps,
+} from "@adapttable/core/binding";
 
 /**
- * Props for an adapter `FindBar` — no slots on the public API.
+ * Kit search field the find bar calls — `@adapttable/core`'s
+ * `FindSearchProps` with React's key event.
  *
  * @public
  */
-export interface FindBarProps {
-  /** The find state, straight from `shell.find`. */
-  find: FindInTableState;
-  /** Labels; falls back to the built-in English. */
-  labels?: TableLabels;
-  /** A kit's own class for the bar. */
-  className?: string;
-}
+export type FindSearchProps = NeutralFindSearchProps<
+  KeyboardEvent<HTMLElement>
+>;
 
 /**
- * Kit search field the find bar calls.
+ * Adapter-supplied controls for {@link FindBarChrome} — `@adapttable/core`'s
+ * `FindBarSlots` drawing React nodes.
  *
  * @public
  */
-export interface FindSearchProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Placeholder text. */
-  readonly placeholder: string;
-  /** Current value. */
-  readonly value: string;
-  /** Ref the chrome focuses when the bar opens. */
-  readonly focusRef: (node: { focus: () => void } | null) => void;
-  /** Called with the new value. */
-  readonly onChange: (value: string) => void;
-  /** Handles the keys this control owns. */
-  readonly onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
-}
-
-/**
- * One find-bar glyph.
- *
- * @public
- */
-export type FindButtonKind = "previous" | "next" | "close";
-
-/**
- * Kit button the find bar calls.
- *
- * @public
- */
-export interface FindButtonProps {
-  /** Accessible name for the control. */
-  readonly label: string;
-  /** Part name, so styling can target this element. */
-  readonly part: string;
-  /** Which find-bar button this is. */
-  readonly kind: FindButtonKind;
-  /** Whether the control is offered but not available. */
-  readonly disabled?: boolean;
-  /** Called when pressed. */
-  readonly onClick: () => void;
-}
-
-/**
- * Adapter-supplied controls for {@link FindBarChrome}.
- *
- * @public
- */
-export interface FindBarSlots {
-  /** Renders the search box. */
-  readonly Search: (props: FindSearchProps) => ReactNode;
-  /** Renders a button. */
-  readonly Button: (props: FindButtonProps) => ReactNode;
-}
+export type FindBarSlots = NeutralFindBarSlots<
+  ReactNode,
+  KeyboardEvent<HTMLElement>
+>;
 
 /**
  * Props for {@link FindBarChrome}.
@@ -107,19 +67,9 @@ export function FindBarChrome({
   slots,
 }: Readonly<FindBarChromeProps>): ReactElement | null {
   if (!find.open) return null;
-  const count = (labels?.findMatchCount ?? defaultCount)(
-    find.index + 1,
-    find.matches.length
-  );
+  const count = findMatchCountText(labels, find.index, find.matches.length);
   const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === "Escape") {
-      find.setOpen(false);
-      return;
-    }
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-    if (event.shiftKey) find.previous();
-    else find.next();
+    handleFindBarKey(event, find);
   };
 
   const Search = slots.Search;
@@ -168,9 +118,4 @@ export function FindBarChrome({
       />
     </div>
   );
-}
-
-/** "3 of 17", or "No matches" — replaceable through `labels.findMatchCount`. */
-function defaultCount(current: number, total: number): string {
-  return total === 0 ? "No matches" : `${current} of ${total}`;
 }

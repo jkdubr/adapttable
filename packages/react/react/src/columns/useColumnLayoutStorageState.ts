@@ -2,7 +2,7 @@ import {
   type LayoutStorage,
   readStoredColumnLayout,
   safeLocalStorage,
-  stableKey,
+  writeStoredColumnLayout,
 } from "@adapttable/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -79,15 +79,7 @@ export function useColumnLayoutStorageState(
   const onLayoutChange = useCallback(
     (next: ColumnLayoutState) => {
       setLayout(next);
-      try {
-        if (stableKey(next) === stableKey(fallback)) {
-          storage?.removeItem(storageKey);
-        } else {
-          storage?.setItem(storageKey, JSON.stringify(next));
-        }
-      } catch {
-        // Storage write failed (quota/private mode) — state still updates.
-      }
+      writeStoredColumnLayout(storage, storageKey, next, fallback);
     },
     [storage, storageKey, fallback]
   );

@@ -14,7 +14,12 @@
  * region that names it for assistive technology, and the fall back to a
  * hand-built panel for rows that have no nested table.
  */
-import type { TableLabels } from "@adapttable/core";
+import {
+  type NestedTableDefaults,
+  nestedTableDefaults,
+  nestedTableLabel,
+  type NestedTableParent,
+} from "@adapttable/core";
 import type { ReactElement, ReactNode } from "react";
 
 import type { Density } from "../url/useDensityUrlState";
@@ -30,31 +35,11 @@ import type { Density } from "../url/useDensityUrlState";
  */
 export type { Density };
 
-/**
- * The props a nested table must be mounted with, handed to the host's `table`
- * callback to spread onto the kit's own component.
- *
- * @public
- */
-export interface NestedTableDefaults {
-  /**
-   * Never true. Two tables writing `?page=` fight over one URL, and the loser
-   * silently resets while the reader is using it.
-   */
-  urlSync: false;
-  /**
-   * Off by default: a second search box inside a row reads as chrome rather
-   * than as a feature. Spread these first and pass `searchable` after to keep
-   * it.
-   */
-  searchable: boolean;
-  /** The parent's density, so the child matches rather than guessing. */
-  density: Density | undefined;
-  /** The parent's labels, so a nested table is localized like its parent. */
-  labels: TableLabels | undefined;
-  /** The accessible name, also used on the region around it. */
-  tableLabel: string;
-}
+export {
+  type NestedTableDefaults,
+  nestedTableDefaults,
+  type NestedTableParent,
+} from "@adapttable/core";
 
 /**
  * A row's nested table.
@@ -83,43 +68,6 @@ export interface NestedTable {
  * @public
  */
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
-
-/**
- * What the parent contributes to its nested tables.
- *
- * @public
- */
-export interface NestedTableParent {
-  /** The parent's density. */
-  density?: Density;
-  /** The parent's labels. */
-  labels?: TableLabels;
-}
-
-/** The name a nested table takes when the host does not give it one. */
-const DEFAULT_LABEL = "Row details";
-
-/**
- * The defaults a table inside a row is mounted with.
- *
- * @param label - The nested table's accessible name.
- * @param parent - What the parent table contributes.
- * @returns Props to spread onto the kit's own table.
- *
- * @public
- */
-export function nestedTableDefaults(
-  label: string,
-  parent: NestedTableParent = {}
-): NestedTableDefaults {
-  return {
-    urlSync: false,
-    searchable: false,
-    density: parent.density,
-    labels: parent.labels,
-    tableLabel: label,
-  };
-}
 
 /**
  * Turn a nested-table declaration into the detail renderer the table already
@@ -158,7 +106,7 @@ function NestedTableRegion({
   nested: NestedTable;
   parent?: NestedTableParent;
 }>): ReactElement {
-  const label = nested.label ?? DEFAULT_LABEL;
+  const label = nestedTableLabel(nested.label);
   return (
     <section data-adapttable-part="nested-table" aria-label={label}>
       {nested.table(nestedTableDefaults(label, parent))}

@@ -16,6 +16,7 @@ import {
   matchKeySet,
   singleCellRange,
 } from "@adapttable/core";
+import type { FindInTableState } from "@adapttable/core/binding";
 import {
   useCallback,
   useEffect,
@@ -51,39 +52,7 @@ export interface UseFindInTableOptions<TRow> {
   urlKey?: string;
 }
 
-/**
- * What `useFindInTable` returns.
- *
- * @public
- */
-export interface FindInTableState {
-  /** Whether the bar is showing. */
-  open: boolean;
-  /** Show or hide the bar. Hiding clears the query, as a find bar does. */
-  setOpen: (open: boolean) => void;
-  /** The current query. */
-  query: string;
-  /** Type into the find bar. Resets the walk to the first hit. */
-  setQuery: (query: string) => void;
-  /** Every matching cell, in reading order. */
-  matches: readonly GridCell[];
-  /** Their keys, for marking cells as this render walks them. */
-  matchKeys: ReadonlySet<string>;
-  /** Which match the walk is on, from zero; `-1` when there are none. */
-  index: number;
-  /** The cell the walk is on, or `null`. */
-  current: GridCell | null;
-  /** Step to the next hit, wrapping at the end. */
-  next: () => void;
-  /** Step to the previous hit, wrapping at the start. */
-  previous: () => void;
-  /**
-   * Open the bar — what Ctrl/Cmd+F and a host's own button call. `undefined`
-   * when the feature is off, so the shortcut stays the BROWSER'S rather than
-   * being swallowed by a table that has no bar to show.
-   */
-  openBar?: () => void;
-}
+export type { FindInTableState };
 
 /**
  * Find state over the loaded rows.

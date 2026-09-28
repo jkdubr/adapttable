@@ -1,4 +1,12 @@
-import { isRtlElement } from "@adapttable/core";
+import {
+  COLUMN_DND_MIME,
+  columnDragAllowed,
+  type ColumnDragRowAttrs,
+  columnDragRowAttrs,
+  type ColumnDragSource,
+  columnReorderKeyStep,
+  isRtlElement,
+} from "@adapttable/core";
 import {
   type DragEvent,
   type KeyboardEvent,
@@ -6,12 +14,8 @@ import {
   useState,
 } from "react";
 
-/**
- * MIME type carrying the dragged column key during a reorder drag.
- *
- * @public
- */
-export const COLUMN_DND_MIME = "application/x-adapttable-column";
+export type { ColumnDragRowAttrs } from "@adapttable/core";
+export { COLUMN_DND_MIME } from "@adapttable/core";
 
 /**
  * Props that make a whole menu ROW draggable (so the browser's drag image is
@@ -38,18 +42,9 @@ export function columnRowDragProps(key: string): ColumnRowDragProps {
   return {
     draggable: true,
     onDragStart: (event) => {
-      // The whole row is draggable so the drag image is the full row — but a
-      // drag starting on an interactive control (the eye/pin buttons) would
-      // hijack their click. Cancel those so the buttons stay clickable. The
-      // reorder grip is exempt even when a kit renders it as a button
-      // (Mantine ActionIcon, MUI IconButton): it carries
-      // `data-adapttable-grip` via {@link columnReorderKeyProps}, and
-      // dragging from the grip is the strongest affordance of all.
-      const target = event.target as HTMLElement | null;
-      if (
-        target?.closest("button,input,select,a") &&
-        !target.closest("[data-adapttable-grip]")
-      ) {
+      // A drag starting on an interactive control (the eye/pin buttons)
+      // would hijack its click; the reorder grip is exempt.
+      if (!columnDragAllowed(event.target as HTMLElement | null)) {
         event.preventDefault();
         return;
       }
@@ -78,15 +73,6 @@ export interface ColumnReorderKeyProps {
 }
 
 /**
- * Whether the grip sits in a right-to-left context. Mirrors the resize
- * handle's detection: an explicit `[dir]` ancestor wins (what the adapters
- * set on the root), falling back to the resolved CSS `direction`.
- */
-function isRtl(grip: HTMLElement | null): boolean {
-  return isRtlElement(grip);
-}
-
-/**
  * Build keyboard props for the reorder grip. Arrow keys move the column one
  * slot — the accessible equivalent of the pointer drag. Up/Down always mean
  * earlier/later in the order; Left/Right follow the writing direction, so in
@@ -111,18 +97,15 @@ export function columnReorderKeyProps(
     "aria-label": label,
     "data-adapttable-grip": "",
     onKeyDown: (event) => {
-      const horizontal =
-        event.key === "ArrowLeft" || event.key === "ArrowRight";
-      const vertical = event.key === "ArrowUp" || event.key === "ArrowDown";
-      if (!horizontal && !vertical) return;
+      // An explicit `[dir]` ancestor wins (what the adapters set on the
+      // root), falling back to the resolved CSS `direction`.
+      const step = columnReorderKeyStep(
+        event.key,
+        isRtlElement(event.currentTarget)
+      );
+      if (step === undefined) return;
       event.preventDefault();
-      // The arrow that points toward the inline start: ArrowLeft in LTR,
-      // ArrowRight in RTL (where the first column renders on the right).
-      const startKey = isRtl(event.currentTarget) ? "ArrowRight" : "ArrowLeft";
-      const towardStart = horizontal
-        ? event.key === startKey
-        : event.key === "ArrowUp";
-      move(key, towardStart ? index - 1 : index + 1);
+      move(key, index + step);
     },
   };
 }
@@ -168,18 +151,6 @@ export function columnDropProps(
 }
 
 /**
- * Indicator attributes for a column-menu row during a reorder drag.
- *
- * @public
- */
-export interface ColumnDragRowAttrs {
-  /** Present on the row being dragged (kits dim it). */
-  "data-dragging"?: "";
-  /** Present on the hovered drop target, with the insertion edge. */
-  "data-drop"?: "before" | "after";
-}
-
-/**
  * Live drag state + composed prop builders from `useColumnDragState`.
  *
  * @public
@@ -216,7 +187,7 @@ export interface ColumnDragState {
  * @public
  */
 export function useColumnDragState(): ColumnDragState {
-  const [drag, setDrag] = useState<{ key: string; from: number } | null>(null);
+  const [drag, setDrag] = useState<ColumnDragSource | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
 
   const reset = useCallback(() => {
@@ -260,16 +231,7 @@ export function useColumnDragState(): ColumnDragState {
   );
 
   const rowAttrs = useCallback<ColumnDragState["rowAttrs"]>(
-    (key, index) => {
-      if (!drag) return {};
-      // The source row matches by key here, so the hovered-target branch
-      // below can never be the dragged row itself.
-      if (drag.key === key) return { "data-dragging": "" };
-      if (overIndex !== index) return {};
-      // `move` inserts the dragged column AT this index: coming from later
-      // in the order it lands before this row, from earlier it lands after.
-      return { "data-drop": index < drag.from ? "before" : "after" };
-    },
+    (key, index) => columnDragRowAttrs(drag, overIndex, key, index),
     [drag, overIndex]
   );
 

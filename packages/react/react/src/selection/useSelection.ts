@@ -1,12 +1,20 @@
 import {
   applyGroupLeafSelection,
+  createAllMatchingScope,
   headerSelectionOf,
   idSetReader,
   offersAllMatching as neutralOffersAllMatching,
   toggleId,
   toggleIds,
 } from "@adapttable/core";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { useControllableStore } from "../hooks/useControllableStore";
 
@@ -132,7 +140,12 @@ export function useSelection<TRow>(
   const acrossPages = options.acrossPages ?? true;
   const [readIds] = useState(idSetReader);
   const onChange = options.onSelectionChange;
-  const [allMatching, setAllMatching] = useState(false);
+  const [scope] = useState(createAllMatchingScope);
+  const allMatching = useSyncExternalStore(
+    scope.subscribe,
+    scope.getSnapshot,
+    scope.getSnapshot
+  );
   // The store's mutators are permanently stable: memoized adapter rows can
   // hold `toggle` forever, and a controlled commit still computes from the
   // selection the host last rendered.
@@ -148,19 +161,18 @@ export function useSelection<TRow>(
   const commit = useCallback(
     (compute: (prev: ReadonlySet<string>) => Set<string>) => {
       // Any explicit mutation narrows the scope back to concrete ids.
-      setAllMatching(false);
+      scope.narrow();
       store.update(compute);
     },
-    [store]
+    [scope, store]
   );
 
   const selectAllMatching = useCallback(() => {
     // Nothing offers this when the source cannot reach past the page, but a
     // host holding the state object can still call it — and "all matching"
     // over rows the source cannot name is a selection nobody can act on.
-    if (!acrossPages) return;
-    setAllMatching(true);
-  }, [acrossPages]);
+    scope.select(acrossPages);
+  }, [scope, acrossPages]);
 
   // Clear on reset-key change, but not on first mount. The effect reads the
   // LATEST size through a ref so only `resetKey` retriggers it. The guard

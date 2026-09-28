@@ -1,7 +1,5 @@
-import type { GroupingPanelInteractions } from "@adapttable/core";
-
-import { featureStateKey } from "./providers";
-
-/** Provider-state key for the optional grouping panel. @public */
-export const GROUPING_PANEL_STATE =
-  featureStateKey<GroupingPanelInteractions>("grouping-panel");
+/**
+ * Provider-state key for the optional grouping panel. The key lives in
+ * `@adapttable/core`, so every binding reads the same id.
+ */
+export { GROUPING_PANEL_STATE } from "@adapttable/core/binding";

@@ -1,9 +1,11 @@
+import { createColumnRenameEditor } from "@adapttable/core";
 import {
   type KeyboardEvent,
   useCallback,
   useId,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 
 import { restoreFocusSoon } from "../overlays/restoreFocus";
@@ -59,18 +61,6 @@ export interface ColumnRenameEditorState {
 }
 
 /**
- * Hand focus back to the control that opened the editor, one frame later.
- *
- * The delay is what makes it work at all: the input is still mounted when
- * close runs, and focusing the trigger synchronously fights React's own
- * commit. It is also what makes it dangerous — a reader who reopens the
- * editor before that frame arrives would have focus pulled out of the input
- * they are already typing into, so the caller is handed a way to cancel it.
- *
- * @param element - The control to focus.
- * @returns A cancel function for the pending restore.
- */
-/**
  * Keep rename behavior identical while every adapter renders its own native
  * label, input and buttons. Core owns no form markup.
  *
@@ -83,12 +73,18 @@ export function useColumnRenameEditor({
   requiredMessage,
   renamedMessage,
 }: UseColumnRenameEditorOptions): ColumnRenameEditorState {
+  // The editor is mutable and must see every render's name and messages.
+  "use no memo";
   const inputId = useId();
   const errorId = `${inputId}-error`;
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(name);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [announcement, setAnnouncement] = useState("");
+  const options = { key, name, onRename, requiredMessage, renamedMessage };
+  const [editor] = useState(() => createColumnRenameEditor(options));
+  editor.configure(options);
+  const { editing, draft, error, announcement } = useSyncExternalStore(
+    editor.subscribe,
+    editor.getSnapshot,
+    editor.getSnapshot
+  );
   const returnFocus = useRef<HTMLElement | null>(null);
   /** Cancels a focus restore that has not run yet. */
   const cancelRestore = useRef<() => void>(() => undefined);
@@ -104,46 +100,23 @@ export function useColumnRenameEditor({
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    setDraft(name);
-    setError(undefined);
-    setEditing(true);
-  }, [name]);
+    editor.begin();
+  }, [editor]);
 
-  const updateDraft = useCallback((value: string) => {
-    setDraft(value);
-    if (value.trim() !== "") setError(undefined);
-  }, []);
-
-  const blur = useCallback(() => {
-    if (draft.trim() === "") setError(requiredMessage);
-  }, [draft, requiredMessage]);
-
-  const close = useCallback(() => {
-    setEditing(false);
-    setError(undefined);
+  const restoreFocus = useCallback(() => {
     cancelRestore.current = restoreFocusSoon(returnFocus.current);
   }, []);
 
   const cancel = useCallback(() => {
-    setDraft(name);
-    close();
-  }, [close, name]);
+    editor.cancel();
+    restoreFocus();
+  }, [editor, restoreFocus]);
 
   const submit = useCallback(() => {
-    const next = draft.trim();
-    if (next === "") {
-      setError(requiredMessage);
-      return false;
-    }
-    if (next === name) {
-      close();
-      return false;
-    }
-    onRename(key, next);
-    setAnnouncement(renamedMessage({ previous: name, name: next }));
-    close();
-    return true;
-  }, [close, draft, key, name, onRename, renamedMessage, requiredMessage]);
+    const outcome = editor.submit();
+    if (outcome !== "invalid") restoreFocus();
+    return outcome === "renamed";
+  }, [editor, restoreFocus]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
@@ -163,8 +136,8 @@ export function useColumnRenameEditor({
     errorId,
     announcement,
     begin,
-    setDraft: updateDraft,
-    blur,
+    setDraft: editor.setDraft,
+    blur: editor.blur,
     submit,
     cancel,
     onKeyDown,

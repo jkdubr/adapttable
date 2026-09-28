@@ -13,6 +13,7 @@ import type { RowPinSide, RowPinState } from "../rows/rowPinModel";
 import type { HeaderSelectionState } from "../selection/selectionState";
 import { devWarn } from "../utils/devWarn";
 import { memoLast } from "../utils/memoLast";
+import { stableKey } from "../utils/stableKey";
 
 /* ── Id sets: selection, expansion, collapsed groups ───────────────── */
 
@@ -376,6 +377,36 @@ export function readStoredColumnLayout(
   } catch {
     // Corrupted or inaccessible storage (private mode, quota) reads as none.
     return null;
+  }
+}
+
+/**
+ * Save a layout under `storageKey`. A layout equal to `fallback` — the
+ * table's default — removes the entry instead, so defaults can evolve in
+ * later releases. A failed write (quota, private mode) is swallowed: the
+ * table's state still updates, it just is not remembered.
+ *
+ * @param storage - Where layouts persist; `undefined` writes nothing.
+ * @param storageKey - This table's storage key.
+ * @param next - The layout to save.
+ * @param fallback - The layout a table with nothing saved starts from.
+ *
+ * @public
+ */
+export function writeStoredColumnLayout(
+  storage: LayoutStorage | undefined,
+  storageKey: string,
+  next: ColumnLayoutState,
+  fallback: ColumnLayoutState
+): void {
+  try {
+    if (stableKey(next) === stableKey(fallback)) {
+      storage?.removeItem(storageKey);
+    } else {
+      storage?.setItem(storageKey, JSON.stringify(next));
+    }
+  } catch {
+    // Storage write failed (quota/private mode) — state still updates.
   }
 }
 

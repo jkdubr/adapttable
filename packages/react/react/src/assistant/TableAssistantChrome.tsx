@@ -24,6 +24,7 @@ import {
   assistantQuestion,
   assistantRejoinable,
   assistantWithGreeting,
+  type TableAssistantProps as NeutralTableAssistantProps,
 } from "@adapttable/core/binding";
 import {
   type CSSProperties,
@@ -56,7 +57,6 @@ import {
   floatingFits,
   floatingStyle,
   launcherStyle,
-  type TableAssistantBoundary,
 } from "./assistantPlacement";
 import type {
   TableAssistantAvatars,
@@ -67,7 +67,6 @@ import {
   type TableAssistantMessageView,
   type TableAssistantView,
 } from "./assistantView";
-import type { SpeechInputHandle } from "./speechView";
 
 export type { TableAssistantBoundary } from "./assistantPlacement";
 
@@ -75,137 +74,15 @@ export type { TableAssistantBoundary } from "./assistantPlacement";
 export { assistantIsBusy };
 import { useConversationScroll } from "./useConversationScroll";
 
-/**
- * Which surface the conversation takes.
- *
- * - `floating` — a nonmodal window over the page, anchored bottom
- *   inline-end. The table keeps its full width and stays operable. Below the
- *   width where that stops being true it becomes the kit's own modal sheet.
- * - `panel` — an in-flow surface the host places itself.
- * - `sheet` — the kit's modal sheet at every width.
- *
- * @public
- */
-export type TableAssistantPresentation = "panel" | "sheet" | "floating";
+export type { TableAssistantPresentation } from "@adapttable/core/binding";
 
 /**
- * Props for an adapter `TableAssistant` — no slots on the public API.
+ * Props for an adapter `TableAssistant` — `@adapttable/core`'s
+ * `TableAssistantProps` with React's node.
  *
  * @public
  */
-export interface TableAssistantProps {
-  /**
-   * Writing direction for surfaces this chrome draws through a portal.
-   *
-   * The panel and the launcher inherit direction from wherever the host put
-   * them; the narrow-viewport sheet does not, because every kit portals it to
-   * the document root. A right-to-left table passes `"rtl"` here so the sheet
-   * is laid out the way the table it belongs to is.
-   */
-  readonly dir?: "ltr" | "rtl";
-  /** The live conversation. */
-  readonly assistant: TableAssistantView;
-  /**
-   * Dictation, when the host turned it on.
-   *
-   * Built by `useSpeechInput` and passed through, so the chrome draws a mic
-   * without knowing anything about recognizers or recorders — and draws none
-   * at all when this browser cannot listen.
-   */
-  readonly speech?: SpeechInputHandle;
-  /** Whether the panel is showing. */
-  readonly open: boolean;
-  /** Asked to open or close. */
-  readonly onOpenChange: (open: boolean) => void;
-  /**
-   * Nonmodal panel beside the table, or a modal sheet over it.
-   *
-   * A host that knows its own layout sets this; the default is a panel,
-   * because a modal that was not asked for is worse than a narrow one.
-   */
-  readonly presentation?: TableAssistantPresentation;
-  /** Labels; falls back to the built-in English. */
-  readonly labels?: TableLabels;
-  /**
-   * The colour the conversation is drawn in.
-   *
-   * Any CSS colour, usually one of the kit's own tokens — each adapter passes
-   * its primary. Everything mixes against it rather than using it flat, so a
-   * strong brand colour tints the surfaces without shouting. Without one the
-   * panel borrows the text colour, which is legible everywhere and belongs to
-   * no brand.
-   */
-  readonly accent?: string;
-  /**
-   * Whether each action draws a card under the reply.
-   *
-   * On by default, and the reason is that a receipt is the only thing in the
-   * conversation the reader can trust: the words above it are the model's,
-   * and the card is read from what the table actually did. A host that has
-   * its own account of a turn — an audit trail, a toast, a status line —
-   * turns them off here rather than being given two.
-   *
-   * Turning them off hides the cards, not the record: the receipts stay in
-   * the conversation state for a host that reads them.
-   */
-  readonly receipts?: boolean;
-  /** Class for the surface. */
-  readonly className?: string;
-  /** Hide the floating launcher when the host supplies its own trigger. */
-  readonly launcher?: boolean;
-  /** Opens the host's own settings. Omit and no settings control is drawn. */
-  readonly onSettings?: () => void;
-  /**
-   * Where a floating window is placed: the viewport, or a container of the
-   * host's own. Ignored by the other presentations.
-   */
-  readonly boundary?: TableAssistantBoundary;
-  /**
-   * One sentence under the empty conversation's heading, for what the host
-   * alone knows — that the examples are scripted until a backend is
-   * connected, say.
-   */
-  readonly note?: string;
-  /**
-   * The assistant's opening line, before anyone has typed.
-   *
-   * Omit it and the panel opens with the built-in question. Pass your own to
-   * say what this assistant is for — it is the first thing a reader reads,
-   * and a table's own words beat a generic one. Pass an empty string and the
-   * panel opens silent: an empty conversation with nothing standing in for a
-   * message nobody wrote.
-   */
-  readonly greeting?: string;
-  /**
-   * The marks beside what each speaker said.
-   *
-   * A photograph, initials, the kit's own Avatar — anything React can render.
-   * The panel draws the circle and the size, so a host supplies the face and
-   * nothing else, and either side left out keeps its glyph.
-   */
-  readonly avatars?: TableAssistantAvatars;
-  /**
-   * An offer to put at the end of one reply.
-   *
-   * The panel knows a message arrived; only the host knows whether it was an
-   * answer or a wall. A scripted demo that cannot understand a question can
-   * hand back the way past it — "connect a backend" — instead of leaving the
-   * reader to find it. Return nothing for messages that need no offer.
-   */
-  readonly messageAction?: (
-    message: TableAssistantMessageView
-  ) => { readonly label: string; readonly onRun: () => void } | undefined;
-  /**
-   * A write waiting on the reader.
-   *
-   * The panel reviews it here when the approval's presentation names the
-   * widget — which is the default, because the conversation is where the
-   * write was asked for. Any other presentation reviews it elsewhere and the
-   * panel only says so, rather than growing a second set of controls for one
-   * decision.
-   */
-  readonly approval?: AgentApprovalPending | null;
-}
+export type TableAssistantProps = NeutralTableAssistantProps<ReactNode>;
 
 /** Props for {@link TableAssistantChrome}. @public */
 export interface TableAssistantChromeProps extends TableAssistantProps {

@@ -132,10 +132,19 @@ export function moveField(config: PivotConfig, zone: PivotZone, index: number, d
 export function pivot<TRow>(rows: readonly TRow[], config: PivotConfig, options?: PivotOptions<TRow>): PivotResult;
 
 // @public
+export const PIVOT_AGGREGATIONS: readonly AggregateName[];
+
+// @public
 export const PIVOT_BLANK = "—";
 
 // @public
 export const PIVOT_GRAND_TOTAL_KEY = "grand";
+
+// @public
+export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
+
+// @public
+export const PIVOT_ROW_INDENT = 16;
 
 // @public
 export const PIVOT_ZONES: readonly PivotZone[];
@@ -172,11 +181,29 @@ export interface PivotField {
 }
 
 // @public
+export function pivotLeafColumnKey(index: number): string;
+
+// @public
+export interface PivotLeafColumnLayout {
+    readonly group: readonly string[] | undefined;
+    readonly header: string;
+    readonly index: number;
+    readonly key: string;
+    readonly leaf: PivotColumnLeaf;
+}
+
+// @public
+export function pivotLeafGroup(leaf: PivotColumnLeaf, totalLabel: string): readonly string[] | undefined;
+
+// @public
 export interface PivotMeasure {
     agg: AggregateName | (string & {}) | Aggregator;
     key: string;
     label?: string;
 }
+
+// @public
+export function pivotMeasureAggName(config: PivotConfig, index: number): AggregateName;
 
 // @public
 export interface PivotOptions<TRow> {
@@ -185,6 +212,9 @@ export interface PivotOptions<TRow> {
     columns?: readonly ColumnModel<TRow>[];
     format?: (value: DisplayValue | undefined, measure: PivotMeasure) => DisplayValue | undefined;
 }
+
+// @public
+export function pivotPanelZones(fields: readonly PivotField[], config: PivotConfig, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">): PivotZoneModel[];
 
 // @public
 export interface PivotResult {
@@ -206,7 +236,30 @@ export interface PivotRow {
 }
 
 // @public
+export function pivotRowCaption(row: PivotRow, labels: Pick<Required<TableLabels>, "pivotGrandTotal">): string;
+
+// @public
+export function pivotRowIndentStyle(row: PivotRow, indent: number): {
+    paddingInlineStart: string;
+} | undefined;
+
+// @public
 export type PivotRowKind = "leaf" | "subtotal" | "grandTotal";
+
+// @public
+export interface PivotTableLayout {
+    readonly grandTotal: PivotRow | undefined;
+    readonly leafColumns: readonly PivotLeafColumnLayout[];
+    readonly rowHeaderLabel: string;
+    readonly rows: readonly PivotRow[];
+    readonly summaryCells: Readonly<Record<string, DisplayValue | undefined>> | undefined;
+}
+
+// @public
+export function pivotTableLayout(result: PivotResult, options?: {
+    readonly fields?: readonly PivotField[];
+    readonly labels?: TableLabels;
+}): PivotTableLayout;
 
 // @public
 export interface PivotUrlState {
@@ -216,6 +269,27 @@ export interface PivotUrlState {
 
 // @public
 export type PivotZone = "rows" | "columns" | "measures";
+
+// @public
+export interface PivotZoneEntry {
+    readonly aggregation?: AggregateName;
+    readonly canMoveDown: boolean;
+    readonly canMoveUp: boolean;
+    readonly index: number;
+    readonly key: string;
+    readonly label: string;
+}
+
+// @public
+export function pivotZoneLabel(zone: PivotZone, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">): string;
+
+// @public
+export interface PivotZoneModel {
+    readonly addOptions: readonly PivotField[];
+    readonly entries: readonly PivotZoneEntry[];
+    readonly label: string;
+    readonly zone: PivotZone;
+}
 
 // @public
 export interface QueryPivotPage {
@@ -256,6 +330,379 @@ export function setMeasureAgg(config: PivotConfig, index: number, agg: Aggregate
 
 // @public
 export type SortableValue = string | number | boolean | null | undefined;
+
+// @public
+export interface TableLabels {
+    actions?: string;
+    addGroupingColumn?: string;
+    addRow?: string;
+    allMatchingSelected?: (total: number) => string;
+    alwaysAllowProposal?: string;
+    applyView?: string;
+    approvalWaitingElsewhere?: string;
+    approveAllProposals?: string;
+    approveProposal?: string;
+    approveRemainingProposals?: string;
+    assistantActions?: (count: number) => string;
+    assistantActionsTitle?: string;
+    assistantAlwaysAllowedRevoke?: (capability: string) => string;
+    assistantAlwaysAllowedTitle?: string;
+    assistantAnswerLabel?: string;
+    assistantAnswerPlaceholder?: string;
+    assistantAnswerSend?: string;
+    assistantBackToTable?: string;
+    assistantCapabilityName?: (capability: string) => string | undefined;
+    assistantClose?: string;
+    assistantConnection?: (status: string) => string;
+    assistantDetached?: string;
+    assistantDetail?: string;
+    assistantEmpty?: string;
+    assistantExamples?: string;
+    assistantNewMessages?: string;
+    assistantOpen?: string;
+    assistantPlaceholder?: string;
+    assistantProgress?: (done: number, total?: number) => string;
+    assistantReceipt?: (receipt: {
+        capability?: string;
+        status: string;
+    }) => string;
+    assistantReceiptAction?: (action: {
+        kind?: string;
+        status: string;
+        cleared?: boolean;
+    }) => string | undefined;
+    assistantReceiptChange?: (change: {
+        before: string;
+        after: string;
+    }) => string;
+    assistantReceiptProposed?: (change: {
+        before: string;
+        after: string;
+    }) => string;
+    assistantReceiptStatus?: (status: string) => string;
+    assistantReceiptTerms?: (subject: {
+        kind?: string;
+        terms?: readonly {
+            column?: string;
+            value?: string;
+        }[];
+        direction?: "asc" | "desc";
+    }) => string | undefined;
+    assistantRejoin?: string;
+    assistantSaveInTable?: string;
+    assistantSend?: string;
+    assistantSettings?: string;
+    assistantSpeaker?: string;
+    assistantStop?: string;
+    assistantTitle?: string;
+    assistantUnavailable?: string;
+    assistantUndo?: string;
+    assistantUndoAll?: string;
+    assistantUndoBlocked?: (code: string) => string | undefined;
+    assistantUnresolved?: (code: string) => string | undefined;
+    assistantVoiceLanguage?: string;
+    assistantVoiceListening?: string;
+    assistantVoiceMessage?: string;
+    assistantVoiceStart?: string;
+    assistantVoiceStop?: string;
+    assistantYou?: string;
+    autoSizeColumn?: string;
+    autoSizeColumns?: string;
+    backToConversation?: string;
+    boolAny?: string;
+    boolFalse?: string;
+    boolTrue?: string;
+    cancel?: string;
+    cancelAll?: string;
+    cancelColumnRename?: string;
+    checklistClear?: string;
+    checklistNoValues?: string;
+    checklistSearch?: string;
+    clearAll?: string;
+    closePanel?: string;
+    collapseColumnGroup?: string;
+    collapseGroup?: string;
+    collapseRow?: string;
+    columnActions?: string;
+    columnName?: string;
+    columnNameRequired?: string;
+    columnRenamed?: (info: {
+        previous: string;
+        name: string;
+    }) => string;
+    columns?: string;
+    commandEmpty?: string;
+    commandPalette?: string;
+    commandSearch?: string;
+    confirmRowMove?: string;
+    confirmRowMoveDescription?: (row: string, from: string, to: string) => string;
+    confirmRowMoveTitle?: string;
+    contextMenu?: string;
+    copyCells?: string;
+    cutCells?: string;
+    defaultViewBadge?: string;
+    deleteRow?: string;
+    deleteRowConfirm?: string;
+    deleteView?: string;
+    density?: string;
+    densityComfortable?: string;
+    densityCompact?: string;
+    duplicateRow?: string;
+    editCell?: string;
+    editConflict?: string;
+    editNothingToUndo?: string;
+    editRedone?: (cells: number) => string;
+    editRow?: string;
+    editUndone?: (cells: number) => string;
+    enterFullscreen?: string;
+    errorMessage?: string;
+    errorTitle?: string;
+    exitFullscreen?: string;
+    expandColumnGroup?: string;
+    expandGroup?: string;
+    expandRow?: string;
+    exportCancelled?: string;
+    exportCsv?: string;
+    exportDismiss?: string;
+    exportDone?: string;
+    exportDownload?: string;
+    exportFailed?: string;
+    exportFile?: (format: string) => string;
+    exportProgress?: (progress: number) => string;
+    exportStarted?: string;
+    filterAddCondition?: string;
+    filterAddGroup?: string;
+    filterColumn?: string;
+    filterCombinatorAnd?: string;
+    filterCombinatorOr?: string;
+    filterField?: string;
+    filterRemoveCondition?: string;
+    filterRemoveGroup?: string;
+    filters?: string;
+    filtersDone?: string;
+    filterTree?: string;
+    findClose?: string;
+    findInTable?: string;
+    findMatchCount?: (current: number, total: number) => string;
+    findNext?: string;
+    findPlaceholder?: string;
+    findPrevious?: string;
+    from?: string;
+    goToPage?: (page: number) => string;
+    gridCellPosition?: (row: number, total: number) => string;
+    gridFillHandle?: string;
+    gridRangeCopied?: (cells: number) => string;
+    gridRangeCopyFailed?: string;
+    gridRangeFilled?: (cells: number) => string;
+    gridRangePasted?: (cells: number) => string;
+    gridRangePasteFailed?: string;
+    gridRangeSelection?: (range: {
+        fromRow: number;
+        toRow: number;
+        fromColumn: number;
+        toColumn: number;
+        cells: number;
+    }) => string;
+    groupByColumn?: (label: string) => string;
+    groupCount?: (count: number) => string;
+    groupingAddAggregation?: string;
+    groupingAdded?: (label: string) => string;
+    groupingAggregateChanged?: (label: string, aggregation: string) => string;
+    groupingAggregateColumn?: string;
+    groupingAggregateRemoved?: (column: string) => string;
+    groupingAggregatesRestored?: string;
+    groupingAggregation?: string;
+    groupingAggregationCustom?: string;
+    groupingAggregationDefault?: string;
+    groupingAggregationFor?: (column: string) => string;
+    groupingAggregationNone?: string;
+    groupingAggregationReadOnly?: string;
+    groupingAggregations?: string;
+    groupingAverage?: string;
+    groupingDropColumns?: string;
+    groupingDropToRemove?: string;
+    groupingMoved?: (label: string, position: number) => string;
+    groupingPanel?: string;
+    groupingRemoveAggregation?: (column: string) => string;
+    groupingRemoved?: (label: string) => string;
+    groupingRestoreAggregations?: string;
+    groupTotal?: (label: string) => string;
+    headerFilters?: string;
+    hideAllColumns?: string;
+    hideColumn?: string;
+    keepMine?: string;
+    loading?: string;
+    loadMore?: string;
+    moreGroups?: (remaining: number) => string;
+    moreRowsInGroup?: (remaining: number) => string;
+    moveEnd?: string;
+    moveGroupingColumn?: (label: string) => string;
+    moveRejectedCycle?: string;
+    moveRejectedPolicyNever?: string;
+    moveRejectedSorted?: string;
+    moveRowDown?: string;
+    moveRowUp?: string;
+    moveStart?: string;
+    moveToGroup?: string;
+    moveToTopLevel?: string;
+    moveUnavailable?: string;
+    moveUnder?: string;
+    moveViewDown?: string;
+    moveViewUp?: string;
+    nextPage?: string;
+    noData?: string;
+    noResults?: string;
+    noticeEditWithoutWriter?: string;
+    noticeExportAllPage?: string;
+    noticeGroupingUnavailable?: string;
+    noticePinNested?: string;
+    // @deprecated
+    noticeReorderNested?: string;
+    noticeVirtualizePaged?: string;
+    opAfter?: string;
+    opAtLeast?: string;
+    opAtMost?: string;
+    opBefore?: string;
+    opBetween?: string;
+    opContains?: string;
+    opEmpty?: string;
+    opEndsWith?: string;
+    opEqual?: string;
+    operator?: string;
+    opGreater?: string;
+    opIn?: string;
+    opLess?: string;
+    opNotContains?: string;
+    opNotEmpty?: string;
+    opNotEqual?: string;
+    opNotIn?: string;
+    opOn?: string;
+    opOnOrAfter?: string;
+    opOnOrBefore?: string;
+    opRelative?: string;
+    opStartsWith?: string;
+    pageOf?: (range: {
+        page: number;
+        total: number;
+    }) => string;
+    pageSelected?: (count: number) => string;
+    pendingProposals?: (count: number) => string;
+    pendingRows?: (count: number) => string;
+    pinEnd?: string;
+    pinnedSummaryBottom?: string;
+    pinnedSummaryRow?: string;
+    pinnedSummaryTop?: string;
+    pinStart?: string;
+    pinToBottom?: string;
+    pinToTop?: string;
+    pivotAdd?: string;
+    pivotAggregation?: string;
+    pivotColumns?: string;
+    pivotGrandTotal?: string;
+    pivotMeasures?: string;
+    pivotMoveDown?: string;
+    pivotMoveUp?: string;
+    pivotRemove?: string;
+    pivotRows?: string;
+    pivotTotal?: string;
+    previousPage?: string;
+    print?: string;
+    proposalChange?: (change: {
+        row: string;
+        column?: string;
+        before?: string;
+        after?: string;
+    }) => string;
+    proposalSummary?: (counts: {
+        changes: number;
+        rows: number;
+    }) => string;
+    proposalTally?: (counts: {
+        pending: number;
+        approved: number;
+        rejected: number;
+    }) => string;
+    proposalValueUnavailable?: string;
+    readOnlyViewBadge?: string;
+    redoEdit?: string;
+    rejectAllProposals?: string;
+    rejectProposal?: string;
+    rejectRemainingProposals?: string;
+    relLastN?: string;
+    relNextN?: string;
+    relPreviousMonth?: string;
+    relThisMonth?: string;
+    relThisWeek?: string;
+    relToday?: string;
+    relTomorrow?: string;
+    relYesterday?: string;
+    removeFilter?: (label: string) => string;
+    removeGroupingColumn?: (label: string) => string;
+    renameColumn?: string;
+    renameView?: string;
+    reorderRow?: string;
+    resetColumn?: string;
+    resetColumns?: string;
+    resizeColumn?: string;
+    retry?: string;
+    reviewAllProposals?: (count: number) => string;
+    rootLevel?: string;
+    rowActionsMenu?: string;
+    rowLifted?: (position: number) => string;
+    rowMoved?: (from: number, to: number) => string;
+    rowMovedToGroup?: (group: string) => string;
+    rowMovedUnder?: (parent: string) => string;
+    rowMoveOptions?: string;
+    rowReorderCancelled?: string;
+    rowSeparator?: string;
+    rowsPerPage?: string;
+    saveAll?: string;
+    saveColumnName?: string;
+    savedViews?: string;
+    saveRow?: string;
+    saveView?: string;
+    search?: string;
+    searchColumns?: string;
+    searchPlaceholder?: string;
+    selectAll?: string;
+    selectAllMatching?: (total: number) => string;
+    selectColumn?: string;
+    selectedCount?: (count: number) => string;
+    selectionAverage?: string;
+    selectionCount?: string;
+    selectionMax?: string;
+    selectionMin?: string;
+    selectionSum?: string;
+    selectRow?: string;
+    setDefaultView?: string;
+    showAllColumns?: string;
+    showColumn?: string;
+    showing?: (range: {
+        from: number;
+        to: number;
+        total: number;
+    }) => string;
+    sidePanel?: string;
+    sortAscending?: string;
+    sortBy?: string;
+    sortDescending?: string;
+    sortedBy?: (info: {
+        column: string;
+        ascending: boolean;
+    }) => string;
+    sortingCleared?: string;
+    table?: string;
+    takeTheirs?: string;
+    theirsValue?: (value: string) => string;
+    to?: string;
+    undoEdit?: string;
+    ungroupColumn?: (label: string) => string;
+    unpin?: string;
+    unpinAllColumns?: string;
+    unpinRow?: string;
+    value?: string;
+    viewName?: string;
+}
 
 // (No @packageDocumentation comment for this package)
 
