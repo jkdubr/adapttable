@@ -50,6 +50,7 @@ import type {
   QuerySupport,
 } from "./queryContract";
 import { createResponseAggregateOps } from "./responseAggregateOps";
+import { createSourceSignal } from "./sourceState";
 import type { TableQuery } from "./tableQuery";
 
 /**
@@ -193,22 +194,7 @@ interface Latest<TRow> {
   readonly baseKey: string;
   readonly trailKey: string;
   readonly cursorMode: boolean;
-  readonly appendPending: boolean;
-}
-
-/** Recompute only when an input changed identity, like a memo hook. */
-function memoOne<TArgs extends readonly unknown[], TResult>(
-  compute: (...args: TArgs) => TResult
-): (...args: TArgs) => TResult {
-  let last: { args: TArgs; result: TResult } | undefined;
-  return (...args) => {
-    if (last?.args.every((arg, index) => Object.is(arg, args[index]))) {
-      return last.result;
-    }
-    const result = compute(...args);
-    last = { args, result };
-    return result;
-  };
+  readonly loading: boolean;
 }
 
 /**
@@ -219,19 +205,12 @@ function memoOne<TArgs extends readonly unknown[], TResult>(
  * @public
  */
 export function createServerSource<TRow>(): ServerSource<TRow> {
-  const listeners = new Set<() => void>();
-  let revision = 0;
-  const notify = (): void => {
-    revision += 1;
-    for (const listener of listeners) listener();
-  };
+  const signal = createSourceSignal();
+  const { notify } = signal;
 
   const emitter = createQueryEmitter();
   const firstLoad = createFirstLoadLatch();
   const aggregateOps = createResponseAggregateOps();
-  const effectiveAggregates = memoOne(effectiveQueryAggregates<TRow>);
-  const effectiveGroupBy = memoOne(queryGroupBy);
-  const requestedOps = memoOne(queryAggregateOps);
 
   let cursors: CursorTrail = EMPTY_CURSOR_TRAIL;
   let stash: AppendStash<TRow> | null = null;
@@ -240,15 +219,9 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
   let latest: Latest<TRow> | undefined;
 
   // What the last commit acted on, so each rule runs when its inputs move.
-  let sent: { key: string; generation: number } | undefined;
+  let sent: string | undefined;
   let abortSent: (() => void) | undefined;
-  let clampedFor: string | undefined;
   let recordedFor: string | undefined;
-
-  const current = (): Latest<TRow> => {
-    if (!latest) throw new Error("createServerSource: call update() first");
-    return latest;
-  };
 
   function update(
     config: ServerSourceConfig<TRow>,
@@ -259,7 +232,7 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     const { page, limit, search, sortBy, sortDir, sortLevels, extra } = view;
     const paged = config.paginationMode === "paged";
 
-    const aggregates = effectiveAggregates(
+    const aggregates = effectiveQueryAggregates(
       config.aggregates,
       view.groupAggregateOverrides,
       config.columns,
@@ -276,7 +249,7 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
       sortDir,
       sortLevels,
       filters: extra,
-      groupBy: effectiveGroupBy(view.groupBy),
+      groupBy: queryGroupBy(view.groupBy),
       aggregates,
       cursor: cursorMode ? cursors[page - 1] : undefined,
       expandedIds: config.expandedIds,
@@ -287,7 +260,7 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     // Value-keyed, so an identical query is never sent twice.
     const queryKey = stableKey(query);
 
-    const requested = requestedOps(aggregates);
+    const requested = queryAggregateOps(aggregates);
     aggregateOps.remember(queryKey, requested);
 
     // Infinite-append accumulation: `fetchNextPage` stashes the rows already
@@ -296,25 +269,9 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     // rows array for the advanced page, which is then appended. Any
     // base-query change, a direct page jump, or an error invalidates the
     // stash, falling back to replacement.
-    const baseKey = appendBaseKey({
-      limit,
-      search,
-      sortBy,
-      sortDir,
-      sortLevels,
-      filters: extra,
-    });
-    const trailKey = cursorTrailKey({
-      limit,
-      search,
-      sortBy,
-      sortDir,
-      sortLevels,
-      groupBy: view.groupBy,
-      groupAggregateOverrides: view.groupAggregateOverrides,
-      filters: extra,
-      filterTree: view.filterTree,
-    });
+    const keyed = { ...view, filters: extra };
+    const baseKey = appendBaseKey(keyed);
+    const trailKey = cursorTrailKey(keyed);
     cursorBase ??= trailKey;
     const appended = appendedRows(stash, baseKey, page, rows);
 
@@ -341,15 +298,16 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
       baseKey,
       trailKey,
       cursorMode,
-      appendPending: appended.pending,
+      loading,
     };
     return frame;
   }
 
   /** One request per real change; the one it supersedes is aborted. */
   function send({ config, frame }: Latest<TRow>): void {
-    if (sent?.key === frame.queryKey && sent.generation === generation) return;
-    sent = { key: frame.queryKey, generation };
+    const key = `${frame.queryKey}#${String(generation)}`;
+    if (sent === key) return;
+    sent = key;
     abortSent?.();
     abortSent = config.onQueryChange
       ? emitter.emit(config.onQueryChange, frame.query, frame.queryKey)
@@ -357,30 +315,18 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
   }
 
   /**
-   * Clamp an out-of-range page (a hand-edited or stale shared link) once the
-   * total is known and nothing is in flight, so `?page=999` heals to the last
-   * real page. Cursor mode has no offset arithmetic to clamp against — the
-   * trail gates which pages are reachable.
-   */
-  function clamp({ config, view, cursorMode }: Latest<TRow>): void {
-    const loading = config.loading ?? false;
-    const key = `${String(cursorMode)}:${String(loading)}:${String(config.total)}:${String(view.limit)}:${String(view.page)}`;
-    if (clampedFor === key) return;
-    clampedFor = key;
-    if (cursorMode || loading) return;
-    const lastPage = clampedPage(view.page, view.limit, config.total);
-    if (lastPage !== undefined) view.setPage(lastPage);
-  }
-
-  /**
    * Record the token for the page after the one on screen, so "next" has
    * something to send and a later "back" can retrace the trail. Returns
    * whether the trail moved.
    */
-  function record({ config, view, cursorMode }: Latest<TRow>): boolean {
-    const loading = config.loading ?? false;
+  function record({
+    config,
+    view,
+    cursorMode,
+    loading,
+  }: Latest<TRow>): boolean {
     const nextCursor = config.nextCursor ?? null;
-    const key = `${String(cursorMode)}:${String(loading)}:${String(nextCursor)}:${String(view.page)}`;
+    const key = [cursorMode, loading, nextCursor, view.page].join();
     if (recordedFor === key) return false;
     recordedFor = key;
     if (!cursorMode || loading || nextCursor === null) return false;
@@ -390,27 +336,10 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     return true;
   }
 
-  /**
-   * A new sort, filter, search, grouping or page size makes every token the
-   * server issued meaningless. Drop the trail and start again from page 1.
-   * Returns whether the trail was dropped.
-   */
-  function restartCursors({
-    view,
-    trailKey,
-    cursorMode,
-  }: Latest<TRow>): boolean {
-    if (!cursorMode || cursorBase === trailKey) return false;
-    cursorBase = trailKey;
-    cursors = EMPTY_CURSOR_TRAIL;
-    view.setPage(1);
-    return true;
-  }
-
   function commit(): void {
     if (!latest) return;
-    const { config, frame, requested, baseKey } = latest;
-    const loading = config.loading ?? false;
+    const { config, view, frame, requested, baseKey, trailKey } = latest;
+    const { cursorMode, loading } = latest;
     const failed = config.error != null;
     const rowsPresent = config.rows.length > 0;
 
@@ -424,7 +353,15 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     });
     send(latest);
     firstLoad.observe(loading, rowsPresent);
-    clamp(latest);
+    // Clamp an out-of-range page (a hand-edited or stale shared link) once
+    // the total is known and nothing is in flight, so `?page=999` heals to
+    // the last real page. Cursor mode has no offset arithmetic to clamp
+    // against — the trail gates which pages are reachable.
+    const lastPage =
+      cursorMode || loading
+        ? undefined
+        : clampedPage(view.page, view.limit, config.total);
+    if (lastPage !== undefined) view.setPage(lastPage);
     if (record(latest)) changed = true;
     // A stash for a superseded base query can never apply, and an errored
     // append stops accumulating.
@@ -432,7 +369,14 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
       stash = null;
       changed = true;
     }
-    if (restartCursors(latest)) changed = true;
+    // A new sort, filter, search, grouping or page size makes every token the
+    // server issued meaningless. Drop the trail and start again from page 1.
+    if (cursorMode && cursorBase !== trailKey) {
+      cursorBase = trailKey;
+      cursors = EMPTY_CURSOR_TRAIL;
+      changed = true;
+      view.setPage(1);
+    }
     if (changed) notify();
   }
 
@@ -440,18 +384,20 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     update,
     commit,
     setPage(next) {
-      const { view, cursorMode } = current();
+      if (!latest) return;
+      const { view, cursorMode } = latest;
       // Without a token a page cannot be requested at all, so a pager click
       // beyond the trail is ignored rather than silently re-serving page 1.
       if (cursorMode && !canRequestCursorPage(cursors, next)) return;
       view.setPage(next);
     },
     fetchNextPage() {
-      const { config, view, frame, baseKey, appendPending } = current();
+      if (!latest) return;
+      const { config, view, frame, baseKey, loading } = latest;
       if (
         config.paginationMode === "paged" ||
-        config.loading === true ||
-        appendPending ||
+        loading ||
+        frame.isFetchingNextPage ||
         !frame.hasNextPage
       ) {
         return;
@@ -468,7 +414,7 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
     refetch() {
       // Re-sending the query IS this tier's fetch mechanism — the host runs
       // the request. Without a handler there is nothing to re-run.
-      if (!current().config.onQueryChange) {
+      if (!latest?.config.onQueryChange) {
         devWarn(
           "refetch() has nothing to re-run without an `onQueryChange` handler."
         );
@@ -477,19 +423,12 @@ export function createServerSource<TRow>(): ServerSource<TRow> {
       generation += 1;
       notify();
     },
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-    revision: () => revision,
+    subscribe: signal.subscribe,
+    revision: signal.revision,
     dispose() {
       abortSent?.();
       abortSent = undefined;
       sent = undefined;
-      clampedFor = undefined;
-      recordedFor = undefined;
     },
   };
 }

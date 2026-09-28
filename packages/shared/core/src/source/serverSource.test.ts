@@ -102,12 +102,14 @@ describe("createServerSource", () => {
     expect(listener.mock.calls[1]?.[1].signal.aborted).toBe(false);
   });
 
-  it("does not read before the first update", () => {
+  it("does nothing before the first update", () => {
     const source = createServerSource<Row>();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     source.commit();
-    expect(() => {
-      source.setPage(2);
-    }).toThrow(/update\(\) first/);
+    source.setPage(2);
+    source.fetchNextPage();
+    source.refetch();
+    expect(warn).toHaveBeenCalledTimes(1);
   });
 
   it("gates capabilities on what the source declares", () => {
@@ -136,7 +138,7 @@ describe("createServerSource", () => {
     expect(declared.query.facets).toEqual(["amount"]);
   });
 
-  it("keeps the query's derived inputs stable across identical updates", () => {
+  it("keys identical updates the same", () => {
     const source = createServerSource<Row>();
     const store = viewStore();
     const aggregates = [{ key: "amount", fn: "sum" }];
@@ -150,7 +152,7 @@ describe("createServerSource", () => {
     });
     const first = source.update(cfg, store.view);
     const second = source.update(cfg, store.view);
-    expect(second.query.aggregates).toBe(first.query.aggregates);
+    expect(second.query.aggregates).toEqual(first.query.aggregates);
     expect(second.queryKey).toBe(first.queryKey);
   });
 
@@ -239,14 +241,11 @@ describe("createServerSource", () => {
       expect(store.view.page).toBe(5);
     });
 
-    it("clamps once per change of its inputs", () => {
+    it("leaves a page in range alone", () => {
       const setPage = vi.fn();
       const source = createServerSource<Row>();
-      const store = viewStore({ page: 99, setPage });
-      render(source, config(), store);
-      render(source, config(), store);
-      expect(setPage).toHaveBeenCalledTimes(1);
-      expect(setPage).toHaveBeenCalledWith(5);
+      render(source, config(), viewStore({ page: 5, setPage }));
+      expect(setPage).not.toHaveBeenCalled();
     });
 
     it("never clamps in cursor mode", () => {

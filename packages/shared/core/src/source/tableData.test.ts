@@ -117,14 +117,12 @@ describe("createTableData", () => {
     release();
   });
 
-  it("throws when finished before a plan", () => {
-    expect(() =>
-      createTableData<Row>().finish({
-        resolved: sourceOf(),
-        frontend: sourceOf(),
-      })
-    ).toThrow(/plan\(\) first/);
-    createTableData<Row>().commit();
+  it("does nothing before a plan", () => {
+    const table = createTableData<Row>();
+    const resolved = sourceOf();
+    expect(table.finish({ resolved, frontend: resolved })).toBe(resolved);
+    table.commit();
+    table.loadOptions()();
   });
 
   it("builds the runtime once per input and ANDs the host's predicate", () => {

@@ -714,6 +714,7 @@
       "core/src/source/querySource.ts",
       "core/src/source/responseAggregateOps.ts",
       "core/src/source/serverSource.ts",
+      "core/src/source/sourceState.ts",
       "core/src/source/tableData.ts",
       "core/src/source/tableQuery.ts",
       "core/src/state/controllableStore.ts",

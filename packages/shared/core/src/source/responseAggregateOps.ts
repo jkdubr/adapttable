@@ -101,17 +101,13 @@ type Settled = {
  */
 export function createResponseAggregateOps(): ResponseAggregateOps {
   const known = new Map<string, GroupAggregateOps | undefined>();
-  let seeded = false;
   let displayed: GroupAggregateOps | undefined;
   let shown: Established | null = null;
   const concluding: { current: Concluding } = { current: null };
 
   return {
     remember(requestKey, requested) {
-      if (!seeded) {
-        seeded = true;
-        displayed = requested;
-      }
+      if (known.size === 0) displayed = requested;
       if (known.has(requestKey)) return;
       known.set(requestKey, requested);
       if (known.size > REMEMBERED) {

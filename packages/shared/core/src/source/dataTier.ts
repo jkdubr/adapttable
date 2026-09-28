@@ -415,17 +415,12 @@ export function cursorTrailKey(query: {
   readonly filters: ExtraFilters;
   readonly filterTree: QueryFilterGroup | undefined;
 }): string {
-  return stableKey({
-    limit: query.limit,
-    search: query.search,
-    sortBy: query.sortBy ?? null,
-    sortDir: query.sortDir ?? null,
-    sortLevels: query.sortLevels,
-    groupBy: query.groupBy ?? null,
-    groupAggregateOverrides: query.groupAggregateOverrides,
-    filters: query.filters,
-    filterTree: query.filterTree ?? null,
-  });
+  return stableKey([
+    appendBaseKey(query),
+    query.groupBy ?? null,
+    query.groupAggregateOverrides,
+    query.filterTree ?? null,
+  ]);
 }
 
 /* ── Infinite pages ────────────────────────────────────────────────── */

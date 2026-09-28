@@ -33,6 +33,7 @@ import {
   warnDataTierMisuse,
 } from "./dataTier";
 import type { QueryFilterGroup } from "./queryContract";
+import { createSourceSignal, memoOne } from "./sourceState";
 import type { TableQuery } from "./tableQuery";
 import type { TableSource } from "./TableSource";
 
@@ -140,21 +141,6 @@ export interface TableData<TRow> {
   readonly revision: () => number;
 }
 
-/** Recompute only when an input changed identity, like a memo hook. */
-function memoOne<TArgs extends readonly unknown[], TResult>(
-  compute: (...args: TArgs) => TResult
-): (...args: TArgs) => TResult {
-  let last: { args: TArgs; result: TResult } | undefined;
-  return (...args) => {
-    if (last?.args.every((arg, index) => Object.is(arg, args[index]))) {
-      return last.result;
-    }
-    const result = compute(...args);
-    last = { args, result };
-    return result;
-  };
-}
-
 /** The change notice a frontend table's `onQueryChange` receives. */
 function noticeOf<TRow>(source: TableSource<TRow>): TableQuery {
   return {
@@ -174,12 +160,8 @@ function noticeOf<TRow>(source: TableSource<TRow>): TableQuery {
  * @public
  */
 export function createTableData<TRow>(): TableData<TRow> {
-  const listeners = new Set<() => void>();
-  let revision = 0;
-  const notify = (): void => {
-    revision += 1;
-    for (const listener of listeners) listener();
-  };
+  const signal = createSourceSignal();
+  const { notify } = signal;
 
   const loader = createFilterOptionsLoader();
   const optionCache = new Map<
@@ -190,13 +172,8 @@ export function createTableData<TRow>(): TableData<TRow> {
   let latest:
     { config: TableDataConfig<TRow>; plan: TableDataPlan<TRow> } | undefined;
   let abortNotice: (() => void) | undefined;
-  let notice:
-    | {
-        emitter: QueryEmitter;
-        query: TableQuery;
-        key: string;
-      }
-    | undefined;
+  let emitter: QueryEmitter | undefined;
+  let notice: { query: TableQuery; key: string } | undefined;
 
   const runtimeOf = memoOne(
     (
@@ -231,29 +208,6 @@ export function createTableData<TRow>(): TableData<TRow> {
         ? (row: TRow, extra: ExtraFilters) =>
             runtime.filterFn(row, extra) && filterFn(row, extra)
         : runtime.filterFn
-  );
-  const treeFilterOf = memoOne(
-    (engine: FilterEngine | undefined, runtime: FilterRuntime<TRow>) =>
-      engine
-        ? (row: TRow, tree: QueryFilterGroup) =>
-            engine.evaluateTree(tree, row, runtime.defs, runtime.registry)
-        : undefined
-  );
-  const facetKeysOf = memoOne(
-    (
-      engine: FilterEngine | undefined,
-      facetKeys: readonly string[] | undefined,
-      defs: readonly FilterDef<TRow>[],
-      registry: FilterTypeRegistry
-    ) => {
-      if (facetKeys) return facetKeys;
-      if (!engine) return undefined;
-      return defs
-        .filter(
-          (def) => (registry.get(def.type)?.widget ?? def.type) === "checklist"
-        )
-        .map((def) => def.key);
-    }
   );
   // Facet counts for the checklist filters, when nothing else answered them:
   // a frontend tier has the rows in hand, so the counts come from the same
@@ -302,36 +256,38 @@ export function createTableData<TRow>(): TableData<TRow> {
       tier,
       runtime,
       filterFn: combinedFilterOf(runtime, config.filterFn),
-      filterTreeFn: treeFilterOf(engine, runtime),
-      facetKeys: facetKeysOf(
-        engine,
-        config.facetKeys,
-        runtime.defs,
-        runtime.registry
-      ),
+      filterTreeFn: engine
+        ? (row, tree) =>
+            engine.evaluateTree(tree, row, runtime.defs, runtime.registry)
+        : undefined,
+      // A server query counts every checklist filter unless told which.
+      facetKeys:
+        config.facetKeys ??
+        (engine
+          ? runtime.defs
+              .filter(
+                (def) =>
+                  (runtime.registry.get(def.type)?.widget ?? def.type) ===
+                  "checklist"
+              )
+              .map((def) => def.key)
+          : undefined),
     };
     latest = { config, plan: next };
     return next;
   }
 
-  function current() {
-    if (!latest) {
-      throw new Error("createTableData: call plan() first");
-    }
-    return latest;
-  }
-
   return {
     plan,
     finish({ resolved, frontend }) {
-      const { config, plan: planned } = current();
+      if (!latest) return resolved;
+      const { config, plan: planned } = latest;
       // The key the table mounted with is already seen: a notification is a
       // CHANGE, and the mount is not one.
       const query = noticeOf(frontend);
       const key = stableKey(query);
-      notice = notice
-        ? { emitter: notice.emitter, query, key }
-        : { emitter: createQueryEmitter(key), query, key };
+      emitter ??= createQueryEmitter(key);
+      notice = { query, key };
       const facets = facetsOf(
         config.engine,
         resolved,
@@ -342,11 +298,11 @@ export function createTableData<TRow>(): TableData<TRow> {
       return withFacets(resolved, facets);
     },
     commit() {
-      if (!notice) return;
-      const { config, plan: planned } = current();
+      if (!emitter || !notice || !latest) return;
+      const { config, plan: planned } = latest;
       const notifying =
         planned.tier === "frontend" && config.mode === "frontend";
-      const abort = notice.emitter.emitIfChanged(
+      const abort = emitter.emitIfChanged(
         notifying ? config.onQueryChange : undefined,
         notice.query,
         notice.key
@@ -361,19 +317,14 @@ export function createTableData<TRow>(): TableData<TRow> {
       abortNotice = undefined;
     },
     loadOptions() {
-      const { config, plan: planned } = current();
-      if (!config.engine) return () => undefined;
+      if (!latest?.config.engine) return () => undefined;
+      const { plan: planned } = latest;
       return loader.load(planned.runtime.defs, (key, options) => {
         loadedOptions = { ...loadedOptions, [key]: options };
         notify();
       });
     },
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-    revision: () => revision,
+    subscribe: signal.subscribe,
+    revision: signal.revision,
   };
 }

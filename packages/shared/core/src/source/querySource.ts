@@ -40,6 +40,7 @@ import {
 } from "./queryContract";
 import { createResponseAggregateOps } from "./responseAggregateOps";
 import type { ServerSourceViewState } from "./serverSource";
+import { createSourceSignal } from "./sourceState";
 
 /**
  * The host's query settings, as of one update.
@@ -206,12 +207,8 @@ export function createQuerySource<
   TParams extends TableQueryParams = TableQueryParams,
   TPage = PaginatedResponse<TRow>,
 >(): QuerySource<TRow, TParams, TPage> {
-  const listeners = new Set<() => void>();
-  let revision = 0;
-  const notify = (): void => {
-    revision += 1;
-    for (const listener of listeners) listener();
-  };
+  const signal = createSourceSignal();
+  const { notify } = signal;
 
   const aggregateOps = createResponseAggregateOps();
   let cursors: CursorTrail = EMPTY_CURSOR_TRAIL;
@@ -474,12 +471,7 @@ export function createQuerySource<
       }
     },
     refetch: () => current().answer.query.refetch(),
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-    revision: () => revision,
+    subscribe: signal.subscribe,
+    revision: signal.revision,
   };
 }
