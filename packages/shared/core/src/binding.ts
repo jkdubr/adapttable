@@ -8,6 +8,32 @@
  *
  * @packageDocumentation
  */
+export type {
+  CommandPaletteChromeProps,
+  CommandPaletteInputProps,
+  CommandPaletteItemProps,
+  CommandPaletteSlots,
+  CommandPaletteSurfaceProps,
+} from "./actions/commandPaletteContract";
+export type {
+  ContextMenuChromeProps,
+  ContextMenuItemProps,
+  ContextMenuSlots,
+  ContextMenuSurfaceProps,
+} from "./actions/contextMenuContract";
+export {
+  AGENT_ALWAYS_ALLOW_STATE,
+  AGENT_APPROVAL_STATE,
+  AGENT_PROGRESS_STATE,
+  AGENT_VIEW_STATE,
+  type AgentAlwaysAllowState,
+  type AgentApprovalButtonProps,
+  type AgentApprovalListProps,
+  type AgentApprovalProps,
+  type AgentApprovalSlots,
+  type AgentViewState,
+  type ApprovalReviewSlots,
+} from "./approval/agentApprovalContract";
 export {
   assistantActionsName,
   assistantBadgeTone,
@@ -37,6 +63,23 @@ export {
   assistantLauncherStyle,
   type TableAssistantPlacement,
 } from "./assistant/assistantPlacement";
+export type {
+  TableAssistantAvatars,
+  TableAssistantBadgeProps,
+  TableAssistantBoundary,
+  TableAssistantButtonProps,
+  TableAssistantComposerProps,
+  TableAssistantFace,
+  TableAssistantLanguageChipProps,
+  TableAssistantMenuItem,
+  TableAssistantMenuProps,
+  TableAssistantPanelProps,
+  TableAssistantPresentation,
+  TableAssistantProps,
+  TableAssistantSheetProps,
+  TableAssistantSlots,
+  TableAssistantWindowProps,
+} from "./assistant/assistantSlots";
 export {
   assistantIsBusy,
   assistantIsUsable,
@@ -57,6 +100,11 @@ export type {
   SpeechInputState,
   SpeechInputStatus,
 } from "./assistant/speechView";
+export type {
+  ColumnGroupToggleButtonProps,
+  ColumnGroupToggleProps,
+  ColumnGroupToggleSlots,
+} from "./columns/columnGroupToggleContract";
 export {
   columnMenuActions,
   filterColumnMenuRows,
@@ -92,6 +140,36 @@ export {
   isColumnGroupSummaryKey,
   toggleCollapsedColumnGroup,
 } from "./columns/headerGroups";
+export type {
+  EditableCellActivateProps,
+  EditableCellButtonProps,
+  EditableCellSlots,
+} from "./editing/editableCellContract";
+export type {
+  MultiSelectEditorCheckboxProps,
+  MultiSelectEditorSlots,
+} from "./editing/multiSelectEditorContract";
+export type {
+  BatchEditBarProps,
+  BatchEditBarSlots,
+  BatchEditButtonProps,
+  BatchEditingState,
+  RowEditActionsProps,
+  RowEditActionsSlots,
+  RowEditButtonProps,
+  RowEditConflict,
+  RowEditControlsOptions,
+  RowEditDrafts,
+  RowEditIcons,
+  RowEditingState,
+} from "./editing/rowEditContract";
+export type {
+  ExportProgressAction,
+  ExportProgressChromeProps,
+  ExportProgressDownload,
+  ExportProgressSlots,
+  ExportProgressSurfaceSlotProps,
+} from "./export/exportProgressContract";
 export {
   drawnSlotFills,
   type FeatureRender,
@@ -115,21 +193,164 @@ export {
 export { deriveRuntimeOperations } from "./features/runtimeOperations";
 export {
   ACTIVE_FILTER_CHIPS,
+  AGENT_APPROVAL,
+  BATCH_EDIT_BAR,
+  BULK_BAR,
+  type BulkBarSlotProps,
+  CELL_NAV_LIVE,
+  type CellNavLiveSlotProps,
+  CHROME_BODY,
+  type ChromeBodySlotProps,
+  type ChromeExtraSlotProps,
+  COLUMN_GROUP_TOGGLE,
   COLUMN_HEADER_RENAME,
+  COLUMN_LAYOUT_LIVE,
   COLUMN_MENU,
+  COLUMN_SELECT,
   type ColumnHeaderRenameSlotProps,
+  COMMAND_PALETTE,
+  COMMAND_PALETTE_LIVE,
+  CONTEXT_MENU,
+  CONTEXT_MENU_LIVE,
+  type ContextMenuLiveSlotProps,
+  EDIT_HISTORY_LIVE,
+  EDITABLE_CELL,
+  type EditableCellSlotProps,
+  type EditHistoryLiveSlotProps,
+  EDITING_LIVE,
   EXPAND_TOGGLE,
   type ExpandToggleSlotProps,
+  EXPANSION_LIVE,
+  EXPORT_LIVE,
+  type ExportLiveSlotProps,
+  FILL_HANDLE,
+  type FillHandleCellSlotProps,
+  FILTER_CHIPS_LIVE,
   FILTER_DRAWER,
+  FILTER_HEADER,
   FILTER_POPOVER,
   type FilterOverlaySlotProps,
+  FILTERS_FORM,
+  FIND_BAR,
+  FIND_LIVE,
+  type FindLiveSlotProps,
+  FULLSCREEN_LIVE,
+  type FullscreenLiveSlotProps,
+  GRID_FOCUS_ANNOUNCER,
+  type GridFocusAnnouncerSlotProps,
+  GROUP_HEADER_CARD,
+  GROUP_HEADER_ROW,
+  type GroupHeaderCardSlotProps,
+  type GroupHeaderRowSlotProps,
+  GROUPING_LIVE,
+  GROUPING_PANEL,
+  KEYED_WINDOW,
+  type KeyedWindowSlotProps,
+  PINNING_LIVE,
+  ROW_ACTIONS_LIVE,
+  ROW_EDIT_ACTIONS,
   ROW_REORDER_ANNOUNCER,
+  ROW_REORDER_BUTTONS,
+  ROW_REORDER_HANDLE,
+  SAVED_VIEWS,
+  type SavedViewsSlotProps,
+  SELECTION_LIVE,
+  SELECTION_STATS_LIVE,
+  type SelectionStatsLiveSlotProps,
+  SIDE_PANEL,
+  STATUS_BAR,
+  TABLE_ASSISTANT,
+  TOOLBAR_EXTRAS,
+  type ToolbarExtrasSlotProps,
+  TREE_CELL,
+  TREE_LIVE,
+  TREE_TOGGLE,
 } from "./features/slotContract";
 export type { TableRuntime, TableRuntimeView } from "./features/tableRuntime";
 export type {
   ActiveFilterChip,
   ActiveFilterChipsSlotProps,
 } from "./filters/activeFilterChips";
+export type {
+  ChecklistButtonProps,
+  ChecklistCheckboxProps,
+  ChecklistClassNames,
+  ChecklistFilterProps,
+  ChecklistSearchProps,
+  ChecklistSlots,
+} from "./filters/checklistContract";
+export { FILTER_ENGINE } from "./filters/filterEngineKey";
+export type {
+  FilterHeaderClassNames,
+  FilterHeaderControlProps,
+  FilterHeaderMultiProps,
+  FilterHeaderOption,
+  FilterHeaderRangeProps,
+  FilterHeaderRowProps,
+  FilterHeaderSearchProps,
+  FilterHeaderSelectProps,
+  FilterHeaderSlots,
+} from "./filters/filterHeaderContract";
+export type {
+  FilterTreeBuilderProps,
+  FilterTreeButtonProps,
+  FilterTreeClassNames,
+  FilterTreeDisclosureProps,
+  FilterTreeInputProps,
+  FilterTreeOption,
+  FilterTreeSelectProps,
+  FilterTreeSlots,
+} from "./filters/filterTreeContract";
+export type {
+  FindBarProps,
+  FindBarSlots,
+  FindButtonKind,
+  FindButtonProps,
+  FindInTableState,
+  FindSearchProps,
+} from "./find/findBarContract";
+export type {
+  ColumnSelectCheckboxChromeProps,
+  ColumnSelectCheckboxProps,
+  ColumnSelectSlots,
+} from "./focus/columnSelectContract";
+export type {
+  FillHandleSlotProps,
+  FillHandleSlots,
+} from "./focus/fillHandleContract";
+export type {
+  SelectionStatPart,
+  SelectionStatsChromeProps,
+  SelectionStatsSlotProps,
+  SelectionStatsSlots,
+} from "./focus/selectionStatsContract";
+export type {
+  StatusBarChromeProps,
+  StatusBarItem,
+  StatusBarSlotProps,
+  StatusBarSlots,
+} from "./focus/statusBarContract";
+export type {
+  GroupingPanelAggregationItemProps,
+  GroupingPanelAggregationRemoveProps,
+  GroupingPanelChecklistOption,
+  GroupingPanelChecklistProps,
+  GroupingPanelChipProps,
+  GroupingPanelDropZoneProps,
+  GroupingPanelOption,
+  GroupingPanelRemoveZoneProps,
+  GroupingPanelRestoreProps,
+  GroupingPanelSelectProps,
+  GroupingPanelSlotProps,
+  GroupingPanelSlots,
+  GroupingPanelSurfaceProps,
+} from "./grouping/groupingPanelContract";
+export { GROUPING_PANEL_STATE } from "./grouping/groupingPanelKey";
+export type {
+  GroupMoreButtonProps,
+  GroupMoreButtonSlotProps,
+  GroupMoreButtonSlots,
+} from "./grouping/groupMoreContract";
 export {
   cellAttributes,
   type ChromeBodySlot,
@@ -195,6 +416,22 @@ export {
   rowSpanSignature,
   rowStyleSignature,
 } from "./layout/leanAssembly";
+export type {
+  SidePanelChromeProps,
+  SidePanelCloseProps,
+  SidePanelFrameProps,
+  SidePanelSlots,
+  SidePanelTabProps,
+} from "./layout/sidePanelContract";
+export type {
+  PivotAddProps,
+  PivotAggProps,
+  PivotFieldProps,
+  PivotPanelChromeProps,
+  PivotPanelSlots,
+  PivotPanelSurfaceProps,
+  PivotZoneProps,
+} from "./pivot/pivotPanelContract";
 export { type BodyCell, cellSpanMark } from "./rows/cellSpan";
 export {
   EXTRA_OVER_SPAN_ROW_STYLE,
@@ -215,17 +452,51 @@ export {
   pinnedRowStickyStyle,
 } from "./rows/pinnedRowChrome";
 export { resolveRowHeight } from "./rows/rowPresentation";
+export type {
+  RowMoveConfirmationProps,
+  RowMoveMenuItemProps,
+  RowMoveMenuSlotProps,
+  RowReorderButtonsProps,
+  RowReorderButtonsSlots,
+  RowReorderHandleProps,
+  RowReorderHandleSlotProps,
+  RowReorderHandleSlots,
+  RowReorderMoveButtonProps,
+} from "./rows/rowReorderContract";
+export type {
+  TreeCellProps,
+  TreeToggleButtonProps,
+  TreeToggleProps,
+  TreeToggleSlots,
+} from "./tree/treeToggleContract";
+export type {
+  SavedViewControlKey,
+  SavedViewRowControl,
+  SavedViewsPanelChromeProps,
+  SavedViewsPanelEmptyProps,
+  SavedViewsPanelInputProps,
+  SavedViewsPanelRowProps,
+  SavedViewsPanelSlots,
+  SavedViewsPanelSurfaceProps,
+} from "./url/savedViewsPanelContract";
 export { rowSourceIndex } from "./virtual/virtualTableModel";
 
 /**
  * The member types the signatures above hand back, so a consumer of this
  * entry can name every part of what it returns.
  */
+export {
+  ensureForcedColorsStyles,
+  FORCED_COLORS_CSS,
+} from "./a11y/forcedColors";
 export type { Command } from "./actions/commandRegistry";
+export type { ConfirmHandler } from "./actions/confirm";
+export type { ConfirmRequest } from "./actions/confirm";
 export type {
   ContextMenuItem,
   ContextMenuTarget,
 } from "./actions/contextMenuModel";
+export type { ContextMenuPoint } from "./actions/contextMenuOpenController";
 export type {
   Aggregatable,
   AggregatableConfig,
@@ -249,6 +520,12 @@ export type {
   AggregationModel,
   AggregationOrigin,
 } from "./aggregate/aggregationModel";
+export type { AgentApprovalPending, AgentProgress } from "./approval/types";
+export type {
+  AgentApprovalDecision,
+  AgentApprovalOperation,
+  AgentApprovalProposal,
+} from "./approval/types";
 export type {
   ColumnAiOptions,
   ColumnGroupShow,
@@ -305,6 +582,10 @@ export type {
 } from "./engine/createTableEngine";
 export type { NeutralTable } from "./engine/neutralTable";
 export type {
+  ExportProgressState,
+  ExportStatus,
+} from "./export/exportController";
+export type {
   ExportPayload,
   ExportRowMeta,
   ExportRowRole,
@@ -312,6 +593,18 @@ export type {
   ExportWriteContext,
   ExportWriter,
 } from "./export/exportWriter";
+export type { ExportContext, ExportCsvOptions } from "./export/tableCsv";
+export type {
+  ExportAllControls,
+  ExportAllQuery,
+  ExportAllResult,
+  ExportColumnScope,
+  ExportInfo,
+  ExportRequest,
+  ExportRowScope,
+  FetchAllExport,
+} from "./export/tableCsv";
+export type { ExportQuery } from "./export/tableCsv";
 export type {
   ColumnMenuActionFactory,
   ContextMenuItemsFactory,
@@ -321,6 +614,7 @@ export type {
 } from "./features/currentHost";
 export type { ChecklistValue } from "./filters/checklistValues";
 export type { FacetCounts, FacetMap } from "./filters/facets";
+export type { FilterRuntime } from "./filters/filterDefs";
 export {
   type ChipLabelResolver,
   FILTER_TYPES,
@@ -330,13 +624,20 @@ export {
   type FilterOptionsSource,
   type FilterType,
 } from "./filters/filterDefs";
-export type { FilterFormSource } from "./filters/filterFormModel";
+export type { FilterEngine } from "./filters/filterEngine";
+export type {
+  FilterFormSource,
+  FiltersFormSlotProps,
+} from "./filters/filterFormModel";
 export type {
   FilterTypeRegistry,
   FilterTypeSpec,
   FilterWidgetKind,
   FilterWidgetRenderProps,
 } from "./filters/filterRegistry";
+export type { CellRange } from "./focus/cellRange";
+export type { GridCell } from "./focus/gridFocus";
+export type { SelectionStats } from "./focus/selectionStats";
 export type {
   GroupAggregateOverride,
   GroupAggregateOverrides,
@@ -360,9 +661,16 @@ export type {
   RowGroupLevel,
   RowGroupRef,
 } from "./grouping/groupRows";
+export type { PivotField, PivotZone } from "./pivot/pivotConfigModel";
+export type { PivotConfig } from "./pivot/pivotModel";
+export type { PivotMeasure } from "./pivot/pivotModel";
+export type { CellSpanAppearance } from "./rows/cellSpan";
+export type { GetCellSpan } from "./rows/cellSpan";
+export type { CellSpanRequest, GetCellSpanArgs } from "./rows/cellSpan";
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "./rows/extraRows";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type { RowPinLookup, RowPinSide } from "./rows/rowPinModel";
+export type { RowReorderLabels } from "./rows/rowReorderEngine";
 export { ROW_DND_MIME } from "./rows/rowReorderEngine";
 export type { RowReorderDigest } from "./rows/rowReorderModel";
 export type { RowHeight, RowStyle } from "./rows/rowStyle";
@@ -381,8 +689,58 @@ export type {
 } from "./source/queryContract";
 export type { QueryGroupRow } from "./source/queryGroups";
 export type { TableSource } from "./source/TableSource";
+export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
+export type { FeatureNoticeAppearance } from "./state/featureNotices";
+export {
+  cellHighlightKind,
+  cellHighlightStyle,
+  CURRENT_MATCH_CELL_STYLE,
+  groupIndentStyle,
+  type GroupRowKind,
+  groupRowParts,
+  isCurrentMatchCell,
+  isMatchedCell,
+  isSelectedCell,
+  logicalAlign,
+  MATCHED_CELL_STYLE,
+  type MergedCellStyle,
+  mergedCellStyle,
+  pinnedDataCellStyle,
+  pinnedEdgeCellStyle,
+  resolveMobileLabel,
+  SELECTED_CELL_OUTLINE,
+  shallowEqualByKeys,
+  SHARED_DESKTOP_ROW_KEYS,
+  sortArrow,
+} from "./style/cellDisplay";
 export type { CssProperties } from "./style/cssProperties";
+export {
+  ASSISTANT_ACTIONS_ICON,
+  ASSISTANT_AVATAR_ICON,
+  ASSISTANT_CLOSE_ICON,
+  ASSISTANT_EXAMPLES_ICON,
+  ASSISTANT_KIND_HUES,
+  ASSISTANT_KIND_PATHS,
+  ASSISTANT_SEND_ICON,
+  ASSISTANT_SETTINGS_ICON,
+  ASSISTANT_STOP_ICON,
+  ASSISTANT_UNDO_ICON,
+  assistantKindIcon,
+  assistantMicIcon,
+  assistantReceiptIcon,
+  expandChevronIcon,
+  eyeIcon,
+  FILTERS_ICON,
+  GRIP_ICON,
+  type IconDescriptor,
+  type IconShape,
+  PERSON_AVATAR_ICON,
+  PIN_ICON,
+  SEARCH_ICON,
+} from "./style/icons";
+export { MOUNT_STAGGER, OVERLAY_MOTION } from "./style/motion";
 export type { TableStateMutators } from "./tableStateMutators";
+export type { TreeEntry } from "./tree/treeRows";
 export type {
   ActionAiOptions,
   ActionApprovalPolicy,
@@ -396,6 +754,8 @@ export type {
   RowAction,
   TableLabels,
 } from "./types";
+export type { SavedView } from "./url/savedViewsController";
+export type { SavedViewVisibility } from "./url/savedViewsController";
 export type {
   VirtualItemMeta,
   VirtualTableRow,

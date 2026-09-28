@@ -24,34 +24,53 @@ export interface GroupingDragState {
   overRemove?: boolean;
 }
 
-/** Drag props spread onto a desktop column header or a grouping chip. @public */
-export interface GroupingDragProps {
+/**
+ * Drag props spread onto a desktop column header or a grouping chip.
+ *
+ * @typeParam TDragEvent - The binding's drag event (React's synthetic event
+ *   in React, the DOM event elsewhere).
+ *
+ * @public
+ */
+export interface GroupingDragProps<TDragEvent = DragEvent> {
   /** Native HTML drag handle. */
   draggable?: boolean;
   /** Starts the grouping-field drag. */
-  onDragStart?: (event: DragEvent) => void;
+  onDragStart?: (event: TDragEvent) => void;
   /** Ends the grouping-field drag. */
-  onDragEnd?: (event: DragEvent) => void;
+  onDragEnd?: (event: TDragEvent) => void;
   /** Marks the element whose native drag is active. */
   "data-grouping-dragging"?: boolean;
 }
 
-/** Props spread onto one insertion target in the grouping strip. @public */
-export interface GroupingDropProps {
+/**
+ * Props spread onto one insertion target in the grouping strip.
+ *
+ * @typeParam TDragEvent - The binding's drag event.
+ *
+ * @public
+ */
+export interface GroupingDropProps<TDragEvent = DragEvent> {
   /** Enters an insertion target. */
-  onDragEnter?: (event: DragEvent) => void;
+  onDragEnter?: (event: TDragEvent) => void;
   /** Moves over an insertion target. */
-  onDragOver?: (event: DragEvent) => void;
+  onDragOver?: (event: TDragEvent) => void;
   /** Leaves an insertion target. */
-  onDragLeave?: (event: DragEvent) => void;
+  onDragLeave?: (event: TDragEvent) => void;
   /** Drops onto an insertion target. */
-  onDrop?: (event: DragEvent) => void;
+  onDrop?: (event: TDragEvent) => void;
   /** Marks the insertion target currently under the dragged field. */
   "data-drop-active"?: boolean;
 }
 
-/** Keyboard props spread onto a grouping chip's drag handle. @public */
-export interface GroupingChipKeyboardProps {
+/**
+ * Keyboard props spread onto a grouping chip's drag handle.
+ *
+ * @typeParam TKeyboardEvent - The binding's key event.
+ *
+ * @public
+ */
+export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
   /** Keep every grouping handle in the tab order. */
   tabIndex: 0;
   /** Expose the handle as an interactive control. */
@@ -59,7 +78,7 @@ export interface GroupingChipKeyboardProps {
   /** Localized move instruction for the field. */
   "aria-label": string;
   /** Handle logical arrow movement and removal keys. */
-  onKeyDown: (event: KeyboardEvent) => void;
+  onKeyDown: (event: TKeyboardEvent) => void;
 }
 
 /** Interaction engine published by the optional feature provider. @public */
