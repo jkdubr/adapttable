@@ -1,17 +1,15 @@
+import { type ColumnDef, type SelectionState } from "@adapttable/react";
 import {
   groupAggregateEntries,
   type GroupedFlatEntry,
+  groupIndentStyle,
   groupLeafCount,
   groupRowLayout,
-  groupSelectionState,
-  type TableLabels,
-} from "@adapttable/core";
-import { type ColumnDef, type SelectionState } from "@adapttable/react";
-import {
-  groupIndentStyle,
   groupRowParts,
+  groupSelectionState,
   GroupToggleSpacer,
   resolveMobileLabel,
+  type TableLabels,
 } from "@adapttable/react/adapter";
 import { ActionIcon, Card, Checkbox, Group, Table, Text } from "@mantine/core";
 import type { ReactElement, ReactNode } from "react";

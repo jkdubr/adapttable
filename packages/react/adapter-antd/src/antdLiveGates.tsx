@@ -6,11 +6,6 @@
  * slots and the inert stubs, never the hooks, so the adapter root graph
  * matches the other kits.
  */
-import type {
-  SelectionStats,
-  TableLabels,
-  TableSource,
-} from "@adapttable/core";
 import {
   asBatchGesture,
   type BatchRowEdit,
@@ -40,7 +35,10 @@ import {
   type GridFocusState,
   RowScrollContext,
   SELECTION_STATS_LIVE,
+  type SelectionStats,
   type SelectionStatsLiveSlotProps,
+  type TableLabels,
+  type TableSource,
   useFeatureSlotFilled,
   type UseGridFocusOptions,
   windowedTableAria,

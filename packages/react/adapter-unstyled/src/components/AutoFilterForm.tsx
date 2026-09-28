@@ -1,4 +1,12 @@
 import {
+  CHECKLIST_LIST_HEIGHT,
+  filterOpLabel,
+  useBooleanFilterWidget,
+  useFilterOptions,
+  useRangeFilterWidget,
+  useTextFilterWidget,
+} from "@adapttable/react";
+import {
   defaultFilterRegistry,
   type FilterDef,
   filterLabel,
@@ -13,15 +21,7 @@ import {
   splitRelativeToken,
   type TableLabels,
   type TableSource,
-} from "@adapttable/core";
-import {
-  CHECKLIST_LIST_HEIGHT,
-  filterOpLabel,
-  useBooleanFilterWidget,
-  useFilterOptions,
-  useRangeFilterWidget,
-  useTextFilterWidget,
-} from "@adapttable/react";
+} from "@adapttable/react/adapter";
 import {
   type CSSProperties,
   type ReactElement,

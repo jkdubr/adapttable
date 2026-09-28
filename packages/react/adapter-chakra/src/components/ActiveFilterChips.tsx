@@ -1,6 +1,6 @@
 /** Removable chips for the active filters. */
-import type { TableLabels } from "@adapttable/core";
 import type { ActiveFilterChip } from "@adapttable/react";
+import type { TableLabels } from "@adapttable/react/adapter";
 import { Button, Tag, Wrap, WrapItem } from "@chakra-ui/react";
 
 /** Removable Chakra tag chips. */

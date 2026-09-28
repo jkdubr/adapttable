@@ -1,7 +1,7 @@
-import type { TableLabels } from "@adapttable/core";
 import {
   createAdapterRowDetailFeatures,
   type ExpandToggleSlotProps,
+  type TableLabels,
 } from "@adapttable/react/adapter";
 
 import { useClassNames } from "./components/classNamesContext";

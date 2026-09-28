@@ -1,15 +1,13 @@
-import {
-  type GroupAggregateOps,
-  type GroupedFlatEntry,
-  groupSelectionState,
-  type TableLabels,
-} from "@adapttable/core";
 import type { SelectionState } from "@adapttable/react";
 import {
   type ExtraEntry,
+  type GroupAggregateOps,
+  type GroupedFlatEntry,
   groupIndentStyle,
+  groupSelectionState,
   GroupToggleSpacer,
   isExtraEntry,
+  type TableLabels,
 } from "@adapttable/react/adapter";
 import { Button, Checkbox, Space, Typography } from "antd";
 import type { CSSProperties, MouseEventHandler, ReactNode } from "react";

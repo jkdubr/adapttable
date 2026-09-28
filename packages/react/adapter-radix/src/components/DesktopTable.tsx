@@ -1,10 +1,4 @@
 /** The desktop `<table>`: header, pinned columns, rows and summary. */
-import {
-  type Direction,
-  PIN_Z,
-  type PinSide,
-  type TableLabels,
-} from "@adapttable/core";
 import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
@@ -17,6 +11,7 @@ import {
   createDesktopRow,
   type DesktopHeaderLeaf,
   type DesktopRowWiring,
+  type Direction,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
@@ -26,12 +21,15 @@ import {
   type HtmlGroupedHeaderCell,
   logicalAlign,
   mergedCellStyle,
+  PIN_Z,
   pinnedEdgeCellStyle,
+  type PinSide,
   REORDER_COLUMN_WIDTH,
   resolveRowEditTrigger,
   rowEditConflict,
   type SharedTableRenderProps,
   sortArrow,
+  type TableLabels,
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
 import { Box, Table, Text } from "@radix-ui/themes";

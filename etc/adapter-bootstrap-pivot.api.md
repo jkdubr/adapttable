@@ -5,7 +5,7 @@
 ```ts
 
 
-export * from "@adapttable/core/pivot";
+export * from "@adapttable/react/pivot";
 
 // (No @packageDocumentation comment for this package)
 

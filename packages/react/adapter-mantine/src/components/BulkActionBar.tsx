@@ -1,10 +1,11 @@
-import type { BulkAction, TableLabels } from "@adapttable/core";
 import { type SelectionState, useBulkActionRunner } from "@adapttable/react";
 import {
+  type BulkAction,
   bulkActionErrorMessage,
   type BulkBarChromeProps,
   offersAllMatching,
   resolveDisabledReason,
+  type TableLabels,
 } from "@adapttable/react/adapter";
 import { Button, Group, Stack, Text, Tooltip } from "@mantine/core";
 import type { ReactNode } from "react";

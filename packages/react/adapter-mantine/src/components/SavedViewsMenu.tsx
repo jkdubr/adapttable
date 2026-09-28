@@ -1,6 +1,5 @@
-import type { TableLabels } from "@adapttable/core";
 import { useSavedViews, type UseSavedViewsOptions } from "@adapttable/react";
-import { useEscapeClose } from "@adapttable/react/adapter";
+import { type TableLabels, useEscapeClose } from "@adapttable/react/adapter";
 import {
   ActionIcon,
   Box,

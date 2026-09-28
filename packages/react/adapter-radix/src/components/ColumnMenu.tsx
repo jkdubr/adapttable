@@ -1,15 +1,11 @@
-import {
-  ACTIONS_COLUMN_KEY,
-  columnMenuRows,
-  REORDER_COLUMN_KEY,
-  type UseColumnLayoutResult,
-} from "@adapttable/core";
 import { columnReorderKeyProps, useColumnDragState } from "@adapttable/react";
 import {
+  ACTIONS_COLUMN_KEY,
   columnMenuActions,
   type ColumnMenuItem,
   type ColumnMenuLabels,
   type ColumnMenuRow,
+  columnMenuRows,
   type ColumnMenuSlotProps,
   type ColumnRenameEditorState,
   EyeIcon,
@@ -20,8 +16,10 @@ import {
   nextPinSide,
   pinActionLabel,
   PinIcon,
+  REORDER_COLUMN_KEY,
   showAllColumns,
   unpinAllColumns,
+  type UseColumnLayoutResult,
   useColumnRenameEditor,
   useFeatureHost,
 } from "@adapttable/react/adapter";

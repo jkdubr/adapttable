@@ -1,4 +1,12 @@
 import {
+  filterOpLabel,
+  listFilterValues,
+  useBooleanFilterWidget,
+  useFilterOptions,
+  useRangeFilterWidget,
+  useTextFilterWidget,
+} from "@adapttable/react";
+import {
   defaultFilterRegistry,
   type FilterDef,
   filterLabel,
@@ -12,15 +20,7 @@ import {
   splitRelativeToken,
   type TableLabels,
   type TableSource,
-} from "@adapttable/core";
-import {
-  filterOpLabel,
-  listFilterValues,
-  useBooleanFilterWidget,
-  useFilterOptions,
-  useRangeFilterWidget,
-  useTextFilterWidget,
-} from "@adapttable/react";
+} from "@adapttable/react/adapter";
 import {
   Autocomplete,
   CircularProgress,

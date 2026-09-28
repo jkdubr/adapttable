@@ -1,5 +1,5 @@
 /** The filters drawer — the backdrop-ed alternative to the popover. */
-import type { Direction, TableLabels } from "@adapttable/core";
+import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { Button, CloseButton, Drawer, Stack } from "@chakra-ui/react";
 import { type ReactNode } from "react";
 

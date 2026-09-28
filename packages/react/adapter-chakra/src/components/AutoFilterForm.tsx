@@ -1,7 +1,18 @@
 import {
+  CHECKLIST_LIST_HEIGHT,
+  filterOpLabel,
+  listFilterValues,
+  scalarFilterText,
+  useBooleanFilterWidget,
+  useFilterOptions,
+  useRangeFilterWidget,
+  useTextFilterWidget,
+} from "@adapttable/react";
+import {
   defaultFilterRegistry,
   type Direction,
   type FilterDef,
+  type FilterFormSource,
   filterLabel,
   type FilterTypeRegistry,
   filterWidgetKind,
@@ -12,18 +23,7 @@ import {
   resolveLabels,
   splitRelativeToken,
   type TableLabels,
-} from "@adapttable/core";
-import {
-  CHECKLIST_LIST_HEIGHT,
-  filterOpLabel,
-  listFilterValues,
-  scalarFilterText,
-  useBooleanFilterWidget,
-  useFilterOptions,
-  useRangeFilterWidget,
-  useTextFilterWidget,
-} from "@adapttable/react";
-import type { FilterFormSource } from "@adapttable/react/adapter";
+} from "@adapttable/react/adapter";
 import {
   Checkbox,
   HStack,

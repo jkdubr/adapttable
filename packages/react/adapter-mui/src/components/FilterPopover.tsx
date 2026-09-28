@@ -1,4 +1,4 @@
-import type { Direction, TableLabels } from "@adapttable/core";
+import type { Direction, TableLabels } from "@adapttable/react/adapter";
 import { Box, Button, Paper, Popper, Stack, Typography } from "@mui/material";
 import { type ReactNode, useEffect, useRef } from "react";
 

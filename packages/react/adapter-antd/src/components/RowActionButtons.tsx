@@ -1,14 +1,14 @@
 /** The trailing row-action buttons, shared by rows and cards. */
 import {
   type ConfirmHandler,
+  resolveDisabledReason,
   type RowAction,
   type RowActionsLayout,
   type RowActionsRenderer,
   runRowAction,
   type TableLabels,
   visibleRowActions,
-} from "@adapttable/core";
-import { resolveDisabledReason } from "@adapttable/react/adapter";
+} from "@adapttable/react/adapter";
 import { Button, Dropdown, Tooltip } from "antd";
 import type { ReactNode } from "react";
 

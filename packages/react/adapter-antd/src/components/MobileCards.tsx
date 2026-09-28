@@ -1,15 +1,4 @@
 import {
-  bodyRowEntries,
-  type ConfirmHandler,
-  type GroupedFlatEntry,
-  type RowAction,
-  type RowActionsLayout,
-  type RowActionsRenderer,
-  type TableLabels,
-  treeCardStyle,
-  type TreeEntry,
-} from "@adapttable/core";
-import {
   type ColumnDef,
   type EditableCellEditing,
   type ReactMobileCardRenderer,
@@ -17,9 +6,12 @@ import {
   type UseDataTableResult,
 } from "@adapttable/react";
 import {
+  bodyRowEntries,
   cellFlashAttr,
+  type ConfirmHandler,
   EXTRA_ROW_PARTS,
   type ExtraRow,
+  type GroupedFlatEntry,
   insertExtraRows,
   isExtraEntry,
   orderedCardEntries,
@@ -29,6 +21,9 @@ import {
   resolveMobileLabel,
   resolveRowEditTrigger,
   resolveRowStyle,
+  type RowAction,
+  type RowActionsLayout,
+  type RowActionsRenderer,
   rowClickProps,
   rowEditConflict,
   rowEditingSignature,
@@ -38,6 +33,9 @@ import {
   type RowReorderState,
   type RowStyle,
   rowStyleSignature,
+  type TableLabels,
+  treeCardStyle,
+  type TreeEntry,
   useSummaryCells,
   type VirtualTableRow,
 } from "@adapttable/react/adapter";

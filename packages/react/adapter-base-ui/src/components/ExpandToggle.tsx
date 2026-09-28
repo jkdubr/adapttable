@@ -1,6 +1,9 @@
 /** The row-expansion chevron, shared by rows and cards. */
-import type { Direction, TableLabels } from "@adapttable/core";
-import { ExpandChevron } from "@adapttable/react/adapter";
+import {
+  type Direction,
+  ExpandChevron,
+  type TableLabels,
+} from "@adapttable/react/adapter";
 
 import { IconButton } from "../ui";
 

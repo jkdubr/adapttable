@@ -1,4 +1,3 @@
-import { resolveLabels, showSimpleFilterFields } from "@adapttable/core";
 import {
   ACTIVE_FILTER_CHIPS,
   AGENT_APPROVAL,
@@ -23,9 +22,11 @@ import {
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
   OptionalSidePanel,
+  resolveLabels,
   resolveStickyToolbar,
   ROW_REORDER_ANNOUNCER,
   SAVED_VIEWS,
+  showSimpleFilterFields,
   SIDE_PANEL,
   STATUS_BAR,
   TableStatusAnnouncer,

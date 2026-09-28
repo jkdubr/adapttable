@@ -1,4 +1,4 @@
-import { pageSizeOptions, type TableLabels } from "@adapttable/core";
+import { pageSizeOptions, type TableLabels } from "@adapttable/react/adapter";
 import { Group, Pagination, Select, Text } from "@mantine/core";
 
 /**

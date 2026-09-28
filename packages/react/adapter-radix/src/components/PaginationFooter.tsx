@@ -1,6 +1,9 @@
 /** Row count and the windowed pager. */
-import type { PaginationInfo, TableLabels } from "@adapttable/core";
-import { paginationSlots } from "@adapttable/react/adapter";
+import {
+  type PaginationInfo,
+  paginationSlots,
+  type TableLabels,
+} from "@adapttable/react/adapter";
 import { Button, Flex, Text } from "@radix-ui/themes";
 
 import { subtleText } from "../styles";

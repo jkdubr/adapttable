@@ -1,8 +1,8 @@
 /** Search field, sort select, filters trigger, menus and rows-per-page. */
-import { pageSizeOptions } from "@adapttable/core";
 import {
   FeatureSlot,
   FILTER_POPOVER,
+  pageSizeOptions,
   SearchIcon,
   TOOLBAR_EXTRAS,
   type ToolbarChromeProps,

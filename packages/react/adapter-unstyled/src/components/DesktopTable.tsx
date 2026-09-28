@@ -1,5 +1,4 @@
 /** The desktop table: header, pinned columns, rows and summary. */
-import { edgePinStyle, PIN_Z, type TableLabels } from "@adapttable/core";
 import { type ColumnDef, resolveColumnFooter } from "@adapttable/react";
 import {
   cellFlashAttr,
@@ -9,6 +8,7 @@ import {
   createDesktopRow,
   type DesktopHeaderLeaf,
   type DesktopRowWiring,
+  edgePinStyle,
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
@@ -19,9 +19,11 @@ import {
   isMatchedCell,
   isSelectedCell,
   mergedCellStyle,
+  PIN_Z,
   resolveRowEditTrigger,
   rowEditConflict,
   type SharedTableRenderProps,
+  type TableLabels,
   useDesktopTableAssembly,
 } from "@adapttable/react/adapter";
 import {

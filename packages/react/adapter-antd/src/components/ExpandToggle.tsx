@@ -1,4 +1,4 @@
-import type { TableLabels } from "@adapttable/core";
+import type { TableLabels } from "@adapttable/react/adapter";
 import { Button } from "antd";
 import type { MouseEventHandler } from "react";
 

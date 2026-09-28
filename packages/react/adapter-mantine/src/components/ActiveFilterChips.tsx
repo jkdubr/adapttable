@@ -1,5 +1,5 @@
-import { defaultLabels } from "@adapttable/core";
 import type { ActiveFilterChip } from "@adapttable/react";
+import { defaultLabels } from "@adapttable/react/adapter";
 import { Anchor, Group, Pill } from "@mantine/core";
 
 /**

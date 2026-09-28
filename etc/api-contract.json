@@ -93,7 +93,7 @@
       "chakra/fullscreen",
       "chakra/preset",
       "chakra/print",
-      "forwards @adapttable/core/pivot",
+      "forwards @adapttable/react/pivot",
       "forwards @adapttable/unstyled/batch-editing",
       "forwards @adapttable/unstyled/bulk-actions",
       "forwards @adapttable/unstyled/cell-navigation",
@@ -3528,8 +3528,8 @@
       "SortableValue",
       "xlsxWriter"
     ],
-    "forwards @adapttable/core/pivot": [
-      "@adapttable/core/pivot"
+    "forwards @adapttable/react/pivot": [
+      "@adapttable/react/pivot"
     ],
     "forwards @adapttable/unstyled/batch-editing": [
       "@adapttable/unstyled/batch-editing"
@@ -6097,7 +6097,7 @@
       "reexport": "bootstrap/grouping"
     },
     "adapter-bootstrap-pivot.api.md": {
-      "reexport": "forwards @adapttable/core/pivot"
+      "reexport": "forwards @adapttable/react/pivot"
     },
     "adapter-bootstrap-row-reorder.api.md": {
       "reexport": "bootstrap/row-reorder"

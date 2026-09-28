@@ -1,6 +1,7 @@
-import type { Direction, TableLabels } from "@adapttable/core";
 import {
+  type Direction,
   OVERLAY_MOTION,
+  type TableLabels,
   useOverlayTransition,
 } from "@adapttable/react/adapter";
 import { type ReactNode, useEffect, useRef } from "react";
