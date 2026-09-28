@@ -112,9 +112,7 @@ function TableAgentProvider({
   // replaced table is a new subscription.
   const subscribeToTable = useCallback(
     (onStoreChange: () => void) =>
-      neutralTable
-        ? controller.subscribeTable(onStoreChange)
-        : () => undefined,
+      neutralTable ? controller.subscribeTable(onStoreChange) : () => undefined,
     [controller, neutralTable]
   );
   const stamp = useSyncExternalStore(
