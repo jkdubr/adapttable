@@ -93,3 +93,4 @@ export type {
 } from "./columnModel";
 export type { ColumnAiOptions } from "./columnModel";
 export type { DisplayValue } from "./display";
+export type { TableLabels } from "./types";
