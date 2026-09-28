@@ -4,7 +4,7 @@
  * The provider owns the chooser's uncontrolled value. A table that never
  * imports this feature never mounts or bundles that state.
  */
-import { coreFeatures } from "@adapttable/core/binding";
+import { coreDensityChooser } from "@adapttable/core/binding";
 import { type ReactNode, useMemo, useState } from "react";
 
 import type { Density } from "../url/useDensityUrlState";
@@ -34,7 +34,7 @@ function DensityProvider({
  */
 export function densityChooser(): StaticTableFeature {
   return {
-    ...coreFeatures.densityChooser(),
+    ...coreDensityChooser(),
     provider: { Provider: DensityProvider },
   };
 }

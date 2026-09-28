@@ -947,9 +947,65 @@ export type ContextMenuTarget<TRow> = {
 };
 
 // @public
+export function coreBatchEditing<TRow>(onBatchEdit: unknown, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
+
+// @public
+export function coreBulkActions(actions: readonly unknown[]): CoreFeature;
+
+// @public
+export function coreCellNavigation(options?: {
+    readonly onRangeChange?: (range: never) => void;
+}): CoreFeature;
+
+// @public
+export function coreCellSpan<TRow>(getCellSpan: unknown, cellSpanAppearance?: unknown): CoreFeature<TRow>;
+
+// @public
+export function coreCollapsibleColumnGroups(): CoreFeature;
+
+// @public
+export function coreColumnMenu(): CoreFeature;
+
+// @public
+export function coreColumnSelectionCheckbox(): CoreFeature;
+
+// @public
+export function coreCommandPalette(options?: boolean | {
+    readonly commands?: readonly Command[];
+}): CoreFeature;
+
+// @public
+export function coreContextMenu<TRow>(options?: boolean | {
+    readonly items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
+}): CoreFeature<TRow, CoreRowFeatureRegistrar<TRow>>;
+
+// @public
+export function coreDensityChooser(): CoreFeature;
+
+// @public
+export function coreDirtyIndicators(): CoreFeature;
+
+// @public
+export function coreEditHistory(options?: unknown): CoreFeature;
+
+// @public
+export function coreEditing<TRow>(onCellEdit: unknown, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
+
+// @public
+export function coreExportCsv<TRow>(options?: boolean | {
+    readonly writer?: ExportWriter;
+}): CoreFeature<TRow>;
+
+// @public
+export function coreExtraRows(rows: readonly unknown[]): CoreFeature;
+
+// @public
 export interface CoreFeature<TRow = unknown, THost = CoreFeatureRegistrar> extends PatchFeature<TRow> {
     setup?(host: THost): void;
 }
+
+// @public
+export function coreFeature<TRow>(id: string, patch?: FeaturePatch<TRow>): CoreFeature<TRow>;
 
 // @public
 export interface CoreFeatureRegistrar<TPanel extends SidePanelEntry = SidePanelEntry> {
@@ -960,69 +1016,79 @@ export interface CoreFeatureRegistrar<TPanel extends SidePanelEntry = SidePanelE
 }
 
 // @public
-export const coreFeatures: {
-    readonly feature: <TRow>(id: string, patch?: FeaturePatch<TRow>) => CoreFeature<TRow>;
-    readonly cellSpan: <TRow>(getCellSpan: unknown, cellSpanAppearance?: unknown) => CoreFeature<TRow>;
-    readonly extraRows: (rows: readonly unknown[]) => CoreFeature;
-    readonly pinnedSummaryRows: <TRow>(pinnedRows: unknown) => CoreFeature<TRow>;
-    readonly rowAppearance: <TRow>(options: FeaturePatch<TRow>) => CoreFeature<TRow>;
-    readonly columnMenu: () => CoreFeature;
-    readonly resizableColumns: () => CoreFeature;
-    readonly collapsibleColumnGroups: () => CoreFeature;
-    readonly commandPalette: (options?: boolean | {
-        readonly commands?: readonly Command[];
-    }) => CoreFeature;
-    readonly contextMenu: <TRow>(options?: boolean | {
-        readonly items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
-    }) => CoreFeature<TRow, CoreRowFeatureRegistrar<TRow>>;
-    readonly sidePanel: <TPanel extends SidePanelEntry>(options: {
-        readonly panels: readonly TPanel[];
-    }) => CoreFeature<unknown, CoreFeatureRegistrar<TPanel>>;
-    readonly bulkActions: (actions: readonly unknown[]) => CoreFeature;
-    readonly filterTypes: (specs: readonly FilterTypeSpec[]) => CoreFeature;
-    readonly headerFilters: () => CoreFeature;
-    readonly savedViews: (options: unknown) => CoreFeature;
-    readonly print: (onPrint: () => void, printButton?: boolean) => CoreFeature;
-    readonly statusBar: () => CoreFeature;
-    readonly undoRedoButtons: () => CoreFeature;
-    readonly multiSort: () => CoreFeature;
-    readonly fitColumns: () => CoreFeature;
-    readonly columnSelectionCheckbox: () => CoreFeature;
-    readonly cellNavigation: (options?: {
-        readonly onRangeChange?: (range: never) => void;
-    }) => CoreFeature;
-    readonly densityChooser: () => CoreFeature;
-    readonly editHistory: (options?: unknown) => CoreFeature;
-    readonly editing: <TRow>(onCellEdit: unknown, extras?: FeaturePatch<TRow>) => CoreFeature<TRow>;
-    readonly rowEditing: <TRow>(onRowEdit: unknown, extras?: FeaturePatch<TRow>) => CoreFeature<TRow>;
-    readonly batchEditing: <TRow>(onBatchEdit: unknown, extras?: FeaturePatch<TRow>) => CoreFeature<TRow>;
-    readonly dirtyIndicators: () => CoreFeature;
-    readonly exportCsv: <TRow>(options?: boolean | {
-        readonly writer?: ExportWriter;
-    }) => CoreFeature<TRow>;
-    readonly filters: <TRow>(defs: unknown) => CoreFeature<TRow>;
-    readonly findInTable: () => CoreFeature;
-    readonly fullscreen: () => CoreFeature;
-    readonly grouping: <TRow>(groupBy: string | readonly string[], extras?: object) => CoreFeature<TRow>;
-    readonly groupingPanel: <TRow>(groupBy?: string | readonly string[], extras?: object) => CoreFeature<TRow>;
-    readonly rowActions: <TRow>(actions?: readonly unknown[], handlers?: {
-        readonly onAddRow?: unknown;
-        readonly onDuplicateRow?: unknown;
-        readonly onDeleteRow?: unknown;
-        readonly confirmDeleteRow?: unknown;
-    }) => CoreFeature<TRow>;
-    readonly rowDetail: <TRow>(renderRowDetail: unknown, defaultExpandedRowIds?: readonly string[]) => CoreFeature<TRow>;
-    readonly nestedTable: <TRow>(nested: unknown, defaultExpandedRowIds?: readonly string[]) => CoreFeature<TRow>;
-    readonly rowPinning: (options?: FeaturePatch) => CoreFeature;
-    readonly selectionStats: () => CoreFeature;
-    readonly tree: <TRow>(options?: FeaturePatch<TRow>) => CoreFeature<TRow>;
-    readonly virtualize: (options?: VirtualizeInput) => CoreFeature;
-};
+export function coreFilters<TRow>(defs: unknown): CoreFeature<TRow>;
+
+// @public
+export function coreFilterTypes(specs: readonly FilterTypeSpec[]): CoreFeature;
+
+// @public
+export function coreFindInTable(): CoreFeature;
+
+// @public
+export function coreFitColumns(): CoreFeature;
+
+// @public
+export function coreFullscreen(): CoreFeature;
+
+// @public
+export function coreGrouping<TRow>(groupBy: string | readonly string[], extras?: object): CoreFeature<TRow>;
+
+// @public
+export function coreGroupingPanel<TRow>(groupBy?: string | readonly string[], extras?: object): CoreFeature<TRow>;
+
+// @public
+export function coreHeaderFilters(): CoreFeature;
+
+// @public
+export function coreMultiSort(): CoreFeature;
+
+// @public
+export function coreNestedTable<TRow>(nested: unknown, defaultExpandedRowIds?: readonly string[]): CoreFeature<TRow>;
+
+// @public
+export function corePinnedSummaryRows<TRow>(pinnedRows: unknown): CoreFeature<TRow>;
+
+// @public
+export function corePrint(onPrint: () => void, printButton?: boolean): CoreFeature;
+
+// @public
+export function coreResizableColumns(): CoreFeature;
+
+// @public
+export function coreRowActions<TRow>(actions?: readonly unknown[], handlers?: {
+    readonly onAddRow?: unknown;
+    readonly onDuplicateRow?: unknown;
+    readonly onDeleteRow?: unknown;
+    readonly confirmDeleteRow?: unknown;
+}): CoreFeature<TRow>;
+
+// @public
+export function coreRowAppearance<TRow>(options: FeaturePatch<TRow>): CoreFeature<TRow>;
+
+// @public
+export function coreRowDetail<TRow>(renderRowDetail: unknown, defaultExpandedRowIds?: readonly string[]): CoreFeature<TRow>;
+
+// @public
+export function coreRowEditing<TRow>(onRowEdit: unknown, extras?: FeaturePatch<TRow>): CoreFeature<TRow>;
 
 // @public
 export interface CoreRowFeatureRegistrar<TRow = unknown, TPanel extends SidePanelEntry = SidePanelEntry> extends CoreFeatureRegistrar<TPanel> {
     registerContextMenuItems(items: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[]): void;
 }
+
+// @public
+export function coreRowPinning(options?: FeaturePatch): CoreFeature;
+
+// @public
+export function coreSavedViews(options: unknown): CoreFeature;
+
+// @public
+export function coreSelectionStats(): CoreFeature;
+
+// @public
+export function coreSidePanel<TPanel extends SidePanelEntry>(options: {
+    readonly panels: readonly TPanel[];
+}): CoreFeature<unknown, CoreFeatureRegistrar<TPanel>>;
 
 // @public
 export interface CoreStandardFeatureFactories<TFeature, TBulk, TFilter, TViews> {
@@ -1052,6 +1118,18 @@ export interface CoreStandardFeatureOptions<TBulk, TFilter, TViews> {
     readonly grouping?: string | readonly string[];
     readonly savedViews?: TViews;
 }
+
+// @public
+export function coreStatusBar(): CoreFeature;
+
+// @public
+export function coreTree<TRow>(options?: FeaturePatch<TRow>): CoreFeature<TRow>;
+
+// @public
+export function coreUndoRedoButtons(): CoreFeature;
+
+// @public
+export function coreVirtualize(options?: VirtualizeInput): CoreFeature;
 
 // @public
 export function createFeatureHost<TPanel extends SidePanelEntry = SidePanelEntry>(features: readonly FeatureSetup<unknown, TPanel>[] | undefined): FeatureHostState;
@@ -1261,7 +1339,6 @@ export function desktopHeaderLeaf<TRow, TColumn extends LeafColumn, THeaderProps
     sortActive: boolean;
     sortButtonProps: TSortProps;
     sortIndex: number | undefined;
-    controller: ColumnHeaderController;
     headerDef: FilterDef<TRow> | undefined;
     pinSide: PinOffset["side"] | undefined;
     resizeHandleProps: unknown;

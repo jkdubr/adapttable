@@ -1046,7 +1046,6 @@ describe("desktopHeaderLeaf", () => {
     expect(leaf.sortDir).toBeUndefined();
     expect(leaf.sortActive).toBe(false);
     expect(leaf.sortIndex).toBeUndefined();
-    expect(leaf.controller.label).toBe("Team");
     expect(leaf.headerDef).toBeUndefined();
     expect(leaf.pinSide).toBeUndefined();
     expect(leaf.resizeHandleProps).toBeUndefined();
@@ -1110,12 +1109,7 @@ describe("desktopHeaderLeaf", () => {
     expect(leaf.sortDir).toBe("asc");
     expect(leaf.sortActive).toBe(true);
     expect(leaf.sortIndex).toBe(1);
-    expect(leaf.controller).toEqual({
-      label: "Name",
-      sortDir: "asc",
-      sortIndex: 1,
-      toggleSort,
-    });
+    expect(leaf.sortButtonProps.onClick).toBe(toggleSort);
     expect(leaf.headerDef).toEqual({ key: "name", type: "text" });
     expect(leaf.pinSide).toBe("start");
     expect(columnResizeHandleProps).toHaveBeenCalledWith(

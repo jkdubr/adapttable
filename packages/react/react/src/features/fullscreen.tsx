@@ -4,7 +4,7 @@
  * The hook names the portal container overlays must use while the table is
  * promoted. A table that never imports it never listens for fullscreen.
  */
-import { coreFeatures } from "@adapttable/core/binding";
+import { coreFullscreen } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { useFullscreen } from "../layout/useFullscreen";
@@ -27,7 +27,7 @@ function LiveFullscreen({
  */
 export function fullscreen(): StaticTableFeature {
   return {
-    ...coreFeatures.fullscreen(),
+    ...coreFullscreen(),
     renders: [
       slotRender(FULLSCREEN_LIVE, (props) => <LiveFullscreen {...props} />),
     ],

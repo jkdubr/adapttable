@@ -5,10 +5,7 @@
  * Empty slots pass chrome through unchanged, so the lean table never
  * imports those modules.
  */
-import {
-  CHROME_EXTRA_SLOT_ORDER,
-  TableRuntimePublisher,
-} from "@adapttable/core/binding";
+import { TableRuntimePublisher } from "@adapttable/core/binding";
 import { type ReactNode, useState } from "react";
 
 import type { ComposedTableProps } from "../props";
@@ -56,20 +53,18 @@ function ExtraGate<TRow>({
 }
 
 /** Each extra's slot key, by id; core owns the order they nest in. */
-const EXTRA_SLOT_BY_ID: Readonly<
-  Record<(typeof CHROME_EXTRA_SLOT_ORDER)[number], typeof COLUMN_LAYOUT_LIVE>
-> = {
-  "column-layout-live": COLUMN_LAYOUT_LIVE,
-  "filter-chips-live": FILTER_CHIPS_LIVE,
-  "grouping-live": GROUPING_LIVE,
-  "tree-live": TREE_LIVE,
-  "selection-live": SELECTION_LIVE,
-  "row-actions-live": ROW_ACTIONS_LIVE,
-  "pinning-live": PINNING_LIVE,
-  "expansion-live": EXPANSION_LIVE,
-  "editing-live": EDITING_LIVE,
-};
-const EXTRA_SLOTS = CHROME_EXTRA_SLOT_ORDER.map((id) => EXTRA_SLOT_BY_ID[id]);
+/** The extra slots, in core's `CHROME_EXTRA_SLOT_ORDER`; a test holds them. */
+export const EXTRA_SLOTS = [
+  COLUMN_LAYOUT_LIVE,
+  FILTER_CHIPS_LIVE,
+  GROUPING_LIVE,
+  TREE_LIVE,
+  SELECTION_LIVE,
+  ROW_ACTIONS_LIVE,
+  PINNING_LIVE,
+  EXPANSION_LIVE,
+  EDITING_LIVE,
+] as const;
 
 function RuntimePublisher<TRow>({
   chrome,

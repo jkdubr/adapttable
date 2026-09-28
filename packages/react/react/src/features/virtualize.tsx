@@ -6,7 +6,7 @@
  * body mounts in-tree through {@link CHROME_BODY}; the base graph never
  * reaches the hooks.
  */
-import { coreFeatures } from "@adapttable/core/binding";
+import { coreVirtualize } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { RowScrollContext } from "../virtual/rowScroll";
@@ -80,7 +80,7 @@ export function virtualize(
   options: VirtualizeOptions = true
 ): StaticTableFeature {
   return {
-    ...coreFeatures.virtualize(options),
+    ...coreVirtualize(options),
     renders: [
       slotRender(CHROME_BODY, (slotProps) => (
         <VirtualChromeBody {...slotProps} />

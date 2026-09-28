@@ -5,7 +5,7 @@
 
 Move chrome orchestration from the React binding into `@adapttable/core/binding`, so every binding assembles a table the same way.
 
-- **Feature patch layer.** `applyTableFeatures`, `mergeFeaturePatches`, `getAppliedFeatures` and `rememberAppliedFeatures`, the `FeaturePatch` and `PatchFeature` types, and `coreFeatures`: the id and option normalization of every built-in feature factory.
+- **Feature patch layer.** `applyTableFeatures`, `mergeFeaturePatches`, `getAppliedFeatures` and `rememberAppliedFeatures`, the `FeaturePatch` and `PatchFeature` types, and one `core*` export per built-in feature factory (`coreCellSpan`, `coreGrouping`, …): its id and option normalization.
 - **Standard preset.** `standardFeatureList` owns the preset's members, their order and the `findButton` flag.
 - **Shell pipeline.** `CHROME_EXTRA_SLOT_ORDER`, `SHELL_LIVE_STAGE_ORDER`, `TableRuntimePublisher` with its runtime view, `cellNavigationInput`, the toolbar prop builders, `finishShellLive`, `overlayChromeExtras` and `finishShellBody`.
 - **Table chrome state.** Body region, empty and refreshing variants, footer, clear filters, the selection observer, reorder enablement, grouping-panel state, feature notices, `FilterTriggerToggleState` and the scroll-reset keys.

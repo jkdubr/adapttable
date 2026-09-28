@@ -47,7 +47,30 @@ export type { NestedTableFor } from "../tree/nestedTable";
 export type { ExportCsvOptions } from "@adapttable/core";
 export type { FilterDef } from "@adapttable/core";
 export type { GroupSort } from "@adapttable/core";
-import { type CoreFeature, coreFeatures } from "@adapttable/core/binding";
+import {
+  coreBulkActions,
+  coreCellSpan,
+  coreCollapsibleColumnGroups,
+  coreColumnMenu,
+  coreColumnSelectionCheckbox,
+  coreCommandPalette,
+  coreContextMenu,
+  coreExtraRows,
+  type CoreFeature,
+  coreFeature,
+  coreFilterTypes,
+  coreFitColumns,
+  coreHeaderFilters,
+  coreMultiSort,
+  corePinnedSummaryRows,
+  corePrint,
+  coreResizableColumns,
+  coreRowAppearance,
+  coreSavedViews,
+  coreSidePanel,
+  coreStatusBar,
+  coreUndoRedoButtons,
+} from "@adapttable/core/binding";
 
 /**
  * A core feature, as a row-aware feature of this binding. Every built-in
@@ -77,7 +100,7 @@ export function feature<TRow>(
   patch: FeaturePatch<TRow> = {},
   setup?: TableFeature<TRow>["setup"]
 ): TableFeature<TRow> {
-  const base = rowAware(coreFeatures.feature(id, patch));
+  const base = rowAware(coreFeature(id, patch));
   return setup ? { ...base, setup } : base;
 }
 
@@ -90,7 +113,7 @@ export function cellSpan<TRow>(
   getCellSpan: GetCellSpan<TRow>,
   cellSpanAppearance?: CellSpanAppearance
 ): TableFeature<TRow> {
-  return rowAware(coreFeatures.cellSpan(getCellSpan, cellSpanAppearance));
+  return rowAware(coreCellSpan(getCellSpan, cellSpanAppearance));
 }
 
 /**
@@ -99,7 +122,7 @@ export function cellSpan<TRow>(
  * @public
  */
 export function extraRows(rows: readonly ExtraRow[]): StaticTableFeature {
-  return rowFree(coreFeatures.extraRows(rows));
+  return rowFree(coreExtraRows(rows));
 }
 
 /**
@@ -114,7 +137,7 @@ export function extraRows(rows: readonly ExtraRow[]): StaticTableFeature {
 export function pinnedSummaryRows<TRow>(
   pinnedRows: PinnedRows<TRow>
 ): TableFeature<TRow> {
-  return rowAware(coreFeatures.pinnedSummaryRows(pinnedRows));
+  return rowAware(corePinnedSummaryRows(pinnedRows));
 }
 
 /**
@@ -127,7 +150,7 @@ export function rowAppearance<TRow>(options: {
   rowStyle?: RowStyle<TRow>;
   rowHeight?: RowHeight<TRow>;
 }): TableFeature<TRow> {
-  return rowAware(coreFeatures.rowAppearance(options));
+  return rowAware(coreRowAppearance(options));
 }
 
 /**
@@ -137,7 +160,7 @@ export function rowAppearance<TRow>(options: {
  */
 export function columnMenu(): StaticTableFeature {
   return {
-    ...rowFree(coreFeatures.columnMenu()),
+    ...rowFree(coreColumnMenu()),
     renders: [COLUMN_LAYOUT_LIVE_RENDER],
   };
 }
@@ -149,7 +172,7 @@ export function columnMenu(): StaticTableFeature {
  */
 export function resizableColumns(): StaticTableFeature {
   return {
-    ...rowFree(coreFeatures.resizableColumns()),
+    ...rowFree(coreResizableColumns()),
     renders: [COLUMN_LAYOUT_LIVE_RENDER],
   };
 }
@@ -161,7 +184,7 @@ export function resizableColumns(): StaticTableFeature {
  */
 export function collapsibleColumnGroups(): StaticTableFeature {
   return {
-    ...rowFree(coreFeatures.collapsibleColumnGroups()),
+    ...rowFree(coreCollapsibleColumnGroups()),
     renders: [COLUMN_LAYOUT_LIVE_RENDER],
   };
 }
@@ -174,7 +197,7 @@ export function collapsibleColumnGroups(): StaticTableFeature {
 export function commandPalette(
   options: boolean | CommandPaletteOptions = true
 ): StaticTableFeature {
-  return rowFree(coreFeatures.commandPalette(options));
+  return rowFree(coreCommandPalette(options));
 }
 
 /**
@@ -186,7 +209,7 @@ export function contextMenu<TRow>(
   options: boolean | ContextMenuOptions<TRow> = true
 ): TableFeature<TRow> {
   return {
-    ...rowAware(coreFeatures.contextMenu(options)),
+    ...rowAware(coreContextMenu(options)),
     renders: [COLUMN_LAYOUT_LIVE_RENDER],
   };
 }
@@ -197,7 +220,7 @@ export function contextMenu<TRow>(
  * @public
  */
 export function sidePanel(options: SidePanelOptions): StaticTableFeature {
-  return coreFeatures.sidePanel(options);
+  return coreSidePanel(options);
 }
 
 /**
@@ -209,7 +232,7 @@ export function bulkActions(
   actions: readonly BulkAction[]
 ): StaticTableFeature {
   return {
-    ...rowFree(coreFeatures.bulkActions(actions)),
+    ...rowFree(coreBulkActions(actions)),
     renders: [SELECTION_LIVE_RENDER],
   };
 }
@@ -222,7 +245,7 @@ export function bulkActions(
 export function filterTypes(
   specs: readonly FilterTypeSpec[]
 ): StaticTableFeature {
-  return rowFree(coreFeatures.filterTypes(specs));
+  return rowFree(coreFilterTypes(specs));
 }
 
 /**
@@ -231,7 +254,7 @@ export function filterTypes(
  * @public
  */
 export function headerFilters(): StaticTableFeature {
-  return rowFree(coreFeatures.headerFilters());
+  return rowFree(coreHeaderFilters());
 }
 
 /**
@@ -241,7 +264,7 @@ export function headerFilters(): StaticTableFeature {
  */
 export function savedViews(options: UseSavedViewsOptions): StaticTableFeature {
   return {
-    ...rowFree(coreFeatures.savedViews(options)),
+    ...rowFree(coreSavedViews(options)),
     // A view is the whole table state, columns included: restoring one writes
     // the layout params back, so this feature has to own the layout they land
     // in. Without it a restored view changes everything except its columns.
@@ -258,7 +281,7 @@ export function print(
   onPrint: () => void,
   printButton = false
 ): StaticTableFeature {
-  return rowFree(coreFeatures.print(onPrint, printButton));
+  return rowFree(corePrint(onPrint, printButton));
 }
 
 /**
@@ -267,7 +290,7 @@ export function print(
  * @public
  */
 export function statusBar(): StaticTableFeature {
-  return rowFree(coreFeatures.statusBar());
+  return rowFree(coreStatusBar());
 }
 
 /**
@@ -276,7 +299,7 @@ export function statusBar(): StaticTableFeature {
  * @public
  */
 export function undoRedoButtons(): StaticTableFeature {
-  return rowFree(coreFeatures.undoRedoButtons());
+  return rowFree(coreUndoRedoButtons());
 }
 
 /**
@@ -285,7 +308,7 @@ export function undoRedoButtons(): StaticTableFeature {
  * @public
  */
 export function multiSort(): StaticTableFeature {
-  return rowFree(coreFeatures.multiSort());
+  return rowFree(coreMultiSort());
 }
 
 /**
@@ -295,7 +318,7 @@ export function multiSort(): StaticTableFeature {
  */
 export function fitColumns(): StaticTableFeature {
   return {
-    ...rowFree(coreFeatures.fitColumns()),
+    ...rowFree(coreFitColumns()),
     renders: [COLUMN_LAYOUT_LIVE_RENDER],
   };
 }
@@ -307,7 +330,7 @@ export function fitColumns(): StaticTableFeature {
  */
 export function columnSelectionCheckbox(): StaticTableFeature {
   return {
-    ...rowFree(coreFeatures.columnSelectionCheckbox()),
+    ...rowFree(coreColumnSelectionCheckbox()),
     renders: [SELECTION_LIVE_RENDER],
   };
 }

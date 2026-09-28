@@ -3,8 +3,6 @@ import {
   cellNavigationInput,
   exportPageOnly,
   finishShellLive,
-  SHELL_LIVE_STAGE_ORDER,
-  type ShellLiveStageId,
   sourceWindowStart,
 } from "@adapttable/core/binding";
 /**
@@ -295,16 +293,17 @@ function SelectionStatsStage<TRow>({
 
 /** Each live slot's stage; core owns the order they mount in. */
 type LiveStage = <TRow>(props: StageProps<TRow>) => ReactNode;
-const STAGE_BY_ID: Readonly<Record<ShellLiveStageId, LiveStage>> = {
-  "find-live": FindStage,
-  "cell-nav-live": CellNavStage,
-  "export-live": ExportStage,
-  "fullscreen-live": FullscreenStage,
-  "selection-stats-live": SelectionStatsStage,
-};
-const LIVE_STAGES: readonly LiveStage[] = SHELL_LIVE_STAGE_ORDER.map(
-  (id) => STAGE_BY_ID[id]
-);
+/**
+ * The live stages, in core's `SHELL_LIVE_STAGE_ORDER` (history runs before
+ * them); a test holds the order.
+ */
+export const LIVE_STAGES: readonly LiveStage[] = [
+  FindStage,
+  CellNavStage,
+  ExportStage,
+  FullscreenStage,
+  SelectionStatsStage,
+];
 
 /** One link of the chain: run this stage, then hand the rest what it grew. */
 function LiveChain<TRow>({

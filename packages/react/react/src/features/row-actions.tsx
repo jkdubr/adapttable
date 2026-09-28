@@ -5,7 +5,7 @@
  * never carries add / duplicate / delete.
  */
 import { ACTIONS_COLUMN_KEY, type RowAction } from "@adapttable/core";
-import { coreFeatures } from "@adapttable/core/binding";
+import { coreRowActions } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
 import {
@@ -81,7 +81,7 @@ export function rowActions<TRow>(
   handlers?: RowMutationHandlers<TRow>
 ): TableFeature<TRow> {
   return {
-    ...coreFeatures.rowActions<TRow>(actions, handlers),
+    ...coreRowActions<TRow>(actions, handlers),
     renders: [
       slotRender(ROW_ACTIONS_LIVE, (props) => <LiveRowActions {...props} />),
     ],

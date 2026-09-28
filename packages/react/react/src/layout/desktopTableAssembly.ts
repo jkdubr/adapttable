@@ -949,7 +949,7 @@ export function useDesktopTableAssembly<TRow>(
     headerIndex: number,
     rowSpan = 1
   ): DesktopHeaderLeaf<TRow> => {
-    const { controller, resizeHandleProps, ...rest } = desktopHeaderLeaf(
+    const { resizeHandleProps, ...rest } = desktopHeaderLeaf(
       leafCtx,
       column,
       headerIndex,
@@ -960,7 +960,11 @@ export function useDesktopTableAssembly<TRow>(
       ...rest,
       caption: resolveColumnHeader(
         column,
-        columnHeaderController(column, controller)
+        columnHeaderController(column, {
+          sortDir: rest.sortDir,
+          sortIndex: rest.sortIndex,
+          toggleSort: rest.sortButtonProps.onClick,
+        })
       ),
       resizeHandleProps: resizeHandleProps
         ? toReactColumnResizeHandleProps(

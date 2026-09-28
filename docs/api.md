@@ -798,8 +798,7 @@ shares, so a new binding calls them rather than re-deriving them.
   `mergeFeaturePatches`, `getAppliedFeatures` and `rememberAppliedFeatures`
   are its parts. `FeaturePatch`, `PatchFeature`, `CoreFeature`,
   `CoreFeatureRegistrar`, `CoreRowFeatureRegistrar` and `VirtualizeInput` are
-  the types. `coreFeatures` holds every built-in factory's id and option
-  normalization; a binding spreads one and adds what it draws.
+  the types. Each built-in factory's id and option normalization is its own export, named `core` plus the factory: `coreFeature`, `coreCellSpan`, `coreExtraRows`, `corePinnedSummaryRows`, `coreRowAppearance`, `coreColumnMenu`, `coreResizableColumns`, `coreCollapsibleColumnGroups`, `coreCommandPalette`, `coreContextMenu`, `coreSidePanel`, `coreBulkActions`, `coreFilterTypes`, `coreHeaderFilters`, `coreSavedViews`, `corePrint`, `coreStatusBar`, `coreUndoRedoButtons`, `coreMultiSort`, `coreFitColumns`, `coreColumnSelectionCheckbox`, `coreCellNavigation`, `coreDensityChooser`, `coreEditHistory`, `coreEditing`, `coreRowEditing`, `coreBatchEditing`, `coreDirtyIndicators`, `coreExportCsv`, `coreFilters`, `coreFindInTable`, `coreFullscreen`, `coreGrouping`, `coreGroupingPanel`, `coreRowActions`, `coreRowDetail`, `coreNestedTable`, `coreRowPinning`, `coreSelectionStats`, `coreTree`, `coreVirtualize`. They are separate functions so a table bundles only the features it uses; a binding spreads one and adds what it draws.
 - **Standard preset.** `standardFeatureList` (`CoreStandardFeatureFactories`,
   `CoreStandardFeatureOptions`) builds the preset's members in order from the
   binding's own factories.

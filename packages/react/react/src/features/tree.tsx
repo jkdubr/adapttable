@@ -5,7 +5,7 @@
  * The hooks mount in-tree through {@link TREE_LIVE}.
  */
 import { buildTreeEntries, treeColumnKey } from "@adapttable/core";
-import { coreFeatures } from "@adapttable/core/binding";
+import { coreTree } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
 import { useLazyChildren } from "../tree/useLazyChildren";
@@ -137,7 +137,7 @@ export function tree<TRow>(
   } = {}
 ): TableFeature<TRow> {
   return {
-    ...coreFeatures.tree<TRow>(options),
+    ...coreTree<TRow>(options),
     renders: [slotRender(TREE_LIVE, (props) => <LiveTree {...props} />)],
   };
 }

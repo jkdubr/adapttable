@@ -10,7 +10,7 @@ import {
   makeExportCsvHandler,
   resolveExportCsv,
 } from "@adapttable/core";
-import { coreFeatures } from "@adapttable/core/binding";
+import { coreExportCsv } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { useExportHandler } from "../export/useExportHandler";
@@ -58,7 +58,7 @@ export function exportCsv<TRow>(
   options: boolean | ExportCsvOptions<TRow> = true
 ): TableFeature<TRow> {
   return {
-    ...coreFeatures.exportCsv<TRow>(options),
+    ...coreExportCsv<TRow>(options),
     renders: [slotRender(EXPORT_LIVE, (props) => <LiveExport {...props} />)],
   };
 }

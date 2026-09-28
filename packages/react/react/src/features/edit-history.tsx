@@ -4,7 +4,7 @@
  * The undo stack lives on this entry. A table that never imports it never
  * records gestures. The hook mounts in-tree through {@link EDIT_HISTORY_LIVE}.
  */
-import { coreFeatures } from "@adapttable/core/binding";
+import { coreEditHistory } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { useTableEditHistory } from "../editing/editHistory";
@@ -82,7 +82,7 @@ export function editHistory(
   options: boolean | EditHistoryOptions = true
 ): StaticTableFeature {
   return {
-    ...coreFeatures.editHistory(options),
+    ...coreEditHistory(options),
     renders: [
       slotRender(EDIT_HISTORY_LIVE, (props) => <LiveEditHistory {...props} />),
     ],

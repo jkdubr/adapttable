@@ -13,7 +13,7 @@ import {
   coveredAddressSet,
   isSingleCell,
 } from "@adapttable/core";
-import { coreFeatures } from "@adapttable/core/binding";
+import { coreCellNavigation } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useRef } from "react";
 
 import { asGesture } from "../editing/editHistory";
@@ -115,7 +115,7 @@ export function cellNavigation(
   options: CellNavigationOptions = {}
 ): StaticTableFeature {
   return {
-    ...coreFeatures.cellNavigation(options),
+    ...coreCellNavigation(options),
     renders: [
       slotRender(CELL_NAV_LIVE, (props) => <LiveCellNav {...props} />),
       slotRender(GRID_FOCUS_ANNOUNCER, (props) => (

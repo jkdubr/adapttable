@@ -1129,8 +1129,9 @@ export function headerSortDir(
 
 /**
  * Assembled sort, filter, pin, resize and selection state for one leaf
- * header cell. The binding turns the controller into its caption node and
- * the resize props into its own handler shape.
+ * header cell. The binding builds its caption from the sort state (see
+ * {@link columnHeaderControllerFor}) and turns the resize props into its own
+ * handler shape.
  *
  * @public
  */
@@ -1156,7 +1157,6 @@ export function desktopHeaderLeaf<
   sortActive: boolean;
   sortButtonProps: TSortProps;
   sortIndex: number | undefined;
-  controller: ColumnHeaderController;
   headerDef: FilterDef<TRow> | undefined;
   pinSide: PinOffset["side"] | undefined;
   resizeHandleProps: unknown;
@@ -1203,11 +1203,6 @@ export function desktopHeaderLeaf<
     sortActive: sortDir !== undefined,
     sortButtonProps,
     sortIndex,
-    controller: columnHeaderControllerFor(column, {
-      sortDir,
-      sortIndex,
-      toggleSort: sortButtonProps.onClick,
-    }),
     headerDef:
       ctx.headerFilters === true
         ? filterDefForColumn(ctx.filterDefs ?? [], column.key)
