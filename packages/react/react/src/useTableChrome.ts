@@ -1,7 +1,5 @@
 import {
-  aggregationModel,
   type BulkAction,
-  collectFeatureNotices,
   type ColumnGroupRecord,
   type ConfirmHandler,
   defaultConfirm,
@@ -14,12 +12,10 @@ import {
   type GroupingPanelState,
   parseGroupBy,
   type PinnedRows,
-  REORDER_COLUMN_KEY,
   resolvePinnedRows,
   responsiveColumns,
   type RowAction,
   type SortByOption,
-  sourceCapabilities,
   type TableErrorState,
   tableErrorState,
   type TableLabels,
@@ -27,12 +23,30 @@ import {
   type TreeEntry,
 } from "@adapttable/core";
 import {
+  applyFeatureNoticesAttribute,
+  chromeBodyRegion,
+  chromeEmptyVariant,
+  chromeFeatureNotices,
+  chromeIsRefreshing,
+  chromeShowFooter,
+  clearChromeFilters,
+  FilterTriggerToggleState,
+  groupingPanelState,
+  printToolbarProps,
+  rowReorderEnablement,
+  scrollResetKeys,
+  selectionObserverIds,
+  undoRedoToolbarProps,
+  viewControlsToolbarProps,
+} from "@adapttable/core/binding";
+import {
   type ReactNode,
   type RefObject,
   useCallback,
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 
 import type { ColumnDef } from "./columnDef";
@@ -509,16 +523,7 @@ export function viewControlsToolbar(
   },
   fullscreen: { supported: boolean; active: boolean; toggle: () => void }
 ): ViewControlsToolbar {
-  return {
-    density: props.density,
-    onDensityChange: props.onDensityChange,
-    ...(props.fullscreen === true && fullscreen.supported
-      ? {
-          onToggleFullscreen: fullscreen.toggle,
-          isFullscreen: fullscreen.active,
-        }
-      : {}),
-  };
+  return viewControlsToolbarProps(props, fullscreen);
 }
 
 /**
@@ -531,15 +536,7 @@ export function undoRedoToolbar<TRow>(
   history: EditHistoryState<TRow>,
   labels: TableLabels
 ): Partial<ToolbarChromeProps<TRow>> {
-  if (wanted !== true || !history.enabled) return {};
-  return {
-    onUndo: history.undo,
-    onRedo: history.redo,
-    canUndo: history.canUndo,
-    canRedo: history.canRedo,
-    undoLabel: labels.undoEdit,
-    redoLabel: labels.redoEdit,
-  };
+  return undoRedoToolbarProps(wanted, history, labels);
 }
 
 /**
@@ -572,8 +569,7 @@ export function printToolbar(
   onPrint: (() => void) | undefined,
   labels: TableLabels
 ): PrintToolbar {
-  if (wanted !== true || onPrint === undefined) return {};
-  return { onPrint, printLabel: labels.print };
+  return printToolbarProps(wanted, onPrint, labels);
 }
 
 const NO_ROW_MUTATIONS: RowMutationsState<never> = {
@@ -701,9 +697,8 @@ export function useTableChrome<TRow>(
     onSelectionChange?.(ids);
   });
   useEffect(() => {
-    if (!controlledSelection && selectedIds) {
-      notifySelectionChange([...selectedIds]);
-    }
+    const ids = selectionObserverIds(controlledSelection, selectedIds);
+    if (ids) notifySelectionChange(ids);
   }, [controlledSelection, selectedIds, notifySelectionChange]);
 
   const mergedChips = extraChips ?? [];
@@ -712,33 +707,25 @@ export function useTableChrome<TRow>(
   const isPaged = source.paginationMode === "paged";
 
   const errorState = tableErrorState(viewSource);
-  let body: TableBodyRegion;
-  if (viewSource.isLoading && viewSource.rows.length === 0) body = "skeleton";
-  else if (table.isEmpty) body = "empty";
-  else if (isMobile) body = "mobile";
-  else body = "desktop";
-
-  // Zero rows under an active search/filter is "nothing MATCHED", not
-  // "nothing exists" — the empty state should say so and offer a clear.
-  const hasSourceFilters = Object.keys(source.extra ?? {}).length > 0;
-  const emptyVariant =
-    activeFilterCount > 0 || hasSourceFilters || source.search !== ""
-      ? "noResults"
-      : "noData";
-
-  // `isFetchingNextPage` is load-more, not a refresh of what's on screen.
-  const isRefreshing = Boolean(
-    source.isFetching && !source.isLoading && !source.isFetchingNextPage
-  );
+  const body = chromeBodyRegion({
+    isLoading: viewSource.isLoading,
+    rowCount: viewSource.rows.length,
+    isEmpty: table.isEmpty,
+    isMobile,
+  });
+  const emptyVariant = chromeEmptyVariant({
+    activeFilterCount,
+    extra: source.extra,
+    search: source.search,
+  });
+  const isRefreshing = chromeIsRefreshing(source);
 
   // `onClearFilters` is a pure NOTIFICATION: the chrome always performs
   // the clear itself, then tells the host. (It used to REPLACE the clear,
   // so a logging handler silently broke the button — take full control
   // via `source.clearExtras` instead.)
   const clearFilters = useCallback(() => {
-    source.clearExtras();
-    source.setFilterTree?.(undefined);
-    onClearFilters?.();
+    clearChromeFilters(source, onClearFilters);
   }, [onClearFilters, source]);
 
   // Grouping, tree, expansion and editing hooks live on their feature
@@ -770,11 +757,11 @@ export function useTableChrome<TRow>(
   // and never carries the drag state machine at all.
   const publishedReorder = useFeatureState(ROW_REORDER) as
     RowReorderState<TRow> | undefined;
-  const requestedReorder = publishedReorder !== undefined;
-  const hasRowReorder = requestedReorder;
-  const reorderHidden = columnLayout.isHidden(REORDER_COLUMN_KEY);
-  const rowReorderEnabled = hasRowReorder && !reorderHidden;
-  const rowReorder = rowReorderEnabled ? publishedReorder : undefined;
+  const { hasRowReorder, rowReorder } = rowReorderEnablement(
+    publishedReorder,
+    columnLayout.isHidden
+  );
+  const requestedReorder = hasRowReorder;
 
   const rowPinning = undefined;
   const resolvedPinnedRows = resolvePinnedRows(props.pinnedRows);
@@ -783,10 +770,7 @@ export function useTableChrome<TRow>(
       ? resolvedPinnedRows
       : undefined;
 
-  const showFooter =
-    isPaged &&
-    !viewSource.error &&
-    (viewSource.total > 0 || viewSource.isLoading || viewSource.isFetching);
+  const showFooter = chromeShowFooter(viewSource);
 
   // What the host asked to group by, whatever composes the grouping engine.
   // The notice is the chrome's to raise: a table told to group by a key its
@@ -801,42 +785,21 @@ export function useTableChrome<TRow>(
   const groupingPanelInteractions = useFeatureState(GROUPING_PANEL_STATE);
   const groupingPanel = useMemo<GroupingPanelState | undefined>(
     () =>
-      groupingPanelInteractions
-        ? {
-            ...groupingPanelInteractions,
-            groupBy: groupByKeys,
-            aggregateOverrides: source.groupAggregateOverrides ?? {},
-            canSetAggregates:
-              source.setGroupAggregateOverrides !== undefined &&
-              (sourceCapabilities({
-                allFilteredRows: source.allFilteredRows,
-                groups: source.groups,
-                capabilities: source.capabilities,
-              }).grouping !== "server" ||
-                source.honorsAggregates === true),
-            // Built here, from the choices this very render carries. Built
-            // from a published view instead, the list would describe the
-            // render before the reader's click — which is exactly what a
-            // reader reads as the control doing nothing.
-            aggregations: aggregationModel({
-              columns: resolvedColumns,
-              overrides: source.groupAggregateOverrides ?? {},
-              declared: groupingPanelInteractions.declaredAggregates,
-              queryAggregates: source.queryAggregates,
-              source: {
-                grouping: sourceCapabilities({
-                  allFilteredRows: source.allFilteredRows,
-                  groups: source.groups,
-                  capabilities: source.capabilities,
-                }).grouping,
-                aggregateOperations:
-                  source.honorsAggregates === false
-                    ? []
-                    : source.aggregateOperations,
-              },
-            }),
-          }
-        : undefined,
+      groupingPanelState({
+        interactions: groupingPanelInteractions,
+        groupBy: groupByKeys,
+        columns: resolvedColumns,
+        source: {
+          groupAggregateOverrides: source.groupAggregateOverrides,
+          setGroupAggregateOverrides: source.setGroupAggregateOverrides,
+          allFilteredRows: source.allFilteredRows,
+          groups: source.groups,
+          capabilities: source.capabilities,
+          honorsAggregates: source.honorsAggregates,
+          queryAggregates: source.queryAggregates,
+          aggregateOperations: source.aggregateOperations,
+        },
+      }),
     [
       resolvedColumns,
       groupByKeys,
@@ -854,26 +817,29 @@ export function useTableChrome<TRow>(
 
   const featureNotices = useMemo(
     () =>
-      collectFeatureNotices({
-        virtualize: props.virtualize,
-        paginationMode: source.paginationMode,
+      chromeFeatureNotices({
+        options: {
+          virtualize: props.virtualize,
+          pinnedRowIds: props.pinnedRowIds,
+          onPinnedRowIdsChange: props.onPinnedRowIdsChange,
+          onCellEdit,
+          rowEditing: props.rowEditing,
+          onRowEdit: props.onRowEdit,
+          batchEditing: props.batchEditing,
+          onBatchEdit: props.onBatchEdit,
+          exportCsv: props.exportCsv,
+        },
+        source: {
+          paginationMode: source.paginationMode,
+          allFilteredRows: source.allFilteredRows,
+          groups: source.groups,
+          total: source.total,
+          capabilities: source.capabilities,
+        },
         groupByKeys,
-        allFilteredRows: source.allFilteredRows,
-        serverGroups: source.groups,
-        total: source.total,
-        capabilities: source.capabilities,
-        rowPinningRequested:
-          props.pinnedRowIds !== undefined ||
-          props.onPinnedRowIdsChange !== undefined,
         rowReorderRequested: requestedReorder,
         nestedArmed: groupingArmed || treeShaped,
         hasEditableColumn,
-        onCellEdit,
-        rowEditing: props.rowEditing,
-        onRowEdit: props.onRowEdit,
-        batchEditing: props.batchEditing,
-        onBatchEdit: props.onBatchEdit,
-        exportCsv: props.exportCsv,
         labels: table.labels,
       }),
     [
@@ -901,11 +867,7 @@ export function useTableChrome<TRow>(
   );
 
   useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    const value = featureNotices.map((notice) => notice.kind).join(" ");
-    if (value) el.dataset.adapttableNotices = value;
-    else delete el.dataset.adapttableNotices;
+    applyFeatureNoticesAttribute(rootRef.current, featureNotices);
   });
 
   return {
@@ -969,21 +931,13 @@ export function useChromeScrollReset<TRow>(
   chrome: TableChrome<TRow>,
   props: ComposedTableProps<TRow>
 ): void {
-  const { source } = props;
   // In infinite mode a page increment means "the window grew at the
   // bottom" (the sentinel loaded more) — yanking the reader back to the
-  // table top would fight the scroll they are mid-way through. Only paged
-  // navigation is a real page change worth resetting for.
-  const pageDep = source.paginationMode === "paged" ? source.page : 0;
+  // table top would fight the scroll they are mid-way through, so core's
+  // keys only count the page when paged.
   useScrollToTableTop({
     ref,
-    deps: [
-      source.search,
-      source.sortBy ?? "",
-      source.sortDir ?? "",
-      pageDep,
-      chrome.activeFilterCount,
-    ],
+    deps: scrollResetKeys(props.source, chrome.activeFilterCount),
     enabled: props.scrollToTopOnChange,
     offset: props.stickyTop,
     gap: props.scrollTopGap,
@@ -1021,16 +975,13 @@ export function useFilterTriggerToggle(
   open: boolean,
   setOpen: (next: boolean | ((current: boolean) => boolean)) => void
 ): FilterTriggerToggle {
-  const wasOpenAtPointerDown = useRef(false);
+  const [toggle] = useState(() => new FilterTriggerToggleState());
   return {
     onPointerDown: useCallback(() => {
-      wasOpenAtPointerDown.current = open;
-    }, [open]),
+      toggle.pointerDown(open);
+    }, [open, toggle]),
     onClick: useCallback(() => {
-      const closedByKit = wasOpenAtPointerDown.current && !open;
-      wasOpenAtPointerDown.current = false;
-      if (closedByKit) return;
-      setOpen((current) => !current);
-    }, [open, setOpen]),
+      if (toggle.click(open)) setOpen((current) => !current);
+    }, [open, setOpen, toggle]),
   };
 }

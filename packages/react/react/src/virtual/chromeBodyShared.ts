@@ -5,14 +5,18 @@
  * from these. Only {@link ./useVirtualChromeBodyData} may reach TanStack.
  */
 import {
-  DEFAULT_CARD_SIZE_PX,
-  DEFAULT_ROW_SIZE_PX,
-  estimateFromRowHeight,
   type GroupedFlatEntry,
-  partitionPinnedRows,
   type TableVirtualization,
   type TreeEntry,
 } from "@adapttable/core";
+import {
+  bodySentinelCount as coreBodySentinelCount,
+  estimateBodyItemSize as coreEstimateBodyItemSize,
+  fetchNextBodyPage,
+  hasLoadedChildren as coreHasLoadedChildren,
+  isBodyEligible as coreIsBodyEligible,
+  pinnedScrollRows,
+} from "@adapttable/core/binding";
 import { type RefCallback, type RefObject, useCallback, useMemo } from "react";
 
 export {
@@ -75,12 +79,7 @@ export function hasLoadedChildren<TRow>(
   rows: readonly TRow[],
   props: ComposedTableProps<TRow>
 ): boolean {
-  const nested = props.getChildren?.(row);
-  if (nested !== undefined) return nested.length > 0;
-  const { getParentId, rowKey } = props;
-  if (!getParentId) return false;
-  const id = rowKey(row);
-  return rows.some((candidate) => getParentId(candidate) === id);
+  return coreHasLoadedChildren(row, rows, props);
 }
 
 /**
@@ -93,12 +92,7 @@ export function hasLoadedChildren<TRow>(
  * list.
  */
 export function isBodyEligible<TRow>(chrome: TableChrome<TRow>): boolean {
-  const expanded = chrome.grouping !== undefined || chrome.tree !== undefined;
-  return (
-    (!chrome.isPaged || expanded) &&
-    !chrome.source.error &&
-    (chrome.body === "desktop" || chrome.body === "mobile")
-  );
+  return coreIsBodyEligible(chrome);
 }
 
 /** A card's height on a phone, a row's on a desktop — or `rowHeight`. */
@@ -107,32 +101,12 @@ export function estimateBodyItemSize<TRow>(
   props: ComposedTableProps<TRow>,
   scrollRows: readonly TRow[]
 ): (index: number) => number {
-  const fallback = chrome.isMobile
-    ? (props.estimateCardSize ?? DEFAULT_CARD_SIZE_PX)
-    : (props.estimateRowSize ?? DEFAULT_ROW_SIZE_PX);
-  return estimateFromRowHeight(props.rowHeight, fallback, (index) => {
-    if (chrome.grouping) {
-      const entry = chrome.grouping.entries[index];
-      if (entry?.kind === "row") return { row: entry.row, index: entry.index };
-      return undefined;
-    }
-    if (chrome.tree) {
-      const entry = chrome.tree.entries[index];
-      if (entry) return { row: entry.row, index };
-      return undefined;
-    }
-    const row = scrollRows[index];
-    return row === undefined ? undefined : { row, index };
-  });
+  return coreEstimateBodyItemSize(chrome, props, scrollRows);
 }
 
 /** How many items the infinite-scroll sentinel counts as already rendered. */
-export function bodySentinelCount<TRow>(
-  chrome: TableChrome<TRow>,
-  groupingArmed: boolean
-): number {
-  if (groupingArmed) return chrome.grouping?.entries.length ?? 0;
-  return chrome.source.rows.length;
+export function bodySentinelCount<TRow>(chrome: TableChrome<TRow>): number {
+  return coreBodySentinelCount(chrome);
 }
 
 /** Partition pinned rows and the remaining scroll list. */
@@ -146,22 +120,16 @@ export function usePinnedScrollRows<TRow>(
 } {
   const pinState = chrome.rowPinning?.state;
   const sourceRows = chrome.source.rows;
-  return useMemo(() => {
-    if (!pinState) {
-      return { top: [] as TRow[], scroll: sourceRows, bottom: [] as TRow[] };
-    }
-    return partitionPinnedRows(sourceRows, pinState, rowKey);
-  }, [pinState, rowKey, sourceRows]);
+  return useMemo(
+    () => pinnedScrollRows(sourceRows, pinState, rowKey),
+    [pinState, rowKey, sourceRows]
+  );
 }
 
 /** Fetch the next infinite page if the source still has one. */
 export function useFetchNextPage<TRow>(chrome: TableChrome<TRow>): () => void {
   const { source } = chrome;
-  return useCallback(() => {
-    if (source.hasNextPage && !source.isFetchingNextPage) {
-      source.fetchNextPage();
-    }
-  }, [source]);
+  return useCallback(() => fetchNextBodyPage(source), [source]);
 }
 
 /** Infinite-scroll sentinel used by both the plain and virtual body paths. */
@@ -170,13 +138,12 @@ export function useBodyLoadMore<TRow>(
   fetchNext: () => void,
   canLoadMore: boolean
 ): RefObject<HTMLDivElement | null> {
-  const groupingArmed = Boolean(chrome.grouping);
   const { source } = chrome;
   return useInfiniteScroll<HTMLDivElement>({
     hasNextPage: Boolean(source.hasNextPage),
     isFetchingNextPage: Boolean(source.isFetchingNextPage),
     fetchNextPage: fetchNext,
-    itemCount: bodySentinelCount(chrome, groupingArmed),
+    itemCount: bodySentinelCount(chrome),
     enabled: canLoadMore,
   });
 }

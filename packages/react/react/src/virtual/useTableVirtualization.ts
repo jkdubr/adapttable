@@ -13,12 +13,18 @@ import {
   type VirtualTableRow,
 } from "@adapttable/core";
 import {
+  asSizeEstimator,
+  EndReachedLatch,
+  keyedWindow,
+  materializeWindowRows,
+  rowWindow,
+} from "@adapttable/core/binding";
+import {
   useVirtualizer,
   useWindowVirtualizer,
   type VirtualItem,
-  type Virtualizer,
 } from "@tanstack/react-virtual";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useRowPairMeasurer } from "./measureRowPair";
 
@@ -34,32 +40,6 @@ export {
   windowGroupedEntries,
 } from "@adapttable/core";
 export { rowSourceIndex } from "@adapttable/core/binding";
-
-/** Either TanStack virtualizer — window mode or element mode. */
-type ModeVirtualizer =
-  Virtualizer<Window, Element> | Virtualizer<Element, Element>;
-
-/** Wrap a constant estimate so both virtualizer modes share one shape. */
-function asSizeEstimator(
-  estimateSize: number | ((index: number) => number)
-): (index: number) => number {
-  return typeof estimateSize === "function" ? estimateSize : () => estimateSize;
-}
-
-/**
- * Spacer height while the virtualizer is armed but has not produced a
- * window yet (null scroll element, first layout). Must not be 0: a 0-height
- * list never intersects the viewport, so the window never appears.
- */
-function pendingListSize(
-  count: number,
-  measured: number,
-  estimateSize: number | ((index: number) => number)
-): number {
-  if (measured > 0) return measured;
-  if (count === 0) return 0;
-  return count * asSizeEstimator(estimateSize)(0);
-}
 
 function asItemMeta(item: VirtualItem): VirtualItemMeta {
   return {
@@ -176,47 +156,22 @@ export function useTableVirtualizer<TRow>({
   const virtualItems = virtualizer.getVirtualItems();
   const active = enabled && virtualItems.length > 0;
   const measureRowPair = useRowPairMeasurer(virtualizer, enabled && expandable);
-  const materializedRows = useMemo<readonly VirtualTableRow<TRow>[]>(() => {
-    if (!enabled) {
-      return rows.map((row, index) => ({
-        row,
-        index,
-        key: rowKey(row),
-      }));
-    }
-    if (!active) return [];
-    return virtualItems.flatMap((virtualItem) => {
-      const row = rows[virtualItem.index];
-      if (row === undefined) return [];
-      return [
-        {
-          row,
-          index: virtualItem.index,
-          key: rowKey(row),
-          virtualItem: asItemMeta(virtualItem),
-        },
-      ];
-    });
-  }, [active, enabled, rowKey, rows, virtualItems]);
+  const items = useMemo(() => virtualItems.map(asItemMeta), [virtualItems]);
+  const materializedRows = useMemo<readonly VirtualTableRow<TRow>[]>(
+    () => materializeWindowRows(rows, rowKey, enabled, active ? items : []),
+    [active, enabled, items, rowKey, rows]
+  );
 
   // `virtualItems` is a fresh array every render, so a naive effect would call
   // `onEndReached` on every render while the last row stays in view. Notify at
   // most once per row count: re-arm only when more rows actually load (the
   // count grows) or the user scrolls back off the end.
-  const notifiedAtCount = useRef(-1);
+  const [endLatch] = useState(() => new EndReachedLatch());
   useEffect(() => {
-    if (!active || rows.length === 0) return;
-    const last = virtualItems.at(-1);
-    const atEnd = last !== undefined && last.index >= rows.length - 1;
-    if (!atEnd) {
-      notifiedAtCount.current = -1;
-      return;
-    }
-    if (notifiedAtCount.current !== rows.length) {
-      notifiedAtCount.current = rows.length;
+    if (endLatch.check(active, rows.length, virtualItems.at(-1)?.index)) {
       onEndReached?.();
     }
-  }, [active, onEndReached, rows.length, virtualItems]);
+  }, [active, endLatch, onEndReached, rows.length, virtualItems]);
 
   const scrollToIndex = useCallback(
     (index: number) => {
@@ -229,87 +184,17 @@ export function useTableVirtualizer<TRow>({
   );
 
   return {
-    virtualization: tableWindow({
+    virtualization: rowWindow({
       enabled,
-      active,
       rows: materializedRows,
       count: rows.length,
       virtualizer,
-      virtualItems,
+      items: active ? items : [],
       estimateSize,
       expandable,
       measureRowPair,
     }),
     scrollToIndex,
-  };
-}
-
-/** The window a table renders, from the virtualizer's current slice. */
-function tableWindow<TRow>({
-  enabled,
-  active,
-  rows: materializedRows,
-  count,
-  virtualizer,
-  virtualItems,
-  estimateSize,
-  expandable,
-  measureRowPair,
-}: {
-  enabled: boolean;
-  active: boolean;
-  rows: readonly VirtualTableRow<TRow>[];
-  count: number;
-  virtualizer: ModeVirtualizer;
-  virtualItems: readonly VirtualItem[];
-  estimateSize: number | ((index: number) => number);
-  expandable: boolean;
-  measureRowPair: TableVirtualization<TRow>["measureRowPair"];
-}): TableVirtualization<TRow> {
-  if (!enabled) {
-    return {
-      enabled: false,
-      rows: materializedRows,
-      paddingTop: 0,
-      paddingBottom: 0,
-    };
-  }
-
-  if (!active) {
-    // Armed but no slice yet — a phone card list with a null scroll box used
-    // to take this path and mount the whole dataset. Hold the height with a
-    // spacer so layout can produce a window; never dump every row.
-    return {
-      enabled: true,
-      rows: materializedRows,
-      paddingTop: 0,
-      paddingBottom: pendingListSize(
-        count,
-        virtualizer.getTotalSize(),
-        estimateSize
-      ),
-      measureElement: expandable ? undefined : virtualizer.measureElement,
-      measureRowPair: expandable ? measureRowPair : undefined,
-    };
-  }
-
-  // `active` guarantees a non-empty window, so the edges always exist.
-  const first = virtualItems[0]!;
-  const last = virtualItems.at(-1)!;
-  const resolvedScrollMargin = virtualizer.options.scrollMargin ?? 0;
-  const paddingTop = first.start - resolvedScrollMargin;
-  const paddingBottom =
-    virtualizer.getTotalSize() - (last.end - resolvedScrollMargin);
-
-  return {
-    enabled: true,
-    rows: materializedRows,
-    paddingTop: Math.max(0, paddingTop),
-    paddingBottom: Math.max(0, paddingBottom),
-    // A row that can expand is measured as a PAIR; one that cannot keeps the
-    // virtualizer's own element measurement, which is cheaper.
-    measureElement: expandable ? undefined : virtualizer.measureElement,
-    measureRowPair: expandable ? measureRowPair : undefined,
   };
 }
 
@@ -372,26 +257,12 @@ export function useKeyedVirtualizer(
   const virtualItems = virtualizer.getVirtualItems();
   const active = enabled && virtualItems.length > 0;
 
-  const indices = useMemo<readonly number[]>(() => {
-    if (!enabled) return keys.map((_, index) => index);
-    if (!active) return [];
-    return virtualItems.map((item) => item.index);
-  }, [active, enabled, keys, virtualItems]);
-
-  const notifiedAtCount = useRef(-1);
+  const [endLatch] = useState(() => new EndReachedLatch());
   useEffect(() => {
-    if (!active || keys.length === 0) return;
-    const last = virtualItems.at(-1);
-    const atEnd = last !== undefined && last.index >= keys.length - 1;
-    if (!atEnd) {
-      notifiedAtCount.current = -1;
-      return;
-    }
-    if (notifiedAtCount.current !== keys.length) {
-      notifiedAtCount.current = keys.length;
+    if (endLatch.check(active, keys.length, virtualItems.at(-1)?.index)) {
       onEndReached?.();
     }
-  }, [active, onEndReached, keys.length, virtualItems]);
+  }, [active, endLatch, onEndReached, keys.length, virtualItems]);
 
   const scrollToIndex = useCallback(
     (index: number) => {
@@ -406,65 +277,11 @@ export function useKeyedVirtualizer(
   return {
     virtualization: keyedWindow({
       enabled,
-      active,
-      indices,
       count: keys.length,
       virtualizer,
-      virtualItems,
+      items: active ? virtualItems.map(asItemMeta) : [],
       estimateSize,
     }),
     scrollToIndex,
-  };
-}
-
-/** The window a keyed list renders, from the virtualizer's current slice. */
-function keyedWindow({
-  enabled,
-  active,
-  indices,
-  count,
-  virtualizer,
-  virtualItems,
-  estimateSize,
-}: {
-  enabled: boolean;
-  active: boolean;
-  indices: readonly number[];
-  count: number;
-  virtualizer: ModeVirtualizer;
-  virtualItems: readonly VirtualItem[];
-  estimateSize: number | ((index: number) => number);
-}): KeyedVirtualization {
-  if (!enabled) {
-    return { enabled: false, indices, paddingTop: 0, paddingBottom: 0 };
-  }
-
-  if (!active) {
-    return {
-      enabled: true,
-      indices,
-      paddingTop: 0,
-      paddingBottom: pendingListSize(
-        count,
-        virtualizer.getTotalSize(),
-        estimateSize
-      ),
-      measureElement: virtualizer.measureElement,
-    };
-  }
-
-  const first = virtualItems[0]!;
-  const last = virtualItems.at(-1)!;
-  const resolvedScrollMargin = virtualizer.options.scrollMargin ?? 0;
-  const paddingTop = first.start - resolvedScrollMargin;
-  const paddingBottom =
-    virtualizer.getTotalSize() - (last.end - resolvedScrollMargin);
-
-  return {
-    enabled: true,
-    indices,
-    paddingTop: Math.max(0, paddingTop),
-    paddingBottom: Math.max(0, paddingBottom),
-    measureElement: virtualizer.measureElement,
   };
 }

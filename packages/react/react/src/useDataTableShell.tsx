@@ -21,6 +21,12 @@ import {
   type VirtualTableRow,
 } from "@adapttable/core";
 import {
+  cardSetSize,
+  finishShellBody,
+  sortedColumnName,
+  sourceWindowStart,
+} from "@adapttable/core/binding";
+import {
   type ReactNode,
   type RefCallback,
   type RefObject,
@@ -438,10 +444,7 @@ export function useDataTableShell<TRow>(
   // slice begins, so Ctrl+End reaches the real last row and the ARIA counts stay
   // truthful under virtualization. Derived here so no adapter has to know: an
   // off-by-a-page error is invisible on screen and only wrong to a screen reader.
-  const windowStart =
-    chrome.source.paginationMode === "paged"
-      ? Math.max(0, (chrome.source.page - 1) * chrome.source.limit)
-      : 0;
+  const windowStart = sourceWindowStart(chrome.source);
   const find = DISABLED_FIND;
   const scrollBoxElement = useRef<HTMLElement | null>(null);
   const columnWindow = disabledColumnWindow(chrome.columnLayout.visibleColumns);
@@ -527,10 +530,7 @@ export function useDataTableShell<TRow>(
     // Rows in the whole dataset, for the card list's `aria-setsize`. A card
     // list is a real <ul>, so a windowed one states its size the way a list
     // does — per item — rather than through the table's `aria-rowcount`.
-    cardSetSize: Math.max(
-      chrome.source.total,
-      windowStart + chrome.source.rows.length
-    ),
+    cardSetSize: cardSetSize(chrome.source, windowStart),
     confirm,
     getRowId,
     rowEntries: undefined as readonly VirtualTableRow<TRow>[] | undefined,
@@ -624,9 +624,6 @@ export function useDataTableShell<TRow>(
   // What the table says out loud when sorting, filtering or paging rewrites the
   // body. Derived from the SETTLED source rather than from the controls, which
   // is what keeps a filter being typed from announcing once per keystroke.
-  const sortedColumn = chrome.columnLayout.visibleColumns.find(
-    (column) => column.key === chrome.source.sortBy
-  );
   const statusAnnouncement = useTableStatusAnnouncement({
     labels,
     total: chrome.source.total,
@@ -636,10 +633,10 @@ export function useDataTableShell<TRow>(
     paged: chrome.source.paginationMode === "paged",
     sortBy: chrome.source.sortBy,
     sortDir: chrome.source.sortDir,
-    sortColumnName:
-      typeof sortedColumn?.header === "string"
-        ? sortedColumn.header
-        : sortedColumn?.key,
+    sortColumnName: sortedColumnName(
+      chrome.columnLayout.visibleColumns,
+      chrome.source.sortBy
+    ),
   });
 
   return {
@@ -711,44 +708,17 @@ export function finishDataTableShell<TRow>(
   shell: DataTableShellResult<TRow>,
   body: ChromeBodyData<TRow>
 ): DataTableShellResult<TRow> {
-  const virtualScrollRef: RefCallback<HTMLElement> = (node) => {
-    shell.tableProps.virtualScrollRef(node);
-    body.virtualScrollRef(node);
-  };
-  const grouping =
-    shell.chrome.grouping && body.groupingEntries
-      ? { ...shell.chrome.grouping, entries: body.groupingEntries }
-      : shell.chrome.grouping;
-  const tree =
-    shell.chrome.tree && body.treeEntries
-      ? { ...shell.chrome.tree, entries: body.treeEntries }
-      : shell.chrome.tree;
-  return {
-    ...shell,
-    loadMoreRef: body.loadMoreRef,
-    canLoadMore: body.canLoadMore,
-    tableProps: {
-      ...shell.tableProps,
-      pinnedTopRows: body.pinnedTopRows,
-      pinnedBottomRows: body.pinnedBottomRows,
-      pinnedSummaryTop: body.pinnedSummaryTop,
-      pinnedSummaryBottom: body.pinnedSummaryBottom,
-      rowEntries: body.virtualization.enabled
-        ? body.virtualization.rows
-        : undefined,
-      paddingTop: body.virtualization.paddingTop,
-      paddingBottom: body.virtualization.paddingBottom,
-      measureElement: body.virtualization.measureElement,
-      measureRowPair: body.virtualization.measureRowPair,
-      columnWindow: body.columnWindow ?? shell.tableProps.columnWindow,
-      grouping,
-      tree,
-      virtualScrollRef,
-    },
-    toolbarProps: {
-      ...shell.toolbarProps,
-      showRowsPerPage: body.canLoadMore && !shell.chrome.grouping,
-    },
+  return finishShellBody(shell, body, composeScrollRefs);
+}
+
+/** One scroll callback that names the box for the shell, then the body. */
+function composeScrollRefs(
+  first: RefCallback<HTMLElement>,
+  second: RefCallback<HTMLElement>
+): RefCallback<HTMLElement> {
+  return (node) => {
+    first(node);
+    second(node);
   };
 }
 
