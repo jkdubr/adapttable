@@ -1,3 +1,4 @@
+import { resolveEditableCellDisplay } from "@adapttable/core";
 import { createElement, type ReactNode } from "react";
 
 import type { BatchRowEdit } from "../editing/batchEditing";
@@ -115,15 +116,13 @@ function withResolvedDisplay(
   Cell: AdapterFeatureComponent<EditableCellRenderProps<never>>
 ): AdapterFeatureComponent<EditableCellSlotProps<never>> {
   return function EditableCellWithDisplay(props) {
-    const column = props.column;
-    const display =
-      props.display ??
-      (column.Cell
-        ? createElement(column.Cell, {
-            row: props.row,
-            rowIndex: props.rowIndex,
-          })
-        : column.accessor?.(props.row));
+    const display = resolveEditableCellDisplay(
+      props.display,
+      props.column,
+      (Cell) =>
+        createElement(Cell, { row: props.row, rowIndex: props.rowIndex }),
+      props.row
+    );
     return createElement(Cell, { ...props, display });
   };
 }

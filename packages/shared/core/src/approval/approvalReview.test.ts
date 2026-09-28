@@ -3,8 +3,8 @@
  */
 import { describe, expect, it } from "vitest";
 
-import type { AgentApprovalPending } from "./AgentApprovalChrome";
 import { approvalReview } from "./approvalReview";
+import type { AgentApprovalPending } from "./types";
 
 function pending(
   patch: Partial<AgentApprovalPending> = {}

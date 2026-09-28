@@ -140,11 +140,16 @@ export {
   isColumnGroupSummaryKey,
   toggleCollapsedColumnGroup,
 } from "./columns/headerGroups";
+export type { BatchEditingState } from "./editing/batchEditing";
 export type {
   EditableCellActivateProps,
   EditableCellButtonProps,
   EditableCellSlots,
 } from "./editing/editableCellContract";
+export type {
+  RowEditConflict,
+  RowEditControlsOptions,
+} from "./editing/editingGate";
 export type {
   MultiSelectEditorCheckboxProps,
   MultiSelectEditorSlots,
@@ -153,16 +158,12 @@ export type {
   BatchEditBarProps,
   BatchEditBarSlots,
   BatchEditButtonProps,
-  BatchEditingState,
   RowEditActionsProps,
   RowEditActionsSlots,
   RowEditButtonProps,
-  RowEditConflict,
-  RowEditControlsOptions,
-  RowEditDrafts,
   RowEditIcons,
-  RowEditingState,
 } from "./editing/rowEditContract";
+export type { RowEditDrafts, RowEditingState } from "./editing/rowEditing";
 export type {
   ExportProgressAction,
   ExportProgressChromeProps,
@@ -401,6 +402,7 @@ export {
   virtualListElement,
 } from "./layout/chromeModel";
 export {
+  type AssemblyFns,
   bodyCellsHaveRowSpan,
   cellsForRow,
   extraHostFillStyle,
@@ -433,6 +435,11 @@ export type {
   PivotZoneProps,
 } from "./pivot/pivotPanelContract";
 export { type BodyCell, cellSpanMark } from "./rows/cellSpan";
+export {
+  type CellSpanRequest,
+  type GetCellSpan,
+  type GetCellSpanArgs,
+} from "./rows/cellSpan";
 export {
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
@@ -557,6 +564,7 @@ export type {
   ColumnMenuSlotProps,
   PinnedSide,
 } from "./columns/columnMenuModel";
+export type { ColumnResizeHandleProps } from "./columns/columnResize";
 export type {
   ColumnGroupDef,
   ColumnGroupRecord,
@@ -605,6 +613,53 @@ export type {
   FetchAllExport,
 } from "./export/tableCsv";
 export type { ExportQuery } from "./export/tableCsv";
+export {
+  coreBatchEditing,
+  coreBulkActions,
+  coreCellNavigation,
+  coreCellSpan,
+  coreCollapsibleColumnGroups,
+  coreColumnMenu,
+  coreColumnSelectionCheckbox,
+  coreCommandPalette,
+  coreContextMenu,
+  coreDensityChooser,
+  coreDirtyIndicators,
+  coreEditHistory,
+  coreEditing,
+  coreExportCsv,
+  coreExtraRows,
+  type CoreFeature,
+  coreFeature,
+  type CoreFeatureRegistrar,
+  coreFilters,
+  coreFilterTypes,
+  coreFindInTable,
+  coreFitColumns,
+  coreFullscreen,
+  coreGrouping,
+  coreGroupingPanel,
+  coreHeaderFilters,
+  coreMultiSort,
+  coreNestedTable,
+  corePinnedSummaryRows,
+  corePrint,
+  coreResizableColumns,
+  coreRowActions,
+  coreRowAppearance,
+  coreRowDetail,
+  coreRowEditing,
+  type CoreRowFeatureRegistrar,
+  coreRowPinning,
+  coreSavedViews,
+  coreSelectionStats,
+  coreSidePanel,
+  coreStatusBar,
+  coreTree,
+  coreUndoRedoButtons,
+  coreVirtualize,
+  type VirtualizeInput,
+} from "./features/coreFeatures";
 export type {
   ColumnMenuActionFactory,
   ContextMenuItemsFactory,
@@ -612,6 +667,21 @@ export type {
   FilterTypeExtend,
   SidePanelEntry,
 } from "./features/currentHost";
+export {
+  applyTableFeatures,
+  type FeatureApplyInput,
+  type FeaturePatch,
+  getAppliedFeatures,
+  mergeFeaturePatches,
+  type PatchFeature,
+  rememberAppliedFeatures,
+} from "./features/featurePatch";
+export type { FeatureRegistration } from "./features/featureRegistration";
+export {
+  type CoreStandardFeatureFactories,
+  type CoreStandardFeatureOptions,
+  standardFeatureList,
+} from "./features/standardPreset";
 export type { ChecklistValue } from "./filters/checklistValues";
 export type { FacetCounts, FacetMap } from "./filters/facets";
 export type { FilterRuntime } from "./filters/filterDefs";
@@ -661,15 +731,84 @@ export type {
   RowGroupLevel,
   RowGroupRef,
 } from "./grouping/groupRows";
+export {
+  absoluteColumnIndex,
+  columnHeaderControllerFor,
+  DESKTOP_ROW_WIRING_KEYS,
+  desktopBodySlots,
+  type DesktopBodySlotsInput,
+  desktopEdgeBodyStyle,
+  desktopEdgeHeadStyle,
+  desktopHeadCellStyle,
+  desktopHeaderLeaf,
+  type DesktopHeaderLeafContext,
+  desktopPinEdges,
+  desktopRowDomProps,
+  type DesktopRowPinPart,
+  desktopRowWiring,
+  type DesktopRowWiringArgs,
+  type DesktopRowWiringContext,
+  desktopRowWiringEqual,
+  type DesktopRowWiringModel,
+  type DesktopStickyPlan,
+  desktopStickyPlan,
+  desktopTableStyle,
+  headerSortDir,
+  type LeafColumn,
+  type LeafSortProps,
+  type WiringReorder,
+} from "./layout/desktopAssembly";
+export {
+  cellNavigationInput,
+  CHROME_EXTRA_SLOT_ORDER,
+  exportPageOnly,
+  finishShellBody,
+  finishShellLive,
+  liveColumnLayout,
+  livePinning,
+  type OverlayChrome,
+  overlayChromeExtras,
+  type PipelineShell,
+  printToolbarProps,
+  readableRowLabel,
+  renderedRowsOf,
+  type RuntimeChromeInput,
+  type RuntimeColumn,
+  SHELL_LIVE_STAGE_ORDER,
+  type ShellBodyInput,
+  type ShellLiveStageId,
+  TableRuntimePublisher,
+  tableRuntimeView,
+  undoRedoToolbarProps,
+  viewControlsToolbarProps,
+} from "./layout/shellPipeline";
+export {
+  applyFeatureNoticesAttribute,
+  cardSetSize,
+  type ChromeBodyRegion,
+  chromeBodyRegion,
+  chromeEmptyVariant,
+  chromeFeatureNotices,
+  type ChromeFeatureNoticesInput,
+  chromeIsRefreshing,
+  chromeShowFooter,
+  clearChromeFilters,
+  featureNoticesAttribute,
+  FilterTriggerToggleState,
+  groupingPanelState,
+  rowReorderEnablement,
+  scrollResetKeys,
+  selectionObserverIds,
+  sortedColumnName,
+} from "./layout/tableChromeState";
 export type { PivotField, PivotZone } from "./pivot/pivotConfigModel";
 export type { PivotConfig } from "./pivot/pivotModel";
 export type { PivotMeasure } from "./pivot/pivotModel";
 export type { CellSpanAppearance } from "./rows/cellSpan";
-export type { GetCellSpan } from "./rows/cellSpan";
-export type { CellSpanRequest, GetCellSpanArgs } from "./rows/cellSpan";
 export type { ExtraEntry, ExtraRow, ExtraRowKind } from "./rows/extraRows";
 export type { IncrementalViewConfig } from "./rows/incremental";
 export type { RowPinLookup, RowPinSide } from "./rows/rowPinModel";
+export type { RowPinState } from "./rows/rowPinModel";
 export type { RowReorderLabels } from "./rows/rowReorderEngine";
 export { ROW_DND_MIME } from "./rows/rowReorderEngine";
 export type { RowReorderDigest } from "./rows/rowReorderModel";
@@ -691,6 +830,7 @@ export type { QueryGroupRow } from "./source/queryGroups";
 export type { TableSource } from "./source/TableSource";
 export type { FeatureNotice, FeatureNoticeKind } from "./state/featureNotices";
 export type { FeatureNoticeAppearance } from "./state/featureNotices";
+export type { CollectFeatureNoticesInput } from "./state/featureNotices";
 export {
   cellHighlightKind,
   cellHighlightStyle,
@@ -748,6 +888,7 @@ export type {
   ApprovalPresentation,
   BulkAction,
   BulkActionContext,
+  ColumnHeaderController,
   ColumnMetadata,
   Direction,
   ResolvedPaginationMode,
@@ -756,7 +897,41 @@ export type {
 } from "./types";
 export type { SavedView } from "./url/savedViewsController";
 export type { SavedViewVisibility } from "./url/savedViewsController";
+export {
+  asSizeEstimator,
+  bodyCanLoadMore,
+  type BodyChrome,
+  bodySentinelCount,
+  type BodyWindowKind,
+  bodyWindowKind,
+  type ChromeRenderModel,
+  chromeRenderModel,
+  type ChromeRenderModelInput,
+  type ColumnViewport,
+  type ColumnWindowPlan,
+  columnWindowPlan,
+  EndReachedLatch,
+  estimateBodyItemSize,
+  fetchNextBodyPage,
+  hasLoadedChildren,
+  isBodyEligible,
+  keyedWindow,
+  materializeWindowRows,
+  pendingListSize,
+  pinnedScrollRows,
+  readColumnViewport,
+  resolveBodyVirtualization,
+  RowPairMeasureController,
+  rowScrollTarget,
+  rowWindow,
+  SummaryCellsCache,
+  virtualizeIgnoredOnPage,
+  type WindowVirtualizer,
+  withSourceIndices,
+} from "./virtual/bodyWindow";
 export type {
+  KeyedVirtualization,
+  TableVirtualization,
   VirtualItemMeta,
   VirtualTableRow,
 } from "./virtual/virtualTableModel";

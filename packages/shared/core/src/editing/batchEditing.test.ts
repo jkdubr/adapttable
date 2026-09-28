@@ -5,11 +5,31 @@
  * saves, and what arrives then is every pending row at once. So the rules that
  * matter are about what counts as pending, and what the one call contains.
  */
-import type { EditableColumnLike } from "@adapttable/core";
-import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { useBatchEditing } from "./batchEditing";
+import {
+  batchEditingView,
+  type BatchEditStoreOptions,
+  createBatchEditStore,
+} from "./batchEditing";
+import type { EditableColumnLike } from "./cellEditing";
+
+/** The store, read the way a binding reads it after every change. */
+function mountBatchEditing<TRow>(options: BatchEditStoreOptions<TRow>) {
+  const store = createBatchEditStore(options);
+  return {
+    result: {
+      get current() {
+        return batchEditingView(store, store.getSnapshot(), options);
+      },
+    },
+  };
+}
+
+/** Run a gesture; a store settles synchronously, so there is nothing to flush. */
+function act(gesture: () => void): void {
+  gesture();
+}
 
 interface Task {
   id: string;
@@ -31,13 +51,11 @@ const setup = (over?: {
   onBatchEdit?: (edits: readonly unknown[]) => unknown;
   columns?: EditableColumnLike<Task>[];
 }) =>
-  renderHook(() =>
-    useBatchEditing<Task>({
-      enabled: over?.enabled ?? true,
-      columns: over?.columns ?? COLUMNS,
-      onBatchEdit: over?.onBatchEdit,
-    })
-  );
+  mountBatchEditing<Task>({
+    enabled: over?.enabled ?? true,
+    columns: over?.columns ?? COLUMNS,
+    onBatchEdit: over?.onBatchEdit,
+  });
 
 describe("useBatchEditing", () => {
   it("does nothing until the host arms it", () => {
@@ -214,16 +232,14 @@ describe("useBatchEditing", () => {
     const onEditCommit = vi.fn();
     const onEditCancel = vi.fn();
     const onBatchEdit = vi.fn();
-    const { result } = renderHook(() =>
-      useBatchEditing<Task>({
-        enabled: true,
-        columns: COLUMNS,
-        onBatchEdit,
-        onEditStart,
-        onEditCommit,
-        onEditCancel,
-      })
-    );
+    const { result } = mountBatchEditing<Task>({
+      enabled: true,
+      columns: COLUMNS,
+      onBatchEdit,
+      onEditStart,
+      onEditCommit,
+      onEditCancel,
+    });
     act(() => {
       result.current.setDraft(ROWS[0]!, "1", "title", "Ship it");
     });
@@ -322,5 +338,28 @@ describe("an incoming row under a pending batch", () => {
       result.current.takeSeeds(ARRIVED, "1", ["title"]);
     });
     expect(result.current.pending).toBe(false);
+  });
+});
+
+describe("createBatchEditStore — options", () => {
+  it("reads its options at the moment it acts", () => {
+    const onBatchEdit = vi.fn();
+    const store = createBatchEditStore<Task>({ columns: COLUMNS });
+    store.setDraft(ROWS[0]!, "1", "title", "Ship it");
+    expect(store.getSnapshot().entries).toEqual([]);
+    store.configure({ enabled: true, columns: COLUMNS, onBatchEdit });
+    store.setDraft(ROWS[0]!, "1", "title", "Ship it");
+    store.setDraft(ROWS[0]!, "1", "points", "8");
+    // A column the table no longer has sends nothing and seeds nothing.
+    store.configure({
+      enabled: true,
+      columns: COLUMNS.filter((column) => column.key !== "points"),
+      onBatchEdit,
+    });
+    store.acceptSeeds(ROWS[0]!, "1", ["points"]);
+    store.saveAll();
+    expect(onBatchEdit).toHaveBeenCalledWith([
+      { row: ROWS[0], rowId: "1", patch: { title: "Ship it" } },
+    ]);
   });
 });

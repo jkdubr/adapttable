@@ -664,6 +664,44 @@ Framework-free — see [concepts](./concepts.md#the-engine-and-why-it-has-no-rea
   on it. `resolvePaginationMode(mode, isMobile)` turns `"auto"` into
   `"infinite"` on mobile and `"paged"` elsewhere; `defaultSearchText` and
   `defaultFrontendRowId` are the defaults a source uses.
+- `createServerSource()` — the server tier as a `ServerSource`: call
+  `update(config, view)` with the host's last answer and request settings
+  (`ServerSourceConfig`) and the view-state store's snapshot and `setPage`
+  (`ServerSourceViewState`) to read a `ServerSourceFrame` — the query and its
+  key, the rows to show (appended pages included), `isLoading`,
+  `isFetchingNextPage`, `hasNextPage` and the aggregate operations on screen.
+  `commit()` once the frame is on screen sends a changed query (aborting the
+  one it supersedes), latches the first load, clamps a page past the end and
+  records the cursor the host returned; `setPage`, `fetchNextPage` and
+  `refetch` are the source's own actions, `subscribe` / `revision` report when
+  its state moved, and `dispose()` aborts the request in flight.
+  `useServerData` runs on it.
+- `createQuerySource()` — the query-library tier as a `QuerySource`: call
+  `params(config, view)` with the host's `QuerySourceConfig` and the
+  view-state store's snapshot for the params to hand the library (the same
+  inputs give the same object), then `update(answer)` with the library's
+  result (`QuerySourceAnswer`) to read a `QuerySourceFrame` — the rows (the
+  last page when paged, every page so far when infinite), `total`, `facets`,
+  the append flags and the aggregate operations on screen. `commit()` once the
+  frame is on screen records the cursor, restarts a stale trail from page 1,
+  and clamps a page past the end; `fetchNextPage` and `refetch` drive the
+  library. `useQuerySource` runs on it.
+- `cursorTrailKey(query)` — what a cursor token's position depends on: limit,
+  search, sort, grouping, aggregate overrides, filters and the filter tree. A
+  change to any of it restarts the trail in both server tiers.
+- `createTableData()` — the table data controller as a `TableData`: `plan`
+  a `TableDataConfig` (the data props plus the filter engine, when composed)
+  into a `TableDataPlan` — the tier, the merged filter runtime, the combined
+  predicate, the tree predicate and the facet keys a server query asks for;
+  `finish({ resolved, frontend })` adds facet counts computed from the
+  searched rows when nothing answered them; `commit()` tells a
+  `mode="frontend"` table's `onQueryChange` about each change (never the
+  mount), `loadOptions()` loads each filter's own option list once, and
+  `dispose()` aborts a notification in flight. `useTableData` runs on it.
+- `ResponseAggregateOps` / `ResponseAggregateOpsInput` /
+  `createResponseAggregateOps` — which aggregate
+  operations the rows on screen were computed with: `remember` each request's
+  operations, `settle` from the response's provenance, read `current()`.
 
 ### Controllable stores
 
@@ -695,6 +733,62 @@ EditValidationStore` — cell then row validation, with superseded checks
   gestures; `DEFAULT_EDIT_HISTORY_DEPTH` is the depth a host that sets none
   keeps. `EditHistorySnapshot`,
   `editHistoryEntry`, `cellsOfBatch`.
+- `createEditHistory(options: EditHistoryControllerOptions):
+EditHistoryController` — the history a table runs: records a gesture with
+  each cell's value before it changed and replays undo and redo through the
+  host's `CellEditHandler`. `editHistoryView` (`EditHistoryState`),
+  `resolveEditHistory` reads the `editHistory` prop, and `recordingCellEdit`
+  wraps the channel so each inline commit is one gesture.
+- `createEditConflictStore(): EditConflictStore` — the live-update
+  reconciler for the open cell, an open row form and a batch
+  (`ReconcileLiveEdit`, `ReconcileLiveRowEdit`, `ReconcileLiveBatchEdit`): a
+  field the reader never typed in takes what arrived, the rest follow
+  `onEditConflict` or the policy, and "ask" holds the question.
+  `EditConflictSnapshot`, `ContestedEditCell`, `contestedCellKey`,
+  `isCellInConflict`, `isRowContested`, `contestedRowSignature`,
+  `editConflictView` (`EditConflictState`), `liveRowChanged`,
+  `resolveConflictChoice`.
+- `createRowEditStore(options: RowEditStoreOptions): RowEditStore` — a row
+  edited as one form: seeds, drafts, one patch on save, and the seeds a live
+  update moves. `RowEditSnapshot`, `RowEditDrafts`, `rowEditSignature`,
+  `rowEditingView` (`RowEditingState`), `parseColumnDraft`.
+- `createBatchEditStore(options: BatchEditStoreOptions): BatchEditStore` —
+  many rows held and saved in one list. `BatchEditSnapshot`,
+  `BatchPendingDrafts`, `BatchEditEntry`, `batchEditingView`
+  (`BatchEditingState`).
+- `createDirtyCellStore(options: DirtyCellStoreOptions): DirtyCellStore` —
+  cells changed and not yet confirmed. `DirtyCellSnapshot`, `dirtyCellKey`,
+  `dirtyCellView` (`DirtyCellState`), and `dirtyMarkerView`, which keeps the
+  count but draws no marks when the host did not ask for them.
+- `cellEditingView` (`CellEditingState`), `editValidationView`
+  (`EditValidationState`) and `cellSaveView` (`CellSaveState`) — the state a
+  binding hands its cells, read off the session, validation and save
+  snapshots.
+- `editableCellController(options)` — one cell's commit pipeline over an
+  `EditingBundle` (with `EditConflictLabels`): the validation gate, the hold
+  while an async check decides, the send to the host, the save it watches,
+  dirty marks and the step to the next cell. `EditableCellController`,
+  `EditableCellMode`, `beginCellEdit`, `stopCellEditKeyboard`,
+  `focusEditorOnMount`.
+- The rules every binding draws the same: `resolveEditingArming`
+  (`EditingArmingProps`, `EditingArming`) — which units the props arm;
+  `editableCellPresentation` (`EditableCellPresentation`) — batch, then an
+  open row form, then the cell; `isEditActivateKey`, `editorKeyRestoresFocus`,
+  `stopEditKeys`, `handleRowEditorKey` and `rowEditSaveBlocked` — the keys;
+  `isFirstEditableColumn` — the field a row form focuses;
+  `editableCellErrorId`, `rowEditErrorId`, `batchEditErrorId`,
+  `editorValidationProps` and `editorBusyProps` (`EditorAriaState`) — ids and
+  ARIA; `editorSelectOptions`, `resolveEditableCellDisplay`;
+  `cellConflictAsk`, `controllerConflictAsk`, `customEditorConflict`
+  (`CellConflictAsk`) and `rowEditConflict` (`RowEditConflict`) — the
+  conflict questions; `resolveRowEditTrigger` (`RowEditTrigger`),
+  `rowEditControls` (`RowEditControls`, `RowEditControlsOptions`) and
+  `rowEditActionsLayout` (`RowEditActionsLayout`) — the row's controls;
+  `batchEditBarModel` (`BatchEditBarModel`) and `defaultPendingRows` — the
+  batch bar.
+- `approvalReview(pending, labels)` — the model every approval surface
+  reads: tallies, the first `APPROVAL_PREVIEW_LIMIT` changes and the summary
+  labels. `ApprovalReview`, `ApprovalReviewItem`.
 
 ### Grid focus
 
@@ -811,6 +905,64 @@ CommandPaletteController` — the palette's open state, controlled or its own.
   into a kit's cell style, with `CURRENT_MATCH_CELL_STYLE`,
   `MATCHED_CELL_STYLE` and `SELECTED_CELL_OUTLINE`, and `mergedCellStyle`
   (`MergedCellStyle`).
+
+#### Chrome orchestration
+
+Every binding assembles a table the same way; these are the decisions it
+shares, so a new binding calls them rather than re-deriving them.
+
+- **Feature patch layer.** `applyTableFeatures` merges each feature's `apply`
+  patch into the table's props: later features win, `assembly` is merged one
+  level deep, host props win, and a second call is a no-op.
+  `mergeFeaturePatches`, `getAppliedFeatures` and `rememberAppliedFeatures`
+  are its parts. `FeaturePatch`, `PatchFeature`, `CoreFeature`,
+  `CoreFeatureRegistrar`, `CoreRowFeatureRegistrar` and `VirtualizeInput` are
+  the types. Each built-in factory's id and option normalization is its own export, named `core` plus the factory: `coreFeature`, `coreCellSpan`, `coreExtraRows`, `corePinnedSummaryRows`, `coreRowAppearance`, `coreColumnMenu`, `coreResizableColumns`, `coreCollapsibleColumnGroups`, `coreCommandPalette`, `coreContextMenu`, `coreSidePanel`, `coreBulkActions`, `coreFilterTypes`, `coreHeaderFilters`, `coreSavedViews`, `corePrint`, `coreStatusBar`, `coreUndoRedoButtons`, `coreMultiSort`, `coreFitColumns`, `coreColumnSelectionCheckbox`, `coreCellNavigation`, `coreDensityChooser`, `coreEditHistory`, `coreEditing`, `coreRowEditing`, `coreBatchEditing`, `coreDirtyIndicators`, `coreExportCsv`, `coreFilters`, `coreFindInTable`, `coreFullscreen`, `coreGrouping`, `coreGroupingPanel`, `coreRowActions`, `coreRowDetail`, `coreNestedTable`, `coreRowPinning`, `coreSelectionStats`, `coreTree`, `coreVirtualize`. They are separate functions so a table bundles only the features it uses; a binding spreads one and adds what it draws.
+- **Standard preset.** `standardFeatureList` (`CoreStandardFeatureFactories`,
+  `CoreStandardFeatureOptions`) builds the preset's members in order from the
+  binding's own factories.
+- **Shell pipeline.** `CHROME_EXTRA_SLOT_ORDER` and `SHELL_LIVE_STAGE_ORDER`
+  (`ShellLiveStageId`) fix the order of the extra slots and live stages.
+  `TableRuntimePublisher` projects the chrome into the runtime view through
+  `tableRuntimeView`, `renderedRowsOf`, `readableRowLabel`,
+  `liveColumnLayout` and `livePinning` (`RuntimeChromeInput`,
+  `RuntimeColumn`). `cellNavigationInput`, `exportPageOnly`,
+  `viewControlsToolbarProps`, `undoRedoToolbarProps` and `printToolbarProps`
+  build the live stages' inputs. `finishShellLive`, `overlayChromeExtras` and
+  `finishShellBody` (`PipelineShell`, `OverlayChrome`, `ShellBodyInput`)
+  finish the shell.
+- **Table chrome state.** `chromeBodyRegion` (`ChromeBodyRegion`),
+  `chromeEmptyVariant`, `chromeIsRefreshing`, `chromeShowFooter`,
+  `clearChromeFilters`, `selectionObserverIds`, `rowReorderEnablement`,
+  `groupingPanelState`, `chromeFeatureNotices` (`ChromeFeatureNoticesInput`),
+  `featureNoticesAttribute`, `applyFeatureNoticesAttribute`,
+  `FilterTriggerToggleState`, `scrollResetKeys`, `cardSetSize` and
+  `sortedColumnName` — what the frame shows before a kit draws it.
+- **Desktop assembly.** `desktopRowWiring` (`DesktopRowWiringContext`,
+  `DesktopRowWiringArgs`, `DesktopRowWiringModel`, `WiringReorder`,
+  `DesktopRowPinPart`) and `desktopRowDomProps` wire one row;
+  `desktopRowWiringEqual` over `DESKTOP_ROW_WIRING_KEYS` is its memo policy.
+  `desktopBodySlots` (`DesktopBodySlotsInput`) orders the body: summaries top,
+  pinned top, the top spacer, the rows with their extras, the bottom spacer,
+  pinned bottom, summaries bottom. `desktopStickyPlan` (`DesktopStickyPlan`),
+  `desktopPinEdges`, `desktopHeadCellStyle`, `desktopEdgeHeadStyle`,
+  `desktopEdgeBodyStyle` and `desktopTableStyle` are the sticky, pin and
+  min-width rules. `desktopHeaderLeaf` (`DesktopHeaderLeafContext`,
+  `LeafColumn`, `LeafSortProps`), `columnHeaderControllerFor`,
+  `headerSortDir` and `absoluteColumnIndex` assemble a header cell.
+- **Body windows.** `chromeRenderModel` (`ChromeRenderModel`,
+  `ChromeRenderModelInput`) and `SummaryCellsCache` build what the body
+  renders. `isBodyEligible`, `virtualizeIgnoredOnPage`,
+  `estimateBodyItemSize`, `bodySentinelCount`, `bodyCanLoadMore`,
+  `fetchNextBodyPage`, `pinnedScrollRows`, `hasLoadedChildren`,
+  `bodyWindowKind` (`BodyWindowKind`, `BodyChrome`),
+  `resolveBodyVirtualization`, `withSourceIndices` and `rowScrollTarget` plan
+  which window is armed. `WindowVirtualizer`, `asSizeEstimator`,
+  `pendingListSize`, `materializeWindowRows`, `rowWindow`, `keyedWindow` and
+  `EndReachedLatch` are the window math over any virtualizer.
+  `readColumnViewport` and `columnWindowPlan` (`ColumnViewport`,
+  `ColumnWindowPlan`) window the columns; `RowPairMeasureController`
+  measures a row with its open detail panel.
 
 ### The builder tier
 

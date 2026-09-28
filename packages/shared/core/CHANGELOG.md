@@ -1,5 +1,12 @@
 # @adapttable/core
 
+## 3.6.0
+
+### Minor Changes
+
+- 6bec4e8: Framework-neutral controllers for the server and query-library tiers, the table data controller, the editing pipeline, table assembly and the assistant panel's view model (`createServerSource`, `createQuerySource`, `createTableData`, `createEditHistory`, `applyTableFeatures` and the rest). `@adapttable/angular` is built on them.
+- 6bec4e8: Both server tiers restart the cursor trail on the same inputs, sort levels, grouping and the filter tree included (`cursorTrailKey`).
+
 ## 3.5.0
 
 ### Minor Changes

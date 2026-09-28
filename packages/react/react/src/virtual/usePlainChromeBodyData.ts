@@ -5,6 +5,7 @@
  * {@link ./useVirtualChromeBodyData} and is mounted only by the virtualize
  * feature's in-tree body.
  */
+import { bodyCanLoadMore } from "@adapttable/core/binding";
 import { type RefCallback, useCallback, useRef } from "react";
 
 import type { BaseDataTableProps } from "../props";
@@ -27,14 +28,13 @@ export function usePlainChromeBodyData<TRow>(
   props: BaseDataTableProps<TRow>
 ): ChromeBodyData<TRow> {
   const { rowKey } = props;
-  const { source } = chrome;
   const fetchNext = useFetchNextPage(chrome);
   const scrollBoxRef = useRef<HTMLElement | null>(null);
   const virtualScrollRef = useCallback<RefCallback<HTMLElement>>((node) => {
     scrollBoxRef.current = node;
   }, []);
   const partitioned = usePinnedScrollRows(chrome, rowKey);
-  const canLoadMore = !chrome.isPaged && !source.error;
+  const canLoadMore = bodyCanLoadMore(chrome);
   const loadMoreRef = useBodyLoadMore(chrome, fetchNext, canLoadMore);
 
   return {

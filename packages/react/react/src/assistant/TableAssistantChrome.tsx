@@ -12,7 +12,11 @@
  * for both, it becomes the kit's own modal sheet instead of a panel squeezed
  * to nothing.
  */
-import type { TableLabels } from "@adapttable/core";
+import {
+  type ApprovalReview,
+  approvalReview,
+  type TableLabels,
+} from "@adapttable/core";
 import {
   assistantBadgeTone,
   assistantComposerState,
@@ -35,7 +39,6 @@ import {
 
 import { LiveRegion } from "../a11y/LiveRegion";
 import type { AgentApprovalPending } from "../editing/AgentApprovalChrome";
-import { type ApprovalReview, approvalReview } from "../editing/approvalReview";
 import {
   ApprovalReviewChrome,
   type ApprovalReviewSlots,

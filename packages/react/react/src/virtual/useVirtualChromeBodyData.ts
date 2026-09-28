@@ -10,6 +10,13 @@ import {
   type TableVirtualization,
   windowGroupedEntries,
 } from "@adapttable/core";
+import {
+  bodyCanLoadMore,
+  resolveBodyVirtualization,
+  rowScrollTarget,
+  virtualizeIgnoredOnPage,
+  withSourceIndices,
+} from "@adapttable/core/binding";
 import { useCallback, useMemo, useRef } from "react";
 
 import type { ComposedTableProps } from "../props";
@@ -55,9 +62,7 @@ export function useVirtualChromeBody<TRow>(
 ): { body: ChromeBodyData<TRow>; scrollToRow: (row: TRow) => void } {
   const { rowKey, virtualize = false } = props;
   const { source } = chrome;
-  const expandedBody =
-    chrome.grouping !== undefined || chrome.tree !== undefined;
-  if (virtualize && source.paginationMode === "paged" && !expandedBody) {
+  if (virtualizeIgnoredOnPage(virtualize, chrome)) {
     devWarn(
       'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it, or group the rows: an expanded page is windowed.'
     );
@@ -108,13 +113,8 @@ export function useVirtualChromeBody<TRow>(
   );
 
   const boxVirtual = resolvedVirtualization.enabled && inScrollBox;
-  const canLoadMore = !chrome.isPaged && !source.error && !boxVirtual;
+  const canLoadMore = bodyCanLoadMore(chrome, boxVirtual);
   const loadMoreRef = useBodyLoadMore(chrome, fetchNext, canLoadMore);
-  const sourceIndexById = useMemo(() => {
-    const map = new Map<string, number>();
-    source.rows.forEach((row, index) => map.set(rowKey(row), index));
-    return map;
-  }, [rowKey, source.rows]);
 
   const columnWindow = useColumnWindow<TRow>({
     columns: chrome.columnLayout.visibleColumns,
@@ -128,16 +128,13 @@ export function useVirtualChromeBody<TRow>(
     getScrollElement: () => scrollBoxRef.current,
   });
 
-  const pinnedVirtualization = useMemo(() => {
-    if (!pinState) return resolvedVirtualization;
-    return {
-      ...resolvedVirtualization,
-      rows: resolvedVirtualization.rows.map((entry) => ({
-        ...entry,
-        sourceIndex: sourceIndexById.get(entry.key) ?? entry.index,
-      })),
-    };
-  }, [pinState, resolvedVirtualization, sourceIndexById]);
+  const pinnedVirtualization = useMemo(
+    () =>
+      pinState
+        ? withSourceIndices(resolvedVirtualization, source.rows, rowKey)
+        : resolvedVirtualization,
+    [pinState, resolvedVirtualization, rowKey, source.rows]
+  );
 
   const body: ChromeBodyData<TRow> = {
     virtualization: pinnedVirtualization,
@@ -233,33 +230,8 @@ function useRowScroll<TRow>(options: {
   latest.current = options;
   return useCallback((row: TRow) => {
     const { rowKey, flat, keyed } = latest.current;
-    const id = rowKey(row);
-    if (flat.virtualization.enabled) {
-      if (flat.virtualization.rows.some((entry) => entry.key === id)) return;
-      const index = flat.rows.findIndex(
-        (candidate) => rowKey(candidate) === id
-      );
-      if (index >= 0) flat.scrollToIndex(index);
-      return;
-    }
-    if (!keyed.virtualization.enabled) return;
-    const index = keyed.keys.indexOf(id);
-    if (index >= 0 && !keyed.virtualization.indices.includes(index)) {
-      keyed.scrollToIndex(index);
-    }
+    const target = rowScrollTarget(row, rowKey, flat, keyed);
+    if (!target) return;
+    (target.window === "flat" ? flat : keyed).scrollToIndex(target.index);
   }, []);
-}
-
-function resolveBodyVirtualization<TRow>(
-  keyed: KeyedVirtualization,
-  virtualization: TableVirtualization<TRow>
-): TableVirtualization<TRow> {
-  if (!keyed.enabled) return virtualization;
-  return {
-    enabled: true,
-    rows: [],
-    paddingTop: keyed.paddingTop,
-    paddingBottom: keyed.paddingBottom,
-    measureElement: keyed.measureElement,
-  };
 }

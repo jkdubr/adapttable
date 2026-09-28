@@ -1,16 +1,20 @@
 import type { EditableColumnLike } from "@adapttable/core";
 import {
   CELL_NAV_LIVE,
+  cellNavigationInput,
   type CellNavLiveSlotProps,
   EDIT_HISTORY_LIVE,
   type EditHistoryLiveSlotProps,
   EXPORT_LIVE,
   type ExportLiveSlotProps,
+  exportPageOnly,
   FIND_LIVE,
+  finishShellLive,
   FULLSCREEN_LIVE,
   type FullscreenLiveSlotProps,
   SELECTION_STATS_LIVE,
   type SelectionStatsLiveSlotProps,
+  sourceWindowStart,
 } from "@adapttable/core/binding";
 /**
  * Mount shell interaction hooks in-tree: history, find, grid, export, fullscreen.
@@ -24,8 +28,6 @@ import { asBatchGesture } from "../editing/editHistory";
 import { beginCellEdit } from "../editing/useCellEditing";
 import { withFindMarks } from "../find/findMarks";
 import type { DataTableShellResult } from "../useDataTableShell";
-import { undoRedoToolbar, viewControlsToolbar } from "../useTableChrome";
-import { sourceWindowStart } from "../virtual/chromeBodyShared";
 import { rememberFeatureHost } from "./featureHost";
 import { FeatureSlot, useFeatureSlotFilled } from "./providers";
 import {
@@ -78,7 +80,7 @@ export function HistoryLiveGate<TRow>({
     columns: shell.chrome.allColumns,
     onCellEdit: shell.chromeProps.onCellEdit,
     children: apply,
-  } as unknown as EditHistoryLiveSlotProps<never>;
+  } as unknown as EditHistoryLiveSlotProps;
   return filled ? (
     <FeatureSlot slot={EDIT_HISTORY_LIVE} props={historyProps} />
   ) : (
@@ -151,44 +153,30 @@ function CellNavStage<TRow>({
   const filled = useFeatureSlotFilled(CELL_NAV_LIVE);
   const props = shell.chromeProps;
   const chrome = shell.chrome;
-  const windowStart = windowStartOf(shell);
-  const columns = chrome.columnLayout.visibleColumns;
   const options = {
-    headerCheckbox: props.columnSelectionCheckbox === true,
-    rowCount:
-      Math.max(chrome.source.total, windowStart + chrome.source.rows.length) +
-      (chrome.pinnedRows?.top?.length ?? 0) +
-      (chrome.pinnedRows?.bottom?.length ?? 0),
-    columns,
-    columnsWindowed: shell.tableProps.columnWindow.enabled,
-    rows: [
-      ...(chrome.pinnedRows?.top ?? []),
-      ...chrome.source.rows,
-      ...(chrome.pinnedRows?.bottom ?? []),
-    ],
-    firstRowIndex: windowStart,
+    ...cellNavigationInput({
+      source: chrome.source,
+      pinnedRows: chrome.pinnedRows,
+      columns: chrome.columnLayout.visibleColumns,
+      columnsWindowed: shell.tableProps.columnWindow.enabled,
+      headerCheckbox: props.columnSelectionCheckbox === true,
+      activate: (row, column) => {
+        const editing = chrome.editing;
+        if (!editing) return;
+        beginCellEdit(
+          editing.state,
+          row,
+          column as EditableColumnLike<TRow>,
+          props.rowKey
+        );
+      },
+    }),
     getRowId: props.rowKey,
     dir: props.dir,
     labels: shell.labels,
     onCut: props.onCellCut,
-    // Enter and F2 on a focused cell open it. The grid leaves those keys to
-    // whatever is inside the cell, and the only thing that handles them is a
-    // control the reader never reaches by arrowing — so a keyboard reader
-    // could walk the grid and never edit anything.
-    onActivate: (cell: { row: number; col: number }) => {
-      const editing = chrome.editing;
-      if (!editing) return;
-      const row = options.rows[cell.row - windowStart];
-      const column = columns[cell.col];
-      if (row === undefined || column === undefined) return;
-      beginCellEdit(
-        editing.state,
-        row,
-        column as EditableColumnLike<TRow>,
-        props.rowKey
-      );
-    },
   };
+  const windowStart = options.firstRowIndex;
   const navProps = {
     options,
     hostProps: props,
@@ -251,12 +239,10 @@ function ExportStage<TRow>({
     },
     featureHost: shell.featureHost,
     labels: shell.labels,
-    pageOnly: chrome.featureNotices.some(
-      (notice) => notice.kind === "export-all-page"
-    ),
+    pageOnly: exportPageOnly(chrome.featureNotices),
     children: (exportHandler: typeof DISABLED_EXPORT) =>
       children({ ...live, exportHandler }),
-  } as unknown as ExportLiveSlotProps<never>;
+  } as unknown as ExportLiveSlotProps;
   return filled ? (
     <FeatureSlot slot={EXPORT_LIVE} props={exportProps} />
   ) : (
@@ -295,7 +281,7 @@ function SelectionStatsStage<TRow>({
     firstRowIndex: windowStartOf(shell),
     children: (stats: DataTableShellResult<TRow>["selectionStats"]) =>
       children({ ...live, stats }),
-  } as unknown as SelectionStatsLiveSlotProps<never>;
+  } as unknown as SelectionStatsLiveSlotProps;
   return filled ? (
     <FeatureSlot slot={SELECTION_STATS_LIVE} props={statsProps} />
   ) : (
@@ -303,9 +289,13 @@ function SelectionStatsStage<TRow>({
   );
 }
 
-/** The order the live slots mount in; each reads what the ones above produced. */
+/** Each live slot's stage; core owns the order they mount in. */
 type LiveStage = <TRow>(props: StageProps<TRow>) => ReactNode;
-const LIVE_STAGES: readonly LiveStage[] = [
+/**
+ * The live stages, in core's `SHELL_LIVE_STAGE_ORDER` (history runs before
+ * them); a test holds the order.
+ */
+export const LIVE_STAGES: readonly LiveStage[] = [
   FindStage,
   CellNavStage,
   ExportStage,
@@ -360,34 +350,4 @@ export function ShellLiveGate<TRow>({
       {(live) => children(finishShellLive(shell, live))}
     </LiveChain>
   );
-}
-
-function finishShellLive<TRow>(
-  shell: DataTableShellResult<TRow>,
-  live: ShellLive<TRow>
-): DataTableShellResult<TRow> {
-  const { find, gridFocus, exportHandler, fullscreen, stats } = live;
-  const history = shell.editHistory;
-  return {
-    ...shell,
-    gridFocus,
-    find,
-    editHistory: history,
-    fullscreen,
-    selectionStats: stats,
-    tableProps: {
-      ...shell.tableProps,
-      gridFocus,
-    },
-    toolbarProps: {
-      ...shell.toolbarProps,
-      ...undoRedoToolbar<TRow>(
-        shell.chromeProps.undoRedoButtons,
-        history,
-        shell.labels
-      ),
-      ...viewControlsToolbar(shell.chromeProps, fullscreen),
-      ...exportHandler,
-    },
-  };
 }

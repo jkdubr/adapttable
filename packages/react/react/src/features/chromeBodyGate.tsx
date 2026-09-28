@@ -6,10 +6,10 @@
  * paint already knows which child to mount — features are static — so SSR
  * and hydration see the same tree.
  */
-import { ACTIONS_COLUMN_KEY, REORDER_COLUMN_KEY } from "@adapttable/core";
 import {
   CHROME_BODY,
   type ChromeBodySlotProps,
+  overlayChromeExtras,
 } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
@@ -67,72 +67,6 @@ function PlainChromeBody<TRow>({
 }): ReactNode {
   const body = usePlainChromeBodyData(chrome, props);
   return children(body);
-}
-
-function overlayChromeExtras<TRow>(
-  shell: DataTableShellResult<TRow>,
-  chrome: TableChrome<TRow>
-): DataTableShellResult<TRow> {
-  const dropped = new Set(chrome.droppedColumns);
-  const visible = chrome.columnLayout.visibleColumns;
-  const columns =
-    dropped.size === 0
-      ? visible
-      : visible.filter((column) => !dropped.has(column.key));
-  const table = {
-    ...shell.tableProps.table,
-    ...chrome.table,
-    columns,
-  };
-  return {
-    ...shell,
-    chrome,
-    source: chrome.source,
-    table,
-    autoSizeColumns: chrome.autoSizeColumns ?? shell.autoSizeColumns,
-    autoSizeColumn: chrome.autoSizeColumn ?? shell.autoSizeColumn,
-    toolbarProps: {
-      ...shell.toolbarProps,
-      activeFilterCount: chrome.activeFilterCount,
-      onAddRow: chrome.rowMutations.canAdd
-        ? chrome.rowMutations.addRow
-        : undefined,
-    },
-    tableProps: {
-      ...shell.tableProps,
-      table,
-      // The row universe an editable cell resolves its commit against. The
-      // shell captured the base chrome's, which is the page slice; grouping
-      // renders the FULL filtered set, so a commit on any row past page one
-      // would find no row and close the editor without a word.
-      rows: chrome.editingRows,
-      actionsPinned:
-        chrome.columnLayout.state.pinned[ACTIONS_COLUMN_KEY] === "end",
-      reorderPinned:
-        chrome.columnLayout.state.pinned[REORDER_COLUMN_KEY] === "start",
-      tree: chrome.tree,
-      grouping: chrome.grouping,
-      editing: chrome.editing,
-      renderRowDetail: chrome.detail?.render,
-      expansion: chrome.detail?.expansion,
-      rowPinning: chrome.rowPinning,
-      rowActions: chrome.rowActions,
-      pinOffset: chrome.columnLayout.pinOffset,
-      setWidth:
-        shell.chromeProps.resizableColumns === true
-          ? chrome.columnLayout.setWidth
-          : undefined,
-      columnWidths: chrome.columnLayout.state.widths,
-      collapsedColumnGroups: chrome.columnLayout.state.collapsedGroups,
-      columnGroups: chrome.columnGroups,
-      onToggleColumnGroup: chrome.columnLayout.toggleColumnGroup,
-      onRenameColumn:
-        shell.chromeProps.enableColumnMenu && shell.chromeProps.onColumnRename
-          ? chrome.columnLayout.setName
-          : undefined,
-    },
-    hasRowActions: chrome.hasRowActions,
-  };
 }
 
 /**

@@ -11,14 +11,14 @@
  *
  * Nothing here renders. It is the model the surfaces read.
  */
-import { defaultLabels, type TableLabels } from "@adapttable/core";
-
+import { defaultLabels } from "../labels";
+import type { TableLabels } from "../types";
 import type {
   AgentApprovalDecision,
   AgentApprovalOperation,
   AgentApprovalPending,
   AgentApprovalProposal,
-} from "./AgentApprovalChrome";
+} from "./types";
 
 /** How many changes a review shows before asking to open the full list. */
 export const APPROVAL_PREVIEW_LIMIT = 3;

@@ -12131,6 +12131,14 @@
       "behavior": ""
     },
     {
+      "export": "absoluteColumnIndex",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ActionAiOptions",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -12172,134 +12180,6 @@
     },
     {
       "export": "ActiveFilterChipsSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AGENT_ALWAYS_ALLOW_STATE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AGENT_APPROVAL",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AGENT_APPROVAL_STATE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AGENT_PROGRESS_STATE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AGENT_VIEW_STATE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentAlwaysAllowState",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalDecision",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalListProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalOperation",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalPending",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalProposal",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentApprovalSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentProgress",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "AgentViewState",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -12435,6 +12315,22 @@
       "behavior": ""
     },
     {
+      "export": "applyFeatureNoticesAttribute",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "applyTableFeatures",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ApprovalPresentation",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -12443,7 +12339,7 @@
       "behavior": ""
     },
     {
-      "export": "ApprovalReviewSlots",
+      "export": "AssemblyFns",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -12451,87 +12347,7 @@
       "behavior": ""
     },
     {
-      "export": "ASSISTANT_ACTIONS_ICON",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ASSISTANT_AVATAR_ICON",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ASSISTANT_CLOSE_ICON",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ASSISTANT_EXAMPLES_ICON",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "ASSISTANT_FLOATING_MIN_WIDTH",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ASSISTANT_KIND_HUES",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ASSISTANT_KIND_PATHS",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ASSISTANT_SEND_ICON",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ASSISTANT_SETTINGS_ICON",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ASSISTANT_STOP_ICON",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ASSISTANT_UNDO_ICON",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-model",
@@ -12603,14 +12419,6 @@
       "behavior": ""
     },
     {
-      "export": "assistantKindIcon",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "assistantLauncherName",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -12620,14 +12428,6 @@
     },
     {
       "export": "assistantLauncherStyle",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "assistantMicIcon",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -12660,14 +12460,6 @@
     },
     {
       "export": "assistantReceiptHeadline",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "assistantReceiptIcon",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -12747,42 +12539,18 @@
       "behavior": ""
     },
     {
-      "export": "BATCH_EDIT_BAR",
+      "export": "asSizeEstimator",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
-      "export": "BatchEditBarProps",
+      "export": "bodyCanLoadMore",
       "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "BatchEditBarSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "BatchEditButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "BatchEditingState",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -12803,9 +12571,33 @@
       "behavior": ""
     },
     {
-      "export": "BULK_BAR",
+      "export": "BodyChrome",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "bodySentinelCount",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "bodyWindowKind",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "BodyWindowKind",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
@@ -12827,18 +12619,10 @@
       "behavior": ""
     },
     {
-      "export": "BulkBarSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CELL_NAV_LIVE",
+      "export": "cardSetSize",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -12851,34 +12635,10 @@
       "behavior": ""
     },
     {
-      "export": "cellHighlightKind",
+      "export": "cellNavigationInput",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "cellHighlightStyle",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CellNavLiveSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CellRange",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -12887,14 +12647,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CellSpanAppearance",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -12908,54 +12660,6 @@
     },
     {
       "export": "CellSpanRequest",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ChecklistButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ChecklistCheckboxProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ChecklistClassNames",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ChecklistFilterProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ChecklistSearchProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ChecklistSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -12979,7 +12683,7 @@
       "behavior": ""
     },
     {
-      "export": "CHROME_BODY",
+      "export": "CHROME_EXTRA_SLOT_ORDER",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-model",
@@ -12987,7 +12691,15 @@
       "behavior": ""
     },
     {
-      "export": "ChromeBodySlot",
+      "export": "chromeBodyRegion",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ChromeBodyRegion",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -12995,7 +12707,7 @@
       "behavior": ""
     },
     {
-      "export": "ChromeBodySlotProps",
+      "export": "ChromeBodySlot",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -13027,6 +12739,14 @@
       "behavior": ""
     },
     {
+      "export": "chromeEmptyVariant",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ChromeExtraSlot",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -13035,7 +12755,15 @@
       "behavior": ""
     },
     {
-      "export": "ChromeExtraSlotProps",
+      "export": "chromeFeatureNotices",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ChromeFeatureNoticesInput",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -13059,10 +12787,50 @@
       "behavior": ""
     },
     {
+      "export": "chromeIsRefreshing",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "chromeRenderModel",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ChromeRenderModel",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ChromeRenderModelInput",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "ChromeRowSlot",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "chromeShowFooter",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -13076,6 +12844,22 @@
     },
     {
       "export": "ChromeVirtualPadSlot",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "clearChromeFilters",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "CollectFeatureNoticesInput",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -13115,14 +12899,6 @@
       "behavior": ""
     },
     {
-      "export": "COLUMN_GROUP_TOGGLE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "COLUMN_HEADER_RENAME",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -13131,23 +12907,7 @@
       "behavior": ""
     },
     {
-      "export": "COLUMN_LAYOUT_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "COLUMN_MENU",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "COLUMN_SELECT",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-model",
@@ -13227,7 +12987,7 @@
       "behavior": ""
     },
     {
-      "export": "ColumnGroupToggleButtonProps",
+      "export": "ColumnHeaderController",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -13235,18 +12995,10 @@
       "behavior": ""
     },
     {
-      "export": "ColumnGroupToggleProps",
+      "export": "columnHeaderControllerFor",
       "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ColumnGroupToggleSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -13395,27 +13147,11 @@
       "behavior": ""
     },
     {
-      "export": "ColumnSelectCheckboxChromeProps",
+      "export": "ColumnResizeHandleProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ColumnSelectCheckboxProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ColumnSelectSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
+      "class": "react-binding",
+      "proposedImport": "@adapttable/react/binding",
       "behavior": ""
     },
     {
@@ -13427,103 +13163,31 @@
       "behavior": ""
     },
     {
+      "export": "ColumnViewport",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "columnWindowPlan",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ColumnWindowPlan",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "Command",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "COMMAND_PALETTE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "COMMAND_PALETTE_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CommandPaletteChromeProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CommandPaletteInputProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CommandPaletteItemProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CommandPaletteSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CommandPaletteSurfaceProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ConfirmHandler",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ConfirmRequest",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CONTEXT_MENU",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CONTEXT_MENU_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ContextMenuChromeProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -13539,47 +13203,7 @@
       "behavior": ""
     },
     {
-      "export": "ContextMenuItemProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "ContextMenuItemsFactory",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ContextMenuLiveSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ContextMenuPoint",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ContextMenuSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ContextMenuSurfaceProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -13595,6 +13219,374 @@
       "behavior": ""
     },
     {
+      "export": "coreBatchEditing",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreBulkActions",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreCellNavigation",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreCellSpan",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreCollapsibleColumnGroups",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreColumnMenu",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreColumnSelectionCheckbox",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreCommandPalette",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreContextMenu",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreDensityChooser",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreDirtyIndicators",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreEditHistory",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreEditing",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreExportCsv",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreExtraRows",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreFeature",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "CoreFeature",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "CoreFeatureRegistrar",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreFilters",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreFilterTypes",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreFindInTable",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreFitColumns",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreFullscreen",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreGrouping",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreGroupingPanel",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreHeaderFilters",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreMultiSort",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreNestedTable",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "corePinnedSummaryRows",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "corePrint",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreResizableColumns",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreRowActions",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreRowAppearance",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreRowDetail",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreRowEditing",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "CoreRowFeatureRegistrar",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreRowPinning",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreSavedViews",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreSelectionStats",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreSidePanel",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "CoreStandardFeatureFactories",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "CoreStandardFeatureOptions",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreStatusBar",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreTree",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreUndoRedoButtons",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "coreVirtualize",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "createFeatureHost",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -13606,14 +13598,6 @@
       "export": "CssProperties",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "CURRENT_MATCH_CELL_STYLE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
@@ -13691,6 +13675,14 @@
       "behavior": ""
     },
     {
+      "export": "DESKTOP_ROW_WIRING_KEYS",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "DESKTOP_SELECTION_WIDTH",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -13708,6 +13700,22 @@
     },
     {
       "export": "DesktopBodyPinStyle",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "desktopBodySlots",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "DesktopBodySlotsInput",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -13739,7 +13747,23 @@
       "behavior": ""
     },
     {
+      "export": "desktopEdgeBodyStyle",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "desktopEdgeHeadPin",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "desktopEdgeHeadStyle",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -13771,7 +13795,47 @@
       "behavior": ""
     },
     {
+      "export": "desktopHeadCellStyle",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "desktopHeaderLeaf",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "DesktopHeaderLeafContext",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "desktopPinEdges",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "desktopPinSignature",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "desktopRowDomProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -13783,6 +13847,54 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "DesktopRowPinPart",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "desktopRowWiring",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "DesktopRowWiringArgs",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "DesktopRowWiringContext",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "desktopRowWiringEqual",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "DesktopRowWiringModel",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -13799,6 +13911,30 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "desktopStickyPlan",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "DesktopStickyPlan",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "desktopTableStyle",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -13843,70 +13979,6 @@
       "behavior": ""
     },
     {
-      "export": "EDIT_HISTORY_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EDITABLE_CELL",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EditableCellActivateProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EditableCellButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EditableCellSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EditableCellSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EditHistoryLiveSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EDITING_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "EMPTY_FEATURE_HOST",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -13915,7 +13987,15 @@
       "behavior": ""
     },
     {
-      "export": "ensureForcedColorsStyles",
+      "export": "EndReachedLatch",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "entryKeys",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -13923,7 +14003,7 @@
       "behavior": ""
     },
     {
-      "export": "entryKeys",
+      "export": "estimateBodyItemSize",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -13939,33 +14019,9 @@
       "behavior": ""
     },
     {
-      "export": "expandChevronIcon",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "ExpandToggleSlotProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EXPANSION_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "EXPORT_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
@@ -14003,14 +14059,6 @@
       "behavior": ""
     },
     {
-      "export": "ExportContext",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "ExportCsvOptions",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -14027,63 +14075,15 @@
       "behavior": ""
     },
     {
-      "export": "ExportLiveSlotProps",
+      "export": "exportPageOnly",
       "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
       "export": "ExportPayload",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ExportProgressAction",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ExportProgressChromeProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ExportProgressDownload",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ExportProgressSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ExportProgressState",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ExportProgressSurfaceSlotProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -14132,14 +14132,6 @@
     },
     {
       "export": "ExportScopeCapability",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ExportStatus",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -14275,14 +14267,6 @@
       "behavior": ""
     },
     {
-      "export": "eyeIcon",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "FacetCounts",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -14292,6 +14276,14 @@
     },
     {
       "export": "FacetMap",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureApplyInput",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -14324,6 +14316,30 @@
     },
     {
       "export": "FeatureNoticeKind",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "featureNoticesAttribute",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FeaturePatch",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "FeatureRegistration",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -14387,63 +14403,15 @@
       "behavior": ""
     },
     {
-      "export": "FILL_HANDLE",
+      "export": "fetchNextBodyPage",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FillHandleCellSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FillHandleSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FillHandleSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FILTER_CHIPS_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
       "export": "FILTER_DRAWER",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FILTER_ENGINE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FILTER_HEADER",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-model",
@@ -14491,87 +14459,7 @@
       "behavior": ""
     },
     {
-      "export": "FilterEngine",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "FilterFormSource",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterHeaderClassNames",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterHeaderControlProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterHeaderMultiProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterHeaderOption",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterHeaderRangeProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterHeaderRowProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterHeaderSearchProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterHeaderSelectProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterHeaderSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -14603,95 +14491,7 @@
       "behavior": ""
     },
     {
-      "export": "FilterRuntime",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FILTERS_FORM",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FILTERS_ICON",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FiltersFormSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterTreeBuilderProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterTreeButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterTreeClassNames",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterTreeDisclosureProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterTreeInputProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterTreeOption",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterTreeSelectProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FilterTreeSlots",
+      "export": "FilterTriggerToggleState",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -14755,75 +14555,19 @@
       "behavior": ""
     },
     {
-      "export": "FIND_BAR",
+      "export": "finishShellBody",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
-      "export": "FIND_LIVE",
+      "export": "finishShellLive",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FindBarProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FindBarSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FindButtonKind",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FindButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FindInTableState",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FindLiveSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FindSearchProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
       "behavior": ""
     },
     {
@@ -14843,26 +14587,10 @@
       "behavior": ""
     },
     {
-      "export": "FORCED_COLORS_CSS",
+      "export": "getAppliedFeatures",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FULLSCREEN_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "FullscreenLiveSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -14878,54 +14606,6 @@
       "export": "GetCellSpanArgs",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GRID_FOCUS_ANNOUNCER",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GridCell",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GridFocusAnnouncerSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GRIP_ICON",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GROUP_HEADER_CARD",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GROUP_HEADER_ROW",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
@@ -15011,54 +14691,6 @@
       "behavior": ""
     },
     {
-      "export": "GroupHeaderCardSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupHeaderRowSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "groupIndentStyle",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GROUPING_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GROUPING_PANEL",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GROUPING_PANEL_STATE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "GroupingCapability",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -15107,54 +14739,6 @@
       "behavior": ""
     },
     {
-      "export": "GroupingPanelAggregationItemProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelAggregationRemoveProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelChecklistOption",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelChecklistProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelChipProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelDropZoneProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "GroupingPanelInteractions",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -15163,87 +14747,15 @@
       "behavior": ""
     },
     {
-      "export": "GroupingPanelOption",
+      "export": "groupingPanelState",
       "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelRemoveZoneProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelRestoreProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelSelectProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
       "behavior": ""
     },
     {
       "export": "GroupingPanelState",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupingPanelSurfaceProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupMoreButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupMoreButtonSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "GroupMoreButtonSlots",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -15267,26 +14779,18 @@
       "behavior": ""
     },
     {
-      "export": "GroupRowKind",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "groupRowParts",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "GroupSort",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "hasLoadedChildren",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -15331,6 +14835,14 @@
       "behavior": ""
     },
     {
+      "export": "headerSortDir",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "hideAllColumns",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -15351,22 +14863,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "IconDescriptor",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "IconShape",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -15403,6 +14899,14 @@
       "behavior": ""
     },
     {
+      "export": "isBodyEligible",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "isColumnGroupRenderKey",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -15427,14 +14931,6 @@
       "behavior": ""
     },
     {
-      "export": "isCurrentMatchCell",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "isExtraEntry",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -15443,34 +14939,42 @@
       "behavior": ""
     },
     {
-      "export": "isMatchedCell",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "isSelectedCell",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "KEYED_WINDOW",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "KeyedWindowSlotProps",
+      "export": "KeyedVirtualization",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "keyedWindow",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "LeafColumn",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "LeafSortProps",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "liveColumnLayout",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -15483,7 +14987,7 @@
       "behavior": ""
     },
     {
-      "export": "logicalAlign",
+      "export": "livePinning",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -15491,10 +14995,10 @@
       "behavior": ""
     },
     {
-      "export": "MATCHED_CELL_STYLE",
+      "export": "materializeWindowRows",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -15515,43 +15019,11 @@
       "behavior": ""
     },
     {
-      "export": "mergedCellStyle",
+      "export": "mergeFeaturePatches",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "MergedCellStyle",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "MOUNT_STAGGER",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "MultiSelectEditorCheckboxProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "MultiSelectEditorSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
       "behavior": ""
     },
     {
@@ -15587,26 +15059,34 @@
       "behavior": ""
     },
     {
-      "export": "OVERLAY_MOTION",
+      "export": "OverlayChrome",
       "currentImport": "@adapttable/core/binding",
-      "kind": "value",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
-      "export": "PERSON_AVATAR_ICON",
+      "export": "overlayChromeExtras",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "PatchFeature",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
-      "export": "PIN_ICON",
+      "export": "pendingListSize",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -15639,22 +15119,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "pinnedDataCellStyle",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "pinnedEdgeCellStyle",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -15699,17 +15163,17 @@
       "behavior": ""
     },
     {
-      "export": "PinnedSide",
+      "export": "pinnedScrollRows",
       "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
-      "export": "PINNING_LIVE",
+      "export": "PinnedSide",
       "currentImport": "@adapttable/core/binding",
-      "kind": "value",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
@@ -15731,7 +15195,7 @@
       "behavior": ""
     },
     {
-      "export": "PivotAddProps",
+      "export": "PipelineShell",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -15739,82 +15203,10 @@
       "behavior": ""
     },
     {
-      "export": "PivotAggProps",
+      "export": "printToolbarProps",
       "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "PivotConfig",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "PivotField",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "PivotFieldProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "PivotMeasure",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "PivotPanelChromeProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "PivotPanelSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "PivotPanelSurfaceProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "PivotZone",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "PivotZoneProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -15851,6 +15243,38 @@
       "behavior": ""
     },
     {
+      "export": "readableRowLabel",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "readColumnViewport",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rememberAppliedFeatures",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "renderedRowsOf",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "REORDER_COLUMN_WIDTH",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -15860,6 +15284,14 @@
     },
     {
       "export": "resetColumnLayout",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "resolveBodyVirtualization",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -15883,14 +15315,6 @@
       "behavior": ""
     },
     {
-      "export": "resolveMobileLabel",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "resolveRowHeight",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -15907,14 +15331,6 @@
       "behavior": ""
     },
     {
-      "export": "ROW_ACTIONS_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "ROW_DND_MIME",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -15923,31 +15339,7 @@
       "behavior": ""
     },
     {
-      "export": "ROW_EDIT_ACTIONS",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "ROW_REORDER_ANNOUNCER",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ROW_REORDER_BUTTONS",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ROW_REORDER_HANDLE",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-model",
@@ -15967,70 +15359,6 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowEditActionsProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowEditActionsSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowEditButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowEditConflict",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowEditControlsOptions",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowEditDrafts",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowEditIcons",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowEditingState",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -16059,23 +15387,7 @@
       "behavior": ""
     },
     {
-      "export": "RowMoveConfirmationProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowMoveMenuItemProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowMoveMenuSlotProps",
+      "export": "RowPairMeasureController",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16115,15 +15427,7 @@
       "behavior": ""
     },
     {
-      "export": "RowReorderButtonsProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowReorderButtonsSlots",
+      "export": "RowPinState",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16147,47 +15451,23 @@
       "behavior": ""
     },
     {
-      "export": "RowReorderHandleProps",
+      "export": "rowReorderEnablement",
       "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowReorderHandleSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowReorderHandleSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowReorderLabels",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "RowReorderMoveButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
       "export": "rowReorderSignature",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "rowScrollTarget",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -16227,15 +15507,15 @@
       "behavior": ""
     },
     {
-      "export": "SAVED_VIEWS",
+      "export": "rowWindow",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
-      "export": "SavedView",
+      "export": "RuntimeChromeInput",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16243,7 +15523,7 @@
       "behavior": ""
     },
     {
-      "export": "SavedViewControlKey",
+      "export": "RuntimeColumn",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16251,82 +15531,10 @@
       "behavior": ""
     },
     {
-      "export": "SavedViewRowControl",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SavedViewsPanelChromeProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SavedViewsPanelEmptyProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SavedViewsPanelInputProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SavedViewsPanelRowProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SavedViewsPanelSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SavedViewsPanelSurfaceProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SavedViewsSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SavedViewVisibility",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SEARCH_ICON",
+      "export": "scrollResetKeys",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -16339,79 +15547,7 @@
       "behavior": ""
     },
     {
-      "export": "SELECTED_CELL_OUTLINE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SELECTION_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SELECTION_STATS_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SelectionStatPart",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SelectionStats",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SelectionStatsChromeProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SelectionStatsLiveSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SelectionStatsSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SelectionStatsSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "shallowEqualByKeys",
+      "export": "selectionObserverIds",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
       "class": "neutral-operation",
@@ -16419,9 +15555,25 @@
       "behavior": ""
     },
     {
-      "export": "SHARED_DESKTOP_ROW_KEYS",
+      "export": "SHELL_LIVE_STAGE_ORDER",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ShellBodyInput",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "ShellLiveStageId",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
@@ -16435,59 +15587,11 @@
       "behavior": ""
     },
     {
-      "export": "SIDE_PANEL",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SidePanelChromeProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SidePanelCloseProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "SidePanelEntry",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SidePanelFrameProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SidePanelSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
-      "export": "SidePanelTabProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
       "behavior": ""
     },
     {
@@ -16523,14 +15627,6 @@
       "behavior": ""
     },
     {
-      "export": "sortArrow",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-operation",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "sortButtonAttributes",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -16543,6 +15639,14 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "sortedColumnName",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -16603,71 +15707,23 @@
       "behavior": ""
     },
     {
-      "export": "STATUS_BAR",
+      "export": "standardFeatureList",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
-      "class": "neutral-model",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
-      "export": "StatusBarChromeProps",
+      "export": "SummaryCellsCache",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "StatusBarItem",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "StatusBarSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "StatusBarSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TABLE_ASSISTANT",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
       "class": "neutral-model",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
     {
       "export": "TableAssistantAllowanceView",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantAvatars",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantBadgeProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16683,63 +15739,7 @@
       "behavior": ""
     },
     {
-      "export": "TableAssistantBoundary",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantButtonProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantComposerProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
       "export": "TableAssistantComposerState",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantFace",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantLanguageChipProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantMenuItem",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantMenuProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16755,14 +15755,6 @@
       "behavior": ""
     },
     {
-      "export": "TableAssistantPanelProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "TableAssistantPlacement",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -16771,23 +15763,7 @@
       "behavior": ""
     },
     {
-      "export": "TableAssistantPresentation",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "TableAssistantProgressView",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16835,22 +15811,6 @@
       "behavior": ""
     },
     {
-      "export": "TableAssistantSheetProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "react-binding",
-      "proposedImport": "@adapttable/react/binding",
-      "behavior": ""
-    },
-    {
       "export": "TableAssistantSuggestionView",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -16868,14 +15828,6 @@
     },
     {
       "export": "TableAssistantView",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TableAssistantWindowProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -16963,6 +15915,22 @@
       "behavior": ""
     },
     {
+      "export": "TableRuntimePublisher",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "tableRuntimeView",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "TableRuntimeView",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
@@ -17003,6 +15971,14 @@
       "behavior": ""
     },
     {
+      "export": "TableVirtualization",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "toggleCollapsedColumnGroup",
       "currentImport": "@adapttable/core/binding",
       "kind": "value",
@@ -17011,55 +15987,7 @@
       "behavior": ""
     },
     {
-      "export": "TOOLBAR_EXTRAS",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "ToolbarExtrasSlotProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
       "export": "TotalCountCapability",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TREE_CELL",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TREE_LIVE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TREE_TOGGLE",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "value",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TreeCellProps",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -17075,26 +16003,10 @@
       "behavior": ""
     },
     {
-      "export": "TreeToggleButtonProps",
+      "export": "undoRedoToolbarProps",
       "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TreeToggleProps",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
-      "proposedImport": "@adapttable/core/binding",
-      "behavior": ""
-    },
-    {
-      "export": "TreeToggleSlots",
-      "currentImport": "@adapttable/core/binding",
-      "kind": "type",
-      "class": "neutral-model",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -17115,7 +16027,31 @@
       "behavior": ""
     },
     {
+      "export": "viewControlsToolbarProps",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
       "export": "VirtualItemMeta",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "virtualizeIgnoredOnPage",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "VirtualizeInput",
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
@@ -17135,6 +16071,30 @@
       "currentImport": "@adapttable/core/binding",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "WindowVirtualizer",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "WiringReorder",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core/binding",
+      "behavior": ""
+    },
+    {
+      "export": "withSourceIndices",
+      "currentImport": "@adapttable/core/binding",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core/binding",
       "behavior": ""
     },
@@ -20307,7 +19267,39 @@
       "behavior": ""
     },
     {
+      "export": "APPROVAL_PREVIEW_LIMIT",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "ApprovalPresentation",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "approvalReview",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalReview",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ApprovalReviewItem",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
@@ -20379,6 +19371,38 @@
       "behavior": ""
     },
     {
+      "export": "batchEditBarModel",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "BatchEditBarModel",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "BatchEditEntry",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "batchEditErrorId",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "batchEditHandler",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -20387,10 +19411,66 @@
       "behavior": ""
     },
     {
+      "export": "BatchEditingState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "batchEditingView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "BatchEditSnapshot",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "BatchEditStore",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "BatchEditStoreOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "BatchPendingDrafts",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "BatchRowEdit",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "beginCellEdit",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -20619,6 +19699,22 @@
       "behavior": ""
     },
     {
+      "export": "cellConflictAsk",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "CellConflictAsk",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "CellEdit",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -20631,6 +19727,30 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "CellEditHandler",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "CellEditingState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "cellEditingView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -20827,6 +19947,14 @@
       "behavior": ""
     },
     {
+      "export": "CellSaveState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "cellSaveStatus",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -20855,6 +19983,14 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "cellSaveView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -21579,6 +20715,30 @@
       "behavior": ""
     },
     {
+      "export": "contestedCellKey",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ContestedEditCell",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "contestedRowSignature",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "ContextMenuActions",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -21739,6 +20899,14 @@
       "behavior": ""
     },
     {
+      "export": "controllerConflictAsk",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "COUNT_OPERATOR_SYMBOL",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -21811,6 +20979,14 @@
       "behavior": ""
     },
     {
+      "export": "createBatchEditStore",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "createCellEditSession",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -21852,6 +21028,30 @@
     },
     {
       "export": "createControllableStore",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "createDirtyCellStore",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "createEditConflictStore",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "createEditHistory",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -21979,6 +21179,30 @@
       "behavior": ""
     },
     {
+      "export": "createQuerySource",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "createResponseAggregateOps",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "createRowEditStore",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "createRowReorderController",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -21988,6 +21212,22 @@
     },
     {
       "export": "createSavedViewsController",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "createServerSource",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "createTableData",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -22067,6 +21307,14 @@
       "behavior": ""
     },
     {
+      "export": "cursorTrailKey",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "CUSTOM_AGGREGATE",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -22103,6 +21351,14 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "customEditorConflict",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -22251,6 +21507,14 @@
       "behavior": ""
     },
     {
+      "export": "defaultPendingRows",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "defaultRowReorderAnnouncements",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -22331,6 +21595,62 @@
       "behavior": ""
     },
     {
+      "export": "dirtyCellKey",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "DirtyCellSnapshot",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "DirtyCellState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "DirtyCellStore",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "DirtyCellStoreOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "dirtyCellView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "dirtyMarkerView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "DisplayValue",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -22371,7 +21691,55 @@
       "behavior": ""
     },
     {
+      "export": "editableCellController",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditableCellController",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "EditableCellEditing",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "editableCellErrorId",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditableCellMode",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "editableCellPresentation",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditableCellPresentation",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
@@ -22419,10 +21787,50 @@
       "behavior": ""
     },
     {
+      "export": "EditConflictLabels",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "EditConflictPolicy",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditConflictSnapshot",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditConflictState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditConflictStore",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "editConflictView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -22436,6 +21844,22 @@
     },
     {
       "export": "EditEventHandler",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditHistoryController",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditHistoryControllerOptions",
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
@@ -22475,6 +21899,46 @@
       "behavior": ""
     },
     {
+      "export": "EditHistoryState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "editHistoryView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditingArming",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditingArmingProps",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "EditingBundle",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "EditLifecycle",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -22483,7 +21947,47 @@
       "behavior": ""
     },
     {
+      "export": "EditorAriaState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "editorBusyProps",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "editorInputType",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "editorKeyRestoresFocus",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "editorSelectOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "editorValidationProps",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -22507,6 +22011,14 @@
       "behavior": ""
     },
     {
+      "export": "EditValidationState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "EditValidationStore",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -22519,6 +22031,14 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "editValidationView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -23515,6 +23035,14 @@
       "behavior": ""
     },
     {
+      "export": "focusEditorOnMount",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "formatFilterChip",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -24211,6 +23739,14 @@
       "behavior": ""
     },
     {
+      "export": "handleRowEditorKey",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "hasEditableColumns",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -24531,6 +24067,14 @@
       "behavior": ""
     },
     {
+      "export": "isCellInConflict",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "isColumnGroup",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -24619,6 +24163,14 @@
       "behavior": ""
     },
     {
+      "export": "isEditActivateKey",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "isEmptyFilterValue",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -24652,6 +24204,14 @@
     },
     {
       "export": "isFilterOpKey",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "isFirstEditableColumn",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -24724,6 +24284,14 @@
     },
     {
       "export": "isRelativeDateToken",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "isRowContested",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -24812,6 +24380,14 @@
     },
     {
       "export": "listFilterValues",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "liveRowChanged",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -25340,6 +24916,14 @@
     },
     {
       "export": "parseClipboardTable",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "parseColumnDraft",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -25915,6 +25499,38 @@
       "behavior": ""
     },
     {
+      "export": "QuerySource",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "QuerySourceAnswer",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "QuerySourceConfig",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "QuerySourceFrame",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "QuerySupport",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -26115,7 +25731,39 @@
       "behavior": ""
     },
     {
+      "export": "ReconcileLiveBatchEdit",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ReconcileLiveEdit",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ReconcileLiveRowEdit",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "recordCursor",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "recordingCellEdit",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
@@ -26331,6 +25979,14 @@
       "behavior": ""
     },
     {
+      "export": "resolveConflictChoice",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "resolveContextTarget",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -26383,6 +26039,30 @@
       "currentImport": "@adapttable/core",
       "kind": "type",
       "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "resolveEditableCellDisplay",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "resolveEditHistory",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "resolveEditingArming",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -26499,6 +26179,14 @@
       "behavior": ""
     },
     {
+      "export": "resolveRowEditTrigger",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "resolveRowHeight",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -26543,6 +26231,22 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ResponseAggregateOps",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ResponseAggregateOpsInput",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -26683,10 +26387,146 @@
       "behavior": ""
     },
     {
+      "export": "rowEditActionsLayout",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditActionsLayout",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "rowEditConflict",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditConflict",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "rowEditControls",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditControls",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditControlsOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditDrafts",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "rowEditErrorId",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "rowEditingSignature",
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditingState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "rowEditingView",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "rowEditSaveBlocked",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "rowEditSignature",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditSnapshot",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditStore",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditStoreOptions",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "RowEditTrigger",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -27379,6 +27219,38 @@
       "behavior": ""
     },
     {
+      "export": "ServerSource",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ServerSourceConfig",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ServerSourceFrame",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "ServerSourceViewState",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "setFilterTreeCombinator",
       "currentImport": "@adapttable/core",
       "kind": "value",
@@ -27539,6 +27411,22 @@
       "behavior": ""
     },
     {
+      "export": "stopCellEditKeyboard",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "stopEditKeys",
+      "currentImport": "@adapttable/core",
+      "kind": "value",
+      "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
       "export": "StreamSocket",
       "currentImport": "@adapttable/core",
       "kind": "type",
@@ -27591,6 +27479,30 @@
       "currentImport": "@adapttable/core",
       "kind": "value",
       "class": "neutral-operation",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "TableData",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "TableDataConfig",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
+      "proposedImport": "@adapttable/core",
+      "behavior": ""
+    },
+    {
+      "export": "TableDataPlan",
+      "currentImport": "@adapttable/core",
+      "kind": "type",
+      "class": "neutral-model",
       "proposedImport": "@adapttable/core",
       "behavior": ""
     },
@@ -35022,7 +34934,7 @@
       "export": "GroupingPanelChipProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -36582,7 +36494,7 @@
       "export": "TableAssistantAvatars",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },
@@ -36702,7 +36614,7 @@
       "export": "TableAssistantProps",
       "currentImport": "@adapttable/react/adapter",
       "kind": "type",
-      "class": "react-chrome",
+      "class": "neutral-operation",
       "proposedImport": "@adapttable/react/adapter",
       "behavior": ""
     },

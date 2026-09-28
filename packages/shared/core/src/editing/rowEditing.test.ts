@@ -6,11 +6,31 @@
  * changed. So the rules that matter are about the patch — never a partial write,
  * never an untouched field, never a write at all when nothing was edited.
  */
-import type { EditableColumnLike } from "@adapttable/core";
-import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { useRowEditing } from "./rowEditing";
+import type { EditableColumnLike } from "./cellEditing";
+import {
+  createRowEditStore,
+  rowEditingView,
+  type RowEditStoreOptions,
+} from "./rowEditing";
+
+/** The store, read the way a binding reads it after every change. */
+function mountRowEditing<TRow>(options: RowEditStoreOptions<TRow>) {
+  const store = createRowEditStore(options);
+  return {
+    result: {
+      get current() {
+        return rowEditingView(store, store.getSnapshot(), options.featureHost);
+      },
+    },
+  };
+}
+
+/** Run a gesture; a store settles synchronously, so there is nothing to flush. */
+function act(gesture: () => void): void {
+  gesture();
+}
 
 interface Task {
   id: string;
@@ -41,13 +61,11 @@ const setup = (over?: {
   onRowEdit?: (row: Task, patch: Readonly<Record<string, unknown>>) => unknown;
   columns?: EditableColumnLike<Task>[];
 }) =>
-  renderHook(() =>
-    useRowEditing<Task>({
-      enabled: over?.enabled ?? true,
-      columns: over?.columns ?? COLUMNS,
-      onRowEdit: over?.onRowEdit,
-    })
-  );
+  mountRowEditing<Task>({
+    enabled: over?.enabled ?? true,
+    columns: over?.columns ?? COLUMNS,
+    onRowEdit: over?.onRowEdit,
+  });
 
 describe("useRowEditing", () => {
   it("does nothing until the host arms it", () => {
@@ -276,16 +294,14 @@ describe("useRowEditing", () => {
     });
     const onEditCancel = vi.fn();
     const onRowEdit = vi.fn();
-    const { result } = renderHook(() =>
-      useRowEditing<Task>({
-        enabled: true,
-        columns: COLUMNS,
-        onRowEdit,
-        onEditStart,
-        onEditCommit,
-        onEditCancel,
-      })
-    );
+    const { result } = mountRowEditing<Task>({
+      enabled: true,
+      columns: COLUMNS,
+      onRowEdit,
+      onEditStart,
+      onEditCommit,
+      onEditCancel,
+    });
     act(() => {
       result.current.begin(TASK, "1");
     });
@@ -388,5 +404,26 @@ describe("an incoming row under an open form", () => {
     });
     expect(result.current.activeRowId).toBeNull();
     expect(result.current.seeds()).toBeUndefined();
+  });
+});
+
+describe("createRowEditStore — options", () => {
+  it("reads its options at the moment it acts, and settles quietly", () => {
+    const onEditCancel = vi.fn();
+    const store = createRowEditStore<Task>({ columns: COLUMNS });
+    store.begin(TASK, "1");
+    expect(store.getSnapshot().activeRowId).toBeNull();
+    store.configure({ enabled: true, columns: COLUMNS, onEditCancel });
+    const listener = vi.fn();
+    store.subscribe(listener);
+    // Closing a form that is not open is not a change anyone draws.
+    store.cancel();
+    expect(listener).not.toHaveBeenCalled();
+    expect(onEditCancel).not.toHaveBeenCalled();
+    store.begin(TASK, "1");
+    const opened = store.getSnapshot();
+    // Typing what a field already holds is not a keystroke worth drawing.
+    store.setDraft("title", "Ship");
+    expect(store.getSnapshot()).toBe(opened);
   });
 });

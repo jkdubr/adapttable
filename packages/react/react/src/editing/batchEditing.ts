@@ -1,33 +1,22 @@
 /**
- * Many rows changed, saved in one go.
- *
- * Row mode holds one row's fields until the reader saves it. Batch mode holds
- * *several rows* until they save all of them — the shape of a review pass, where
- * someone walks a list correcting values and wants one write at the end rather
- * than one per row. Nothing is sent until they say so, and one Cancel puts
- * everything back.
- *
- * The table still owns none of the data: what a save produces is the list of
- * patches, and the host applies them however it applies anything else. That is
- * also what makes the write atomic if the host wants it to be — a single request
- * with every change in it.
+ * Many rows changed, saved in one go: nothing is sent until the reader says
+ * so, and one Cancel puts everything back. The rules live in
+ * `@adapttable/core` (`createBatchEditStore`); this hook subscribes to the
+ * store.
  */
 import {
+  type BatchEditingState,
+  batchEditingView,
   type BatchRowEdit,
+  createBatchEditStore,
   type EditableColumnLike,
   type FeatureHostState,
-  parseCellEditValue,
-  readEditableCellValue,
-  resolveCellEditor,
 } from "@adapttable/core";
-import type { BatchEditingState } from "@adapttable/core/binding";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 
-import { useEventCallback } from "../hooks/useEventCallback";
-import { type EditEventHandler, observeEdit } from "./editingEvents";
+import type { EditEventHandler } from "./editingEvents";
 
-export type { BatchRowEdit } from "@adapttable/core";
-export type { BatchEditingState };
+export type { BatchEditingState, BatchRowEdit } from "@adapttable/core";
 
 /**
  * What {@link useBatchEditing} needs.
@@ -57,20 +46,6 @@ export interface UseBatchEditingOptions<TRow> {
   featureHost?: FeatureHostState;
 }
 
-/** The drafts of one row, by column key. */
-type RowDrafts = Readonly<Record<string, string>>;
-
-/**
- * Every pending row's drafts, by row id.
- *
- * `seeds` is what each changed field read when the reader changed it — what an
- * incoming update is measured against, so a field they typed in can be told
- * apart from one they never touched.
- */
-type PendingDrafts = Readonly<
-  Record<string, { row: unknown; drafts: RowDrafts; seeds: RowDrafts }>
->;
-
 /**
  * Headless state for changing many rows and saving them together.
  *
@@ -83,244 +58,16 @@ type PendingDrafts = Readonly<
 export function useBatchEditing<TRow>(
   options: UseBatchEditingOptions<TRow>
 ): BatchEditingState<TRow> {
-  const enabled = options.enabled ?? false;
-  const [pending, setPending] = useState<PendingDrafts>({});
-  // A ref beside the state: a save reads the drafts in the same tick a keystroke
-  // wrote one, and a control that saves on the click that also edits would
-  // otherwise send the values as they were before it.
-  const pendingRef = useRef<PendingDrafts>({});
-
-  const write = useEventCallback((next: PendingDrafts) => {
-    pendingRef.current = next;
-    setPending(next);
-  });
-
-  const setDraft = useEventCallback(
-    (row: TRow, rowId: string, columnKey: string, value: string) => {
-      if (!enabled) return;
-      const column = options.columns.find((entry) => entry.key === columnKey);
-      if (!column) return;
-      const stored = readEditableCellValue(row, column, options.featureHost);
-      const current = pendingRef.current[rowId];
-      const drafts = { ...current?.drafts, [columnKey]: value };
-      const seeds = { ...current?.seeds, [columnKey]: stored };
-      // A value typed back to what it was is not a change, and a row left with
-      // no changes is not pending — otherwise "3 unsaved rows" counts rows the
-      // reader has already put back.
-      if (value === stored) {
-        delete drafts[columnKey];
-        delete seeds[columnKey];
-      }
-      const wasPending = current !== undefined;
-      const next = { ...pendingRef.current };
-      if (Object.keys(drafts).length === 0) delete next[rowId];
-      else next[rowId] = { row: current?.row ?? row, drafts, seeds };
-      write(next);
-      if (!wasPending && next[rowId]) {
-        observeEdit(options.onEditStart, {
-          row,
-          rowId,
-          columnKey,
-          value,
-          previousValue: stored,
-          unit: "batch",
-        });
-      }
-    }
+  const [store] = useState(() => createBatchEditStore<TRow>(options));
+  store.configure(options);
+  const snapshot = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot
   );
-
-  const entries = useMemo(
-    () =>
-      Object.entries(pending).map(([rowId, entry]) => ({
-        rowId,
-        openedRow: entry.row,
-        seeds: entry.seeds,
-        drafts: entry.drafts,
-      })),
-    [pending]
-  );
-
-  /** What an incoming row reads for these fields. */
-  const incomingOf = useEventCallback(
-    (row: TRow, columnKeys: readonly string[]): Record<string, string> => {
-      const values: Record<string, string> = {};
-      for (const columnKey of columnKeys) {
-        const column = options.columns.find((one) => one.key === columnKey);
-        if (!column) continue;
-        values[columnKey] = readEditableCellValue(
-          row,
-          column,
-          options.featureHost
-        );
-      }
-      return values;
-    }
-  );
-
-  const acceptSeeds = useEventCallback(
-    (row: TRow, rowId: string, columnKeys: readonly string[]) => {
-      const current = pendingRef.current[rowId];
-      if (!current) return;
-      write({
-        ...pendingRef.current,
-        [rowId]: {
-          ...current,
-          row,
-          seeds: { ...current.seeds, ...incomingOf(row, columnKeys) },
-        },
-      });
-    }
-  );
-
-  const takeSeeds = useEventCallback(
-    (row: TRow, rowId: string, columnKeys: readonly string[]) => {
-      const current = pendingRef.current[rowId];
-      if (!current) return;
-      // Taking what arrived leaves nothing changed in that cell, so the draft
-      // goes: an untouched cell reads the row itself.
-      const drafts = { ...current.drafts };
-      const seeds = { ...current.seeds };
-      for (const columnKey of columnKeys) {
-        delete drafts[columnKey];
-        delete seeds[columnKey];
-      }
-      const next = { ...pendingRef.current };
-      if (Object.keys(drafts).length === 0) delete next[rowId];
-      else next[rowId] = { row, drafts, seeds };
-      write(next);
-    }
-  );
-
-  const saveAll = useEventCallback(() => {
-    const current = pendingRef.current;
-    const edits: BatchRowEdit<TRow>[] = [];
-    for (const [rowId, entry] of Object.entries(current)) {
-      const row = entry.row as TRow;
-      const patch: Record<string, unknown> = {};
-      for (const [columnKey, draft] of Object.entries(entry.drafts)) {
-        const column = options.columns.find((one) => one.key === columnKey);
-        if (!column) continue;
-        patch[columnKey] = column.parseValue
-          ? column.parseValue(draft, row)
-          : parseCellEditValue(
-              resolveCellEditor(column, options.featureHost) ?? "text",
-              draft
-            );
-      }
-      edits.push({ row, rowId, patch });
-    }
-    if (edits.length > 0) {
-      options.onBatchEdit?.(edits);
-      for (const edit of edits) {
-        observeEdit(options.onEditCommit, {
-          row: edit.row,
-          rowId: edit.rowId,
-          columnKey: "",
-          value: edit.patch,
-          previousValue: edit.row,
-          unit: "batch",
-        });
-      }
-    }
-    write({});
-  });
-
-  const cancelAll = useEventCallback(() => {
-    for (const [rowId, entry] of Object.entries(pendingRef.current)) {
-      observeEdit(options.onEditCancel, {
-        row: entry.row as TRow,
-        rowId,
-        columnKey: "",
-        value: entry.drafts,
-        previousValue: entry.row,
-        unit: "batch",
-      });
-    }
-    write({});
-  });
-
-  const cancelRow = useEventCallback((rowId: string) => {
-    const entry = pendingRef.current[rowId];
-    if (!entry) return;
-    observeEdit(options.onEditCancel, {
-      row: entry.row as TRow,
-      rowId,
-      columnKey: "",
-      value: entry.drafts,
-      previousValue: entry.row,
-      unit: "batch",
-    });
-    const next = { ...pendingRef.current };
-    delete next[rowId];
-    write(next);
-  });
-
-  const isPending = useCallback((rowId: string) => rowId in pending, [pending]);
-
-  const isChanged = useCallback(
-    (rowId: string, columnKey: string) =>
-      pending[rowId]?.drafts[columnKey] !== undefined,
-    [pending]
-  );
-
-  const draftFor = useCallback(
-    (row: TRow, rowId: string, columnKey: string) => {
-      const draft = pending[rowId]?.drafts[columnKey];
-      if (draft !== undefined) return draft;
-      const column = options.columns.find((entry) => entry.key === columnKey);
-      return column
-        ? readEditableCellValue(row, column, options.featureHost)
-        : "";
-    },
-    [pending, options.columns, options.featureHost]
-  );
-
-  const signature = useMemo(
-    () =>
-      Object.entries(pending)
-        .map(
-          ([rowId, entry]) =>
-            `${rowId}:${Object.entries(entry.drafts)
-              .map(([key, value]) => `${key}=${value}`)
-              .join("|")}`
-        )
-        .join(";"),
-    [pending]
-  );
-
-  const count = Object.keys(pending).length;
-
+  const { columns, featureHost } = options;
   return useMemo(
-    () => ({
-      count,
-      pending: count > 0,
-      isPending,
-      isChanged,
-      draftFor,
-      setDraft,
-      saveAll,
-      cancelAll,
-      cancelRow,
-      entries,
-      acceptSeeds,
-      takeSeeds,
-      signature,
-      featureHost: options.featureHost,
-    }),
-    [
-      count,
-      isPending,
-      isChanged,
-      draftFor,
-      setDraft,
-      saveAll,
-      cancelAll,
-      cancelRow,
-      entries,
-      acceptSeeds,
-      takeSeeds,
-      signature,
-      options.featureHost,
-    ]
+    () => batchEditingView(store, snapshot, { columns, featureHost }),
+    [store, snapshot, columns, featureHost]
   );
 }

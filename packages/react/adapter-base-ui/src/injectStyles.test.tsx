@@ -47,11 +47,16 @@ describe("base-ui chrome styles", () => {
     ).toHaveLength(1);
   });
 
-  it("injected chrome matches styles.css", () => {
+  it("injected chrome matches styles.css without comments", () => {
     const css = readFileSync(
       join(dirname(fileURLToPath(import.meta.url)), "styles.css"),
       "utf8"
     );
-    expect(ADAPTTABLE_BASE_UI_CSS).toBe(css);
+    const rules = css
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\s+/g, " ")
+      .replace(/ ?([{};,>]) ?/g, "$1")
+      .trim();
+    expect(ADAPTTABLE_BASE_UI_CSS).toBe(rules);
   });
 });

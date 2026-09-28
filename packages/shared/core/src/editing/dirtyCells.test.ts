@@ -6,14 +6,36 @@
  * clear: never on its own, because a mark that fades on a timer says the change
  * is safe when nobody checked.
  */
-import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { useDirtyCells } from "./dirtyCells";
+import {
+  createDirtyCellStore,
+  dirtyCellKey,
+  type DirtyCellStoreOptions,
+  dirtyCellView,
+  dirtyMarkerView,
+} from "./dirtyCells";
+
+/** The store, read the way a binding reads it after every change. */
+function mountDirtyCells(options?: DirtyCellStoreOptions) {
+  const store = createDirtyCellStore(options);
+  return {
+    result: {
+      get current() {
+        return dirtyCellView(store, store.getSnapshot());
+      },
+    },
+  };
+}
+
+/** Run a gesture; a store settles synchronously, so there is nothing to flush. */
+function act(gesture: () => void): void {
+  gesture();
+}
 
 describe("useDirtyCells", () => {
   it("marks nothing until the host asks for marks", () => {
-    const { result } = renderHook(() => useDirtyCells());
+    const { result } = mountDirtyCells();
     act(() => {
       result.current.mark("1", "name");
     });
@@ -22,7 +44,7 @@ describe("useDirtyCells", () => {
   });
 
   it("marks a cell, and its row with it", () => {
-    const { result } = renderHook(() => useDirtyCells({ enabled: true }));
+    const { result } = mountDirtyCells({ enabled: true });
     act(() => {
       result.current.mark("1", "name");
     });
@@ -34,7 +56,7 @@ describe("useDirtyCells", () => {
   });
 
   it("marks the same cell once however many times it is edited", () => {
-    const { result } = renderHook(() => useDirtyCells({ enabled: true }));
+    const { result } = mountDirtyCells({ enabled: true });
     act(() => {
       result.current.mark("1", "name");
     });
@@ -48,7 +70,7 @@ describe("useDirtyCells", () => {
   });
 
   it("clears one cell without touching its neighbours", () => {
-    const { result } = renderHook(() => useDirtyCells({ enabled: true }));
+    const { result } = mountDirtyCells({ enabled: true });
     act(() => {
       result.current.mark("1", "name");
       result.current.mark("1", "team");
@@ -64,7 +86,7 @@ describe("useDirtyCells", () => {
   });
 
   it("clears a whole row", () => {
-    const { result } = renderHook(() => useDirtyCells({ enabled: true }));
+    const { result } = mountDirtyCells({ enabled: true });
     act(() => {
       result.current.mark("1", "name");
       result.current.mark("1", "team");
@@ -78,7 +100,7 @@ describe("useDirtyCells", () => {
   });
 
   it("clears everything, which is what a fresh fetch means", () => {
-    const { result } = renderHook(() => useDirtyCells({ enabled: true }));
+    const { result } = mountDirtyCells({ enabled: true });
     act(() => {
       result.current.mark("1", "name");
       result.current.mark("2", "name");
@@ -90,7 +112,7 @@ describe("useDirtyCells", () => {
   });
 
   it("does no work clearing what was never marked", () => {
-    const { result } = renderHook(() => useDirtyCells({ enabled: true }));
+    const { result } = mountDirtyCells({ enabled: true });
     const before = result.current.signature;
     act(() => {
       result.current.confirm("9", "name");
@@ -101,11 +123,35 @@ describe("useDirtyCells", () => {
   });
 
   it("changes its signature so a row repaints", () => {
-    const { result } = renderHook(() => useDirtyCells({ enabled: true }));
+    const { result } = mountDirtyCells({ enabled: true });
     const before = result.current.signature;
     act(() => {
       result.current.mark("1", "name");
     });
     expect(result.current.signature).not.toBe(before);
+  });
+});
+
+describe("dirtyMarkerView", () => {
+  it("draws nothing without markers, while still counting", () => {
+    const { result } = mountDirtyCells({ enabled: true });
+    act(() => {
+      result.current.mark("1", "name");
+    });
+    const tracked = result.current;
+    expect(dirtyMarkerView(tracked, true)).toBe(tracked);
+    const hidden = dirtyMarkerView(tracked, false);
+    expect(hidden.isDirty("1", "name")).toBe(false);
+    expect(hidden.isRowDirty("1")).toBe(false);
+    expect(hidden.signature).toBe("");
+    expect(hidden.count).toBe(1);
+  });
+
+  it("reads its options at the moment it marks", () => {
+    const store = createDirtyCellStore();
+    store.mark("1", "name");
+    store.configure({ enabled: true });
+    store.mark("1", "name");
+    expect(store.getSnapshot().cells.has(dirtyCellKey("1", "name"))).toBe(true);
   });
 });

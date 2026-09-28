@@ -189,9 +189,68 @@ export {
   restoreAggregationDefaults,
   serializeAggregationDerivedKey,
 } from "./aggregate/aggregationModel";
+export {
+  APPROVAL_PREVIEW_LIMIT,
+  type ApprovalReview,
+  approvalReview,
+  type ApprovalReviewItem,
+} from "./approval/approvalReview";
 export { columnText } from "./columns/columnText";
 export { computed, type ComputedColumnSpec } from "./columns/computed";
 export { localizedColumnPath } from "./columns/resolveColumns";
+export {
+  type BatchEditEntry,
+  type BatchEditingState,
+  batchEditingView,
+  type BatchEditSnapshot,
+  type BatchEditStore,
+  type BatchEditStoreOptions,
+  type BatchPendingDrafts,
+  createBatchEditStore,
+} from "./editing/batchEditing";
+export {
+  createDirtyCellStore,
+  dirtyCellKey,
+  type DirtyCellSnapshot,
+  type DirtyCellState,
+  type DirtyCellStore,
+  type DirtyCellStoreOptions,
+  dirtyCellView,
+  dirtyMarkerView,
+} from "./editing/dirtyCells";
+export {
+  beginCellEdit,
+  type CellEditingState,
+  cellEditingView,
+  type CellSaveState,
+  cellSaveView,
+  type EditableCellController,
+  editableCellController,
+  type EditableCellMode,
+  type EditConflictLabels,
+  type EditingBundle,
+  type EditValidationState,
+  editValidationView,
+  focusEditorOnMount,
+  stopCellEditKeyboard,
+} from "./editing/editableCell";
+export {
+  contestedCellKey,
+  type ContestedEditCell,
+  contestedRowSignature,
+  createEditConflictStore,
+  type EditConflictSnapshot,
+  type EditConflictState,
+  type EditConflictStore,
+  editConflictView,
+  isCellInConflict,
+  isRowContested,
+  liveRowChanged,
+  type ReconcileLiveBatchEdit,
+  type ReconcileLiveEdit,
+  type ReconcileLiveRowEdit,
+  resolveConflictChoice,
+} from "./editing/editConflict";
 export type {
   BatchRowEdit,
   CellValidator,
@@ -207,6 +266,16 @@ export type {
   RowValidator,
   ValidationTarget,
 } from "./editing/editContracts";
+export {
+  type CellEditHandler,
+  createEditHistory,
+  type EditHistoryController,
+  type EditHistoryControllerOptions,
+  type EditHistoryState,
+  editHistoryView,
+  recordingCellEdit,
+  resolveEditHistory,
+} from "./editing/editHistory";
 export {
   asBatchGesture,
   asGesture,
@@ -248,6 +317,54 @@ export {
   validationKey,
   validationSignature,
 } from "./editing/editingController";
+export {
+  type BatchEditBarModel,
+  batchEditBarModel,
+  batchEditErrorId,
+  type CellConflictAsk,
+  cellConflictAsk,
+  controllerConflictAsk,
+  customEditorConflict,
+  defaultPendingRows,
+  editableCellErrorId,
+  type EditableCellPresentation,
+  editableCellPresentation,
+  type EditingArming,
+  type EditingArmingProps,
+  type EditorAriaState,
+  editorBusyProps,
+  editorKeyRestoresFocus,
+  editorSelectOptions,
+  editorValidationProps,
+  handleRowEditorKey,
+  isEditActivateKey,
+  isFirstEditableColumn,
+  resolveEditableCellDisplay,
+  resolveEditingArming,
+  resolveRowEditTrigger,
+  type RowEditActionsLayout,
+  rowEditActionsLayout,
+  type RowEditConflict,
+  rowEditConflict,
+  type RowEditControls,
+  rowEditControls,
+  type RowEditControlsOptions,
+  rowEditErrorId,
+  rowEditSaveBlocked,
+  type RowEditTrigger,
+  stopEditKeys,
+} from "./editing/editingGate";
+export {
+  createRowEditStore,
+  parseColumnDraft,
+  type RowEditDrafts,
+  type RowEditingState,
+  rowEditingView,
+  rowEditSignature,
+  type RowEditSnapshot,
+  type RowEditStore,
+  type RowEditStoreOptions,
+} from "./editing/rowEditing";
 export type {
   FeatureRegistration,
   NeutralFeatureHost,
@@ -608,6 +725,7 @@ export {
   createQueryEmitter,
   cursorHasMore,
   type CursorTrail,
+  cursorTrailKey,
   type DataTier,
   effectiveQueryAggregates,
   EMPTY_CURSOR_TRAIL,
@@ -636,6 +754,31 @@ export {
   type FrontendSourceViewState,
   resolvePaginationMode,
 } from "./source/frontendSource";
+export {
+  createQuerySource,
+  type QuerySource,
+  type QuerySourceAnswer,
+  type QuerySourceConfig,
+  type QuerySourceFrame,
+} from "./source/querySource";
+export {
+  createResponseAggregateOps,
+  type ResponseAggregateOps,
+  type ResponseAggregateOpsInput,
+} from "./source/responseAggregateOps";
+export {
+  createServerSource,
+  type ServerSource,
+  type ServerSourceConfig,
+  type ServerSourceFrame,
+  type ServerSourceViewState,
+} from "./source/serverSource";
+export {
+  createTableData,
+  type TableData,
+  type TableDataConfig,
+  type TableDataPlan,
+} from "./source/tableData";
 export type { TableSource } from "./source/TableSource";
 export type {
   SummaryRowFn,

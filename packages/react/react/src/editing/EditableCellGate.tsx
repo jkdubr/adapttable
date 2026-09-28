@@ -1,7 +1,15 @@
 import {
   booleanDraft,
+  type CellConflictAsk,
+  cellConflictAsk,
+  controllerConflictAsk,
+  editableCellErrorId,
+  editableCellPresentation,
+  editorKeyRestoresFocus,
   formatMultiDraft,
   isCustomEditor,
+  isEditActivateKey,
+  isFirstEditableColumn,
 } from "@adapttable/core";
 import type {
   EditableCellActivateProps as NeutralEditableCellActivateProps,
@@ -92,22 +100,6 @@ export interface EditableCellEditorCtrl {
 }
 
 /**
- * Whether a column is the first editable one — the field a row edit focuses.
- *
- * By column order rather than by which cell renders first, so the answer is the
- * same in a windowed body and in a reordered one.
- */
-function isFirstEditableColumn(
-  columns: readonly { key: string; editable?: unknown }[],
-  key: string
-): boolean {
-  const first = columns.find(
-    (column) => column.editable !== undefined && column.editable !== false
-  );
-  return first?.key === key;
-}
-
-/**
  * Opt-in cell wrapper: plain display when editing is off; double-click /
  * Enter / F2 to activate; kit supplies the editor via `renderEditor`.
  *
@@ -166,122 +158,12 @@ export interface EditableCellGateProps<TRow> {
   readonly slots: EditableCellSlots;
 }
 
-/**
- * Keep an editor's own keys out of the table's key handler.
- *
- * Enter, Escape and Tab all mean something to BOTH an open editor and the grid
- * around it: the editor commits, cancels or moves to the next field, and the
- * table would also move focus or leave edit mode on the same press. The editor
- * is the one the user is typing in, so it wins — and the table never sees it.
- *
- * Structural event on purpose, so this stays usable from any framework's
- * handler and from a plain listener.
- *
- * @public
- */
-export function stopEditKeys(
-  event: Readonly<{ key: string; stopPropagation: () => void }>
-): void {
-  if (event.key === "Enter" || event.key === "Escape" || event.key === "Tab") {
-    event.stopPropagation();
-  }
-}
-
-/**
- * The ARIA a kit's editor needs when validation is in play.
- *
- * Spread onto the input or select: invalid marks the field, `describedby`
- * points at the message so it is read WITH the field rather than announced
- * once and lost, and busy says an async check is still deciding.
- *
- * @param ctrl - The editor controller the gate handed the kit.
- * @returns Attributes to spread; empty while the value is fine.
- *
- * @public
- */
-export function editorValidationProps(ctrl: EditableCellEditorCtrl): {
-  "aria-invalid"?: true;
-  "aria-describedby"?: string;
-  "aria-busy"?: true;
-  "data-conflict"?: "";
-} {
-  return {
-    "aria-invalid": ctrl.error === undefined ? undefined : true,
-    "aria-describedby": ctrl.error === undefined ? undefined : ctrl.errorId,
-    "aria-busy": ctrl.validating ? true : undefined,
-    "data-conflict": ctrl.conflict === true ? "" : undefined,
-  };
-}
-
-/**
- * Busy and conflict marks, for a kit whose own input owns `aria-invalid`
- * (Mantine, MUI). `data-conflict` still belongs on the field so the same
- * selector works on every kit; `aria-describedby` points at the notice
- * while one is up.
- *
- * @param ctrl - The editor controller the gate handed the kit.
- * @returns Attributes to spread; empty unless a check is running or a
- *   conflict is being asked.
- *
- * @public
- */
-export function editorBusyProps(ctrl: EditableCellEditorCtrl): {
-  "aria-busy"?: true;
-  "aria-describedby"?: string;
-  "data-conflict"?: "";
-} {
-  const describedBy =
-    ctrl.conflict === true ? { "aria-describedby": ctrl.errorId } : {};
-  return {
-    "aria-busy": ctrl.validating ? true : undefined,
-    ...describedBy,
-    "data-conflict": ctrl.conflict === true ? "" : undefined,
-  };
-}
-
-/** Keep mine / Take theirs — same channel as a validation message. */
-/**
- * The incoming value waiting on one cell the reader is working in.
- *
- * A row that changed underneath marks every field that moved, each with the
- * notice a cell already shows — the reader is choosing between two versions of
- * a value, which they cannot do without seeing the one that arrived. Answering
- * on any of them answers for the row: the row moved as a whole.
- */
-function cellAsk<TRow>(
-  editing: EditableCellEditing<TRow> | undefined,
-  rowId: string,
-  columnKey: string
-): CellConflictAsk | undefined {
-  const conflict = editing?.conflict;
-  const cell = conflict?.contestedCell(rowId, columnKey);
-  if (!conflict || !cell) return undefined;
-  return {
-    incomingValue: cell.incomingValue,
-    // One cell, one answer: a reader working across several columns — or, in a
-    // batch, several rows — settles each on its own, and the rest stand.
-    keep: () => {
-      conflict.keepCell(rowId, columnKey);
-    },
-    take: () => {
-      conflict.takeCell(rowId, columnKey);
-    },
-  };
-}
-
-/**
- * What one cell needs to ask about an incoming value.
- *
- * @public
- */
-export interface CellConflictAsk {
-  /** What that field reads now. */
-  readonly incomingValue: string;
-  /** Keep the draft; accept the incoming value as the new stored value. */
-  readonly keep: () => void;
-  /** Replace the draft with the incoming value. */
-  readonly take: () => void;
-}
+export {
+  type CellConflictAsk,
+  editorBusyProps,
+  editorValidationProps,
+  stopEditKeys,
+} from "@adapttable/core";
 
 /**
  * Props for {@link CellConflictNotice}.
@@ -378,15 +260,7 @@ function ConflictNotice(
   const { ctrl, errorId, errorClassName, slots } = props;
   return (
     <CellConflictNotice
-      ask={
-        ctrl.conflict
-          ? {
-              incomingValue: ctrl.conflict.incomingValue,
-              keep: ctrl.keepConflict,
-              take: ctrl.takeConflict,
-            }
-          : undefined
-      }
+      ask={controllerConflictAsk(ctrl)}
       labels={ctrl.conflictLabels}
       errorId={errorId}
       errorClassName={errorClassName}
@@ -458,11 +332,15 @@ export function EditableCellGate<TRow>(
     activateRef.current?.focus();
   });
 
-  // A batch turns every editable cell into a field: the reader is walking a
-  // list correcting values, and opening each cell first is the friction the
-  // mode exists to remove.
+  // Which unit owns this cell — a batch, then an open row form, then the
+  // cell's own controller.
+  const presentation = editableCellPresentation(
+    props.editing,
+    props.rowId,
+    ctrl
+  );
   const batch = props.editing?.batch;
-  if (batch) {
+  if (presentation === "batch" && batch) {
     return (
       <BatchEditCell
         batch={batch}
@@ -472,7 +350,7 @@ export function EditableCellGate<TRow>(
         display={<>{props.display}</>}
         editLabel={props.editLabel}
         renderEditor={props.renderEditor}
-        ask={cellAsk(props.editing, props.rowId, props.column.key)}
+        ask={cellConflictAsk(props.editing, props.rowId, props.column.key)}
         conflictLabels={props.editing?.conflictLabels}
         errorClassName={props.errorClassName}
         slots={props.slots}
@@ -480,10 +358,8 @@ export function EditableCellGate<TRow>(
     );
   }
 
-  // A row being edited as one unit owns every cell in it: the per-cell activate
-  // control would be a second way to start an edit that is already open.
   const rowEditing = props.editing?.rowEditing;
-  if (rowEditing?.isEditing(props.rowId) === true) {
+  if (presentation === "row" && rowEditing) {
     return (
       <RowEditCell
         rowEditing={rowEditing}
@@ -492,7 +368,7 @@ export function EditableCellGate<TRow>(
         editLabel={props.editLabel}
         takesFocus={isFirstEditableColumn(props.columns, props.column.key)}
         renderEditor={props.renderEditor}
-        ask={cellAsk(props.editing, props.rowId, props.column.key)}
+        ask={cellConflictAsk(props.editing, props.rowId, props.column.key)}
         rowAsking={props.editing?.conflict?.isRowContested(props.rowId)}
         conflictLabels={props.editing?.conflictLabels}
         errorClassName={props.errorClassName}
@@ -501,11 +377,11 @@ export function EditableCellGate<TRow>(
     );
   }
 
-  if (ctrl.mode === "display") {
+  if (presentation === "display") {
     return <>{props.display}</>;
   }
 
-  const errorId = `adapttable-edit-error-${props.rowId}-${props.column.key}`;
+  const errorId = editableCellErrorId(props.rowId, props.column.key);
 
   /** Hand the reader's keys to the table, and focus back to the cell after. */
   const onEditorKeyDown = (event: {
@@ -516,7 +392,7 @@ export function EditableCellGate<TRow>(
     // Escape cancels, Enter commits — BOTH must hand keyboard focus
     // back to the activate button, or it falls to <body>. (Tab moves
     // to the next editable cell, which manages its own focus.)
-    if (event.key === "Escape" || event.key === "Enter") {
+    if (editorKeyRestoresFocus(event.key)) {
       restoreFocusRef.current = true;
     }
     ctrl.onEditorKeyDown(event);
@@ -526,7 +402,7 @@ export function EditableCellGate<TRow>(
   // kit: activation, focus, the keyboard flow, validation and the commit are
   // all the table's either way, so nine copies of this branch would differ only
   // in which file they sat in.
-  if (ctrl.mode === "editing" && isCustomEditor(ctrl.editor)) {
+  if (presentation === "custom-editor" && isCustomEditor(ctrl.editor)) {
     const custom = ctrl.editor.render({
       draft: ctrl.draft,
       setDraft: ctrl.setDraft,
@@ -545,13 +421,7 @@ export function EditableCellGate<TRow>(
       error: ctrl.error,
       validating: ctrl.validating,
       errorId,
-      conflict: ctrl.conflict
-        ? {
-            incomingValue: ctrl.conflict.incomingValue,
-            keep: ctrl.keepConflict,
-            take: ctrl.takeConflict,
-          }
-        : undefined,
+      conflict: controllerConflictAsk(ctrl),
     });
     return (
       <>
@@ -579,7 +449,7 @@ export function EditableCellGate<TRow>(
     );
   }
 
-  if (ctrl.mode === "editing" && ctrl.editor) {
+  if (presentation === "editor" && ctrl.editor) {
     return (
       <>
         {props.renderEditor({
@@ -645,7 +515,7 @@ export function EditableCellGate<TRow>(
           event.stopPropagation();
         }}
         onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === "F2") {
+          if (isEditActivateKey(event.key)) {
             event.preventDefault();
             stopCellEditKeyboard(event);
             ctrl.begin();

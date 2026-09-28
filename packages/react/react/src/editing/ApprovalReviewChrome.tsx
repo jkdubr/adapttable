@@ -9,7 +9,11 @@
  *
  * Structure and part names live here; every visible control is a kit slot.
  */
-import type { TableLabels } from "@adapttable/core";
+import type {
+  ApprovalReview,
+  ApprovalReviewItem,
+  TableLabels,
+} from "@adapttable/core";
 import type { ApprovalReviewSlots as NeutralApprovalReviewSlots } from "@adapttable/core/binding";
 import { Fragment, type ReactElement, type ReactNode, useId } from "react";
 
@@ -17,7 +21,6 @@ import type {
   AgentApprovalButtonProps,
   AgentApprovalProposal,
 } from "./AgentApprovalChrome";
-import type { ApprovalReview, ApprovalReviewItem } from "./approvalReview";
 
 /**
  * Controls a kit supplies to the shared review body — `@adapttable/core`'s
