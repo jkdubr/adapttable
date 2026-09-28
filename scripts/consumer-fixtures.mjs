@@ -132,7 +132,11 @@ const CORE_FIXTURES = [
     name: "core · every export",
     kind: "core",
     pkg: "core",
-    budgetKB: 93,
+    // Raised from 93 KB when the feature controllers and runtimes moved out
+    // of the React binding into core, so every binding drives the same state
+    // machines (#497). The weight moved rather than grew: a headless table
+    // still costs ~25 KB, and this fixture imports everything at once.
+    budgetKB: 100,
     code: `export * from "PKG";`,
     absent: ["useRowPatchStream", "grouping-drop-zone"],
   },
