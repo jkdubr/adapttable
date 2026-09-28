@@ -816,6 +816,101 @@ FilterTreeEditorActions`, `filterTreeCombinatorOptions`,
   `HeaderFilterOption`. `hasActiveHeaderFilter` says when a column's funnel
   lights.
 
+### Row feature runtimes
+
+Grouping, trees, row actions and cell navigation, for a binding to drive.
+
+- `createGroupingPanelController(options: GroupingPanelControllerOptions):
+GroupingPanelController` — the grouping panel's drag and keyboard state
+  machine, its aggregate gates and announcements. `GroupingPanelSnapshot`,
+  `GroupingDragEventLike`, `GroupingKeyEventLike`. The panel's layout reads
+  `groupingDropPlan` (`GroupingDropPlan`), `GroupingDropHandlers`,
+  `INERT_GROUPING_DROP_HANDLERS`, `deferGroupingDropToInner`,
+  `groupingAvailableColumns`, `groupingColumnName`, `groupingOperationLabel`,
+  `groupingAggregationOptions`, `focusAfterAggregationRemoval` and
+  `aggregationRemovalFocusSelectors`.
+- `groupingAggregationSource`, `groupingIgnoredWarning`,
+  `groupingAggregates(options: GroupingAggregatesOptions):
+GroupingAggregates`, `groupedRowModel(options: GroupedRowModelOptions):
+GroupedRowModel`, `groupShowMoreRequest` (`GroupShowMoreRequest`),
+  `groupedViewSource` and `groupingPanelAggregations` — the grouping runtime
+  over a `GroupingRuntimeSource`. `advanceGroupPaging` and
+  `createGroupPagingController(): GroupPagingController` page a group's
+  rows; `groupCollapseActions(): GroupCollapseActions` expands and collapses.
+- `createLazyChildrenController(options: LazyChildrenOptions):
+LazyChildrenController` — a tree's children loaded on expand, with the node
+  closed again when the load fails. `LazyChildrenSnapshot`.
+  `treeExpansionActions` (`TreeExpansionActions`), `toggleTreeNode`,
+  `closeFailedTreeNode`, `treeHasLoadedChildren` and
+  `treeExportExpandedIds`.
+- `rowPinActions`, `withRowPinActions`, `commitRowPin`,
+  `rowPinningRequested`, `rowPinningBlockedWarning`, `rowPinningControl`,
+  `rowPinningUrlSync` and `ROW_PIN_STORE_OPTIONS` — row pinning;
+  `EMPTY_ROW_PIN_STATE`. `rowMutationActions` and `withRowMutationActions`
+  add duplicate and delete (`MergedRowActions`).
+  `dispatchRowMove`, `rowMoveView` and `rowReorderRuntimeOptions` dispatch a
+  row reorder.
+- `cellNavigationChannels(options: CellNavigationChannelsOptions)` — cell
+  navigation's covered cells, and paste and fill recorded as one undo
+  gesture. `reportedCellRange` and `cellRangeKey` report the selected range.
+- `copyContextMenuSelection`, `copyContextMenuTargetCell` and
+  `withContextMenuCellCopy` — the context menu's copy rules, with and
+  without cell navigation (`ContextMenuCopyFocus`).
+- `TableRuntime` and `TableRuntimeView` are named on the main entry too, since
+  these runtimes take them.
+
+### Panel, bar and effect models
+
+- `handleFindBarKey` (`FindBarKeyEvent`, `FindBarKeyTarget`),
+  `findMatchCountText`, `defaultFindMatchCount`, `isFindShortcut`,
+  `createFindShortcutScope(options: FindShortcutScopeOptions):
+FindShortcutScope`, `scrollCurrentMatchIntoView`,
+  `FIND_CURRENT_MATCH_SELECTOR` and `findMatchRow` — the find bar's keys,
+  count text, Ctrl/Cmd+F scope and scrolling to the current match.
+- `parseChord` (`ParsedChord`), `chordMatches` (`ChordKeyEvent`),
+  `chordHasCommandModifier`, `isTextEntryTarget` and
+  `createShortcutHandler` (`ShortcutKeyEvent`) — keyboard shortcuts,
+  `mod+k` included.
+- `createBulkActionRunner(options: BulkActionRunnerOptions):
+BulkActionRunnerController` (`BulkActionRunnerSnapshot`) and
+  `bulkBarModel(selection: BulkBarSelection): BulkBarModel` — the bulk
+  action runner and the "all matching" banner.
+- `savedViewRowControls(input: SavedViewRowControlsInput)`
+  (`SavedViewRowControlModel`, `SavedViewGlyph`, `SAVED_VIEW_GLYPH_PATHS`)
+  and `createSavedViewRenameController(): SavedViewRenameController`
+  (`SavedViewRenameSnapshot`) — a saved view's row controls.
+- `exportProgressView` (`ExportProgressView`), `exportProgressHeading` and
+  `focusExportTrigger` — the export progress panel.
+- `statusBarItems(input: StatusBarItemsInput)` and `selectionStatParts` —
+  the status bar and selection stats.
+- `sidePanelModel` (`SidePanelModel`, `SidePanelModelPanel`,
+  `SidePanelTabModel`), `sidePanelTabIndex`, `sidePanelTabId`,
+  `handleSidePanelTabKey`, `handleSidePanelBodyKey` (`SidePanelKeyEvent`) and
+  `DEFAULT_SIDE_PANEL_ID_PREFIX` — the side panel's tablist.
+- `stickyToolbarStyle` (`StickyToolbarStyle`), `stickyHeaderOffset` and
+  `measuredToolbarHeight` — the sticky toolbar rule. `shouldEscapeClose`
+  and `isElementShowing` — the Escape-close rule. `restoreFocusSoon` and
+  `focusWasDropped` — restore-focus timing. `resolveDensity`,
+  `requestDensityChange` and `DEFAULT_DENSITY` — density.
+- `createAllMatchingScope(): AllMatchingScope` — selection's "all matching"
+  scope. `createHighlightStore(options: HighlightStoreOptions):
+HighlightStore` (`HighlightSnapshot`, `highlightDuration`,
+  `highlightCellKey`, `HIGHLIGHT_FADE_MS`, `HIGHLIGHT_STEADY_MS`) and
+  `createChangedCellFlashStore(options: ChangedCellFlashOptions):
+ChangedCellFlashStore` (`changedRowFields`, `patchTouchedKeys`,
+  `CHANGED_CELL_FLASH_MS`) — row highlights and the changed-cell flash.
+- `sparklineBars` (`SparklineBar`), `sparklinePoints` (`SparklinePoint`),
+  `sparklineLinePath`, `sparklineAreaPath`, `sparklineSortValue`,
+  `SPARKLINE_DEFAULT_WIDTH` and `SPARKLINE_DEFAULT_HEIGHT` — sparkline
+  geometry. `NESTED_TABLE_DEFAULT_LABEL` and `nestedTableLabel` — nested
+  table defaults.
+- On `@adapttable/core` and `@adapttable/core/pivot`:
+  `pivotTableLayout` (`PivotTableLayout`, `PivotLeafColumnLayout`),
+  `pivotLeafColumnKey`, `pivotLeafGroup`, `pivotRowCaption`,
+  `pivotRowIndentStyle` and `PIVOT_ROW_INDENT` lay out a pivot table;
+  `pivotPanelZones` (`PivotZoneModel`, `PivotZoneEntry`), `pivotZoneLabel`,
+  `pivotMeasureAggName` and `PIVOT_AGGREGATIONS` model its panel.
+
 ### `@adapttable/core/binding` — the Chrome model
 
 - `chromeColumnPlan` (`ChromeColumnPlan`) — the columns a desktop table draws,
