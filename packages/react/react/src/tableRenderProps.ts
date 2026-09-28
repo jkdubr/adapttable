@@ -14,7 +14,6 @@
  */
 import {
   type AssemblyFns,
-  bodyRowEntries,
   type CellSpanAppearance,
   type ColumnGroupRecord,
   type ConfirmHandler,
@@ -25,10 +24,6 @@ import {
   type GroupByInput,
   type GroupedFlatEntry,
   type GroupingPanelState,
-  incrementalViewOf,
-  pinnedSummaryEntries,
-  resolveAssembly,
-  resolveVirtualRows,
   type RowAction,
   type RowActionsLayout,
   type RowActionsRenderer,
@@ -36,16 +31,14 @@ import {
   type RowStyle,
   type TableLabels,
   type TreeEntry,
-  virtualColumnSpan,
   type VirtualTableRow,
 } from "@adapttable/core";
 import {
   type BodyCell,
-  chromeColumnPlan,
-  extraRowCoveredSlots,
-  pinnedRowIds,
+  chromeRenderModel,
+  SummaryCellsCache,
 } from "@adapttable/core/binding";
-import { type ReactNode, useMemo, useRef } from "react";
+import { type ReactNode, useState } from "react";
 
 import type { ColumnDef } from "./columnDef";
 import type { PinOffset } from "./columns/useColumnLayout";
@@ -362,139 +355,7 @@ export function tableRenderModel<TRow>(
     | "assembly"
   >
 ): TableRenderModel<TRow> {
-  const assembly = resolveAssembly(props.assembly);
-  const { selection, labels } = props.table;
-  // Windowed columns replace the full set for every renderer at once, so no
-  // adapter has to know whether the horizontal axis is windowed.
-  const windowed = props.columnWindow?.enabled === true;
-  const columns = windowed
-    ? (props.columnWindow?.columns ?? props.table.columns)
-    : props.table.columns;
-  // The trailing control column exists for row actions AND for row-mode's own
-  // edit / save / cancel — both live there, and a row edit with nowhere to be
-  // saved from would be a mode nobody can leave.
-  const { showActions, showReorder, expandable, hasSelection, leadingCells } =
-    chromeColumnPlan({
-      rowActionCount: props.rowActions?.length ?? 0,
-      rowEditing: props.editing?.rowEditing !== undefined,
-      rowReorder: props.rowReorder !== undefined,
-      rowDetail: Boolean(props.renderRowDetail && props.expansion),
-      selection: Boolean(selection),
-    });
-  const pinnedIds = pinnedRowIds(
-    props.getRowId,
-    props.pinnedTopRows,
-    props.pinnedBottomRows
-  );
-  const rawEntries = resolveVirtualRows(
-    props.rows,
-    props.getRowId,
-    props.rowEntries
-  );
-  const entries =
-    pinnedIds.size === 0
-      ? rawEntries
-      : rawEntries.filter((entry) => !pinnedIds.has(entry.key));
-  const fullColumns = props.table.columns;
-  const windowKeys = windowed
-    ? new Set(columns.map((column) => column.key))
-    : undefined;
-  const cellOptions = {
-    columns: fullColumns,
-    getRowId: props.getRowId,
-    getCellSpan: props.getCellSpan,
-    pinOffset: props.pinOffset,
-    windowKeys,
-  };
-  const cellsByRow = new Map<string, readonly BodyCell<TRow>[]>();
-  const merge = (map: ReadonlyMap<string, readonly BodyCell<TRow>[]>) => {
-    for (const [key, cells] of map) cellsByRow.set(key, cells);
-  };
-  const scrollRows = bodyRowEntries(entries, props.tree);
-  const visualRows = [
-    ...(props.pinnedTopRows ?? []),
-    ...scrollRows.map((entry) => entry.row),
-    ...(props.pinnedBottomRows ?? []),
-  ];
-  const visualIds = visualRows.map((row) => props.getRowId(row));
-  merge(
-    assembly.buildBodyCells({
-      ...cellOptions,
-      rows: visualRows,
-    })
-  );
-  for (const entry of [
-    ...pinnedSummaryEntries(props.pinnedSummaryTop ?? [], "top"),
-    ...pinnedSummaryEntries(props.pinnedSummaryBottom ?? [], "bottom"),
-  ]) {
-    merge(
-      assembly.buildBodyCells({
-        ...cellOptions,
-        getRowId: () => entry.id,
-        rows: [entry.row],
-      })
-    );
-  }
-  // A grouped body renders `grouping.entries`, not the row list above — its
-  // leaves reach the screen through a different array and would otherwise have
-  // no cells built for them at all, so every grouped row would render empty.
-  const groupedRows = (props.grouping?.entries ?? []).filter(
-    (entry): entry is Extract<GroupedFlatEntry<TRow>, { kind: "row" }> =>
-      entry.kind === "row"
-  );
-  if (groupedRows.length > 0) {
-    merge(
-      assembly.buildBodyCells({
-        ...cellOptions,
-        rows: groupedRows.map((entry) => entry.row),
-        firstRowIndex: groupedRows[0]?.index ?? 0,
-      })
-    );
-  }
-  const spannedCells = assembly.inflateBodyCellRowSpans(
-    cellsByRow,
-    visualIds,
-    props.extraRows
-  );
-  if (spannedCells !== cellsByRow) {
-    cellsByRow.clear();
-    merge(spannedCells);
-  }
-  const extraCoveredSlots = extraRowCoveredSlots(
-    props.extraRows,
-    (beforeRowId) =>
-      assembly.extraCoveredTableSlots(beforeRowId, {
-        visualIds,
-        cellsByRow,
-        extraRows: props.extraRows,
-        leadingCells,
-      })
-  );
-  return {
-    columns,
-    selection,
-    labels,
-    showActions,
-    showReorder,
-    leadingCells,
-    entries,
-    columnSpan:
-      virtualColumnSpan(
-        columns.length,
-        hasSelection,
-        showActions,
-        expandable,
-        showReorder
-      ) + (windowed ? 2 : 0),
-    columnSpacers: windowed
-      ? {
-          start: props.columnWindow?.paddingStart ?? 0,
-          end: props.columnWindow?.paddingEnd ?? 0,
-        }
-      : undefined,
-    cellsByRow,
-    extraCoveredSlots,
-  };
+  return chromeRenderModel(props);
 }
 
 /**
@@ -517,13 +378,8 @@ export function useSummaryCells<TRow>(
     ((rows: readonly TRow[]) => Partial<Record<string, ReactNode>>) | undefined,
   rows: readonly TRow[]
 ): Partial<Record<string, ReactNode>> | undefined {
-  const fromView = incrementalViewOf(rows)?.aggregates as
-    Partial<Record<string, ReactNode>> | undefined;
-  const builderRef = useRef(summaryRow);
-  builderRef.current = summaryRow;
-  const enabled = summaryRow !== undefined && fromView === undefined;
-  return useMemo(
-    () => (enabled ? builderRef.current?.(rows) : fromView),
-    [enabled, rows, fromView]
+  const [cache] = useState(
+    () => new SummaryCellsCache<Partial<Record<string, ReactNode>>>()
   );
+  return cache.read(summaryRow, rows);
 }

@@ -13,6 +13,12 @@ import {
   dirtyMarkerView,
   resolveEditingArming,
 } from "@adapttable/core";
+import {
+  coreBatchEditing,
+  coreDirtyIndicators,
+  coreEditing,
+  coreRowEditing,
+} from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { type BatchRowEdit, useBatchEditing } from "../editing/batchEditing";
@@ -288,8 +294,7 @@ export function editing<TRow>(
   extras?: FeaturePatch<TRow>
 ): TableFeature<TRow> {
   return {
-    id: "editing",
-    apply: () => ({ onCellEdit, ...extras }),
+    ...coreEditing(onCellEdit, extras),
     renders: [editingRender],
   };
 }
@@ -304,8 +309,7 @@ export function rowEditing<TRow>(
   extras?: FeaturePatch<TRow>
 ): TableFeature<TRow> {
   return {
-    id: "row-editing",
-    apply: () => ({ rowEditing: true, onRowEdit, ...extras }),
+    ...coreRowEditing(onRowEdit, extras),
     renders: [editingRender],
   };
 }
@@ -320,8 +324,7 @@ export function batchEditing<TRow>(
   extras?: FeaturePatch<TRow>
 ): TableFeature<TRow> {
   return {
-    id: "batch-editing",
-    apply: () => ({ batchEditing: true, onBatchEdit, ...extras }),
+    ...coreBatchEditing(onBatchEdit, extras),
     renders: [editingRender],
   };
 }
@@ -333,8 +336,7 @@ export function batchEditing<TRow>(
  */
 export function dirtyIndicators(): StaticTableFeature {
   return {
-    id: "dirty-indicators",
-    apply: () => ({ dirtyIndicators: true }),
+    ...coreDirtyIndicators(),
     renders: [editingRender],
   };
 }

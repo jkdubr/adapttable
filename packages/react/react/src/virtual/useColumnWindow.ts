@@ -18,12 +18,14 @@
  * Arabic is the one on the right. Sizing them as leading/trailing rather than
  * left/right is what makes a wide RTL table scroll correctly.
  */
+import {
+  type ColumnViewport,
+  columnWindowPlan,
+  readColumnViewport,
+} from "@adapttable/core/binding";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ColumnDef } from "../columnDef";
-
-/** How wide a column is assumed to be when nothing has measured it. */
-const DEFAULT_COLUMN_WIDTH = 160;
 
 /**
  * What {@link useColumnWindow} needs.
@@ -81,7 +83,10 @@ export function useColumnWindow<TRow>(
     getScrollElement,
     overscan = 3,
   } = options;
-  const [viewport, setViewport] = useState({ start: 0, width: 0 });
+  const [viewport, setViewport] = useState<ColumnViewport>({
+    start: 0,
+    width: 0,
+  });
   // The accessor arrives fresh from the caller every render; reading it
   // through a ref keeps the scroll listener from being torn down and
   // reattached on every keystroke elsewhere in the table.
@@ -91,12 +96,7 @@ export function useColumnWindow<TRow>(
   const read = useCallback(() => {
     const element = scrollElement.current?.();
     if (!element) return;
-    // `scrollLeft` is negative in RTL in every engine that follows the spec,
-    // so its magnitude is the distance scrolled either way.
-    const next = {
-      start: Math.abs(element.scrollLeft),
-      width: element.clientWidth,
-    };
+    const next = readColumnViewport(element);
     // Same numbers, same object: a fresh one every scroll event would
     // re-render the whole table at 60fps for nothing.
     setViewport((current) =>
@@ -125,58 +125,16 @@ export function useColumnWindow<TRow>(
     };
   }, [enabled, read]);
 
-  return useMemo(() => {
-    if (!enabled || viewport.width === 0) {
-      return {
-        enabled: false,
+  return useMemo(
+    () =>
+      columnWindowPlan({
         columns,
-        paddingStart: 0,
-        paddingEnd: 0,
-      };
-    }
-    const widthOf = (column: ColumnDef<TRow>) =>
-      widths?.[column.key] ?? DEFAULT_COLUMN_WIDTH;
-    const pinned = columns.filter((column) => pinnedKeys?.has(column.key));
-    const scrollable = columns.filter((column) => !pinnedKeys?.has(column.key));
-
-    // Walk the scrollable columns, accumulating offsets, and keep the span the
-    // viewport crosses plus the overscan either side.
-    let offset = 0;
-    let first = scrollable.length;
-    let last = -1;
-    const offsets: number[] = [];
-    for (const [index, column] of scrollable.entries()) {
-      const width = widthOf(column);
-      offsets.push(offset);
-      const end = offset + width;
-      if (end > viewport.start && offset < viewport.start + viewport.width) {
-        first = Math.min(first, index);
-        last = Math.max(last, index);
-      }
-      offset = end;
-    }
-    if (last === -1) {
-      // Scrolled past everything (or nothing measurable yet): show the head of
-      // the table rather than an empty row.
-      first = 0;
-      last = Math.min(scrollable.length - 1, overscan * 2);
-    }
-    const from = Math.max(0, first - overscan);
-    const to = Math.min(scrollable.length - 1, last + overscan);
-    const windowed = scrollable.slice(from, to + 1);
-    const paddingStart = offsets[from] ?? 0;
-    const paddingEnd = Math.max(
-      0,
-      offset - ((offsets[to] ?? 0) + widthOf(scrollable[to] ?? columns[0]!))
-    );
-
-    return {
-      enabled: true,
-      // Pinned columns keep their declared order relative to the window: they
-      // are rendered first, which is where their sticky offsets put them.
-      columns: [...pinned, ...windowed],
-      paddingStart,
-      paddingEnd,
-    };
-  }, [enabled, columns, widths, pinnedKeys, viewport, overscan]);
+        enabled,
+        viewport,
+        widths,
+        pinnedKeys,
+        overscan,
+      }),
+    [enabled, columns, widths, pinnedKeys, viewport, overscan]
+  );
 }

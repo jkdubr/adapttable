@@ -6,6 +6,7 @@
  * body mounts in-tree through {@link CHROME_BODY}; the base graph never
  * reaches the hooks.
  */
+import { coreVirtualize } from "@adapttable/core/binding";
 import type { ReactNode } from "react";
 
 import { RowScrollContext } from "../virtual/rowScroll";
@@ -18,7 +19,7 @@ import {
   KEYED_WINDOW,
   type KeyedWindowSlotProps,
 } from "./slotKeys";
-import type { FeaturePatch, StaticTableFeature } from "./tableFeature";
+import type { StaticTableFeature } from "./tableFeature";
 
 /**
  * Options the factory accepts — a boolean or the windowing knobs.
@@ -34,15 +35,6 @@ export type VirtualizeOptions =
       virtualOverscan?: number;
       virtualScrollMargin?: number;
     };
-
-// Row-independent, so the patch is typed for the row type that fits every
-// table rather than the one that fits none.
-function patchOf(options: VirtualizeOptions): FeaturePatch<unknown> {
-  if (options === true || options === false) {
-    return { virtualize: options };
-  }
-  return { virtualize: true, ...options };
-}
 
 /**
  * The in-tree body that calls TanStack. Mounted only when this feature
@@ -87,10 +79,8 @@ function KeyedWindow({
 export function virtualize(
   options: VirtualizeOptions = true
 ): StaticTableFeature {
-  const patch = patchOf(options);
   return {
-    id: "virtualize",
-    apply: () => patch,
+    ...coreVirtualize(options),
     renders: [
       slotRender(CHROME_BODY, (slotProps) => (
         <VirtualChromeBody {...slotProps} />

@@ -18,6 +18,7 @@ import { AggregateFormatContext } from '@adapttable/core';
 import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core/binding';
+import { applyTableFeatures } from '@adapttable/core/binding';
 import { APPROVAL_PREVIEW_LIMIT } from '@adapttable/core';
 import { ApprovalReview } from '@adapttable/core';
 import { approvalReview } from '@adapttable/core';
@@ -180,11 +181,12 @@ import { extraUncoveredColSpans } from '@adapttable/core/binding';
 import { FacetCounts } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
 import { FailedCellSave } from '@adapttable/core';
+import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeAppearance } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
-import { FeatureRegistration } from '@adapttable/core';
+import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { featureSlotKey } from '@adapttable/core/binding';
@@ -268,6 +270,7 @@ import { paginationItems } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
 import { paginationSlots } from '@adapttable/core';
+import { PatchFeature } from '@adapttable/core/binding';
 import { pinActionLabel } from '@adapttable/core';
 import { PinLeads } from '@adapttable/core';
 import { PINNED_BOTTOM_PART } from '@adapttable/core/binding';
@@ -627,8 +630,7 @@ export { Aggregator }
 
 export { applyCollapsedColumnGroups }
 
-// @public
-export function applyTableFeatures<P extends object>(props: P): P;
+export { applyTableFeatures }
 
 export { APPROVAL_PREVIEW_LIMIT }
 
@@ -2113,10 +2115,7 @@ export { FacetMap }
 
 export { FailedCellSave }
 
-// @public
-export type FeatureApplyInput<TRow = unknown> = object & {
-    readonly __row?: TRow;
-};
+export { FeatureApplyInput }
 
 // @public
 export function featureHostOf(props: object): FeatureHostState | undefined;
@@ -2135,11 +2134,7 @@ export { FeatureNoticeAppearance }
 
 export { FeatureNoticeKind }
 
-// @public
-export interface FeaturePatch<TRow = unknown> {
-    readonly [key: string]: unknown;
-    readonly __row?: (row: TRow) => void;
-}
+export { FeaturePatch }
 
 // @public
 export interface FeatureProps<TRow> {
@@ -4596,7 +4591,7 @@ export { TableErrorState }
 export { tableErrorState }
 
 // @public
-export interface TableFeature<TRow = unknown> extends FeatureRegistration<TRow> {
+export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;
