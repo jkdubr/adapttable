@@ -4,6 +4,22 @@
  * Kept as a dedicated barrel so the main entry stays grouped by concern.
  */
 
+export type { CellNavigationChannelsOptions } from "./focus/cellNavigationRuntime";
+export {
+  cellNavigationChannels,
+  cellRangeKey,
+  reportedCellRange,
+} from "./focus/cellNavigationRuntime";
+export type {
+  ContextMenuCopyFocus,
+  ContextMenuCopyTarget,
+} from "./focus/contextMenuCopy";
+export {
+  contextMenuCopyTarget,
+  copyContextMenuSelection,
+  copyContextMenuTargetCell,
+  withContextMenuCellCopy,
+} from "./focus/contextMenuCopy";
 export type { GroupCollapseActions } from "./grouping/groupCollapse";
 export { groupCollapseActions } from "./grouping/groupCollapse";
 export type {
