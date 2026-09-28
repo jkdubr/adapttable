@@ -22,11 +22,11 @@ import {
   rowPinSideOf,
   type RowPinState,
 } from "@adapttable/core";
+import type { RowPinningState } from "@adapttable/core/binding";
 import { useCallback, useMemo } from "react";
 
 import { useControllableStore } from "../hooks/useControllableStore";
 import { useEventCallback } from "../hooks/useEventCallback";
-
 export type { RowPinSide, RowPinState } from "@adapttable/core";
 export { applyRowPin, partitionPinnedRows } from "@adapttable/core";
 export {
@@ -36,25 +36,8 @@ export {
   UNPIN_ROW_ACTION_KEY,
 } from "@adapttable/core";
 export { EMPTY_ROW_PIN_STATE } from "@adapttable/core";
+export type { RowPinningState } from "@adapttable/core/binding";
 export { rowPinSignature } from "@adapttable/core/binding";
-
-/**
- * Headless pin state adapters read.
- *
- * @public
- */
-export interface RowPinningState<TRow> {
-  /** Current lists. */
-  state: RowPinState;
-  /** Which edge a row is pinned to, if any. */
-  sideOf: (rowId: string) => RowPinSide | undefined;
-  /** Pin a row to an edge (moves it if it was on the other). */
-  pin: (rowId: string, side: RowPinSide) => void;
-  /** Remove a row from both edges. */
-  unpin: (rowId: string) => void;
-  /** Pin actions, hidden per row so a top-pinned row does not offer Pin to top. */
-  actions: readonly RowAction<TRow>[];
-}
 
 /**
  * Headless row pinning. Inert until the host passes `enabled`;

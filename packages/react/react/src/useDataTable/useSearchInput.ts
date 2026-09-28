@@ -1,18 +1,8 @@
+import type { SearchInputState } from "@adapttable/core/binding";
 import { useEffect, useRef, useState } from "react";
 
 import { useDebounce } from "../hooks/useDebounce";
-
-/**
- * A controlled, debounced search input bound to a committed value.
- *
- * @public
- */
-export interface SearchInputState {
-  /** The live (uncommitted) input value. */
-  value: string;
-  /** Update the live input value. */
-  setValue: (next: string) => void;
-}
+export type { SearchInputState } from "@adapttable/core/binding";
 
 /**
  * Bridge a fast-typing search box to a slower committed search value.

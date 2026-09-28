@@ -9,6 +9,7 @@ import {
   type TableEngine,
   type TableEngineReader,
 } from "@adapttable/core";
+import { sameRows } from "@adapttable/core/binding";
 import {
   useDebugValue,
   useEffect,
@@ -16,8 +17,6 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
-
-import { sameRows } from "@adapttable/core/binding";
 
 function revisionToken<TRow>(reader: TableEngineReader<TRow>): string {
   const revisions = reader.snapshot().revisions;

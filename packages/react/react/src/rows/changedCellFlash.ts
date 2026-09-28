@@ -16,6 +16,7 @@ import {
   createChangedCellFlashStore,
   type RowPatchEvent,
 } from "@adapttable/core";
+import type { ChangedCellFlashState } from "@adapttable/core/binding";
 import {
   useCallback,
   useDebugValue,
@@ -25,6 +26,7 @@ import {
 } from "react";
 
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
+export type { ChangedCellFlashState } from "@adapttable/core/binding";
 
 export type { RowPatchEvent };
 
@@ -41,30 +43,6 @@ export interface UseChangedCellFlashOptions {
   enabled?: boolean;
   /** How long each mark lasts. Defaults to 1200 ms. */
   durationMs?: number;
-}
-
-/**
- * Marks a host can read while rendering.
- *
- * @public
- */
-export interface ChangedCellFlashState {
-  /** Whether this cell changed recently enough to still be marked. */
-  isFlashing: (rowId: string, columnKey: string) => boolean;
-  /** Whether any cell in the row is marked — for a row-level tint. */
-  isRowFlashing: (rowId: string) => boolean;
-  /**
-   * The attribute a cell spreads. Empty when the cell is not marked, so a
-   * renderer can spread it unconditionally.
-   */
-  flashProps: (
-    rowId: string,
-    columnKey: string
-  ) => { "data-flash"?: "" } | Record<string, never>;
-  /** Feed the events a patch produced. Ignored while disabled. */
-  mark: (events: readonly RowPatchEvent<unknown>[]) => void;
-  /** Drop every mark now — a refetch, a page change, a filter. */
-  clear: () => void;
 }
 
 /**

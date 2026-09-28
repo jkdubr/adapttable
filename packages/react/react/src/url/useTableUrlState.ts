@@ -1,17 +1,15 @@
 import {
   createTableViewStore,
   type ExtraFilters,
-  type GroupAggregateOverrides,
-  type QueryFilterGroup,
-  type SortDirection,
   type TableQueryParams,
-  type TableStateMutators,
   type TableViewState,
   type TableViewStateConfig,
 } from "@adapttable/core";
+import type { UseTableUrlStateResult } from "@adapttable/core/binding";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { type UrlStateAdapter, useResolvedAdapter } from "./adapter";
+export type { UseTableUrlStateResult } from "@adapttable/core/binding";
 
 /**
  * Options for `useTableUrlState`.
@@ -43,37 +41,6 @@ export interface UseTableUrlStateOptions {
    * `left.q`, `left.page`, `left.f_status`, … Omit for the bare keys.
    */
   urlKey?: string;
-}
-
-/**
- * State + setters returned by `useTableUrlState`.
- *
- * @public
- */
-export interface UseTableUrlStateResult extends TableStateMutators {
-  /** Current 1-based page. */
-  page: number;
-  /** Current page size. */
-  limit: number;
-  /**
-   * Page size applied when the URL has no `limit` param (`defaults.limit`,
-   * or 25). Stable across `setLimit` so the rows-per-page list can keep it.
-   */
-  defaultLimit: number;
-  /** Current committed search term. */
-  search: string;
-  /** Active sort column key, if any. */
-  sortBy: string | undefined;
-  /** Active sort direction, if any. */
-  sortDir: SortDirection | undefined;
-  /** Active row-grouping keys, comma-separated, if any. */
-  groupBy: string | undefined;
-  /** Session-level group aggregation choices keyed by column. */
-  groupAggregateOverrides: GroupAggregateOverrides;
-  /** The extra-filter bag. */
-  extra: ExtraFilters;
-  /** Nested AND/OR filter tree, when one is in the URL. */
-  filterTree: QueryFilterGroup | undefined;
 }
 
 /**

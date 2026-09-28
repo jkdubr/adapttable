@@ -8,50 +8,21 @@ import {
   CHECKLIST_VIRTUALIZE_AT,
   checklistActions,
   checklistItems,
-  type ChecklistValue,
   type FilterDef,
   listFilterValues,
   searchChecklistItems,
   type TableSource,
 } from "@adapttable/core";
+import type { ChecklistFilterState } from "@adapttable/core/binding";
 import { useMemo, useState } from "react";
-
 export type { ChecklistValue } from "@adapttable/core";
 export {
   CHECKLIST_ITEM_HEIGHT,
   CHECKLIST_LIST_HEIGHT,
   CHECKLIST_VIRTUALIZE_AT,
 } from "@adapttable/core";
-
-/**
- * Kit-agnostic state behind {@link useChecklistFilter}.
- *
- * @public
- */
-export interface ChecklistFilterState {
-  /** False when the source has no full filtered set — do not render. */
-  available: boolean;
-  /** Distinct values, selected-but-missing ones included at count 0. */
-  items: readonly ChecklistValue[];
-  /** `items` narrowed by the search box. */
-  visible: readonly ChecklistValue[];
-  /** Current search box text. */
-  query: string;
-  /** Replaces the checklist's search text. */
-  setQuery: (next: string) => void;
-  /** Currently checked values. */
-  selected: readonly string[];
-  /** True when `visible` is long enough to window. */
-  virtualize: boolean;
-  /** Checks every option the search left visible. */
-  selectAllVisible: () => void;
-  /** Unchecks every option. */
-  clear: () => void;
-  /** Checks or unchecks one option. */
-  toggle: (value: string, on: boolean) => void;
-}
-
 export { collectChecklistValues } from "@adapttable/core";
+export type { ChecklistFilterState } from "@adapttable/core/binding";
 
 /**
  * Derive the checklist from `source.facets` or `source.allFilteredRows`.

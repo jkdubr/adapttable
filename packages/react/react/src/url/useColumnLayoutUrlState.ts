@@ -1,8 +1,10 @@
 import { columnLayoutSlice } from "@adapttable/core";
+import type { UseColumnLayoutUrlStateResult } from "@adapttable/core/binding";
 
 import type { ColumnLayoutState } from "../columns/useColumnLayout";
 import type { UrlStateAdapter } from "./adapter";
 import { useUrlSlice } from "./useUrlSlice";
+export type { UseColumnLayoutUrlStateResult } from "@adapttable/core/binding";
 
 /**
  * Options for {@link useColumnLayoutUrlState}.
@@ -24,18 +26,6 @@ export interface UseColumnLayoutUrlStateOptions {
 }
 
 export { URL_SLICE_WRITE_DEBOUNCE_MS as LAYOUT_URL_WRITE_DEBOUNCE_MS } from "@adapttable/core";
-
-/**
- * State + change handler returned by {@link useColumnLayoutUrlState}.
- *
- * @public
- */
-export interface UseColumnLayoutUrlStateResult {
-  /** Current layout — from the URL, or the default when the URL is empty. */
-  layout: ColumnLayoutState;
-  /** Persist a new layout into the URL. Wire to `onColumnLayoutChange`. */
-  onLayoutChange: (next: ColumnLayoutState) => void;
-}
 
 /**
  * Headless URL-synced column layout. Mirrors `useTableUrlState` for the

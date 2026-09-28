@@ -1,24 +1,12 @@
 import { toggleId } from "@adapttable/core";
+import type { RowExpansionState } from "@adapttable/core/binding";
 import { useCallback, useMemo } from "react";
 
 import {
   UNCONTROLLED,
   useControllableStore,
 } from "../hooks/useControllableStore";
-
-/**
- * Expansion state + actions returned by `useRowExpansion`.
- *
- * @public
- */
-export interface RowExpansionState {
-  /** Ids of the currently expanded rows. */
-  expandedIds: ReadonlySet<string>;
-  /** Whether a row is expanded. */
-  isExpanded: (id: string) => boolean;
-  /** Toggle a row's detail panel. */
-  toggle: (id: string) => void;
-}
+export type { RowExpansionState } from "@adapttable/core/binding";
 
 /**
  * Headless row-expansion state for `renderRowDetail`: multiple rows may be

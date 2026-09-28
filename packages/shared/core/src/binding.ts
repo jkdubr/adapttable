@@ -945,3 +945,45 @@ export {
   resolveColumnHeaders,
 } from "./columns/resolveColumns";
 export { sameRows } from "./engine/sameRows";
+
+// Shared state shapes the bindings return from their hooks.
+export type { BulkBarState } from "./actions/actionsBindingState";
+export type { UseColumnLayoutStorageStateResult } from "./columns/columnsBindingState";
+export type { ExportHandlerState } from "./export/exportBindingState";
+export type {
+  ChecklistFilterState,
+  ChecklistWindowState,
+} from "./filters/filtersBindingState";
+export type { GridFocusState } from "./focus/focusBindingState";
+export type { UseFormulaUrlStateResult } from "./formula/formulaBindingState";
+export type {
+  GroupCollapseState,
+  GroupPagingState,
+} from "./grouping/groupingBindingState";
+export type { FullscreenState } from "./layout/layoutBindingState";
+export type { UsePivotUrlStateResult } from "./pivot/pivotBindingState";
+export type {
+  ChangedCellFlashState,
+  HighlightState,
+  RowExpansionState,
+  RowMutationsState,
+  RowPinningState,
+} from "./rows/rowsBindingState";
+export type { SelectionState } from "./selection/selectionBindingState";
+export type { HeaderSelectionState } from "./selection/selectionState";
+export type {
+  SearchInputState,
+  UseTableDataResult,
+} from "./source/sourceBindingState";
+export type { RowPatchStreamState } from "./stream/streamBindingState";
+export type {
+  LazyChildrenState,
+  TreeExpansionState,
+} from "./tree/treeBindingState";
+export type {
+  UseColumnLayoutUrlStateResult,
+  UseGroupCollapseUrlStateResult,
+  UseRowPinningUrlStateResult,
+  UseSavedViewsResult,
+  UseTableUrlStateResult,
+} from "./url/urlBindingState";

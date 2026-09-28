@@ -4,11 +4,12 @@ import {
   safeLocalStorage,
   writeStoredColumnLayout,
 } from "@adapttable/core";
+import type { UseColumnLayoutStorageStateResult } from "@adapttable/core/binding";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { type ColumnLayoutState, EMPTY_COLUMN_LAYOUT } from "./useColumnLayout";
-
 export type { LayoutStorage } from "@adapttable/core";
+export type { UseColumnLayoutStorageStateResult } from "@adapttable/core/binding";
 
 /**
  * Options for {@link useColumnLayoutStorageState}.
@@ -22,18 +23,6 @@ export interface UseColumnLayoutStorageStateOptions {
   storage?: LayoutStorage;
   /** Layout applied when storage carries no saved layout yet. */
   defaultColumnLayout?: Partial<ColumnLayoutState>;
-}
-
-/**
- * State + change handler returned by {@link useColumnLayoutStorageState}.
- *
- * @public
- */
-export interface UseColumnLayoutStorageStateResult {
-  /** Current layout — from storage, or the default when storage is empty. */
-  layout: ColumnLayoutState;
-  /** Persist a new layout. Wire to `onColumnLayoutChange`. */
-  onLayoutChange: (next: ColumnLayoutState) => void;
 }
 
 /**

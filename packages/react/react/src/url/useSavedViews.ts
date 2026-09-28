@@ -9,13 +9,12 @@
 import {
   createSavedViewsController,
   safeLocalStorage,
-  type SavedView,
   type SavedViewsControllerOptions,
 } from "@adapttable/core";
+import type { UseSavedViewsResult } from "@adapttable/core/binding";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import type { LayoutStorage } from "../columns/useColumnLayoutStorageState";
-
 export {
   SAVED_VIEW_VERSION,
   type SavedView,
@@ -23,6 +22,7 @@ export {
   type SavedViewsStore,
   type SavedViewVisibility,
 } from "@adapttable/core";
+export type { UseSavedViewsResult } from "@adapttable/core/binding";
 
 /**
  * Options for `useSavedViews`.
@@ -35,51 +35,6 @@ export interface UseSavedViewsOptions extends Omit<
 > {
   /** Storage backend. Defaults to `localStorage`; memory-only under SSR. */
   storage?: LayoutStorage;
-}
-
-/**
- * Result of `useSavedViews`.
- *
- * @public
- */
-export interface UseSavedViewsResult {
-  /** The saved views, in save order. */
-  views: readonly SavedView[];
-  /** Capture the table's CURRENT state under a name (replaces same-name). */
-  save: (name: string) => void;
-  /** Apply a saved view to the table (other tables' params untouched). */
-  apply: (name: string) => void;
-  /** Remove a saved view. */
-  remove: (name: string) => void;
-  /**
-   * Rename a view, keeping its place in the list. A no-op when the name is
-   * unknown or the new name is taken — silently merging two views is how a
-   * rename loses one.
-   */
-  rename: (from: string, to: string) => void;
-  /**
-   * Move a view one step through the list. Past either end does nothing
-   * rather than wrapping, and a view this reader may not change does not move
-   * at all. With a `store`, the new order reaches it through
-   * {@link SavedViewsStore.reorder}; a store without that member reorders for
-   * the session only.
-   */
-  move: (name: string, delta: -1 | 1) => void;
-  /**
-   * Make a view the default, or clear the default by passing its own name
-   * again. Only one view can hold it.
-   */
-  setDefault: (name: string) => void;
-  /** The default view, when one is set. */
-  defaultView: SavedView | undefined;
-  /**
-   * Read the list again — after someone else has changed a shared view, say.
-   * Loading happens on mount and when `storageKey` changes; a `store` or a
-   * `migrate` written inline changes identity on every render, so neither can
-   * be allowed to trigger it. Refreshing is therefore something the host asks
-   * for rather than something identity accidentally causes.
-   */
-  reload: () => void;
 }
 
 /**

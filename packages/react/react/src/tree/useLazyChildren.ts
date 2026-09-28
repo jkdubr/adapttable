@@ -4,7 +4,9 @@
  * fetch-once rule.
  */
 import { createLazyChildrenController } from "@adapttable/core";
+import type { LazyChildrenState } from "@adapttable/core/binding";
 import { useEffect, useState, useSyncExternalStore } from "react";
+export type { LazyChildrenState } from "@adapttable/core/binding";
 
 /**
  * What {@link useLazyChildren} needs.
@@ -28,24 +30,6 @@ export interface UseLazyChildrenOptions<TRow> {
    * again.
    */
   onLoadFailed?: (row: TRow, id: string) => void;
-}
-
-/**
- * Lazy-loading state for a tree.
- *
- * @public
- */
-export interface LazyChildrenState<TRow> {
-  /** Nodes being fetched right now — what the chevron shows a spinner for. */
-  loadingIds: ReadonlySet<string>;
-  /**
-   * Call before opening a node: fetches its children when they are missing.
-   * Returns nothing — expansion is not blocked on the fetch, so the row opens
-   * immediately and fills when the rows arrive.
-   */
-  loadIfNeeded: (row: TRow) => void;
-  /** Ids whose last fetch rejected, so a caller can offer a retry. */
-  failedIds: ReadonlySet<string>;
 }
 
 /**
