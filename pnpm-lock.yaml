@@ -364,6 +364,12 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
 
+  packages/angular/adapter-material: {}
+
+  packages/angular/adapter-ng-zorro: {}
+
+  packages/angular/adapter-primeng: {}
+
   packages/angular/angular:
     dependencies:
       '@adapttable/core':
