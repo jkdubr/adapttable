@@ -10,6 +10,9 @@
  * kit renders, there are just fewer of them at a time.
  */
 import {
+  CHECKLIST_ITEM_WIDTH,
+  CHECKLIST_LIST_HEIGHT,
+  CHECKLIST_OPTION_GAP,
   type FilterDef,
   filterLabel,
   resolveLabels,
@@ -21,12 +24,8 @@ import type {
 } from "@adapttable/core/binding";
 import { type CSSProperties, type ReactNode } from "react";
 
-import { CHECKLIST_LIST_HEIGHT, useChecklistFilter } from "./checklist";
-import {
-  CHECKLIST_ITEM_WIDTH,
-  CHECKLIST_OPTION_GAP,
-  useChecklistWindow,
-} from "./checklistWindow";
+import { useChecklistFilter } from "./checklist";
+import { useChecklistWindow } from "./checklistWindow";
 
 export type { FilterDef, TableSource };
 

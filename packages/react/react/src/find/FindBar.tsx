@@ -2,6 +2,7 @@
  * Find-bar layout. Structure only — adapters pass the search field and
  * the previous / next / close buttons the end user clicks.
  */
+import { findMatchCountText, handleFindBarKey } from "@adapttable/core";
 import type {
   FindBarProps,
   FindBarSlots as NeutralFindBarSlots,
@@ -66,19 +67,9 @@ export function FindBarChrome({
   slots,
 }: Readonly<FindBarChromeProps>): ReactElement | null {
   if (!find.open) return null;
-  const count = (labels?.findMatchCount ?? defaultCount)(
-    find.index + 1,
-    find.matches.length
-  );
+  const count = findMatchCountText(labels, find.index, find.matches.length);
   const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === "Escape") {
-      find.setOpen(false);
-      return;
-    }
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-    if (event.shiftKey) find.previous();
-    else find.next();
+    handleFindBarKey(event, find);
   };
 
   const Search = slots.Search;
@@ -127,9 +118,4 @@ export function FindBarChrome({
       />
     </div>
   );
-}
-
-/** "3 of 17", or "No matches" — replaceable through `labels.findMatchCount`. */
-function defaultCount(current: number, total: number): string {
-  return total === 0 ? "No matches" : `${current} of ${total}`;
 }

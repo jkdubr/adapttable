@@ -27,7 +27,12 @@
  * here. Every visible control is a required slot the adapter fills with its
  * own kit's component.
  */
-import { resolveLabels } from "@adapttable/core";
+import {
+  createSavedViewRenameController,
+  resolveLabels,
+  type SavedViewGlyph,
+  savedViewRowControls,
+} from "@adapttable/core";
 import type {
   SavedViewRowControl as NeutralSavedViewRowControl,
   SavedViewsPanelChromeProps as NeutralSavedViewsPanelChromeProps,
@@ -35,7 +40,12 @@ import type {
   SavedViewsPanelSlots as NeutralSavedViewsPanelSlots,
   SavedViewsPanelSurfaceProps as NeutralSavedViewsPanelSurfaceProps,
 } from "@adapttable/core/binding";
-import { type CSSProperties, type ReactNode, useState } from "react";
+import {
+  type CSSProperties,
+  type ReactNode,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import type { SavedView } from "./useSavedViews";
 
@@ -107,7 +117,7 @@ const ROW_LAYOUT = {
  * kit still owns the button around them — its size, its shape, its focus ring
  * and its danger colour.
  */
-const glyph = (paths: readonly string[], filled = false): ReactNode => (
+const glyph = ({ paths, filled }: SavedViewGlyph): ReactNode => (
   <svg
     width={14}
     height={14}
@@ -125,20 +135,6 @@ const glyph = (paths: readonly string[], filled = false): ReactNode => (
     ))}
   </svg>
 );
-
-const PENCIL = ["M4 20h4l10-10-4-4L4 16v4z", "M14 6l4 4"];
-const ARROW_UP = ["M12 19V5", "M6 11l6-6 6 6"];
-const ARROW_DOWN = ["M12 5v14", "M6 13l6 6 6-6"];
-const STAR = [
-  "M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9L12 3.5z",
-];
-const TRASH = [
-  "M4 7h16",
-  "M9 7V4h6v3",
-  "M6 7l1 13h10l1-13",
-  "M10 11v6",
-  "M14 11v6",
-];
 
 export type {
   SavedViewControlKey,
@@ -220,8 +216,12 @@ export function SavedViewsPanelChrome({
   const { Surface, Row, Input, Empty } = slots;
   // Which view is being renamed, and the draft. Held here rather than by the
   // host: a half-typed name is the panel's business, not the table's.
-  const [editing, setEditing] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
+  const [rename] = useState(createSavedViewRenameController);
+  const { editing, draft } = useSyncExternalStore(
+    rename.subscribe,
+    rename.getSnapshot,
+    rename.getSnapshot
+  );
 
   // Focus when the element arrives rather than in an effect: kits portal or
   // mount their inputs a tick later, and an effect would run too early.
@@ -229,73 +229,37 @@ export function SavedViewsPanelChrome({
     element?.focus();
   };
 
-  /** A handler, or `undefined` when this reader may not make that change. */
-  const allowed = (view: SavedView, run: () => void) =>
-    view.readOnly === true ? undefined : run;
-
   const commit = () => {
-    if (editing !== null) onRename(editing, draft);
-    setEditing(null);
+    rename.commit(onRename);
   };
 
   /** The cluster for one view, in the order every kit renders it. */
   const controlsFor = (
     view: SavedView,
     index: number
-  ): readonly SavedViewRowControl[] => [
-    {
-      key: "rename",
-      label: labels.renameView,
-      icon: glyph(PENCIL),
-      onPress:
-        editing === view.name
-          ? undefined
-          : allowed(view, () => {
-              setEditing(view.name);
-              setDraft(view.name);
-            }),
-    },
-    {
-      key: "moveUp",
-      label: labels.moveViewUp,
-      icon: glyph(ARROW_UP),
-      onPress:
-        index > 0
-          ? allowed(view, () => {
-              onMove(view.name, -1);
-            })
-          : undefined,
-    },
-    {
-      key: "moveDown",
-      label: labels.moveViewDown,
-      icon: glyph(ARROW_DOWN),
-      onPress:
-        index < views.length - 1
-          ? allowed(view, () => {
-              onMove(view.name, 1);
-            })
-          : undefined,
-    },
-    {
-      key: "default",
-      label: labels.setDefaultView,
-      icon: glyph(STAR, view.isDefault === true),
-      pressed: view.isDefault === true,
-      onPress: allowed(view, () => {
+  ): readonly SavedViewRowControl[] =>
+    savedViewRowControls({
+      view,
+      index,
+      count: views.length,
+      editing: editing === view.name,
+      labels,
+      onStartRename: () => {
+        rename.begin(view.name);
+      },
+      onMove: (delta) => {
+        onMove(view.name, delta);
+      },
+      onSetDefault: () => {
         onSetDefault(view.name);
-      }),
-    },
-    {
-      key: "remove",
-      label: labels.deleteView,
-      icon: glyph(TRASH),
-      danger: true,
-      onPress: allowed(view, () => {
+      },
+      onRemove: () => {
         onRemove(view.name);
-      }),
-    },
-  ];
+      },
+    }).map(({ glyph: shape, ...control }) => ({
+      ...control,
+      icon: glyph(shape),
+    }));
 
   return (
     <Surface
@@ -322,11 +286,9 @@ export function SavedViewsPanelChrome({
                 label={labels.viewName}
                 ref={focusOnArrival}
                 value={draft}
-                onChange={setDraft}
+                onChange={rename.setDraft}
                 onCommit={commit}
-                onCancel={() => {
-                  setEditing(null);
-                }}
+                onCancel={rename.cancel}
               />
             ) : (
               view.name

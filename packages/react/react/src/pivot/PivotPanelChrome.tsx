@@ -18,16 +18,15 @@
 import {
   type AggregateName,
   assignField,
-  availableFields,
-  measureLabel,
   moveField,
+  PIVOT_AGGREGATIONS,
   type PivotConfig,
   type PivotField,
+  pivotPanelZones,
   type PivotZone,
   removeField,
   resolveLabels,
   setMeasureAgg,
-  type TableLabels,
 } from "@adapttable/core";
 import type {
   PivotFieldProps as NeutralPivotFieldProps,
@@ -39,15 +38,6 @@ import type {
 import type { ReactNode } from "react";
 
 export type { AggregateName, PivotConfig, PivotField, PivotZone };
-
-/** The aggregations the panel offers. */
-const AGGREGATIONS: readonly AggregateName[] = [
-  "sum",
-  "avg",
-  "count",
-  "min",
-  "max",
-];
 
 export type { PivotAddProps, PivotAggProps } from "@adapttable/core/binding";
 
@@ -91,13 +81,6 @@ export type PivotPanelSlots = NeutralPivotPanelSlots<ReactNode>;
  */
 export type PivotPanelChromeProps = NeutralPivotPanelChromeProps<ReactNode>;
 
-/** The caption for one zone. */
-function zoneLabel(zone: PivotZone, labels: Required<TableLabels>): string {
-  if (zone === "rows") return labels.pivotRows;
-  if (zone === "columns") return labels.pivotColumns;
-  return labels.pivotMeasures;
-}
-
 /**
  * The pivot configuration panel.
  *
@@ -116,30 +99,18 @@ export function PivotPanelChrome({
 }: Readonly<PivotPanelChromeProps>) {
   const labels = resolveLabels(labelsProp);
   const { Surface, Zone, Field, Add, Agg } = slots;
-  const unused = availableFields(fields, config);
-  const nameOf = (key: string) =>
-    fields.find((field) => field.key === key)?.label ?? key;
-
-  const entriesFor = (zone: PivotZone): { key: string; label: string }[] =>
-    zone === "measures"
-      ? config.measures.map((measure, index) => ({
-          key: `${measure.key}-${String(index)}`,
-          label: measureLabel(measure, fields),
-        }))
-      : config[zone].map((key) => ({ key, label: nameOf(key) }));
 
   return (
     <Surface className={className} data-adapttable-part="pivot-panel">
-      {(["rows", "columns", "measures"] as const).map((zone) => {
-        const entries = entriesFor(zone);
-        return (
+      {pivotPanelZones(fields, config, labels).map(
+        ({ zone, label, entries, addOptions }) => (
           <Zone
             key={zone}
             zone={zone}
-            label={zoneLabel(zone, labels)}
+            label={label}
             data-adapttable-part="pivot-zone"
           >
-            {entries.map((entry, index) => (
+            {entries.map((entry) => (
               <Field
                 key={entry.key}
                 label={entry.label}
@@ -148,58 +119,46 @@ export function PivotPanelChrome({
                 moveDownLabel={labels.pivotMoveDown}
                 removeLabel={labels.pivotRemove}
                 onMoveUp={
-                  index > 0
+                  entry.canMoveUp
                     ? () => {
-                        onChange(moveField(config, zone, index, -1));
+                        onChange(moveField(config, zone, entry.index, -1));
                       }
                     : undefined
                 }
                 onMoveDown={
-                  index < entries.length - 1
+                  entry.canMoveDown
                     ? () => {
-                        onChange(moveField(config, zone, index, 1));
+                        onChange(moveField(config, zone, entry.index, 1));
                       }
                     : undefined
                 }
                 onRemove={() => {
-                  onChange(removeField(config, zone, index));
+                  onChange(removeField(config, zone, entry.index));
                 }}
                 aggregation={
-                  zone === "measures" ? (
+                  entry.aggregation === undefined ? undefined : (
                     <Agg
                       label={labels.pivotAggregation}
-                      value={aggNameAt(config, index)}
-                      options={AGGREGATIONS}
+                      value={entry.aggregation}
+                      options={PIVOT_AGGREGATIONS}
                       onChange={(next) => {
-                        onChange(setMeasureAgg(config, index, next));
+                        onChange(setMeasureAgg(config, entry.index, next));
                       }}
                     />
-                  ) : undefined
+                  )
                 }
               />
             ))}
             <Add
               label={labels.pivotAdd}
-              // Measures may repeat a column; dimensions may not, so the
-              // list of what can still be added differs per zone.
-              options={zone === "measures" ? fields : unused}
+              options={addOptions}
               onAdd={(key) => {
                 onChange(assignField(config, key, zone));
               }}
             />
           </Zone>
-        );
-      })}
+        )
+      )}
     </Surface>
   );
-}
-
-function isAggName(value: string): value is AggregateName {
-  return (AGGREGATIONS as readonly string[]).includes(value);
-}
-
-/** The aggregation shown for a measure, or `sum` for a custom one. */
-function aggNameAt(config: PivotConfig, index: number): AggregateName {
-  const agg = config.measures[index]?.agg;
-  return typeof agg === "string" && isAggName(agg) ? agg : "sum";
 }

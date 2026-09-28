@@ -7,27 +7,13 @@
  * is the binding's `TNode`, so a React kit and an Angular kit fill the same
  * shapes with their own nodes.
  */
-import type { FeatureNotice, FeatureNoticeKind } from "../state/featureNotices";
+import type { FeatureNotice } from "../state/featureNotices";
 import type { TableLabels } from "../types";
 import type { SelectionStats } from "./selectionStats";
 import type { SelectionStatsSlots } from "./selectionStatsContract";
+import type { StatusBarItem } from "./statusBar";
 
-/**
- * One piece of the status bar, in display order.
- *
- * @public
- */
-export interface StatusBarItem {
-  /** What this figure is, for a kit that styles them differently. */
-  readonly key: "rows" | "selected" | FeatureNoticeKind;
-  /** The text to show, already localized and formatted. */
-  readonly text: string;
-  /**
-   * How the matching feature looks at the table: off, disabled, or
-   * one page. Present on notices; omitted on the row/selected counts.
-   */
-  readonly appearance?: FeatureNotice["appearance"];
-}
+export type { StatusBarItem };
 
 /**
  * Props an adapter's status-bar component receives.

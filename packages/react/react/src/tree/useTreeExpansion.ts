@@ -9,7 +9,7 @@
  * Expanded rather than collapsed, unlike groups: a tree starts folded, so the
  * open set is the small one — the opposite default, and the same reasoning.
  */
-import { idSetReader, toggleId } from "@adapttable/core";
+import { idSetReader, treeExpansionActions } from "@adapttable/core";
 import { useCallback, useMemo, useState } from "react";
 
 import { useControllableStore } from "../hooks/useControllableStore";
@@ -62,25 +62,9 @@ export function useTreeExpansion(controlled?: {
     [expandedIds]
   );
 
-  const toggle = useCallback(
-    (id: string) => store.update((prev) => toggleId(prev, id)),
-    [store]
+  const [{ toggle, expand, expandAll, collapseAll }] = useState(() =>
+    treeExpansionActions(store)
   );
-
-  const expand = useCallback(
-    (id: string) => {
-      if (store.current().has(id)) return;
-      store.update((prev) => new Set(prev).add(id));
-    },
-    [store]
-  );
-
-  const expandAll = useCallback(
-    (ids: readonly string[]) => store.commit(new Set(ids)),
-    [store]
-  );
-
-  const collapseAll = useCallback(() => store.commit(new Set()), [store]);
 
   return useMemo(
     () => ({

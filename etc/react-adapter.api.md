@@ -52,6 +52,7 @@ import { bodyCellsHaveRowSpan } from '@adapttable/core/binding';
 import { buildBodyCells } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
+import { bulkActionErrorMessage } from '@adapttable/core';
 import { CellConflictAsk } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditCommit } from '@adapttable/core';
@@ -90,12 +91,14 @@ import { ChromeGroupEntry } from '@adapttable/core/binding';
 import { ChromeGroupSlot } from '@adapttable/core/binding';
 import { ChromeRowSlot } from '@adapttable/core/binding';
 import { ChromeVirtualPadSlot } from '@adapttable/core/binding';
+import { COLUMN_DND_MIME } from '@adapttable/core';
 import { COLUMN_GROUP_ID_SEP } from '@adapttable/core/binding';
 import { COLUMN_GROUP_RENDER_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_PREFIX } from '@adapttable/core/binding';
 import { COLUMN_GROUP_STUB_WIDTH } from '@adapttable/core/binding';
 import { COLUMN_GROUP_TOGGLE } from '@adapttable/core/binding';
 import { COLUMN_MENU } from '@adapttable/core/binding';
+import { ColumnDragRowAttrs } from '@adapttable/core';
 import { ColumnFilter } from '@adapttable/core';
 import { columnFlexShares } from '@adapttable/core';
 import { ColumnFooterContext } from '@adapttable/core';
@@ -144,6 +147,8 @@ import { ConfirmRequest } from '@adapttable/core';
 import { Context } from 'react';
 import { ContextMenuActions } from '@adapttable/core';
 import { ContextMenuChromeProps as ContextMenuChromeProps_2 } from '@adapttable/core/binding';
+import { ContextMenuCopyTarget } from '@adapttable/core';
+import { contextMenuCopyTarget } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuItemProps } from '@adapttable/core/binding';
 import { ContextMenuItemsFactory } from '@adapttable/core';
@@ -341,6 +346,7 @@ import { GroupNode } from '@adapttable/core';
 import { GroupRowKind } from '@adapttable/core/binding';
 import { groupRowParts } from '@adapttable/core/binding';
 import { GroupSort } from '@adapttable/core';
+import { hasActiveHeaderFilter } from '@adapttable/core';
 import { HeaderGroupCell } from '@adapttable/core/binding';
 import { headerGroupRow } from '@adapttable/core/binding';
 import { headerGroupRows } from '@adapttable/core/binding';
@@ -370,6 +376,9 @@ import { MobileCardField } from '@adapttable/core';
 import { mobileCardListStyle } from '@adapttable/core';
 import { MobileCardModel } from '@adapttable/core';
 import { MobileCardRenderer } from '@adapttable/core';
+import { NestedTableDefaults } from '@adapttable/core';
+import { nestedTableDefaults } from '@adapttable/core';
+import { NestedTableParent } from '@adapttable/core';
 import { NeutralFeatureHost } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { normalizeEditorOptions } from '@adapttable/core';
@@ -430,6 +439,7 @@ import { ReconcileLiveEdit } from '@adapttable/core';
 import { ReconcileLiveRowEdit } from '@adapttable/core';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
+import { REORDER_COLUMN_WIDTH } from '@adapttable/core';
 import { resetColumnLayout } from '@adapttable/core/binding';
 import { resolveContextTarget } from '@adapttable/core';
 import { ResolvedContextTarget } from '@adapttable/core';
@@ -439,7 +449,9 @@ import { resolveMobileLabel } from '@adapttable/core/binding';
 import { resolveRowEditTrigger } from '@adapttable/core';
 import { resolveRowHeight } from '@adapttable/core/binding';
 import { resolveRowStyle } from '@adapttable/core/binding';
+import { resolveStickyToolbar } from '@adapttable/core';
 import { resolveVirtualRows } from '@adapttable/core';
+import { restoreFocusSoon } from '@adapttable/core';
 import { ROW_DND_MIME } from '@adapttable/core/binding';
 import { ROW_EDIT_ACTIONS } from '@adapttable/core/binding';
 import { ROW_ID_ATTRIBUTE } from '@adapttable/core';
@@ -475,7 +487,9 @@ import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
 import { RowPairMeasurer } from '@adapttable/core/binding';
+import { RowPinSide } from '@adapttable/core';
 import { rowPinSignature } from '@adapttable/core/binding';
+import { RowPinState } from '@adapttable/core';
 import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/core/binding';
 import { RowReorderButtonsSlots as RowReorderButtonsSlots_2 } from '@adapttable/core/binding';
 import { RowReorderHandleProps as RowReorderHandleProps_2 } from '@adapttable/core/binding';
@@ -514,6 +528,7 @@ import { SelectionStatsSlotProps } from '@adapttable/core/binding';
 import { SelectionStatsSlots as SelectionStatsSlots_2 } from '@adapttable/core/binding';
 import { shallowEqualByKeys } from '@adapttable/core/binding';
 import { SHARED_DESKTOP_ROW_KEYS } from '@adapttable/core/binding';
+import { Shortcut } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
 import { SidePanelChromeProps as SidePanelChromeProps_2 } from '@adapttable/core/binding';
 import { SidePanelCloseProps } from '@adapttable/core/binding';
@@ -880,8 +895,7 @@ export { BulkAction }
 
 export { BulkActionContext }
 
-// @public
-export function bulkActionErrorMessage(error: unknown): string | null;
+export { bulkActionErrorMessage }
 
 // @public
 export interface BulkBarChromeProps {
@@ -1032,8 +1046,7 @@ export type ChromeExtraSlotProps<TRow = never> = ChromeExtraSlotProps_2<TableChr
     urlKey?: string;
 }, ReactNode>;
 
-// @public
-export const COLUMN_DND_MIME = "application/x-adapttable-column";
+export { COLUMN_DND_MIME }
 
 export { COLUMN_GROUP_ID_SEP }
 
@@ -1069,11 +1082,7 @@ export interface ColumnDef<TRow> extends ColumnMetadata<TRow> {
     renderHeader?: (ctx: ColumnHeaderContext_2<TRow>) => ReactNode;
 }
 
-// @public
-export interface ColumnDragRowAttrs {
-    "data-dragging"?: "";
-    "data-drop"?: "before" | "after";
-}
+export { ColumnDragRowAttrs }
 
 // @public
 export interface ColumnDragState {
@@ -1292,18 +1301,9 @@ export function ContextMenuChrome(props: Readonly<ContextMenuChromeProps>): JSX.
 // @public
 export type ContextMenuChromeProps = ContextMenuChromeProps_2<ReactNode>;
 
-// @public
-export interface ContextMenuCopyTarget {
-    readonly available: boolean;
-    readonly cell?: GridCell;
-}
+export { ContextMenuCopyTarget }
 
-// @public
-export function contextMenuCopyTarget(focus: Pick<GridFocusState, "cellAt" | "range">, target: {
-    kind: string;
-    rowId?: string;
-    columnKey?: string;
-}): ContextMenuCopyTarget;
+export { contextMenuCopyTarget }
 
 export { ContextMenuItem }
 
@@ -2540,8 +2540,7 @@ export { GroupSort }
 // @public
 export function GroupToggleSpacer(): ReactElement;
 
-// @public
-export function hasActiveHeaderFilter<TRow>(props: Readonly<Pick<FilterHeaderControlProps<TRow>, "def" | "source" | "registry">>): boolean;
+export { hasActiveHeaderFilter }
 
 export { HeaderGroupCell }
 
@@ -2640,17 +2639,9 @@ export interface NestedTable {
     table: (defaults: NestedTableDefaults) => ReactNode;
 }
 
-// @public
-export interface NestedTableDefaults {
-    density: Density | undefined;
-    labels: TableLabels | undefined;
-    searchable: boolean;
-    tableLabel: string;
-    urlSync: false;
-}
+export { NestedTableDefaults }
 
-// @public
-export function nestedTableDefaults(label: string, parent?: NestedTableParent): NestedTableDefaults;
+export { nestedTableDefaults }
 
 // @public
 export function nestedTableDetail<TRow>(options: {
@@ -2662,11 +2653,7 @@ export function nestedTableDetail<TRow>(options: {
 // @public
 export type NestedTableFor<TRow> = (row: TRow) => NestedTable | undefined;
 
-// @public
-export interface NestedTableParent {
-    density?: Density;
-    labels?: TableLabels;
-}
+export { NestedTableParent }
 
 export { nextPinSide }
 
@@ -2840,8 +2827,7 @@ export { ReconcileLiveRowEdit }
 // @public
 export function rememberFeatureHost(props: object, host: FeatureHostState | undefined): void;
 
-// @public
-export const REORDER_COLUMN_WIDTH = 64;
+export { REORDER_COLUMN_WIDTH }
 
 export { resetColumnLayout }
 
@@ -2872,13 +2858,11 @@ export { resolveRowHeight }
 
 export { resolveRowStyle }
 
-// @public
-export function resolveStickyToolbar(stickyHeader?: boolean, stickyToolbar?: boolean, inScrollBox?: boolean): boolean;
+export { resolveStickyToolbar }
 
 export { resolveVirtualRows }
 
-// @public
-export function restoreFocusSoon(element: HTMLElement | null): () => void;
+export { restoreFocusSoon }
 
 // @public
 export const ROW_ACTIONS_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
@@ -3037,16 +3021,11 @@ export interface RowPinningState<TRow> {
     unpin: (rowId: string) => void;
 }
 
-// @public
-export type RowPinSide = "top" | "bottom";
+export { RowPinSide }
 
 export { rowPinSignature }
 
-// @public
-export interface RowPinState {
-    readonly bottom: readonly string[];
-    readonly top: readonly string[];
-}
+export { RowPinState }
 
 // @public
 export function RowReorderAnnouncer(props: Readonly<{
@@ -3345,11 +3324,7 @@ export function ShellLiveGate<TRow>(input: {
     readonly children: (view: DataTableShellResult<TRow>) => ReactNode;
 }): ReactNode;
 
-// @public
-export interface Shortcut {
-    chord: string;
-    command: string;
-}
+export { Shortcut }
 
 export { showAllColumns }
 

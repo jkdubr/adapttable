@@ -34,6 +34,16 @@ export interface ActiveFilterChip {
 }
 
 // @public
+export function activeFilterChips(input: ActiveFilterChipsOptions): ActiveFilterChip[];
+
+// @public
+export interface ActiveFilterChipsOptions {
+    readonly labels: Readonly<Record<string, ChipLabelResolver>>;
+    readonly onChange: (key: string, next: FilterValue) => void;
+    readonly values: Readonly<Record<string, FilterValue>>;
+}
+
+// @public
 export function addAggregation(overrides: Readonly<Partial<Record<string, string>>>, columnKey: string, operationId: string): Readonly<Partial<Record<string, string>>>;
 
 // @public
@@ -41,6 +51,9 @@ export function addFilterTreeCondition(tree: QueryFilterGroup | undefined, path:
 
 // @public
 export function addFilterTreeGroup(tree: QueryFilterGroup | undefined, path: readonly number[]): QueryFilterGroup;
+
+// @public
+export function advanceGroupPaging(current: GroupPaging, pageSize: number, groupKey?: string): GroupPaging;
 
 // @public
 export type AgentApprovalDecision = "pending" | "approved" | "rejected";
@@ -176,6 +189,9 @@ export interface AggregationModelInput<TRow> {
 export type AggregationOrigin = "reader" | "declared" | "host";
 
 // @public
+export function aggregationRemovalFocusSelectors(remainingKeys: readonly string[], removedIndex: number): string[];
+
+// @public
 export interface AggregationSourceSupport {
     readonly aggregateOperations?: readonly string[];
     readonly grouping?: GroupingCapability;
@@ -183,6 +199,14 @@ export interface AggregationSourceSupport {
 
 // @public
 export type Aggregator<TValue = AggregateOrderedValue> = (values: readonly TValue[]) => DisplayValue | undefined;
+
+// @public
+export interface AllMatchingScope {
+    readonly getSnapshot: () => boolean;
+    readonly narrow: () => void;
+    readonly select: (acrossPages: boolean) => boolean;
+    readonly subscribe: (listener: () => void) => () => void;
+}
 
 // @public
 export function allowsOperation(resolved: ResolvedAggregatable | undefined, operationId: string): boolean;
@@ -490,7 +514,20 @@ export interface BodyRowEntry<TRow> {
 }
 
 // @public
+export type BooleanChoice = "" | "true" | "false";
+
+// @public
 export function booleanDraft(checked: boolean): string;
+
+// @public
+export interface BooleanFieldWidget {
+    choice: BooleanChoice;
+    label: string;
+    write: (next: BooleanChoice) => void;
+}
+
+// @public
+export function booleanFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">): BooleanFieldWidget;
 
 // @public
 export function buildBodyCells<TRow>(options: {
@@ -588,6 +625,60 @@ export interface BulkAction {
 export interface BulkActionContext {
     allMatching: boolean;
     total: number;
+}
+
+// @public
+export function bulkActionErrorMessage(error: unknown): string | null;
+
+// @public
+export type BulkActionOutcome = {
+    status: "success";
+} | {
+    status: "error";
+    error: unknown;
+};
+
+// @public
+export interface BulkActionRunnerController {
+    readonly configure: (options: BulkActionRunnerOptions) => void;
+    readonly getSnapshot: () => BulkActionRunnerSnapshot;
+    readonly run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface BulkActionRunnerOptions {
+    cancelLabel: string;
+    confirm: ConfirmHandler;
+    onComplete?: (outcome: BulkActionOutcome) => void;
+}
+
+// @public
+export interface BulkActionRunnerSnapshot {
+    readonly error: unknown;
+    readonly pending: string | null;
+}
+
+// @public
+export interface BulkBarModel {
+    readonly banner: {
+        readonly text: string;
+        readonly action: string;
+        readonly command: "clear" | "select-all-matching";
+    };
+    readonly expandable: boolean;
+    readonly scope: BulkActionContext | undefined;
+}
+
+// @public
+export function bulkBarModel(selection: BulkBarSelection, total: number, labels: Pick<Required<TableLabels>, "allMatchingSelected" | "clearAll" | "pageSelected" | "selectAllMatching">): BulkBarModel;
+
+// @public
+export interface BulkBarSelection {
+    readonly acrossPages: boolean;
+    readonly allMatching: boolean;
+    readonly headerState: HeaderSelectionState;
+    readonly visibleIds: readonly string[];
 }
 
 // @public
@@ -753,6 +844,23 @@ export interface CellFillHandlerOptions<TRow> {
 export function cellFlashAttr(isCellFlashing: ((rowId: string, columnKey: string) => boolean) | undefined, rowId: string, columnKey: string): "" | undefined;
 
 // @public
+export function cellNavigationChannels<TRow>(options: CellNavigationChannelsOptions<TRow>): Pick<GridFocusControllerOptions<TRow>, "isCoveredCell" | "onPaste" | "onFill" | "onUndo" | "onRedo">;
+
+// @public
+export interface CellNavigationChannelsOptions<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly firstRowIndex?: number;
+    readonly host: CellPasteHandlerOptions<TRow> & CellFillHandlerOptions<TRow> & {
+        readonly getCellSpan?: GetCellSpan<TRow>;
+    };
+    readonly pinOffset?: (key: string) => PinOffset | undefined;
+    readonly record: (edits: readonly CellEdit<TRow>[]) => void;
+    readonly redo: () => number;
+    readonly rows: readonly TRow[];
+    readonly undo: () => number;
+}
+
+// @public
 export function cellPasteHandler<TRow>(options: CellPasteHandlerOptions<TRow>): ((edits: CellEdit<TRow>[]) => void) | undefined;
 
 // @public
@@ -789,6 +897,9 @@ export function cellRangeIndices(range: CellRange): {
     rows: number[];
     cols: number[];
 };
+
+// @public
+export function cellRangeKey(range: CellRange | null): string;
 
 // @public
 export function cellRangeSize(range: CellRange | null): number;
@@ -888,6 +999,69 @@ export type CellValidator<TRow> = (value: unknown, row: TRow) => string | undefi
 export function cellValue<TRow>(row: TRow, column: ColumnMetadata<TRow>, locale?: string): unknown;
 
 // @public
+export const CHANGED_CELL_FLASH_MS = 1200;
+
+// @public
+export interface ChangedCellFlashOptions {
+    readonly durationMs: number;
+    readonly live: boolean;
+}
+
+// @public
+export interface ChangedCellFlashStore {
+    readonly clear: () => void;
+    readonly configure: (options: ChangedCellFlashOptions) => void;
+    readonly getSnapshot: () => number;
+    readonly isFlashing: (rowId: string, columnKey: string) => boolean;
+    readonly isRowFlashing: (rowId: string) => boolean;
+    readonly mark: (events: readonly RowPatchEvent<unknown>[]) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export function changedRowFields(prev: unknown, next: unknown): readonly string[];
+
+// @public
+export const CHECKLIST_ITEM_HEIGHT = 28;
+
+// @public
+export const CHECKLIST_ITEM_WIDTH = 200;
+
+// @public
+export const CHECKLIST_LIST_HEIGHT = 240;
+
+// @public
+export const CHECKLIST_OPTION_GAP = 8;
+
+// @public
+export const CHECKLIST_VIRTUALIZE_AT = 40;
+
+// @public
+export interface ChecklistActions {
+    readonly clear: () => void;
+    readonly selectAllVisible: () => void;
+    readonly toggle: (value: string, on: boolean) => void;
+}
+
+// @public
+export function checklistActions<TRow>(def: FilterDef<TRow>, source: Pick<ChecklistSource<TRow>, "extra" | "setExtra">, visible: readonly ChecklistValue[]): ChecklistActions;
+
+// @public
+export function checklistColumnsAcross(width: number): number;
+
+// @public
+export interface ChecklistItems {
+    readonly available: boolean;
+    readonly items: readonly ChecklistValue[];
+}
+
+// @public
+export function checklistItems<TRow>(def: FilterDef<TRow>, source: Pick<ChecklistSource<TRow>, "allFilteredRows" | "extra" | "facets">): ChecklistItems;
+
+// @public
+export type ChecklistSource<TRow> = Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "facets">;
+
+// @public
 export interface ChecklistValue {
     count: number;
     label: string;
@@ -895,7 +1069,36 @@ export interface ChecklistValue {
 }
 
 // @public
+export interface ChecklistWindow {
+    end: number;
+    padBottom: number;
+    padTop: number;
+    start: number;
+}
+
+// @public
+export function checklistWindow(count: number, scrollTop: number, width: number): ChecklistWindow;
+
+// @public
 export type ChipLabelResolver = (value: string, extra?: ExtraFilters) => string;
+
+// @public
+export function chipValuesOf(extra: ExtraFilters, labels: Readonly<Record<string, ChipLabelResolver>>): Record<string, FilterValue>;
+
+// @public
+export function chordHasCommandModifier(chord: ParsedChord): boolean;
+
+// @public
+export interface ChordKeyEvent {
+    readonly altKey: boolean;
+    readonly ctrlKey: boolean;
+    readonly key: string;
+    readonly metaKey: boolean;
+    readonly shiftKey: boolean;
+}
+
+// @public
+export function chordMatches(chord: ParsedChord, event: ChordKeyEvent): boolean;
 
 // @public
 export function clampedPage(page: number, limit: number, total: number): number | undefined;
@@ -920,6 +1123,12 @@ export interface ClipboardRangeOptions<TRow> {
 
 // @public
 export function clipboardRangeText<TRow>(options: ClipboardRangeOptions<TRow>): string;
+
+// @public
+export function closeFailedTreeNode(expansion: {
+    readonly isExpanded: (id: string) => boolean;
+    readonly toggle: (id: string) => void;
+}, id: string): void;
 
 // @public
 export function coerceBooleanValue(value: unknown): boolean | undefined;
@@ -955,6 +1164,9 @@ export interface CollectFeatureNoticesInput<TRow = unknown> {
 // @public
 export type ColorScheme = "light" | "dark" | "auto";
 
+// @public
+export const COLUMN_DND_MIME = "application/x-adapttable-column";
+
 // @public @deprecated
 export const COLUMN_GROUP_ID_SEP: typeof COLUMN_GROUP_ID_SEP_2;
 
@@ -968,6 +1180,9 @@ export const COLUMN_GROUP_STUB_PREFIX: typeof COLUMN_GROUP_STUB_PREFIX_2;
 export const COLUMN_GROUP_STUB_WIDTH: typeof COLUMN_GROUP_STUB_WIDTH_2;
 
 // @public
+export const COLUMN_LAYOUT_STORE_OPTIONS: ControllableStoreOptions<ColumnLayoutState>;
+
+// @public
 export function columnAggregationSignature<TRow>(column: ColumnMetadata<TRow>): string;
 
 // @public
@@ -975,6 +1190,29 @@ export interface ColumnAiOptions {
     description?: string;
     examples?: readonly unknown[];
     sample?: boolean;
+}
+
+// @public
+export function columnDragAllowed(target: ColumnDragTarget | null): boolean;
+
+// @public
+export interface ColumnDragRowAttrs {
+    "data-dragging"?: "";
+    "data-drop"?: "before" | "after";
+}
+
+// @public
+export function columnDragRowAttrs(drag: ColumnDragSource | null, overIndex: number | null, key: string, index: number): ColumnDragRowAttrs;
+
+// @public
+export interface ColumnDragSource {
+    readonly from: number;
+    readonly key: string;
+}
+
+// @public
+export interface ColumnDragTarget {
+    closest: (selector: string) => unknown;
 }
 
 // @public
@@ -1052,6 +1290,30 @@ export function columnHeaderLabel<TRow>(column: ColumnMetadata<TRow>): string;
 export type ColumnInput<TRow> = ColumnModel<TRow> | ColumnGroupDef<TRow>;
 
 // @public
+export interface ColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
+    readonly configure: (options: ColumnLayoutControllerOptions<TRow, TColumn>) => void;
+    readonly move: (key: string, toIndex: number) => void;
+    readonly reset: () => void;
+    readonly resetName: (key: string) => void;
+    readonly setHidden: (key: string, hidden: boolean) => void;
+    readonly setName: (key: string, name: string) => void;
+    readonly setOrder: (order: readonly string[]) => void;
+    readonly setPinned: (key: string, side: PinSide | undefined) => void;
+    readonly setWidth: (key: string, width: number | undefined) => void;
+    readonly store: ControllableStore<ColumnLayoutState>;
+    readonly toggleColumnGroup: (id: string) => void;
+    readonly toggleVisible: (key: string) => void;
+}
+
+// @public
+export interface ColumnLayoutControllerOptions<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>> {
+    readonly collapsibleColumnGroups?: boolean;
+    readonly columnGroups?: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
+    readonly columns: readonly TColumn[];
+    readonly onColumnRename?: (key: string, name: string) => void;
+}
+
+// @public
 export const columnLayoutSlice: UrlSliceSpec<ColumnLayoutState, {
     readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
 }>;
@@ -1065,6 +1327,9 @@ export interface ColumnLayoutState {
     pinned: Readonly<Record<string, PinSide>>;
     widths: Readonly<Record<string, number>>;
 }
+
+// @public
+export function columnLayoutVisibleColumns<TColumn extends ColumnMetadata<never>>(columns: readonly TColumn[], state: Pick<ColumnLayoutState, "names" | "order" | "hidden" | "collapsedGroups">, options?: Pick<ColumnLayoutControllerOptions<never>, "collapsibleColumnGroups" | "columnGroups">): TColumn[];
 
 // @public
 export function columnLetter(index: number): string;
@@ -1265,6 +1530,47 @@ export type ColumnModelEditor = string | Readonly<Record<string, unknown>>;
 export type ColumnModelFilter = string | Readonly<Record<string, unknown>>;
 
 // @public
+export function columnPinInsets(visibleColumns: readonly ColumnMetadata<never>[], state: Pick<ColumnLayoutState, "pinned" | "widths">): ReadonlyMap<string, PinOffset>;
+
+// @public
+export interface ColumnRenameEditor {
+    readonly begin: () => void;
+    readonly blur: () => void;
+    readonly cancel: () => void;
+    readonly configure: (options: ColumnRenameEditorOptions) => void;
+    readonly getSnapshot: () => ColumnRenameEditorSnapshot;
+    readonly setDraft: (value: string) => void;
+    readonly submit: () => ColumnRenameSubmit;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface ColumnRenameEditorOptions {
+    readonly key: string;
+    readonly name: string;
+    readonly onRename: (key: string, name: string) => void;
+    readonly renamedMessage: (info: {
+        previous: string;
+        name: string;
+    }) => string;
+    readonly requiredMessage: string;
+}
+
+// @public
+export interface ColumnRenameEditorSnapshot {
+    readonly announcement: string;
+    readonly draft: string;
+    readonly editing: boolean;
+    readonly error?: string;
+}
+
+// @public
+export type ColumnRenameSubmit = "invalid" | "unchanged" | "renamed";
+
+// @public
+export function columnReorderKeyStep(key: string, rtl: boolean): -1 | 1 | undefined;
+
+// @public
 export interface ColumnResizeHandleProps {
     "aria-label": string;
     onDoubleClick: (event: MouseEvent & {
@@ -1373,6 +1679,9 @@ export interface CommandPaletteSnapshot {
 }
 
 // @public
+export function commitRowPin(store: ControllableStore<RowPinState>, enabled: boolean, rowId: string, side: RowPinSide | undefined): void;
+
+// @public
 export function compareValues(a: SortableValue, b: SortableValue): number;
 
 // @public
@@ -1449,6 +1758,25 @@ export interface ContextMenuActions<TRow> {
     onSort?: (columnKey: string, direction: "asc" | "desc") => void;
     onTogglePin?: (columnKey: string) => void;
 }
+
+// @public
+export interface ContextMenuCopyFocus {
+    readonly cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
+    readonly range: CellRange | null;
+}
+
+// @public
+export interface ContextMenuCopyTarget {
+    readonly available: boolean;
+    readonly cell?: GridCell;
+}
+
+// @public
+export function contextMenuCopyTarget(focus: ContextMenuCopyFocus, target: {
+    kind: string;
+    rowId?: string;
+    columnKey?: string;
+}): ContextMenuCopyTarget;
 
 // @public
 export interface ContextMenuItem {
@@ -1620,6 +1948,18 @@ export interface ControllableStoreOptions<T> {
 export function controllerConflictAsk<TRow>(controller: Pick<EditableCellController<TRow>, "conflict" | "keepConflict" | "takeConflict">): CellConflictAsk | undefined;
 
 // @public
+export function copyContextMenuSelection(focus: ContextMenuCopyFocus & {
+    readonly copyCells: (cell?: GridCell, cut?: boolean) => void;
+}, target: {
+    kind: string;
+    rowId?: string;
+    columnKey?: string;
+}, cut?: boolean): void;
+
+// @public
+export function copyContextMenuTargetCell<TRow>(columns: readonly ColumnMetadata<TRow>[], target: ContextMenuTarget<TRow>): void;
+
+// @public
 export const COUNT_OPERATOR_SYMBOL: Record<CountOperator, string>;
 
 // @public
@@ -1658,13 +1998,28 @@ export function coveredAddressSet<TRow>(options: {
 }): ReadonlySet<string>;
 
 // @public
+export function createAllMatchingScope(): AllMatchingScope;
+
+// @public
 export function createBatchEditStore<TRow>(options: BatchEditStoreOptions<TRow>): BatchEditStore<TRow>;
+
+// @public
+export function createBulkActionRunner(initial: BulkActionRunnerOptions): BulkActionRunnerController;
 
 // @public
 export function createCellEditSession<TRow = unknown>(options?: CellEditSessionOptions<TRow>): CellEditSession<TRow>;
 
 // @public
 export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>): CellSaveStore<TRow>;
+
+// @public
+export function createChangedCellFlashStore(initial: ChangedCellFlashOptions): ChangedCellFlashStore;
+
+// @public
+export function createColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(defaultColumnLayout?: Partial<ColumnLayoutState>): ColumnLayoutController<TRow, TColumn>;
+
+// @public
+export function createColumnRenameEditor(options: ColumnRenameEditorOptions): ColumnRenameEditor;
 
 // @public
 export function createCommandList(): CommandListController;
@@ -1706,6 +2061,9 @@ export function createFilterRegistry(specs: readonly FilterTypeSpec[]): FilterTy
 export function createFindController(initial: FindControllerOptions): FindController;
 
 // @public
+export function createFindShortcutScope(options: FindShortcutScopeOptions): FindShortcutScope;
+
+// @public
 export function createFirstLoadLatch(): FirstLoadLatch;
 
 // @public
@@ -1715,13 +2073,25 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow>;
 export function createGridFocusController<TRow>(initial: GridFocusControllerOptions<TRow>): GridFocusController<TRow>;
 
 // @public
+export function createGroupingPanelController(initial: GroupingPanelControllerOptions): GroupingPanelController;
+
+// @public
+export function createGroupPagingController(): GroupPagingController;
+
+// @public
 export function createHeaderFilterOverlay(initial: HeaderFilterOverlayOptions): HeaderFilterOverlayController;
+
+// @public
+export function createHighlightStore(initial: HighlightStoreOptions): HighlightStore;
 
 // @public
 export function createHistoryAdapter(): UrlStateAdapter;
 
 // @public
 export function createIncrementalView<TRow>(rows: readonly TRow[], config: IncrementalViewConfig<TRow>): IncrementalView<TRow>;
+
+// @public
+export function createLazyChildrenController<TRow>(initial: LazyChildrenOptions<TRow>): LazyChildrenController<TRow>;
 
 // @public
 export function createMemoryAdapter(initialSearch?: string): UrlStateAdapter;
@@ -1745,10 +2115,16 @@ export function createRowEditStore<TRow>(options: RowEditStoreOptions<TRow>): Ro
 export function createRowReorderController<TRow>(initial: RowReorderControllerOptions<TRow>): RowReorderController<TRow>;
 
 // @public
+export function createSavedViewRenameController(): SavedViewRenameController;
+
+// @public
 export function createSavedViewsController(initial: SavedViewsControllerOptions): SavedViewsController;
 
 // @public
 export function createServerSource<TRow>(): ServerSource<TRow>;
+
+// @public
+export function createShortcutHandler(shortcuts: readonly Shortcut[], onCommand: (command: string) => void): (event: ShortcutKeyEvent) => boolean;
 
 // @public
 export function createTableData<TRow>(): TableData<TRow>;
@@ -1902,6 +2278,9 @@ export function declaredColumnName<TRow>(column: ColumnMetadata<TRow>): string;
 export const DEFAULT_CARD_SIZE_PX = 132;
 
 // @public
+export const DEFAULT_DENSITY: TableDensity;
+
+// @public
 export const DEFAULT_EDIT_HISTORY_DEPTH = 50;
 
 // @public
@@ -1911,10 +2290,19 @@ export const DEFAULT_LIMIT = 25;
 export const DEFAULT_ROW_SIZE_PX = 56;
 
 // @public
+export const DEFAULT_SHORTCUTS: readonly Shortcut[];
+
+// @public
+export const DEFAULT_SIDE_PANEL_ID_PREFIX = "adapttable-side-panel";
+
+// @public
 export const defaultConfirm: ConfirmHandler;
 
 // @public
 export const defaultFilterRegistry: FilterTypeRegistry;
+
+// @public
+export function defaultFindMatchCount(current: number, total: number): string;
 
 // @public
 export function defaultFrontendRowId<TRow>(row: TRow): string;
@@ -1933,6 +2321,14 @@ export function defaultSaveErrorMessage(error: unknown): string;
 
 // @public
 export function defaultSearchText<TRow>(row: TRow): string;
+
+// @public
+export function deferGroupingDropToInner<TEvent extends {
+    readonly defaultPrevented: boolean;
+}>(props: GroupingDropHandlers<TEvent>): GroupingDropHandlers<TEvent>;
+
+// @public
+export const DELETE_ROW_ACTION_KEY = "adapttable:delete-row";
 
 // @public
 export const densitySlice: UrlSliceSpec<TableDensity, {
@@ -2000,6 +2396,9 @@ export function dirtyCellView(store: DirtyCellStore, snapshot: DirtyCellSnapshot
 export function dirtyMarkerView(tracked: DirtyCellState, markers: boolean): DirtyCellState;
 
 // @public
+export function dispatchRowMove<TRow>(request: RowMoveRequest<TRow>, options: RowReorderOptions<TRow> | undefined): void;
+
+// @public
 export type DisplayValue = string | number | boolean | bigint | object | null;
 
 // @public
@@ -2021,6 +2420,9 @@ export function downloadTableCsv<TRow>(options: {
     onBeforeExport?: NonNullable<ExportCsvOptions<TRow>["onBeforeExport"]>;
     onAfterExport?: NonNullable<ExportCsvOptions<TRow>["onAfterExport"]>;
 }): void;
+
+// @public
+export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
 
 // @public
 export function edgePinStyle(side: PinSide, active: boolean, zIndex?: number): PinnedCellStyle | undefined;
@@ -2477,6 +2879,9 @@ export const EMPTY_PINNED_ROWS: PinnedRows<never>;
 export const EMPTY_PIVOT_CONFIG: PivotConfig;
 
 // @public
+export const EMPTY_ROW_PIN_STATE: RowPinState;
+
+// @public
 export function emptyFilterRegistry(): FilterTypeRegistry;
 
 // @public
@@ -2611,6 +3016,21 @@ export interface ExportPayload {
 }
 
 // @public
+export interface ExportProgressAction {
+    readonly label: string;
+    readonly onAction: () => void;
+}
+
+// @public
+export interface ExportProgressDownload {
+    readonly label: string;
+    readonly url: string;
+}
+
+// @public
+export function exportProgressHeading(status: Exclude<ExportStatus, "idle">, labels: TableLabels): string;
+
+// @public
 export interface ExportProgressState {
     readonly downloadUrl: string | undefined;
     readonly error: string;
@@ -2621,6 +3041,23 @@ export interface ExportProgressState {
     readonly status: Exclude<ExportStatus, "idle">;
     readonly value: number | undefined;
 }
+
+// @public
+export interface ExportProgressView {
+    readonly cancel: ExportProgressAction | undefined;
+    readonly dismiss: ExportProgressAction | undefined;
+    readonly download: ExportProgressDownload | undefined;
+    readonly error: string;
+    readonly heading: string;
+    readonly message: string;
+    readonly progress: number | undefined;
+    readonly progressLabel: string;
+    readonly retry: ExportProgressAction | undefined;
+    readonly status: Exclude<ExportStatus, "idle">;
+}
+
+// @public
+export function exportProgressView(progress: ExportProgressState, labels: TableLabels): ExportProgressView;
 
 // @public
 export interface ExportQuery {
@@ -2963,6 +3400,9 @@ export type FilterOp = TextOp | NumberOp | DateOp;
 export function filterOpKey(key: string): string;
 
 // @public
+export function filterOpLabel(labels: Required<TableLabels>, key: keyof TableLabels): string;
+
+// @public
 export interface FilterOption {
     label: string;
     value: string;
@@ -2993,7 +3433,48 @@ export interface FilterRuntime<TRow> {
 export function filterStateKeys(def: Pick<FilterDef, "key" | "type">, registry?: FilterTypeRegistry): string[];
 
 // @public
+export function filterTreeChipLabel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], labels: Required<TableLabels>, registry?: FilterTypeRegistry): string;
+
+// @public
+export function filterTreeCombinatorOptions(labels: Required<TableLabels>): readonly FilterTreeOption[];
+
+// @public
+export interface FilterTreeConditionModel<TRow> {
+    readonly def: FilterDef<TRow>;
+    readonly fieldOptions: readonly FilterTreeOption[];
+    readonly opOptions: readonly FilterTreeOption[];
+    readonly value: FilterTreeValueEditor;
+    readonly withField: (key: string) => QueryCondition | undefined;
+    readonly withOp: (op: string) => QueryCondition;
+    readonly withValue: (value: unknown) => QueryCondition;
+}
+
+// @public
+export function filterTreeConditionModel<TRow>(condition: QueryCondition, defs: readonly FilterDef<TRow>[], registry: FilterTypeRegistry, labels: Required<TableLabels>): FilterTreeConditionModel<TRow> | undefined;
+
+// @public
+export interface FilterTreeEditorActions {
+    readonly addCondition: (path: readonly number[]) => void;
+    readonly addGroup: (path: readonly number[]) => void;
+    readonly remove: (path: readonly number[]) => void;
+    readonly replace: (path: readonly number[], next: QueryCondition) => void;
+    readonly setCombinator: (path: readonly number[], next: string) => void;
+}
+
+// @public
+export function filterTreeEditorActions<TRow>(tree: QueryFilterGroup | undefined, commit: (tree: QueryFilterGroup | undefined) => void, first: FilterDef<TRow>, registry: FilterTypeRegistry): FilterTreeEditorActions;
+
+// @public
 export type FilterTreeNode = QueryCondition | QueryFilterGroup;
+
+// @public
+export function filterTreeOpLabel(widget: string | undefined, op: string, labels: Required<TableLabels>): string;
+
+// @public
+export interface FilterTreeOption {
+    readonly label: string;
+    readonly value: string;
+}
 
 // @public
 export function filterTreeRows<TRow>(options: {
@@ -3002,6 +3483,39 @@ export function filterTreeRows<TRow>(options: {
     withChildren: (row: TRow, children: readonly TRow[]) => TRow;
     match: (row: TRow) => boolean;
 }): TRow[];
+
+// @public
+export type FilterTreeValueEditor = {
+    readonly kind: "none";
+} | {
+    readonly kind: "boolean";
+    readonly choice: "true" | "false";
+    readonly options: readonly FilterTreeOption[];
+    readonly write: (choice: string) => unknown;
+} | {
+    readonly kind: "relative";
+    readonly preset: RelativePreset;
+    readonly n: number;
+    readonly counted: boolean;
+    readonly options: readonly FilterTreeOption[];
+    readonly writePreset: (preset: string) => unknown;
+    readonly writeCount: (n: string) => unknown;
+} | {
+    readonly kind: "between";
+    readonly type: "text" | "number" | "date";
+    readonly a: string;
+    readonly b: string;
+    readonly writeA: (a: string) => unknown;
+    readonly writeB: (b: string) => unknown;
+} | {
+    readonly kind: "single";
+    readonly type: "text" | "number" | "date";
+    readonly text: string;
+    readonly write: (text: string) => unknown;
+};
+
+// @public
+export function filterTreeValueEditor<TRow>(def: FilterDef<TRow>, condition: QueryCondition, registry: FilterTypeRegistry, labels: Required<TableLabels>): FilterTreeValueEditor;
 
 // @public
 export type FilterType = (typeof FILTER_TYPES)[number];
@@ -3061,7 +3575,24 @@ export interface FilterWidgetRenderProps<TRow = unknown> {
 }
 
 // @public
+export const FIND_CURRENT_MATCH_SELECTOR = "[data-cell-match-current]";
+
+// @public
 export const FIND_URL_WRITE_DEBOUNCE_MS = 150;
+
+// @public
+export interface FindBarKeyEvent {
+    readonly key: string;
+    preventDefault(): void;
+    readonly shiftKey: boolean;
+}
+
+// @public
+export interface FindBarKeyTarget {
+    readonly next: () => void;
+    readonly previous: () => void;
+    readonly setOpen: (open: boolean) => void;
+}
 
 // @public
 export interface FindController {
@@ -3084,6 +3615,9 @@ export interface FindControllerOptions {
 }
 
 // @public
+export function findMatchCountText(labels: Pick<TableLabels, "findMatchCount"> | undefined, index: number, total: number): string;
+
+// @public
 export function findMatches<TRow>(options: FindMatchesOptions<TRow>): GridCell[];
 
 // @public
@@ -3095,12 +3629,34 @@ export interface FindMatchesOptions<TRow> {
 }
 
 // @public
+export function findMatchRow<TRow>(rows: readonly TRow[], firstRowIndex: number | undefined, current: GridCell | null): TRow | undefined;
+
+// @public
+export interface FindShortcutScope {
+    readonly focusIn: (target: unknown) => void;
+    readonly keyDown: (event: ChordKeyEvent & {
+        readonly target: unknown;
+        preventDefault(): void;
+    }) => void;
+    readonly pointerDown: (target: unknown) => void;
+}
+
+// @public
+export interface FindShortcutScopeOptions {
+    readonly contains: (target: unknown) => boolean;
+    readonly openBar: () => void;
+}
+
+// @public
 export interface FindSnapshot {
     readonly index: number;
     readonly open: boolean;
     readonly pending: string | null;
     readonly query: string;
 }
+
+// @public
+export function finiteSparklineValues(values: readonly number[]): number[];
 
 // @public
 export interface FirstLoadLatch {
@@ -3121,9 +3677,18 @@ export interface FlattenedColumns<TRow> {
 }
 
 // @public
+export function focusAfterAggregationRemoval(root: ParentNode | null, remainingKeys: readonly string[], removedIndex: number): void;
+
+// @public
 export function focusEditorOnMount(node: {
     focus: () => void;
 } | null): void;
+
+// @public
+export function focusExportTrigger(root?: Pick<ParentNode, "querySelector"> | undefined): boolean;
+
+// @public
+export function focusWasDropped(trigger: HTMLElement): boolean;
 
 // @public
 export function formatFilterChip(fieldLabel: string, opWord: string, value?: string): string;
@@ -3505,6 +4070,20 @@ export interface GroupAggregatesMapper<TRow> {
 export type GroupByInput = string | readonly string[] | null | undefined;
 
 // @public
+export interface GroupCollapseActions {
+    readonly collapseAll: (groupKeys: readonly string[]) => void;
+    readonly collapseToDepth: (depth: number, groups: readonly {
+        key: string;
+        level: number;
+    }[]) => void;
+    readonly expandAll: () => void;
+    readonly toggle: (groupKey: string) => void;
+}
+
+// @public
+export function groupCollapseActions(store: ControllableStore<ReadonlySet<string>>): GroupCollapseActions;
+
+// @public
 export const groupCollapseSlice: UrlSliceSpec<string[], {
     readonly defaultCollapsedGroupIds?: readonly string[];
 }>;
@@ -3610,7 +4189,81 @@ export const groupedHeaderChildRule: typeof groupedHeaderChildRule_2;
 export const groupedHeaderLabelStyle: typeof groupedHeaderLabelStyle_2;
 
 // @public
+export interface GroupedRowModel<TRow> {
+    readonly entries: readonly (GroupedFlatEntry<TRow> | TableExtraEntry)[];
+    readonly openGroups: readonly {
+        key: string;
+        level: number;
+    }[];
+}
+
+// @public
+export function groupedRowModel<TRow>(options: GroupedRowModelOptions<TRow>): GroupedRowModel<TRow> | undefined;
+
+// @public
+export interface GroupedRowModelOptions<TRow> {
+    readonly aggregates: GroupingAggregates<TRow>;
+    readonly collapsedGroupIds: ReadonlySet<string>;
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly extraRows?: readonly ExtraRow[];
+    readonly getRowId: (row: TRow) => string;
+    readonly groupByKeys: readonly string[];
+    readonly groupFilter?: (group: GroupNode<TRow>) => boolean;
+    readonly groupFooters?: boolean;
+    readonly groupPageSize?: number;
+    readonly groupRowPageSize?: number;
+    readonly groupSort?: GroupSort<TRow>;
+    readonly locale?: string;
+    readonly paging?: GroupPaging;
+    readonly source: GroupingRuntimeSource<TRow>;
+}
+
+// @public
+export function groupedViewSource<TSource extends {
+    readonly allFilteredRows?: readonly unknown[];
+}>(source: TSource): TSource;
+
+// @public
 export const GROUPING_COLUMN_DND_MIME = "application/x-adapttable-grouping-column";
+
+// @public
+export interface GroupingAggregates<TRow> {
+    readonly aggregates: GroupAggregatesFn<TRow> | undefined;
+    readonly declared: DeclaredAggregates | undefined;
+    readonly derivedKey: string | undefined;
+    readonly source: AggregationSourceSupport;
+}
+
+// @public
+export function groupingAggregates<TRow>(options: GroupingAggregatesOptions<TRow>): GroupingAggregates<TRow>;
+
+// @public
+export interface GroupingAggregatesOptions<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly groupAggregates?: (rows: readonly TRow[]) => unknown;
+    readonly panelDeclared?: DeclaredAggregates;
+    readonly source: GroupingRuntimeSource<TRow>;
+}
+
+// @public
+export function groupingAggregationOptions(item: AggregationItem, labels: Required<TableLabels>): {
+    value: string;
+    label: string;
+}[];
+
+// @public
+export function groupingAggregationSource<TRow>(source: GroupingRuntimeSource<TRow>): AggregationSourceSupport;
+
+// @public
+export function groupingAvailableColumns(columns: readonly {
+    readonly key: string;
+    readonly header?: unknown;
+    readonly mobileLabel?: string;
+    readonly groupable?: boolean;
+}[], groupBy: readonly string[]): {
+    value: string;
+    label: string;
+}[];
 
 // @public
 export type GroupingCapability = "client" | "server" | false;
@@ -3624,6 +4277,13 @@ export interface GroupingChipKeyboardProps<TKeyboardEvent = KeyboardEvent> {
 }
 
 // @public
+export function groupingColumnName(column: {
+    readonly key: string;
+    readonly header?: unknown;
+    readonly mobileLabel?: string;
+}): string;
+
+// @public
 export type GroupingComputationKind = "source" | "client" | "none";
 
 // @public
@@ -3633,6 +4293,14 @@ export function groupingComputationKind(input: {
     allFilteredRows?: readonly unknown[];
     capabilities?: TableSourceCapabilities;
 }): GroupingComputationKind;
+
+// @public
+export interface GroupingDragEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly dataTransfer: DataTransfer | null;
+    preventDefault(): void;
+    readonly target: EventTarget | null;
+}
 
 // @public
 export function groupingDragKey(event: Pick<DragEvent, "dataTransfer">): string | undefined;
@@ -3657,12 +4325,89 @@ export interface GroupingDragState {
 }
 
 // @public
+export interface GroupingDropHandlers<TEvent> {
+    onDragEnter?: (event: TEvent) => void;
+    onDragLeave?: (event: TEvent) => void;
+    onDragOver?: (event: TEvent) => void;
+    onDrop?: (event: TEvent) => void;
+}
+
+// @public
+export interface GroupingDropPlan {
+    readonly chipTarget: (index: number) => number | undefined;
+    readonly inert: (index: number) => boolean;
+    readonly panelTarget: number | undefined;
+}
+
+// @public
+export function groupingDropPlan(groupBy: readonly string[], drag: GroupingDragState | undefined): GroupingDropPlan;
+
+// @public
 export interface GroupingDropProps<TDragEvent = DragEvent> {
     "data-drop-active"?: boolean;
     onDragEnter?: (event: TDragEvent) => void;
     onDragLeave?: (event: TDragEvent) => void;
     onDragOver?: (event: TDragEvent) => void;
     onDrop?: (event: TDragEvent) => void;
+}
+
+// @public
+export function groupingIgnoredWarning<TRow>(groupByKeys: readonly string[], source: Pick<GroupingRuntimeSource<TRow>, "allFilteredRows" | "groups" | "capabilities">): string | undefined;
+
+// @public
+export interface GroupingKeyEventLike {
+    readonly currentTarget: EventTarget | null;
+    readonly key: string;
+    preventDefault(): void;
+}
+
+// @public
+export function groupingOperationLabel(operation: Pick<ResolvedAggregateOperation, "id" | "builtIn" | "label">, labels: Required<TableLabels>): string;
+
+// @public
+export function groupingPanelAggregations<TRow>(options: {
+    readonly source: GroupingRuntimeSource<TRow>;
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly declared?: DeclaredAggregates;
+    readonly entries?: readonly {
+        readonly kind: string;
+        readonly aggregateCells?: Readonly<Record<string, unknown>>;
+    }[];
+}): AggregationModel;
+
+// @public
+export interface GroupingPanelController {
+    readonly add: (key: string) => void;
+    readonly addAggregate: (key: string) => void;
+    readonly chipKeyDown: (key: string, event: GroupingKeyEventLike) => void;
+    readonly chipLabel: (label: string) => string;
+    readonly configure: (options: GroupingPanelControllerOptions) => void;
+    readonly dragEnter: (index: number, event: GroupingDragEventLike) => void;
+    readonly dragOver: (index: number, event: GroupingDragEventLike) => void;
+    readonly drop: (index: number, event: GroupingDragEventLike) => void;
+    readonly finishDrag: () => void;
+    readonly getSnapshot: () => GroupingPanelSnapshot;
+    readonly initialize: (initialGroupBy?: string | readonly string[]) => void;
+    readonly interactions: (snapshot: GroupingPanelSnapshot, declared: DeclaredAggregates | undefined) => GroupingPanelInteractions;
+    readonly moveBy: (key: string, delta: -1 | 1) => void;
+    readonly reconcile: () => void;
+    readonly reconcileKey: () => string;
+    readonly remove: (key: string) => void;
+    readonly removeAggregate: (key: string) => void;
+    readonly removeDragEnter: (event: GroupingDragEventLike) => void;
+    readonly removeDragOver: (event: GroupingDragEventLike) => void;
+    readonly removeDrop: (event: GroupingDragEventLike) => void;
+    readonly restoreAggregateDefaults: () => void;
+    readonly setAggregate: (key: string, value: GroupAggregateOverride | undefined) => void;
+    readonly setAggregateOperation: (key: string, operationId: string) => void;
+    readonly startDrag: (key: string, source: GroupingDragSource, event: GroupingDragEventLike) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface GroupingPanelControllerOptions {
+    readonly groupAggregates?: unknown;
+    readonly runtime: TableRuntime;
 }
 
 // @public
@@ -3686,12 +4431,21 @@ export interface GroupingPanelInteractions {
 }
 
 // @public
+export interface GroupingPanelSnapshot {
+    readonly announcement: string;
+    readonly drag: GroupingDragState | undefined;
+}
+
+// @public
 export interface GroupingPanelState extends GroupingPanelInteractions {
     aggregateOverrides: GroupAggregateOverrides;
     aggregations: AggregationModel;
     canSetAggregates: boolean;
     groupBy: readonly string[];
 }
+
+// @public
+export type GroupingRuntimeSource<TRow> = Pick<TableSource<TRow>, "allFilteredRows" | "groups" | "capabilities" | "honorsAggregates" | "aggregateOperations" | "groupAggregateOverrides" | "queryAggregates" | "groupAggregations">;
 
 // @public
 export function groupLeafCount(entry: {
@@ -3712,6 +4466,14 @@ export interface GroupNode<TRow> {
 export interface GroupPaging {
     groups?: number;
     rows?: Readonly<Record<string, number>>;
+}
+
+// @public
+export interface GroupPagingController {
+    readonly getSnapshot: () => GroupPaging;
+    readonly reset: () => void;
+    readonly showMore: (pageSize: number, groupKey?: string) => void;
+    readonly subscribe: (listener: () => void) => () => void;
 }
 
 // @public
@@ -3740,16 +4502,55 @@ export function groupsCollapsedToDepth(groups: readonly {
 export function groupSelectionState(leafIds: readonly string[], selectedIds: ReadonlySet<string>): HeaderSelectionState;
 
 // @public
+export interface GroupShowMoreRequest {
+    readonly groupKey?: string;
+    readonly loadMoreKey?: string;
+    readonly pageSize: number;
+}
+
+// @public
+export function groupShowMoreRequest(entry: {
+    readonly scope: "groups" | "rows";
+    readonly groupKey?: string;
+}, sizes: {
+    readonly groupPageSize?: number;
+    readonly groupRowPageSize?: number;
+}): GroupShowMoreRequest;
+
+// @public
 export type GroupSort<TRow> = "label" | "label-desc" | "count" | "count-desc" | ((a: GroupNode<TRow>, b: GroupNode<TRow>) => number);
 
 // @public
 export function groupValueKey(value: unknown): string;
 
 // @public
+export function handleFindBarKey(event: FindBarKeyEvent, find: FindBarKeyTarget): boolean;
+
+// @public
 export function handleRowEditorKey<TRow>(event: {
     key: string;
     preventDefault: () => void;
 }, rowEditing: Pick<RowEditingState<TRow>, "save" | "cancel">, saveBlocked: boolean): void;
+
+// @public
+export function handleSidePanelBodyKey(event: Pick<SidePanelKeyEvent, "key" | "stopPropagation">, onClose: () => void): boolean;
+
+// @public
+export function handleSidePanelTabKey(event: SidePanelKeyEvent, input: {
+    readonly panels: readonly {
+        readonly key: string;
+    }[];
+    readonly selectedIndex: number;
+    readonly onOpenPanel: (key: string) => void;
+    readonly onClose: () => void;
+}): string | undefined;
+
+// @public
+export function hasActiveHeaderFilter<TRow>(props: Readonly<{
+    def: FilterDef<TRow>;
+    source: FilterFormSource<TRow>;
+    registry?: FilterTypeRegistry;
+}>): boolean;
 
 // @public
 export function hasEditableColumns(columns: readonly EditableColumnLike[]): boolean;
@@ -3759,6 +4560,15 @@ export function hasGroupingColumnDrag(event: Pick<DragEvent, "dataTransfer">): b
 
 // @public
 export const HEADER_FILTER_SESSION_ATTR = "data-adapttable-header-filter";
+
+// @public
+export function headerFilterBooleanOptions(labels: Required<TableLabels>): readonly HeaderFilterOption[];
+
+// @public
+export type HeaderFilterCellKind = "text" | "select" | "multi" | "boolean" | "range";
+
+// @public
+export function headerFilterCellKind<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): HeaderFilterCellKind | undefined;
 
 // @public
 export function headerFilterFieldIsComplete<TRow>(def: FilterDef<TRow>, extra: ExtraFilters, registry?: FilterTypeRegistry): boolean;
@@ -3771,9 +4581,27 @@ export function headerFilterInsideSelector(input: {
 }): string;
 
 // @public
+export interface HeaderFilterMultiModel {
+    readonly label: string;
+    readonly options: readonly HeaderFilterOption[];
+    readonly selected: readonly string[];
+    readonly summary: string;
+    readonly toggle: (value: string, checked: boolean) => void;
+}
+
+// @public
+export function headerFilterMultiModel<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">, options: readonly HeaderFilterOption[], labels: Required<TableLabels>): HeaderFilterMultiModel;
+
+// @public
 export interface HeaderFilterOpenHost {
     readonly openKey: string | null;
     readonly setOpenKey: (key: string | null) => void;
+}
+
+// @public
+export interface HeaderFilterOption {
+    readonly label: string;
+    readonly value: string;
 }
 
 // @public
@@ -3798,6 +4626,27 @@ export interface HeaderFilterOverlaySnapshot {
 }
 
 // @public
+export interface HeaderFilterRangeModel {
+    readonly showUpper: boolean;
+    readonly writeLower: (value: string) => void;
+    readonly writeUpper: (value: string) => void;
+}
+
+// @public
+export function headerFilterRangeModel(widget: Pick<RangeFieldWidget, "op" | "a" | "b" | "arity" | "write">): HeaderFilterRangeModel;
+
+// @public
+export interface HeaderFilterSelectModel {
+    readonly label: string;
+    readonly options: readonly HeaderFilterOption[];
+    readonly value: string;
+    readonly write: (value: string) => void;
+}
+
+// @public
+export function headerFilterSelectModel<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtra">, options: readonly HeaderFilterOption[], labels: Required<TableLabels>): HeaderFilterSelectModel;
+
+// @public
 export type HeaderFilterWrites<TRow> = Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras">;
 
 // @public @deprecated
@@ -3817,6 +4666,47 @@ export type HeaderSelectionState = "all" | "some" | "none";
 
 // @public @deprecated
 export const hideAllColumns: typeof hideAllColumns_2;
+
+// @public
+export const HIGHLIGHT_FADE_MS = 1500;
+
+// @public
+export const HIGHLIGHT_STEADY_MS = 2500;
+
+// @public
+export function highlightCellKey(rowId: string, columnKey: string): string;
+
+// @public
+export function highlightDuration(reducedMotion: boolean): number;
+
+// @public
+export interface HighlightedCell {
+    columnKey: string;
+    rowId: string;
+}
+
+// @public
+export interface HighlightSnapshot {
+    readonly cells: ReadonlySet<string>;
+    readonly rows: ReadonlySet<string>;
+}
+
+// @public
+export interface HighlightStore {
+    readonly clear: () => void;
+    readonly configure: (options: HighlightStoreOptions) => void;
+    readonly dispose: () => void;
+    readonly flashCell: (cell: HighlightedCell) => void;
+    readonly flashRow: (rowId: string) => void;
+    readonly getSnapshot: () => HighlightSnapshot;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface HighlightStoreOptions {
+    readonly durationMs: number;
+    readonly enabled: boolean;
+}
 
 // @public @deprecated
 export type HtmlGroupedHeaderCell = HtmlGroupedHeaderCell_2;
@@ -3884,6 +4774,11 @@ export function incrementalViewConfig<TRow>(view: IncrementalView<TRow>): Increm
 export function incrementalViewOf<TRow>(rows: readonly TRow[]): IncrementalView<TRow> | undefined;
 
 // @public
+export const INERT_GROUPING_DROP_HANDLERS: Readonly<GroupingDropHandlers<{
+    stopPropagation(): void;
+}>>;
+
+// @public
 export interface InfiniteQueryLike<TPage> {
     data: {
         pages: TPage[];
@@ -3907,6 +4802,12 @@ export function initialColumnLayout(defaultColumnLayout: Partial<ColumnLayoutSta
 
 // @public
 export function initialOperation(resolved: ResolvedAggregatable, source?: AggregationSourceSupport): string;
+
+// @public
+export function initialRangeFilterOp<TRow>(def: FilterDef<TRow>, extra: FilterFormSource<TRow>["extra"]): RangeOp | undefined;
+
+// @public
+export function initialTextFilterOp<TRow>(def: FilterDef<TRow>, extra: FilterFormSource<TRow>["extra"]): TextOp;
 
 // @public @deprecated
 export const insertExtraRows: typeof insertExtraRows_2;
@@ -3988,6 +4889,9 @@ export function isDraftChecked(draft: string): boolean;
 export function isEditActivateKey(key: string): boolean;
 
 // @public
+export function isElementShowing(element: Element): boolean;
+
+// @public
 export function isEmptyFilterValue(value: FilterValue): boolean;
 
 // @public
@@ -4001,6 +4905,9 @@ export function isFilterGroup(node: QueryCondition | QueryFilterGroup): node is 
 
 // @public
 export function isFilterOpKey(key: string): boolean;
+
+// @public
+export function isFindShortcut(event: ChordKeyEvent): boolean;
 
 // @public
 export function isFirstEditableColumn(columns: readonly {
@@ -4068,6 +4975,9 @@ export function isStreamLive(status: RowPatchStreamStatus): boolean;
 export function isStreamSettled(status: RowPatchStreamStatus): boolean;
 
 // @public
+export function isTextEntryTarget(target: unknown): boolean;
+
+// @public
 export function isValuelessFilterOp(op: string): boolean;
 
 // @public
@@ -4084,6 +4994,29 @@ export interface KeyedVirtualization {
 
 // @public
 export type LayoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+// @public
+export interface LazyChildrenController<TRow> {
+    readonly configure: (options: LazyChildrenOptions<TRow>) => void;
+    readonly connect: () => () => void;
+    readonly getSnapshot: () => LazyChildrenSnapshot;
+    readonly loadIfNeeded: (row: TRow) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface LazyChildrenOptions<TRow> {
+    getRowId: (row: TRow) => string;
+    hasLoadedChildren: (row: TRow) => boolean;
+    onLoadChildren?: (row: TRow) => void | Promise<void>;
+    onLoadFailed?: (row: TRow, id: string) => void;
+}
+
+// @public
+export interface LazyChildrenSnapshot {
+    readonly failedIds: ReadonlySet<string>;
+    readonly loadingIds: ReadonlySet<string>;
+}
 
 // @public
 export function listFilterValues(value: FilterValue): string[];
@@ -4139,7 +5072,19 @@ export const MAX_LIMIT = 500;
 export function measureColumnWidth(root: Element | null, key: string): number | null;
 
 // @public
+export function measuredToolbarHeight(element: Pick<Element, "getBoundingClientRect">): number;
+
+// @public
 export function measureLabel(measure: PivotMeasure, fields: readonly PivotField[]): string;
+
+// @public
+export interface MergedRowActions<TRow> {
+    readonly hasRowActions: boolean;
+    readonly rowActions: RowAction<TRow>[] | undefined;
+}
+
+// @public
+export function mergeFilterChips(filterChips: readonly ActiveFilterChip[], extraChips: readonly ActiveFilterChip[] | undefined): readonly ActiveFilterChip[];
 
 // @internal
 export function mergeProps<T extends Props>(base: T, overrides?: Props): T;
@@ -4187,6 +5132,30 @@ export function moveGroupingKeyBy(keys: readonly string[], key: string, delta: -
 export const MULTI_SEPARATOR = "";
 
 // @public
+export const NESTED_TABLE_DEFAULT_LABEL = "Row details";
+
+// @public
+export interface NestedTableDefaults {
+    density: TableDensity | undefined;
+    labels: TableLabels | undefined;
+    searchable: boolean;
+    tableLabel: string;
+    urlSync: false;
+}
+
+// @public
+export function nestedTableDefaults(label: string, parent?: NestedTableParent): NestedTableDefaults;
+
+// @public
+export function nestedTableLabel(label: string | undefined): string;
+
+// @public
+export interface NestedTableParent {
+    density?: TableDensity;
+    labels?: TableLabels;
+}
+
+// @public
 export interface NeutralFeatureHost<TRow = unknown> {
     readonly __row?: (row: TRow) => void;
     onDispose(cleanup: () => void): void;
@@ -4223,6 +5192,9 @@ export interface NeutralTableBinding<TRow = unknown> {
     readonly operations?: () => Readonly<Record<string, boolean>>;
     readonly visibleRows?: () => readonly TRow[];
 }
+
+// @public
+export function newFilterTreeCondition<TRow>(def: FilterDef<TRow>, registry: FilterTypeRegistry): QueryCondition;
 
 // @public
 export function nextCommandIndex(key: string, at: number, count: number): number | undefined;
@@ -4382,7 +5354,13 @@ export const PARAM_SORT_BY = "sortBy";
 export const PARAM_SORT_DIR = "sortDir";
 
 // @public
+export function parseBooleanChoice(value: FilterValue): BooleanChoice;
+
+// @public
 export function parseCellEditValue(editor: CellEditor, draft: string): unknown;
+
+// @public
+export function parseChord(chord: string): ParsedChord;
 
 // @public
 export function parseClipboardTable(text: string): string[][];
@@ -4392,6 +5370,16 @@ export function parseColumnDraft<TRow>(column: EditableColumnLike<TRow>, draft: 
 
 // @public
 export function parseDateOp(raw: FilterValue | undefined): DateOp | undefined;
+
+// @public
+export interface ParsedChord {
+    readonly alt: boolean;
+    readonly ctrl: boolean;
+    readonly key: string;
+    readonly meta: boolean;
+    readonly mod: boolean;
+    readonly shift: boolean;
+}
 
 // @public
 export function parseFilterTree(raw: string | null | undefined): QueryFilterGroup | undefined;
@@ -4454,6 +5442,15 @@ export interface PasteRangeOptions<TRow> {
     rows: readonly TRow[];
     text: string;
 }
+
+// @public
+export function patchTouchedKeys(event: RowPatchEvent<unknown>): readonly string[] | null;
+
+// @public
+export const PIN_BOTTOM_ACTION_KEY = "adapttable:pin-row-bottom";
+
+// @public
+export const PIN_TOP_ACTION_KEY = "adapttable:pin-row-top";
 
 // @public
 export const PIN_Z: {
@@ -4559,10 +5556,19 @@ export type PinSide = "start" | "end";
 export function pivot<TRow>(rows: readonly TRow[], config: PivotConfig, options?: PivotOptions<TRow>): PivotResult;
 
 // @public
+export const PIVOT_AGGREGATIONS: readonly AggregateName[];
+
+// @public
 export const PIVOT_BLANK = "—";
 
 // @public
 export const PIVOT_GRAND_TOTAL_KEY = "grand";
+
+// @public
+export const PIVOT_ROW_COLUMN_KEY = "pivot-row";
+
+// @public
+export const PIVOT_ROW_INDENT = 16;
 
 // @public
 export const PIVOT_ZONES: readonly PivotZone[];
@@ -4599,11 +5605,29 @@ export interface PivotField {
 }
 
 // @public
+export function pivotLeafColumnKey(index: number): string;
+
+// @public
+export interface PivotLeafColumnLayout {
+    readonly group: readonly string[] | undefined;
+    readonly header: string;
+    readonly index: number;
+    readonly key: string;
+    readonly leaf: PivotColumnLeaf;
+}
+
+// @public
+export function pivotLeafGroup(leaf: PivotColumnLeaf, totalLabel: string): readonly string[] | undefined;
+
+// @public
 export interface PivotMeasure {
     agg: AggregateName | (string & {}) | Aggregator;
     key: string;
     label?: string;
 }
+
+// @public
+export function pivotMeasureAggName(config: PivotConfig, index: number): AggregateName;
 
 // @public
 export interface PivotOptions<TRow> {
@@ -4612,6 +5636,9 @@ export interface PivotOptions<TRow> {
     columns?: readonly ColumnModel<TRow>[];
     format?: (value: DisplayValue | undefined, measure: PivotMeasure) => DisplayValue | undefined;
 }
+
+// @public
+export function pivotPanelZones(fields: readonly PivotField[], config: PivotConfig, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">): PivotZoneModel[];
 
 // @public
 export interface PivotResult {
@@ -4633,12 +5660,35 @@ export interface PivotRow {
 }
 
 // @public
+export function pivotRowCaption(row: PivotRow, labels: Pick<Required<TableLabels>, "pivotGrandTotal">): string;
+
+// @public
+export function pivotRowIndentStyle(row: PivotRow, indent: number): {
+    paddingInlineStart: string;
+} | undefined;
+
+// @public
 export type PivotRowKind = "leaf" | "subtotal" | "grandTotal";
 
 // @public
 export const pivotSlice: UrlSliceSpec<PivotUrlState, {
     readonly defaultConfig?: PivotConfig;
 }>;
+
+// @public
+export interface PivotTableLayout {
+    readonly grandTotal: PivotRow | undefined;
+    readonly leafColumns: readonly PivotLeafColumnLayout[];
+    readonly rowHeaderLabel: string;
+    readonly rows: readonly PivotRow[];
+    readonly summaryCells: Readonly<Record<string, DisplayValue | undefined>> | undefined;
+}
+
+// @public
+export function pivotTableLayout(result: PivotResult, options?: {
+    readonly fields?: readonly PivotField[];
+    readonly labels?: TableLabels;
+}): PivotTableLayout;
 
 // @public
 export interface PivotUrlState {
@@ -4648,6 +5698,27 @@ export interface PivotUrlState {
 
 // @public
 export type PivotZone = "rows" | "columns" | "measures";
+
+// @public
+export interface PivotZoneEntry {
+    readonly aggregation?: AggregateName;
+    readonly canMoveDown: boolean;
+    readonly canMoveUp: boolean;
+    readonly index: number;
+    readonly key: string;
+    readonly label: string;
+}
+
+// @public
+export function pivotZoneLabel(zone: PivotZone, labels: Pick<Required<TableLabels>, "pivotRows" | "pivotColumns" | "pivotMeasures">): string;
+
+// @public
+export interface PivotZoneModel {
+    readonly addOptions: readonly PivotField[];
+    readonly entries: readonly PivotZoneEntry[];
+    readonly label: string;
+    readonly zone: PivotZone;
+}
 
 // @public
 export interface PointerReleaseTarget {
@@ -4830,7 +5901,32 @@ export const RANGE_SUFFIXES: {
 };
 
 // @public
+export interface RangeFieldWidget {
+    a: string;
+    arity: RangeOpArity;
+    b: string;
+    inputType: "date" | "number" | "text";
+    label: string;
+    op: RangeOp | undefined;
+    opLabelKeys: RangeOpLabelKeys;
+    ops: readonly RangeOp[];
+    setOp: (op: RangeOp | undefined) => void;
+    write: (nextOp: RangeOp | undefined, nextA: string, nextB: string) => void;
+}
+
+// @public
+export function rangeFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, op: RangeOp | undefined): Omit<RangeFieldWidget, "setOp">;
+
+// @public
 export type RangeOp = NumberOp | DateOp;
+
+// @public
+export type RangeOpArity = "none" | "one" | "two" | "list";
+
+// @public
+export type RangeOpLabelKeys = typeof NUMBER_OP_LABEL_KEYS | (typeof DATE_OP_LABEL_KEYS & {
+    readonly eq: "opOn";
+});
 
 // @public
 export interface RangeWidgetState {
@@ -5034,6 +6130,16 @@ export const REORDER_COLUMN_WIDTH: typeof REORDER_COLUMN_WIDTH_2;
 // @public
 export function replaceFilterTreeNode(tree: QueryFilterGroup, path: readonly number[], next: FilterTreeNode): QueryFilterGroup;
 
+// @public
+export function reportedCellRange(range: CellRange | null): CellRange | null;
+
+// @public
+export function requestDensityChange(next: TableDensity, route: {
+    readonly controlled: boolean;
+    readonly setFeatureDensity?: (next: TableDensity) => void;
+    readonly onDensityChange?: (next: TableDensity) => void;
+}): void;
+
 // @public @deprecated
 export const resetColumnLayout: typeof resetColumnLayout_2;
 
@@ -5042,6 +6148,9 @@ export function resetDevWarnings(): void;
 
 // @internal
 export function resetHistoryAdapter(): void;
+
+// @public
+export function resolveActiveFilterCount(override: number | undefined, chipCount: number): number;
 
 // @public
 export function resolveAggregatable<TRow>(column: ColumnMetadata<TRow>): ResolvedAggregatable | undefined;
@@ -5104,6 +6213,9 @@ export interface ResolvedContextTarget<TRow> {
     element: HTMLElement;
     target: ContextMenuTarget<TRow>;
 }
+
+// @public
+export function resolveDensity(controlled: TableDensity | undefined, featureOwned: TableDensity | undefined): TableDensity;
 
 // @public
 export function resolveDisabledReason(reason: string | undefined): string | undefined;
@@ -5202,6 +6314,9 @@ export function resolveRowMove<TRow>(view: RowMoveView<TRow>, drop: RowMoveDrop<
 export const resolveRowStyle: typeof resolveRowStyle_2;
 
 // @public
+export function resolveStickyToolbar(stickyHeader?: boolean, stickyToolbar?: boolean, inScrollBox?: boolean): boolean;
+
+// @public
 export function resolveTableStatus(options: TableStatusAnnouncementOptions, previous: TableStatusSignature | undefined): {
     announcement: string;
     signature: TableStatusSignature;
@@ -5252,6 +6367,9 @@ export interface ResponsiveFit<TCol extends ColumnMetadata<never> = ColumnMetada
 export function restoreAggregationDefaults(): Readonly<Partial<Record<string, string>>>;
 
 // @public
+export function restoreFocusSoon(element: HTMLElement | null): () => void;
+
+// @public
 export function revisionToken(revisions: TableRevisions): string;
 
 // @public
@@ -5267,6 +6385,9 @@ export interface RouterUrlAdapterOptions {
 
 // @public
 export const ROW_ID_ATTRIBUTE = "data-row-id";
+
+// @public
+export const ROW_PIN_STORE_OPTIONS: ControllableStoreOptions<RowPinState>;
 
 // @public
 export interface RowAction<TRow> {
@@ -5552,6 +6673,17 @@ export interface RowMoveView<TRow> {
 }
 
 // @public
+export function rowMoveView<TRow>(view: TableRuntimeView<TRow>): RowMoveView<TRow>;
+
+// @public
+export function rowMutationActions<TRow>(options: {
+    readonly duplicate?: (row: TRow) => void;
+    readonly remove?: (row: TRow) => void;
+    readonly confirmDelete: boolean;
+    readonly labels: Pick<Required<TableLabels>, "duplicateRow" | "deleteRow" | "deleteRowConfirm">;
+}): RowAction<TRow>[];
+
+// @public
 export interface RowPairMeasurer {
     detail: (index: number) => (node: Element | null) => void;
     row: (index: number) => (node: Element | null) => void;
@@ -5616,12 +6748,57 @@ export type RowPatchStreamStatus =
 "closed";
 
 // @public
+export function rowPinActions<TRow>(options: {
+    readonly labels: RowPinLabels;
+    readonly getRowId: (row: TRow) => string;
+    readonly sideOf: (rowId: string) => RowPinSide | undefined;
+    readonly pin: (rowId: string, side: RowPinSide) => void;
+    readonly unpin: (rowId: string) => void;
+}): RowAction<TRow>[];
+
+// @public
+export interface RowPinLabels {
+    pinToBottom: string;
+    pinToTop: string;
+    unpinRow: string;
+}
+
+// @public
 export interface RowPinLookup {
     sideOf: (rowId: string) => RowPinSide | undefined;
 }
 
 // @public
+export function rowPinningBlockedWarning(requested: boolean, blocked: boolean): string | undefined;
+
+// @public
+export function rowPinningControl(options: {
+    readonly requested: boolean;
+    readonly pinnedRowIds?: RowPinState;
+    readonly onPinnedRowIdsChange?: (next: RowPinState) => void;
+    readonly urlPinnedRowIds?: RowPinState;
+    readonly writeUrl: (next: RowPinState) => void;
+}): {
+    readonly pinnedRowIds: RowPinState | undefined;
+    readonly onPinnedRowIdsChange: ((next: RowPinState) => void) | undefined;
+};
+
+// @public
+export function rowPinningRequested(props: {
+    readonly rowPinningArmed?: boolean;
+    readonly pinnedRowIds?: RowPinState;
+    readonly onPinnedRowIdsChange?: (next: RowPinState) => void;
+}): boolean;
+
+// @public
 export const rowPinningSlice: UrlSliceSpec<RowPinState, object>;
+
+// @public
+export function rowPinningUrlSync(options: {
+    readonly urlSync?: boolean;
+    readonly requested: boolean;
+    readonly pinnedRowIds?: RowPinState;
+}): boolean;
 
 // @public
 export type RowPinSide = "top" | "bottom";
@@ -5743,6 +6920,9 @@ export function rowReorderRowAttributes(state: Pick<RowReorderSnapshot<unknown>,
     "data-drop"?: RowDropPosition;
 };
 
+// @public
+export function rowReorderRuntimeOptions<TRow>(runtime: TableRuntime<TRow>, onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): RowReorderControllerOptions<TRow>;
+
 // @public @deprecated
 export const rowReorderSignature: typeof rowReorderSignature_2;
 
@@ -5837,6 +7017,9 @@ export function sanitizeCountFilterParams<P extends Record<string, unknown>>(par
 export function sanitizeStoredLayout(parsed: unknown): ColumnLayoutState | null;
 
 // @public
+export const SAVED_VIEW_GLYPH_PATHS: Readonly<Record<SavedViewControlKey, readonly string[]>>;
+
+// @public
 export const SAVED_VIEW_VERSION = 2;
 
 // @public
@@ -5850,7 +7033,58 @@ export interface SavedView {
 }
 
 // @public
+export type SavedViewControlKey = "rename" | "moveUp" | "moveDown" | "default" | "remove";
+
+// @public
+export interface SavedViewGlyph {
+    readonly filled: boolean;
+    readonly paths: readonly string[];
+}
+
+// @public
 export type SavedViewMigration = (view: SavedView, from: number) => SavedView | null;
+
+// @public
+export interface SavedViewRenameController {
+    readonly begin: (name: string) => void;
+    readonly cancel: () => void;
+    readonly commit: (onRename: (from: string, to: string) => void) => void;
+    readonly getSnapshot: () => SavedViewRenameSnapshot;
+    readonly setDraft: (draft: string) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface SavedViewRenameSnapshot {
+    readonly draft: string;
+    readonly editing: string | null;
+}
+
+// @public
+export interface SavedViewRowControlModel {
+    readonly danger?: boolean;
+    readonly glyph: SavedViewGlyph;
+    readonly key: SavedViewControlKey;
+    readonly label: string;
+    readonly onPress?: () => void;
+    readonly pressed?: boolean;
+}
+
+// @public
+export function savedViewRowControls(input: SavedViewRowControlsInput): readonly SavedViewRowControlModel[];
+
+// @public
+export interface SavedViewRowControlsInput {
+    readonly count: number;
+    readonly editing: boolean;
+    readonly index: number;
+    readonly labels: Pick<Required<TableLabels>, "renameView" | "moveViewUp" | "moveViewDown" | "setDefaultView" | "deleteView">;
+    readonly onMove: (delta: -1 | 1) => void;
+    readonly onRemove: () => void;
+    readonly onSetDefault: () => void;
+    readonly onStartRename: () => void;
+    readonly view: SavedView;
+}
 
 // @public
 export interface SavedViewsController {
@@ -5897,7 +7131,25 @@ export interface SavedViewsStore {
 export type SavedViewVisibility = "private" | "team";
 
 // @public
+export function scalarFilterText(value: FilterValue): string;
+
+// @public
+export function scrollCurrentMatchIntoView(root: Pick<ParentNode, "querySelector"> | null): boolean;
+
+// @public
 export const SEARCH_DEBOUNCE_MS = 300;
+
+// @public
+export function searchChecklistItems(items: readonly ChecklistValue[], query: string): readonly ChecklistValue[];
+
+// @public
+export interface SelectionStatPart {
+    readonly key: "count" | "sum" | "average" | "min" | "max";
+    readonly text: string;
+}
+
+// @public
+export function selectionStatParts(stats: SelectionStats | null, labels?: TableLabels, locale?: string): SelectionStatPart[] | null;
 
 // @public
 export interface SelectionStats {
@@ -6023,6 +7275,24 @@ export function setFilterTreeCombinator(tree: QueryFilterGroup, path: readonly n
 // @public
 export function setMeasureAgg(config: PivotConfig, index: number, agg: AggregateName): PivotConfig;
 
+// @public
+export interface Shortcut {
+    chord: string;
+    command: string;
+}
+
+// @public
+export interface ShortcutKeyEvent extends ChordKeyEvent {
+    preventDefault(): void;
+    readonly target: unknown;
+}
+
+// @public
+export function shouldEscapeClose(event: {
+    readonly key: string;
+    readonly target: unknown;
+}, ignoreWithin?: string): boolean;
+
 // @public @deprecated
 export const showAllColumns: typeof showAllColumns_2;
 
@@ -6032,6 +7302,57 @@ export function showSimpleFilterFields(headerFiltersOn: boolean, filterFields?: 
 // @public
 export interface SidePanelEntry {
     key: string;
+}
+
+// @public
+export interface SidePanelKeyEvent {
+    readonly key: string;
+    preventDefault(): void;
+    stopPropagation(): void;
+}
+
+// @public
+export interface SidePanelModel<TPanel extends SidePanelModelPanel = SidePanelModelPanel> {
+    readonly bodyId: string;
+    readonly bodyLabel: string | undefined;
+    readonly bodyLabelledBy: string | undefined;
+    readonly bodyRole: "tabpanel" | undefined;
+    readonly closeLabel: string;
+    readonly selected: TPanel;
+    readonly selectedIndex: number;
+    readonly tabbed: boolean;
+    readonly tablistLabel: string;
+    readonly tabs: readonly SidePanelTabModel<TPanel>[];
+}
+
+// @public
+export function sidePanelModel<TPanel extends SidePanelModelPanel>(input: {
+    readonly panels: readonly TPanel[];
+    readonly openPanel: string;
+    readonly idPrefix?: string;
+    readonly labels?: TableLabels;
+}): SidePanelModel<TPanel> | null;
+
+// @public
+export interface SidePanelModelPanel {
+    readonly key: string;
+    readonly label: string;
+}
+
+// @public
+export function sidePanelTabId(prefix: string, key: string): string;
+
+// @public
+export function sidePanelTabIndex(key: string, at: number, count: number): number | undefined;
+
+// @public
+export interface SidePanelTabModel<TPanel extends SidePanelModelPanel = SidePanelModelPanel> {
+    readonly controls: string;
+    readonly id: string;
+    readonly key: string;
+    readonly panel: TPanel;
+    readonly selected: boolean;
+    readonly tabIndex: number;
 }
 
 // @public
@@ -6071,6 +7392,50 @@ export function sourceCapabilities(source: CapabilitySource, support?: QuerySupp
 export function spanningArmed<TRow>(columns: readonly ColumnMetadata<TRow>[], getCellSpan: GetCellSpan<TRow> | undefined): boolean;
 
 // @public
+export const SPARKLINE_DEFAULT_HEIGHT = 28;
+
+// @public
+export const SPARKLINE_DEFAULT_WIDTH = 80;
+
+// @public
+export function sparklineAreaPath(series: readonly number[], width: number, height: number): string;
+
+// @public
+export interface SparklineBar {
+    readonly height: number;
+    readonly width: number;
+    readonly x: number;
+    readonly y: number;
+}
+
+// @public
+export function sparklineBars(series: readonly number[], width: number, height: number): SparklineBar[];
+
+// @public
+export function sparklineExportValue(values: readonly number[]): string;
+
+// @public
+export type SparklineKind = "bar" | "line" | "area";
+
+// @public
+export function sparklineLinePath(series: readonly number[], width: number, height: number): string;
+
+// @public
+export interface SparklinePoint {
+    readonly x: number;
+    readonly y: number;
+}
+
+// @public
+export function sparklinePoints(series: readonly number[], width: number, height: number): SparklinePoint[];
+
+// @public
+export function sparklineSortValue(values: readonly number[]): number | undefined;
+
+// @public
+export function sparklineSummary(values: readonly number[]): string;
+
+// @public
 export function splitRelativeToken(raw: string): {
     preset: RelativePreset;
     n: number;
@@ -6083,6 +7448,28 @@ export function stableKey(input: unknown): string;
 export function staleAppendStash<TRow>(stash: AppendStash<TRow> | null, baseKey: string, failed: boolean): boolean;
 
 // @public
+export interface StatusBarItem {
+    readonly appearance?: FeatureNotice["appearance"];
+    readonly key: "rows" | "selected" | FeatureNoticeKind;
+    readonly text: string;
+}
+
+// @public
+export function statusBarItems(input: StatusBarItemsInput): StatusBarItem[];
+
+// @public
+export interface StatusBarItemsInput {
+    readonly enabled: boolean;
+    readonly labels?: TableLabels;
+    readonly limit?: number;
+    readonly notices?: readonly FeatureNotice[];
+    readonly page?: number;
+    readonly selected: number;
+    readonly shown: number;
+    readonly total?: number;
+}
+
+// @public
 export function stepEditableCell<TRow>(options: {
     rows: readonly TRow[];
     columns: readonly EditableColumnLike<TRow>[];
@@ -6093,6 +7480,20 @@ export function stepEditableCell<TRow>(options: {
 
 // @public
 export function stepMatch(index: number, total: number, step: number): number;
+
+// @public
+export function stickyHeaderOffset(enabled: boolean, stickyTop: number, toolbarHeight: number): number;
+
+// @public
+export interface StickyToolbarStyle {
+    readonly background: string;
+    readonly position: "sticky";
+    readonly top: number;
+    readonly zIndex: number;
+}
+
+// @public
+export function stickyToolbarStyle(enabled: boolean, stickyTop?: number): StickyToolbarStyle | undefined;
 
 // @public
 export function stopCellEditKeyboard(event: {
@@ -6823,6 +8224,86 @@ export interface TableRevisions {
 export type TableRowScope = "visible" | "page" | "full";
 
 // @public
+export interface TableRuntime<TRow = unknown> {
+    featureIds(): readonly string[];
+    labels(): Readonly<Record<string, unknown>> | undefined;
+    rowAt(localIndex: number): TRow | undefined;
+    view(): TableRuntimeView<TRow> | undefined;
+}
+
+// @public
+export interface TableRuntimeView<TRow = unknown> {
+    readonly actions?: {
+        readonly row: readonly RowAction<TRow>[];
+        readonly bulk: readonly BulkAction[];
+    };
+    readonly columnLayout?: {
+        readonly keys: readonly string[];
+        readonly hidden: readonly string[];
+        readonly setHidden?: (key: string, hidden: boolean) => void;
+        readonly move?: (key: string, toIndex: number) => void;
+        readonly setOrder?: (order: readonly string[]) => void;
+    };
+    readonly editing?: {
+        readonly onCellEdit?: (row: TRow, key: string, nextValue: unknown) => unknown;
+        readonly stageCell?: (row: TRow, rowId: string, columnKey: string, value: string) => void;
+    };
+    readonly filterDefs?: readonly FilterDef<TRow>[];
+    readonly filterRegistry?: FilterTypeRegistry;
+    readonly getRowId: (row: TRow) => string;
+    readonly grouping?: unknown;
+    readonly groupingState?: {
+        readonly groupBy: string | undefined;
+        readonly aggregateOverrides: GroupAggregateOverrides;
+        readonly columnLabel: (key: string) => string;
+        readonly columns?: readonly ColumnMetadata<TRow>[];
+        readonly computedAggregateKeys?: readonly string[];
+        readonly queryAggregates?: readonly QueryAggregate[];
+        readonly aggregateOperations?: readonly string[];
+        readonly honorsAggregates?: boolean;
+        readonly setGroupBy: (key: string | undefined) => void;
+        readonly initializeGroupBy?: (key: string) => void;
+        readonly setAggregateOverrides?: (overrides: GroupAggregateOverrides) => void;
+    };
+    readonly neutralTable?: NeutralTable<TRow>;
+    readonly pinning?: {
+        readonly columns: Readonly<Record<string, PinSide>>;
+        readonly setColumnPin?: (key: string, side: PinSide | undefined) => void;
+        readonly rows?: {
+            readonly top: readonly string[];
+            readonly bottom: readonly string[];
+        };
+        readonly setRowPin?: (rowKey: string, side: RowPinSide | undefined) => void;
+    };
+    readonly query?: {
+        readonly page: number;
+        readonly limit: number;
+        readonly total?: number;
+        readonly defaultLimit?: number;
+        readonly search: string;
+        readonly sortBy?: string;
+        readonly sortDir?: "asc" | "desc";
+        readonly setPage: (page: number) => void;
+        readonly setLimit: (limit: number) => void;
+        readonly setSearch: (search: string) => void;
+        readonly setSort: (key?: string, dir?: "asc" | "desc") => void;
+        readonly extra?: ExtraFilters;
+        readonly setExtras?: (extra: ExtraFilters) => void;
+        readonly clearExtras?: () => void;
+    };
+    readonly rowLabel: (row: TRow) => string;
+    readonly rows: readonly TRow[];
+    readonly selection?: {
+        readonly selectedIds: ReadonlySet<string>;
+        readonly replace: (ids: readonly string[] | undefined) => void;
+    };
+    readonly sortBy?: string;
+    readonly sourceCapabilities?: TableSourceCapabilities;
+    readonly tree?: unknown;
+    readonly visibleRows?: readonly TRow[];
+}
+
+// @public
 export interface TableSnapshot<TRow = unknown> {
     readonly capabilities: TableSourceCapabilities;
     readonly columns: readonly ColumnMetadata<TRow>[];
@@ -6989,6 +8470,21 @@ export const TEXT_OP_LABEL_KEYS: {
 export const TEXT_OPS: readonly ["eq", "neq", "contains", "notContains", "startsWith", "endsWith", "empty", "notEmpty"];
 
 // @public
+export interface TextFieldWidget {
+    label: string;
+    needsValue: boolean;
+    op: TextOp;
+    opLabelKeys: typeof TEXT_OP_LABEL_KEYS;
+    ops: readonly TextOp[];
+    setOp: (op: TextOp) => void;
+    value: string;
+    write: (nextOp: TextOp, nextValue: string) => void;
+}
+
+// @public
+export function textFilterWidget<TRow>(def: FilterDef<TRow>, source: Pick<FilterFormSource<TRow>, "extra" | "setExtras">, localOp: TextOp, setLocalOp: (op: TextOp) => void): TextFieldWidget;
+
+// @public
 export type TextOp = (typeof TEXT_OPS)[number];
 
 // @public
@@ -7011,6 +8507,12 @@ export function toggleId(set: ReadonlySet<string>, id: string): Set<string>;
 
 // @public
 export function toggleIds(set: ReadonlySet<string>, ids: readonly string[]): Set<string>;
+
+// @public
+export function toggleTreeNode<TRow>(entries: readonly TreeEntry<TRow>[], id: string, actions: {
+    readonly loadIfNeeded: (row: TRow) => void;
+    readonly toggle: (id: string) => void;
+}): void;
 
 // @public
 export function toolbarShowsFilters(mode: FilterChromeMode, hasForm: boolean, hasFilterTree: boolean): boolean;
@@ -7041,6 +8543,20 @@ export interface TreeEntry<TRow> {
 }
 
 // @public
+export interface TreeExpansionActions {
+    readonly collapseAll: () => void;
+    readonly expand: (id: string) => void;
+    readonly expandAll: (ids: readonly string[]) => void;
+    readonly toggle: (id: string) => void;
+}
+
+// @public
+export function treeExpansionActions(store: ControllableStore<ReadonlySet<string>>): TreeExpansionActions;
+
+// @public
+export function treeExportExpandedIds<TRow>(entries: readonly TreeEntry<TRow>[]): Set<string>;
+
+// @public
 export function treeIndentStyle(level: number): {
     paddingInlineStart?: string;
 };
@@ -7054,6 +8570,9 @@ export interface TreeShape<TRow> {
     getParentId?: (row: TRow) => string | undefined;
     hasChildren?: (row: TRow) => boolean;
 }
+
+// @public
+export const UNPIN_ROW_ACTION_KEY = "adapttable:unpin-row";
 
 // @public @deprecated
 export const unpinAllColumns: typeof unpinAllColumns_2;
@@ -7233,6 +8752,9 @@ export function withColumnPinned(state: ColumnLayoutState, key: string, side: Pi
 export function withColumnWidth(state: ColumnLayoutState, key: string, width: number | undefined): ColumnLayoutState;
 
 // @public
+export function withContextMenuCellCopy<TRow, TActions extends ContextMenuActions<TRow>>(actions: TActions, columns: readonly ColumnMetadata<TRow>[], gridNavigation: boolean): TActions;
+
+// @public
 export function withDeclaredAggregates<TRow>(mapper: (rows: readonly TRow[]) => Partial<Record<string, DisplayValue>>, declared: DeclaredAggregates): GroupAggregatesMapper<TRow>;
 
 // @public
@@ -7243,6 +8765,22 @@ export function withGroupAggregateOverrides<TRow>(base: GroupAggregatesFn<TRow> 
 
 // @public
 export function withQueryAggregateOverrides<TRow = unknown>(base: readonly QueryAggregate[] | undefined, overrides: GroupAggregateOverrides, columns?: readonly ColumnMetadata<TRow>[], source?: AggregationSourceSupport): readonly QueryAggregate[] | undefined;
+
+// @public
+export function withRowMutationActions<TRow>(options: {
+    readonly host?: RowAction<TRow>[];
+    readonly mutations: readonly RowAction<TRow>[];
+    readonly actionsHidden: boolean;
+}): MergedRowActions<TRow>;
+
+// @public
+export function withRowPinActions<TRow>(options: {
+    readonly rowActions?: RowAction<TRow>[];
+    readonly hasRowActions: boolean;
+    readonly pinning: boolean;
+    readonly pins: readonly RowAction<TRow>[];
+    readonly actionsHidden: boolean;
+}): MergedRowActions<TRow>;
 
 // @public
 export function writeClipboardText(text: string): Promise<boolean>;
@@ -7273,6 +8811,9 @@ export function writeSortLevels(params: URLSearchParams, levels: readonly {
     key: string;
     dir: SortDirection;
 }[], prefix?: string): void;
+
+// @public
+export function writeStoredColumnLayout(storage: LayoutStorage | undefined, storageKey: string, next: ColumnLayoutState, fallback: ColumnLayoutState): void;
 
 // @public @deprecated
 export const xlsxWriter: typeof xlsxWriter_2;

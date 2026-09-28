@@ -11,6 +11,9 @@ import type { TableSource } from "../source/TableSource";
 import type { TableLabels } from "../types";
 import type { FilterDef } from "./filterDefs";
 import type { FilterTypeRegistry } from "./filterRegistry";
+import type { FilterTreeOption } from "./filterTreeEditor";
+
+export type { FilterTreeOption };
 
 /**
  * Class hooks the unstyled adapter maps onto `DataTableClassNames`.
@@ -62,18 +65,6 @@ export interface FilterTreeBuilderProps<TRow> {
   readonly registry?: FilterTypeRegistry;
   /** Open Advanced on first paint. Default: open only when a tree already exists. */
   readonly defaultExpanded?: boolean;
-}
-
-/**
- * One option in a tree Select.
- *
- * @public
- */
-export interface FilterTreeOption {
-  /** Value stored when this option is chosen. */
-  readonly value: string;
-  /** Caption shown for the option. */
-  readonly label: string;
 }
 
 /**

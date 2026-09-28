@@ -4,7 +4,12 @@
  * The mutation hook lives on this entry. A table that never imports it
  * never carries add / duplicate / delete.
  */
-import { ACTIONS_COLUMN_KEY, type RowAction } from "@adapttable/core";
+import {
+  ACTIONS_COLUMN_KEY,
+  type RowAction,
+  withRowMutationActions,
+  withRowPinActions,
+} from "@adapttable/core";
 import { coreRowActions } from "@adapttable/core/binding";
 import { type ReactNode, useMemo } from "react";
 
@@ -29,27 +34,31 @@ function LiveRowActions({
     confirmDeleteRow: props.confirmDeleteRow,
   });
   const mutationActions = rowMutations.actions;
-  const hasRowActions =
-    (props.rowActions?.length ?? 0) + mutationActions.length > 0;
   const actionsHidden = chrome.columnLayout.isHidden(ACTIONS_COLUMN_KEY);
   const hostRowActions = props.rowActions;
-  const rowActions = useMemo<RowAction<never>[] | undefined>(() => {
-    if (actionsHidden || !hasRowActions) return undefined;
-    if (mutationActions.length === 0) return hostRowActions;
-    return [...(hostRowActions ?? []), ...mutationActions];
-  }, [actionsHidden, hasRowActions, hostRowActions, mutationActions]);
-  const hasAnyActions = hasRowActions || chrome.rowPinning !== undefined;
-  const pins = chrome.rowPinning?.actions ?? [];
+  const merged = useMemo(
+    () =>
+      withRowMutationActions({
+        host: hostRowActions,
+        mutations: mutationActions,
+        actionsHidden,
+      }),
+    [actionsHidden, hostRowActions, mutationActions]
+  );
   // Pin entries ride the same trailing column as the host's row actions, so
   // they are appended rather than given a column of their own.
-  const withPins =
-    pins.length === 0 ? rowActions : [...(rowActions ?? []), ...pins];
-  const visible = actionsHidden || !hasAnyActions ? undefined : withPins;
+  const visible = withRowPinActions({
+    rowActions: merged.rowActions,
+    hasRowActions: merged.hasRowActions,
+    pinning: chrome.rowPinning !== undefined,
+    pins: chrome.rowPinning?.actions ?? [],
+    actionsHidden,
+  });
   return children({
     ...chrome,
     rowMutations,
-    rowActions: visible,
-    hasRowActions: hasAnyActions,
+    rowActions: visible.rowActions,
+    hasRowActions: visible.hasRowActions,
   });
 }
 

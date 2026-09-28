@@ -1,78 +1,9 @@
 /**
- * The window behind a long checklist.
- *
- * A column with two hundred distinct values renders two hundred kit
- * checkboxes into a 240px popover, and every keystroke in the search box
- * re-renders all of them. Windowing keeps that to what a reader can see plus
- * a margin, and holds the rest open with two spacers so the scrollbar still
- * describes the whole list.
- *
- * The list wraps — several options to a row — so the window is computed in
- * ROWS of options, not options. That needs to know how many fit across, which
- * is why the virtualized layout gives every option the same width: with a
- * uniform cell the count is arithmetic on the measured container instead of a
- * per-item measurement pass. Before anything is measured the answer is one per
- * row, which over-renders slightly and is never wrong.
+ * The window behind a long checklist: track the list's scroll position and
+ * width, and derive the window core's `checklistWindow` computes.
  */
+import { type ChecklistWindow, checklistWindow } from "@adapttable/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-import { CHECKLIST_ITEM_HEIGHT, CHECKLIST_LIST_HEIGHT } from "./checklist";
-
-/** Width of one option cell while the list is windowed, in px. */
-export const CHECKLIST_ITEM_WIDTH = 200;
-
-/** Space between option cells, in px — both axes. */
-export const CHECKLIST_OPTION_GAP = 8;
-
-/** Rows rendered either side of the visible span. */
-const OVERSCAN_ROWS = 2;
-
-/** Height one row of options occupies, gap included. */
-const ROW_HEIGHT = CHECKLIST_ITEM_HEIGHT + CHECKLIST_OPTION_GAP;
-
-/** The slice to render and the space the rest of the list occupies. */
-export interface ChecklistWindow {
-  /** Index of the first option to render. */
-  start: number;
-  /** Index one past the last option to render. */
-  end: number;
-  /** Height of the spacer before the window, in px. */
-  padTop: number;
-  /** Height of the spacer after it, in px. */
-  padBottom: number;
-}
-
-/** How many uniform option cells fit across a container of this width. */
-export function columnsAcross(width: number): number {
-  if (width <= 0) return 1;
-  const each = CHECKLIST_ITEM_WIDTH + CHECKLIST_OPTION_GAP;
-  return Math.max(1, Math.floor((width + CHECKLIST_OPTION_GAP) / each));
-}
-
-/** The window over `count` options at a scroll position, given the row width. */
-export function checklistWindow(
-  count: number,
-  scrollTop: number,
-  width: number
-): ChecklistWindow {
-  const columns = columnsAcross(width);
-  const rowCount = Math.ceil(count / columns);
-  const visibleRows = Math.ceil(CHECKLIST_LIST_HEIGHT / ROW_HEIGHT);
-  const startRow = Math.max(
-    0,
-    Math.min(
-      Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN_ROWS,
-      Math.max(0, rowCount - visibleRows)
-    )
-  );
-  const endRow = Math.min(rowCount, startRow + visibleRows + OVERSCAN_ROWS * 2);
-  return {
-    start: startRow * columns,
-    end: Math.min(count, endRow * columns),
-    padTop: startRow * ROW_HEIGHT,
-    padBottom: Math.max(0, (rowCount - endRow) * ROW_HEIGHT),
-  };
-}
 
 /** What {@link useChecklistWindow} hands the layout. */
 export interface ChecklistWindowState extends ChecklistWindow {

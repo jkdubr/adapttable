@@ -20,30 +20,17 @@
  * would light up whatever landed there. These are keyed by row id and cell
  * address, so the mark travels with the data.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createHighlightStore,
+  highlightCellKey,
+  highlightDuration,
+  type HighlightedCell,
+} from "@adapttable/core";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 
-/** How long an animated highlight lasts, in milliseconds. */
-const FADE_MS = 1500;
-
-/**
- * Longer without motion: a steady mark needs more time to be noticed than
- * one that animates, because nothing about it catches the eye.
- */
-const STEADY_MS = 2500;
-
-/**
- * One highlighted cell.
- *
- * @public
- */
-export interface HighlightedCell {
-  /** Identity of the row. */
-  rowId: string;
-  /** Key of the column. */
-  columnKey: string;
-}
+export type { HighlightedCell } from "@adapttable/core";
 
 /**
  * What {@link useHighlight} returns.
@@ -68,8 +55,6 @@ export interface HighlightState {
   animated: boolean;
 }
 
-const cellKey = (rowId: string, columnKey: string) => `${rowId} ${columnKey}`;
-
 /**
  * Highlight rows and cells for a moment.
  *
@@ -80,81 +65,25 @@ const cellKey = (rowId: string, columnKey: string) => `${rowId} ${columnKey}`;
  */
 export function useHighlight(enabled: boolean): HighlightState {
   const reduced = usePrefersReducedMotion();
-  const [rows, setRows] = useState<ReadonlySet<string>>(() => new Set());
-  const [cells, setCells] = useState<ReadonlySet<string>>(() => new Set());
-  // One timer per mark, so a second flash restarts that mark's clock
-  // without disturbing any other.
-  const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
-  const duration = reduced ? STEADY_MS : FADE_MS;
-
-  useEffect(
-    () => () => {
-      for (const timer of timers.current.values()) clearTimeout(timer);
-      timers.current.clear();
-    },
-    []
+  const options = { enabled, durationMs: highlightDuration(reduced) };
+  const [store] = useState(() => createHighlightStore(options));
+  store.configure(options);
+  const { rows, cells } = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot
   );
 
-  const schedule = useCallback(
-    (key: string, drop: () => void) => {
-      const existing = timers.current.get(key);
-      if (existing) clearTimeout(existing);
-      timers.current.set(
-        key,
-        setTimeout(() => {
-          timers.current.delete(key);
-          drop();
-        }, duration)
-      );
-    },
-    [duration]
-  );
-
-  const flashRow = useCallback(
-    (rowId: string) => {
-      if (!enabled) return;
-      setRows((current) => new Set(current).add(rowId));
-      schedule(`row:${rowId}`, () => {
-        setRows((current) => {
-          const next = new Set(current);
-          next.delete(rowId);
-          return next;
-        });
-      });
-    },
-    [enabled, schedule]
-  );
-
-  const flashCell = useCallback(
-    ({ rowId, columnKey }: HighlightedCell) => {
-      if (!enabled) return;
-      const key = cellKey(rowId, columnKey);
-      setCells((current) => new Set(current).add(key));
-      schedule(`cell:${key}`, () => {
-        setCells((current) => {
-          const next = new Set(current);
-          next.delete(key);
-          return next;
-        });
-      });
-    },
-    [enabled, schedule]
-  );
-
-  const clear = useCallback(() => {
-    for (const timer of timers.current.values()) clearTimeout(timer);
-    timers.current.clear();
-    setRows(new Set());
-    setCells(new Set());
-  }, []);
+  // Timers must not outlive the table.
+  useEffect(() => store.dispose, [store]);
 
   return {
-    flashRow,
-    flashCell,
-    clear,
+    flashRow: store.flashRow,
+    flashCell: store.flashCell,
+    clear: store.clear,
     isRowHighlighted: (rowId) => rows.has(rowId),
     isCellHighlighted: (rowId, columnKey) =>
-      cells.has(cellKey(rowId, columnKey)),
+      cells.has(highlightCellKey(rowId, columnKey)),
     animated: enabled && !reduced,
   };
 }

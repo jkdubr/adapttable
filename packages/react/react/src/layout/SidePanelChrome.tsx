@@ -26,6 +26,13 @@
  * the same chrome hold a filter form, a column list, or a pivot builder
  * without knowing what any of them are.
  */
+import {
+  DEFAULT_SIDE_PANEL_ID_PREFIX,
+  handleSidePanelBodyKey,
+  handleSidePanelTabKey,
+  sidePanelModel,
+  sidePanelTabId,
+} from "@adapttable/core";
 import type {
   SidePanelChromeProps as NeutralSidePanelChromeProps,
   SidePanelFrameProps as NeutralSidePanelFrameProps,
@@ -94,20 +101,6 @@ export type SidePanelChromeProps = NeutralSidePanelChromeProps<
 >;
 
 /**
- * Move the roving tab stop.
- *
- * Arrow keys wrap, Home and End jump to the ends — the pattern a `tablist`
- * is expected to follow, and the reason the tabs are not seven buttons.
- */
-function nextIndex(key: string, at: number, count: number): number | undefined {
-  if (key === "ArrowRight" || key === "ArrowDown") return (at + 1) % count;
-  if (key === "ArrowLeft" || key === "ArrowUp") return (at - 1 + count) % count;
-  if (key === "Home") return 0;
-  if (key === "End") return count - 1;
-  return undefined;
-}
-
-/**
  * Renders the side panel, or nothing when there are no panels to show.
  *
  * @param props - The panels, which one is open, and the kit's slots.
@@ -118,69 +111,66 @@ function nextIndex(key: string, at: number, count: number): number | undefined {
 export function SidePanelChrome(props: Readonly<SidePanelChromeProps>) {
   const { panels, openPanel, onOpenPanel, onClose, slots } = props;
   const tabsRef = useRef<HTMLDivElement | null>(null);
-  const prefix = props.idPrefix ?? "adapttable-side-panel";
-  const selectedIndex = Math.max(
-    0,
-    panels.findIndex((panel) => panel.key === openPanel)
-  );
-  const selected = panels[selectedIndex];
+  const prefix = props.idPrefix ?? DEFAULT_SIDE_PANEL_ID_PREFIX;
+  const model = sidePanelModel({
+    panels,
+    openPanel,
+    idPrefix: prefix,
+    labels: props.labels,
+  });
+  const selectedIndex = model?.selectedIndex ?? 0;
 
   // The keys are handled on the tabs rather than on the strip around them:
   // the tab is what has focus, and a `tablist` that listens for keys is a
   // container the user can never be inside of.
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key === "Escape") {
-        event.stopPropagation();
-        onClose();
-        return;
-      }
-      const to = nextIndex(event.key, selectedIndex, panels.length);
-      if (to === undefined) return;
-      const panel = panels[to];
-      if (!panel) return;
-      event.preventDefault();
-      onOpenPanel(panel.key);
+      const key = handleSidePanelTabKey(event, {
+        panels,
+        selectedIndex,
+        onOpenPanel,
+        onClose,
+      });
+      if (key === undefined) return;
       // Focus follows selection in an automatic tablist, and the newly
       // selected tab is the only one still in the tab order.
-      const id = CSS.escape(`${prefix}-tab-${panel.key}`);
+      const id = CSS.escape(sidePanelTabId(prefix, key));
       tabsRef.current?.querySelector<HTMLElement>(`#${id}`)?.focus();
     },
     [onClose, onOpenPanel, panels, prefix, selectedIndex]
   );
 
-  if (panels.length === 0 || !selected) return null;
+  if (!model) return null;
 
-  const labels = props.labels;
   return (
     <slots.Frame side={props.side ?? "end"} className={props.className}>
       <div
         data-adapttable-part="side-panel-header"
         style={{ display: "flex", alignItems: "center", gap: 8 }}
       >
-        {panels.length > 1 && (
+        {model.tabbed && (
           <div
             ref={tabsRef}
             role="tablist"
-            aria-label={labels?.sidePanel ?? "Table settings"}
+            aria-label={model.tablistLabel}
             data-adapttable-part="side-panel-tabs"
             style={{ display: "flex", flex: 1, gap: 4 }}
           >
-            {panels.map((panel, index) => (
+            {model.tabs.map((tab) => (
               <slots.Tab
-                key={panel.key}
-                panel={panel}
-                selected={index === selectedIndex}
+                key={tab.key}
+                panel={tab.panel}
+                selected={tab.selected}
                 buttonProps={{
-                  id: `${prefix}-tab-${panel.key}`,
+                  id: tab.id,
                   role: "tab",
                   type: "button",
-                  tabIndex: index === selectedIndex ? 0 : -1,
-                  "aria-selected": index === selectedIndex,
-                  "aria-controls": `${prefix}-body`,
+                  tabIndex: tab.tabIndex,
+                  "aria-selected": tab.selected,
+                  "aria-controls": tab.controls,
                   "data-adapttable-part": "side-panel-tab",
                   onClick: () => {
-                    onOpenPanel(panel.key);
+                    onOpenPanel(tab.key);
                   },
                   onKeyDown,
                 }}
@@ -188,29 +178,22 @@ export function SidePanelChrome(props: Readonly<SidePanelChromeProps>) {
             ))}
           </div>
         )}
-        <slots.Close
-          label={labels?.closePanel ?? "Close panel"}
-          onClose={onClose}
-        />
+        <slots.Close label={model.closeLabel} onClose={onClose} />
       </div>
       <div
-        id={`${prefix}-body`}
-        role={panels.length > 1 ? "tabpanel" : undefined}
-        aria-labelledby={
-          panels.length > 1 ? `${prefix}-tab-${selected.key}` : undefined
-        }
+        id={model.bodyId}
+        role={model.bodyRole}
+        aria-labelledby={model.bodyLabelledBy}
         data-adapttable-part="side-panel-body"
         // A single-panel side panel has no tab to be labelled by, so it
         // names itself — otherwise the region is anonymous to a screen
         // reader the moment a host asks for only one panel.
-        aria-label={panels.length > 1 ? undefined : selected.label}
+        aria-label={model.bodyLabel}
         onKeyDown={(event) => {
-          if (event.key !== "Escape") return;
-          event.stopPropagation();
-          onClose();
+          handleSidePanelBodyKey(event, onClose);
         }}
       >
-        {selected.content}
+        {model.selected.content}
       </div>
     </slots.Frame>
   );

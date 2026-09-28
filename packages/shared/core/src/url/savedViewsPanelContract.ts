@@ -11,14 +11,9 @@
 import type { CssProperties } from "../style/cssProperties";
 import type { TableLabels } from "../types";
 import type { SavedView } from "./savedViewsController";
+import type { SavedViewControlKey } from "./savedViewsPanelModel";
 
-/**
- * Which control a cluster entry is. Stable across kits, and across renders.
- *
- * @public
- */
-export type SavedViewControlKey =
-  "rename" | "moveUp" | "moveDown" | "default" | "remove";
+export type { SavedViewControlKey };
 
 /**
  * One control in a row's cluster.

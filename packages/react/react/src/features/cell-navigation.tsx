@@ -6,17 +6,14 @@
  * through {@link CELL_NAV_LIVE}.
  */
 import {
-  type CellEdit,
-  cellFillHandler,
-  cellPasteHandler,
+  cellNavigationChannels,
   type CellRange,
-  coveredAddressSet,
-  isSingleCell,
+  cellRangeKey,
+  reportedCellRange,
 } from "@adapttable/core";
 import { coreCellNavigation } from "@adapttable/core/binding";
 import { type ReactNode, useEffect, useRef } from "react";
 
-import { asGesture } from "../editing/editHistory";
 import { useFindFocus } from "../find/useFindInTable";
 import { GridFocusAnnouncer } from "../focus/GridFocusAnnouncer";
 import { useGridFocus } from "../focus/useGridFocus";
@@ -40,28 +37,19 @@ function LiveCellNav({
   currentMatch,
   children,
 }: CellNavLiveSlotProps<never>): ReactNode {
-  const coveredCells = coveredAddressSet({
-    rows: options.rows,
-    columns: options.columns,
-    getCellSpan: hostProps.getCellSpan,
-    firstRowIndex: options.firstRowIndex,
-    pinOffset,
-  });
   const gridFocus = useGridFocus({
     ...options,
     enabled: true,
-    isCoveredCell: (cell: { row: number; col: number }) =>
-      coveredCells.has(`${cell.row}:${cell.col}`),
-    onPaste: asGesture(
-      cellPasteHandler(hostProps),
-      record as (edits: readonly CellEdit<never>[]) => void
-    ),
-    onFill: asGesture(
-      cellFillHandler(hostProps),
-      record as (edits: readonly CellEdit<never>[]) => void
-    ),
-    onUndo: undo,
-    onRedo: redo,
+    ...cellNavigationChannels({
+      rows: options.rows,
+      columns: options.columns,
+      firstRowIndex: options.firstRowIndex,
+      pinOffset,
+      host: hostProps,
+      record,
+      undo,
+      redo,
+    }),
     onFind,
     matchKeys,
     currentMatch,
@@ -76,13 +64,8 @@ function LiveCellNav({
   const wired = hostProps.onCellRangeChange !== undefined;
   // A lone focused cell is not a selection, so it reports `null`, and the
   // host hears only when the reported rectangle changes.
-  const range =
-    gridFocus.range === null || isSingleCell(gridFocus.range)
-      ? null
-      : gridFocus.range;
-  const rangeKey = range
-    ? `${range.anchor.row}:${range.anchor.col}-${range.head.row}:${range.head.col}`
-    : "";
+  const range = reportedCellRange(gridFocus.range);
+  const rangeKey = cellRangeKey(range);
   const latestRange = useRef(range);
   latestRange.current = range;
   useEffect(() => {

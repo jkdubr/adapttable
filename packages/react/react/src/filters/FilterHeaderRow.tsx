@@ -6,9 +6,14 @@
 import {
   defaultFilterRegistry,
   type FilterDef,
-  filterLabel,
-  filterStateKeys,
+  filterDefForColumn,
+  type FilterFormSource,
   type FilterTypeRegistry,
+  headerFilterBooleanOptions,
+  headerFilterCellKind,
+  headerFilterMultiModel,
+  headerFilterRangeModel,
+  headerFilterSelectModel,
   renderRegisteredFilter,
   type TableLabels,
 } from "@adapttable/core";
@@ -22,8 +27,6 @@ import type { CSSProperties, ReactElement, ReactNode } from "react";
 import type { ColumnDef } from "../columnDef";
 import { ColumnSpacer } from "../virtual/ColumnSpacer";
 import {
-  type FilterFormSource,
-  listFilterValues,
   useBooleanFilterWidget,
   useRangeFilterWidget,
   useTextFilterWidget,
@@ -31,7 +34,7 @@ import {
 import { useFilterOptions } from "./useFilterOptions";
 
 export type { FilterFormSource, FilterTypeRegistry };
-
+export { filterDefForColumn, hasActiveHeaderFilter } from "@adapttable/core";
 export type {
   FilterHeaderClassNames,
   FilterHeaderControlProps,
@@ -70,35 +73,6 @@ export type FilterHeaderRowProps<TRow> = NeutralFilterHeaderRowProps<
 >;
 
 /**
- * Whether a header filter holds a value worth marking its column with.
- *
- * The emptiness rules are the whole point, and they are not obvious: a cleared
- * text field leaves `""`, a cleared multi-select leaves `[]`, and a control
- * nobody touched leaves `undefined`. None of those is a filter. A funnel that
- * lights up for one is worse than no funnel at all, because a reader who trusts
- * it goes looking for a filter that is not there.
- *
- * Every adapter drew this conclusion for itself with a byte-identical copy of
- * these six lines; it belongs here, where it can be wrong in one place only.
- *
- * @public
- */
-export function hasActiveHeaderFilter<TRow>(
-  props: Readonly<
-    Pick<FilterHeaderControlProps<TRow>, "def" | "source" | "registry">
-  >
-): boolean {
-  return filterStateKeys(
-    props.def,
-    props.registry ?? defaultFilterRegistry
-  ).some((key) => {
-    const value = props.source.extra[key];
-    if (value == null || value === "") return false;
-    return !(Array.isArray(value) && value.length === 0);
-  });
-}
-
-/**
  * Adapter-supplied controls for {@link FilterHeaderChrome} —
  * `@adapttable/core`'s `FilterHeaderSlots` drawing React nodes.
  *
@@ -128,18 +102,6 @@ export interface FilterHeaderControlChromeProps<
 > extends FilterHeaderControlProps<TRow> {
   /** The kit's controls for each filter shape. */
   readonly slots: FilterHeaderSlots;
-}
-
-/**
- * The definition that drives a column's header filter, if any.
- *
- * @public
- */
-export function filterDefForColumn<TRow>(
-  defs: readonly FilterDef<TRow>[],
-  key: string
-): FilterDef<TRow> | undefined {
-  return defs.find((def) => (def.column ?? def.key) === key);
 }
 
 function Pad({
@@ -203,26 +165,15 @@ function SelectCell<TRow>({
   slots: FilterHeaderSlots;
 }>): ReactElement {
   const { options } = useFilterOptions(def);
-  const selected = listFilterValues(source.extra[def.key]);
-  const write = (values: readonly string[]) => {
-    source.setExtra(def.key, values.length > 0 ? [...values] : undefined);
-  };
+  const model = headerFilterSelectModel(def, source, options, labels);
   const Select = slots.Select;
   return (
     <Select
-      label={filterLabel(def)}
-      value={selected[0] ?? ""}
+      label={model.label}
+      value={model.value}
       className={className}
-      options={[
-        { value: "", label: labels.boolAny },
-        ...options.map((option) => ({
-          value: option.value,
-          label: option.label,
-        })),
-      ]}
-      onChange={(value) => {
-        write(value === "" ? [] : [value]);
-      }}
+      options={model.options}
+      onChange={model.write}
     />
   );
 }
@@ -243,33 +194,17 @@ function CompactMultiCell<TRow>({
   slots: FilterHeaderSlots;
 }>): ReactElement {
   const { options } = useFilterOptions(def);
-  const selected = listFilterValues(source.extra[def.key]);
-  const write = (values: readonly string[]) => {
-    source.setExtra(def.key, values.length > 0 ? [...values] : undefined);
-  };
-  const first = options.find((option) => option.value === selected[0]);
-  let summary = labels.boolAny;
-  if (selected.length === 1) summary = first?.label ?? selected[0] ?? summary;
-  if (selected.length > 1) summary = labels.groupCount(selected.length);
+  const model = headerFilterMultiModel(def, source, options, labels);
   const Multi = slots.Multi;
   return (
     <Multi
-      label={filterLabel(def)}
-      summary={summary}
-      options={options.map((option) => ({
-        value: option.value,
-        label: option.label,
-      }))}
-      selected={selected}
+      label={model.label}
+      summary={model.summary}
+      options={model.options}
+      selected={model.selected}
       className={className}
       menuClassName={menuClassName}
-      onToggle={(value, checked) => {
-        write(
-          checked
-            ? [...selected, value]
-            : selected.filter((item) => item !== value)
-        );
-      }}
+      onToggle={model.toggle}
     />
   );
 }
@@ -294,11 +229,7 @@ function BooleanCell<TRow>({
       label={widget.label}
       value={widget.choice}
       className={className}
-      options={[
-        { value: "", label: labels.boolAny },
-        { value: "true", label: labels.boolTrue },
-        { value: "false", label: labels.boolFalse },
-      ]}
+      options={headerFilterBooleanOptions(labels)}
       onChange={(value) => widget.write(value as typeof widget.choice)}
     />
   );
@@ -316,9 +247,7 @@ function RangeCell<TRow>({
   slots: FilterHeaderSlots;
 }>): ReactElement {
   const widget = useRangeFilterWidget(def, source);
-  // Compact header has no operator picker. An unset op would wipe the
-  // value on write; `gte` is the same inference a lone lower bound uses.
-  const op = widget.op ?? "gte";
+  const model = headerFilterRangeModel(widget);
   const Range = slots.Range;
   return (
     <span data-adapttable-part="filter-header-input" className={className}>
@@ -326,14 +255,14 @@ function RangeCell<TRow>({
         label={widget.label}
         type={widget.inputType}
         value={widget.a}
-        onChange={(value) => widget.write(op, value, widget.b)}
+        onChange={model.writeLower}
       />
-      {widget.arity === "two" ? (
+      {model.showUpper ? (
         <Range
           label={widget.label}
           type={widget.inputType}
           value={widget.b}
-          onChange={(value) => widget.write(op, widget.a, value)}
+          onChange={model.writeUpper}
         />
       ) : null}
     </span>
@@ -357,7 +286,6 @@ function FilterHeaderCell<TRow>({
   registry?: FilterTypeRegistry;
   slots: FilterHeaderSlots;
 }>): ReactElement | null {
-  const spec = registry.get(def.type);
   const custom = renderRegisteredFilter(
     def,
     source,
@@ -366,7 +294,7 @@ function FilterHeaderCell<TRow>({
     className
   );
   if (custom) return custom as ReactElement;
-  switch (spec?.widget ?? def.type) {
+  switch (headerFilterCellKind(def, registry)) {
     case "text":
       return (
         <TextCell
@@ -387,8 +315,7 @@ function FilterHeaderCell<TRow>({
           slots={slots}
         />
       );
-    case "multiSelect":
-    case "checklist":
+    case "multi":
       return (
         <CompactMultiCell
           def={def}
@@ -409,8 +336,7 @@ function FilterHeaderCell<TRow>({
           slots={slots}
         />
       );
-    case "numberRange":
-    case "dateRange":
+    case "range":
       return (
         <RangeCell
           def={def}
@@ -419,7 +345,7 @@ function FilterHeaderCell<TRow>({
           slots={slots}
         />
       );
-    default:
+    case undefined:
       return null;
   }
 }

@@ -1112,6 +1112,7 @@ export {
  */
 export type { TableCommandOptions } from "./actions/commandRegistry";
 export * from "./bindingExports";
+export * from "./columnFilterExports";
 export type {
   ColumnMenuChoice,
   ColumnMenuChoiceOption,
@@ -1131,6 +1132,7 @@ export type {
   FilterTypeExtend,
 } from "./features/currentHost";
 export type { BuildGroupedFlatModelOptions } from "./grouping/groupRows";
+export * from "./rowFeatureExports";
 export type {
   FeatureNotice,
   FeatureNoticeAppearance,
@@ -1204,3 +1206,4 @@ export {
   unpinAllColumns,
   xlsxWriter,
 } from "./adapterMachinery";
+export * from "./panelFeatureExports";

@@ -9,30 +9,12 @@
  */
 import type { TableLabels } from "../types";
 import type { ExportProgressState, ExportStatus } from "./exportController";
+import type {
+  ExportProgressAction,
+  ExportProgressDownload,
+} from "./exportProgressView";
 
-/**
- * One action rendered by the adapter-owned export progress surface.
- *
- * @public
- */
-export interface ExportProgressAction {
-  /** Localized control label. */
-  readonly label: string;
-  /** Runs the lifecycle action. */
-  readonly onAction: () => void;
-}
-
-/**
- * A download offered after a server-built export resolves `{ url }`.
- *
- * @public
- */
-export interface ExportProgressDownload {
-  /** Host-provided file URL. */
-  readonly url: string;
-  /** Localized link label. */
-  readonly label: string;
-}
+export type { ExportProgressAction, ExportProgressDownload };
 
 /**
  * Props for an adapter-owned server-export progress surface.

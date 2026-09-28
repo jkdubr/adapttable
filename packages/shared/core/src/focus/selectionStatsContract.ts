@@ -8,6 +8,9 @@
  */
 import type { TableLabels } from "../types";
 import type { SelectionStats } from "./selectionStats";
+import type { SelectionStatPart } from "./statusBar";
+
+export type { SelectionStatPart };
 
 /**
  * Props for the selection-stats Chrome.
@@ -27,18 +30,6 @@ export interface SelectionStatsChromeProps<TNode = unknown> {
   className?: string;
   /** Adapter-owned visible component. */
   slots: SelectionStatsSlots<TNode>;
-}
-
-/**
- * One formatted statistic in display order.
- *
- * @public
- */
-export interface SelectionStatPart {
-  /** Which statistic this part reports. */
-  readonly key: "count" | "sum" | "average" | "min" | "max";
-  /** The text to render. */
-  readonly text: string;
 }
 
 /**
