@@ -20,20 +20,16 @@
  * check — a stale answer must never mark a value the reader has already changed.
  */
 import {
-  type CellValidator,
   createEditValidationStore,
-  rowHasValidationError,
+  type EditValidationState,
+  editValidationView,
   type RowValidator,
-  type ValidationCheckResult,
-  validationErrorFor,
-  validationKey,
-  validationSignature,
-  type ValidationTarget,
 } from "@adapttable/core";
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 
 export type {
   CellValidator,
+  EditValidationState,
   RowValidator,
   ValidationCheckResult,
   ValidationTarget,
@@ -49,47 +45,6 @@ export interface UseEditValidationOptions<TRow> {
    * spread keyed by the column key.
    */
   applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
-}
-
-/**
- * Validation state for the whole table.
- *
- * @public
- */
-export interface EditValidationState<TRow> {
-  /** The message on one cell, if any. */
-  errorFor: (rowId: string, columnKey: string) => string | undefined;
-  /** The row-level message, if any. */
-  rowErrorFor: (rowId: string) => string | undefined;
-  /** Whether a cell's validators are still running. */
-  isValidating: (rowId: string, columnKey: string) => boolean;
-  /** Whether any cell in this row carries a message. */
-  rowHasError: (rowId: string) => boolean;
-  /**
-   * Run the validators for one commit.
-   *
-   * `allowed` is whether the commit may proceed. A rejection also carries
-   * `error` — the sentence the editor shows — so a caller that fires in the
-   * same tick as the check does not have to wait for a render to read it.
-   */
-  check: (options: {
-    target: ValidationTarget;
-    value: unknown;
-    row: TRow;
-    validateCell?: CellValidator<TRow>;
-  }) => Promise<ValidationCheckResult>;
-  /** Forget everything about one cell — what cancelling an edit does. */
-  clear: (rowId: string, columnKey: string) => void;
-  /** Forget every message. */
-  clearAll: () => void;
-  /** A digest of the messages, for a row memo comparator. */
-  signature: string;
-  /**
-   * Whether a row validator is armed. A cell with no validator of its own still
-   * has to run the check when the table has one — a cross-field rule fires on
-   * whichever cell was edited.
-   */
-  hasRowValidator: boolean;
 }
 
 /**
@@ -109,47 +64,9 @@ export function useEditValidation<TRow>(
     store.getSnapshot,
     store.getSnapshot
   );
-  const signature = useMemo(() => validationSignature(snapshot), [snapshot]);
-
-  const errorFor = useCallback(
-    (rowId: string, columnKey: string) =>
-      validationErrorFor(snapshot, rowId, columnKey),
-    [snapshot]
-  );
-  const rowErrorFor = useCallback(
-    (rowId: string) => snapshot.rowErrors.get(rowId),
-    [snapshot]
-  );
-  const isValidating = useCallback(
-    (rowId: string, columnKey: string) =>
-      snapshot.validating.has(validationKey(rowId, columnKey)),
-    [snapshot]
-  );
-  const rowHasError = useCallback(
-    (rowId: string) => rowHasValidationError(snapshot, rowId),
-    [snapshot]
-  );
-
+  const hasRowValidator = options.validateRow !== undefined;
   return useMemo(
-    () => ({
-      errorFor,
-      rowErrorFor,
-      isValidating,
-      rowHasError,
-      check: store.check,
-      clear: store.clear,
-      clearAll: store.clearAll,
-      signature,
-      hasRowValidator: options.validateRow !== undefined,
-    }),
-    [
-      errorFor,
-      rowErrorFor,
-      isValidating,
-      rowHasError,
-      store,
-      signature,
-      options.validateRow,
-    ]
+    () => editValidationView(store, snapshot, hasRowValidator),
+    [store, snapshot, hasRowValidator]
   );
 }

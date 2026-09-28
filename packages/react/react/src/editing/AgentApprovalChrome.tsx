@@ -5,10 +5,11 @@
  * required kit slot — core never draws a button. Invisible live-region
  * announcements are the one thing this chrome owns itself.
  */
-import type {
-  AgentApprovalPending,
-  AgentProgress,
-  TableLabels,
+import {
+  type AgentApprovalPending,
+  type AgentProgress,
+  approvalReview,
+  type TableLabels,
 } from "@adapttable/core";
 import {
   type ReactElement,
@@ -20,7 +21,6 @@ import {
 
 import { LiveRegion } from "../a11y/LiveRegion";
 import { featureStateKey } from "../features/providers";
-import { approvalReview } from "./approvalReview";
 import { ApprovalReviewChrome } from "./ApprovalReviewChrome";
 
 // The contracts a surface is handed now live in core, where an adapter can

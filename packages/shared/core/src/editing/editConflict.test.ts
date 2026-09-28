@@ -1,15 +1,33 @@
 /**
  * A live row changing under an open editor is a conflict, not a discard.
  */
-import type { EditableColumnLike } from "@adapttable/core";
-import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import type { EditableColumnLike } from "./cellEditing";
 import {
+  createEditConflictStore,
+  type EditConflictState,
+  editConflictView,
   liveRowChanged,
   resolveConflictChoice,
-  useEditConflict,
 } from "./editConflict";
+
+/** The store, read the way a binding reads it after every change. */
+function mountEditConflict<TRow>() {
+  const store = createEditConflictStore<TRow>();
+  return {
+    result: {
+      get current() {
+        return editConflictView(store, store.getSnapshot());
+      },
+    },
+  };
+}
+
+/** Run a gesture; a store settles synchronously, so there is nothing to flush. */
+function act(gesture: () => void): void {
+  gesture();
+}
 
 interface Task {
   id: string;
@@ -107,7 +125,7 @@ describe("useEditConflict", () => {
   it("asks by default, then keep and take each run once", () => {
     const keep = vi.fn();
     const take = vi.fn();
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     act(() => {
       result.current.reconcile({ ...base, keep, take, policy: "ask" });
     });
@@ -132,7 +150,7 @@ describe("useEditConflict", () => {
   it("applies the keep policy without asking", () => {
     const keep = vi.fn();
     const take = vi.fn();
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     act(() => {
       result.current.reconcile({ ...base, keep, take, policy: "keep" });
     });
@@ -143,7 +161,7 @@ describe("useEditConflict", () => {
   it("applies the take policy without asking", () => {
     const keep = vi.fn();
     const take = vi.fn();
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     act(() => {
       result.current.reconcile({ ...base, keep, take, policy: "take" });
     });
@@ -152,7 +170,7 @@ describe("useEditConflict", () => {
   });
 
   it("does not re-ask the same incoming value", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     act(() => {
       result.current.reconcile({ ...base, policy: "ask" });
     });
@@ -165,7 +183,7 @@ describe("useEditConflict", () => {
   });
 
   it("clears when the editor closes", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     act(() => {
       result.current.reconcile({ ...base, policy: "ask" });
     });
@@ -181,7 +199,7 @@ describe("useEditConflict", () => {
   });
 
   it("does nothing when the live row or column is gone", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     act(() => {
       result.current.reconcile({ ...base, rows: [], policy: "ask" });
     });
@@ -193,7 +211,7 @@ describe("useEditConflict", () => {
   });
 
   it("clears when the live row matches the opened snapshot again", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     act(() => {
       result.current.reconcile({ ...base, policy: "ask" });
     });
@@ -209,7 +227,7 @@ describe("useEditConflict", () => {
   });
 
   it("keep and take are no-ops while idle", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     act(() => {
       result.current.keep();
       result.current.take();
@@ -224,7 +242,7 @@ describe("a row edited as one unit", () => {
 
   /** Reconcile an open row form against a live row set. */
   function reconcile(
-    state: ReturnType<typeof useEditConflict<Task>>,
+    state: EditConflictState<Task>,
     rows: readonly Task[],
     handlers: {
       accept: (row: Task, keys: readonly string[]) => void;
@@ -261,7 +279,7 @@ describe("a row edited as one unit", () => {
     // The keys do not change when a field that is already asking moves again.
     // A set compared by keys alone would go on showing — and taking — the
     // value that arrived first.
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     const take = vi.fn();
     reconcile(result.current, [LIVE], { accept: vi.fn(), take });
     expect(result.current.contestedCell("1", "title")?.incomingValue).toBe(
@@ -281,7 +299,7 @@ describe("a row edited as one unit", () => {
   });
 
   it("tells a host what the row read before the change", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     const seen: { row: Task; previous: Task }[] = [];
     reconcile(
       result.current,
@@ -300,7 +318,7 @@ describe("a row edited as one unit", () => {
   });
 
   it("names every field of the row that is waiting on an answer", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     expect(result.current.isRowContested("1")).toBe(false);
     reconcile(result.current, [LIVE], { accept: vi.fn(), take: vi.fn() });
     expect(result.current.isRowContested("1")).toBe(true);
@@ -308,7 +326,7 @@ describe("a row edited as one unit", () => {
   });
 
   it("asks about a field the reader was working in", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     reconcile(result.current, [LIVE], { accept: vi.fn(), take: vi.fn() });
 
     expect(result.current.isRowConflict("1")).toBe(true);
@@ -325,7 +343,7 @@ describe("a row edited as one unit", () => {
 
   it("takes a field the reader never typed in, without asking", () => {
     const take = vi.fn();
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     // The draft still reads what the seed does: nothing of theirs is at stake.
     reconcile(
       result.current,
@@ -341,7 +359,7 @@ describe("a row edited as one unit", () => {
   it("answers one field at a time", () => {
     const accept = vi.fn();
     const take = vi.fn();
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     reconcile(result.current, [LIVE], { accept, take });
     act(() => {
       result.current.keepCell("1", "title");
@@ -349,7 +367,7 @@ describe("a row edited as one unit", () => {
     expect(accept).toHaveBeenCalledWith(LIVE, ["title"]);
     expect(result.current.isRowConflict("1")).toBe(false);
 
-    const second = renderHook(() => useEditConflict<Task>());
+    const second = mountEditConflict<Task>();
     reconcile(second.result.current, [LIVE], { accept: vi.fn(), take });
     act(() => {
       second.result.current.takeCell("1", "title");
@@ -358,7 +376,7 @@ describe("a row edited as one unit", () => {
   });
 
   it("says nothing when no field moved, or no form is open", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     reconcile(result.current, [OPENED], { accept: vi.fn(), take: vi.fn() });
     expect(result.current.isRowConflict("1")).toBe(false);
 
@@ -374,7 +392,7 @@ describe("a row edited as one unit", () => {
   it("answers a whole form at once when a policy says how", () => {
     const accept = vi.fn();
     const take = vi.fn();
-    const kept = renderHook(() => useEditConflict<Task>());
+    const kept = mountEditConflict<Task>();
     act(() => {
       kept.result.current.reconcileRow({
         activeRowId: "1",
@@ -391,7 +409,7 @@ describe("a row edited as one unit", () => {
     expect(accept).toHaveBeenCalledWith(LIVE, ["title"]);
     expect(kept.result.current.isRowConflict("1")).toBe(false);
 
-    const taken = renderHook(() => useEditConflict<Task>());
+    const taken = mountEditConflict<Task>();
     act(() => {
       taken.result.current.reconcileRow({
         activeRowId: "1",
@@ -410,13 +428,13 @@ describe("a row edited as one unit", () => {
   });
 
   it("says nothing about a row that is not on screen", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     reconcile(result.current, [], { accept: vi.fn(), take: vi.fn() });
     expect(result.current.isRowConflict("1")).toBe(false);
   });
 
   it("ignores an answer for a form nobody is asking about", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     act(() => {
       result.current.keepCell("1", "title");
       result.current.takeCell("1", "title");
@@ -425,7 +443,7 @@ describe("a row edited as one unit", () => {
   });
 
   it("holds one question per cell, however often it is asked", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     const handlers = { accept: vi.fn(), take: vi.fn() };
     reconcile(result.current, [LIVE], handlers);
     const first = result.current.contestedCell("1", "title");
@@ -443,7 +461,7 @@ describe("a batch of open rows", () => {
 
   /** Reconcile a batch against a live row set. */
   function reconcileBatch(
-    state: ReturnType<typeof useEditConflict<Task>>,
+    state: EditConflictState<Task>,
     rows: readonly Task[],
     entries: readonly {
       rowId: string;
@@ -473,7 +491,7 @@ describe("a batch of open rows", () => {
   ];
 
   it("asks per cell, naming each by its row", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     reconcileBatch(result.current, [LIVE, OTHER_LIVE], changed, {
       accept: vi.fn(),
       take: vi.fn(),
@@ -490,7 +508,7 @@ describe("a batch of open rows", () => {
 
   it("answers one row without disturbing the other", () => {
     const accept = vi.fn();
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     reconcileBatch(result.current, [LIVE, OTHER_LIVE], changed, {
       accept,
       take: vi.fn(),
@@ -506,7 +524,7 @@ describe("a batch of open rows", () => {
 
   it("takes a cell the reader never changed, without asking", () => {
     const take = vi.fn();
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     reconcileBatch(
       result.current,
       [LIVE],
@@ -519,7 +537,7 @@ describe("a batch of open rows", () => {
   });
 
   it("forgets a row that left the batch, or the row set", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     reconcileBatch(result.current, [LIVE, OTHER_LIVE], changed, {
       accept: vi.fn(),
       take: vi.fn(),
@@ -541,7 +559,7 @@ describe("a batch of open rows", () => {
   });
 
   it("digests one row's questions for a row memo", () => {
-    const { result } = renderHook(() => useEditConflict<Task>());
+    const { result } = mountEditConflict<Task>();
     expect(result.current.rowSignature("1")).toBe("");
     reconcileBatch(result.current, [LIVE, OTHER_LIVE], changed, {
       accept: vi.fn(),
@@ -550,5 +568,74 @@ describe("a batch of open rows", () => {
 
     expect(result.current.rowSignature("1")).toBe("|title=Arrived");
     expect(result.current.rowSignature("2")).toBe("|title=Moved");
+  });
+});
+
+describe("createEditConflictStore — quiet paths", () => {
+  it("skips fields the form never seeded and answers nothing unasked", () => {
+    const store = createEditConflictStore<Task>();
+    const listener = vi.fn();
+    store.subscribe(listener);
+    // Nothing is contested, so there is nothing to drop or answer.
+    store.keepCell("1", "title");
+    store.takeCell("1", "title");
+    store.reconcileBatch({
+      entries: [],
+      rows: [LIVE],
+      columns: [TITLE],
+      rowKey: (row) => row.id,
+      policy: "ask",
+      accept: () => undefined,
+      take: () => undefined,
+    });
+    store.reconcileRow({
+      activeRowId: "1",
+      // `rev` is not editable and `title` was never seeded: neither can move.
+      seeds: {},
+      drafts: {},
+      rows: [LIVE],
+      columns: [TITLE, { key: "rev" }],
+      rowKey: (row) => row.id,
+      policy: "ask",
+      accept: () => undefined,
+      take: () => undefined,
+    });
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it("leaves other rows standing when one row stops asking", () => {
+    const store = createEditConflictStore<Task>();
+    const ask = (rowId: string) => ({
+      rowId,
+      seeds: { title: "Ship" },
+      drafts: { title: "Mine" },
+      openedRow: OPENED,
+    });
+    const input = {
+      rows: [LIVE, { ...LIVE, id: "2" }],
+      columns: [TITLE],
+      rowKey: (row: Task) => row.id,
+      policy: "ask" as const,
+      accept: () => undefined,
+      take: () => undefined,
+    };
+    store.reconcileBatch({ ...input, entries: [ask("1"), ask("2")] });
+    expect(store.getSnapshot().contested.size).toBe(2);
+    store.takeCell("1", "title");
+    const before = store.getSnapshot();
+    // Asking about a cell that has already been answered changes nothing.
+    store.takeCell("1", "title");
+    expect(store.getSnapshot()).toBe(before);
+    store.reconcileBatch({ ...input, entries: [ask("2")] });
+    expect(store.getSnapshot()).toBe(before);
+    // A row form closing on a row nobody asked about leaves the batch's
+    // questions where they are.
+    store.reconcileRow({
+      ...input,
+      activeRowId: "9",
+      seeds: {},
+      drafts: {},
+    });
+    expect(store.getSnapshot()).toBe(before);
   });
 });

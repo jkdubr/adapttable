@@ -8,11 +8,15 @@
  * {@link editing}, {@link rowEditing} and {@link batchEditing} all fill
  * the same slot; apply() sets the channel each one owns.
  */
-import { devWarn } from "@adapttable/core";
+import {
+  devWarn,
+  dirtyMarkerView,
+  resolveEditingArming,
+} from "@adapttable/core";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { type BatchRowEdit, useBatchEditing } from "../editing/batchEditing";
-import { type DirtyCellState, useDirtyCells } from "../editing/dirtyCells";
+import { useDirtyCells } from "../editing/dirtyCells";
 import { useEditConflict } from "../editing/editConflict";
 import { useEditLifecycle } from "../editing/editingEvents";
 import { useRowEditing } from "../editing/rowEditing";
@@ -53,32 +57,6 @@ function useReportDirty(
   }, [wired, count, signature, confirm, confirmRow, confirmAll]);
 }
 
-/** A dirty set that draws nothing, for a host that only counts. */
-const NOT_DIRTY = () => false;
-
-/**
- * The dirty set the cells read. It is always the tracked one — the same
- * marks, the same confirms, the same count — but without `dirtyIndicators()`
- * it reports no cell or row as marked, so nothing is drawn.
- */
-function useMarkerView(
-  tracked: DirtyCellState,
-  markers: boolean
-): DirtyCellState {
-  return useMemo(
-    () =>
-      markers
-        ? tracked
-        : {
-            ...tracked,
-            isDirty: NOT_DIRTY,
-            isRowDirty: NOT_DIRTY,
-            signature: "",
-          },
-    [tracked, markers]
-  );
-}
-
 function LiveEditing({
   chrome,
   props,
@@ -106,14 +84,15 @@ function LiveEditing({
     formatError: props.formatEditError,
     onEditError: lifecycle.onEditError,
   });
-  const markers = props.dirtyIndicators === true;
-  const tracked = useDirtyCells({
-    enabled: markers || props.onDirtyChange !== undefined,
-  });
+  const armed = resolveEditingArming(props);
+  const tracked = useDirtyCells({ enabled: armed.trackDirty });
   useReportDirty(props.onDirtyChange, tracked);
-  const dirty = useMarkerView(tracked, markers);
-  const rowModeArmed =
-    props.rowEditing === true && props.onRowEdit !== undefined;
+  const markers = armed.dirtyMarkers;
+  const dirty = useMemo(
+    () => dirtyMarkerView(tracked, markers),
+    [tracked, markers]
+  );
+  const rowModeArmed = armed.row;
   const rowEditing = useRowEditing({
     enabled: rowModeArmed,
     columns: chrome.allColumns,
@@ -123,8 +102,7 @@ function LiveEditing({
     onEditCommit: lifecycle.onEditCommit,
     featureHost: featureHostOf(props),
   });
-  const batchArmed =
-    props.batchEditing === true && props.onBatchEdit !== undefined;
+  const batchArmed = armed.batch;
   const batch = useBatchEditing({
     enabled: batchArmed,
     columns: chrome.allColumns,
@@ -134,7 +112,7 @@ function LiveEditing({
     onEditCommit: lifecycle.onEditCommit,
     featureHost: featureHostOf(props),
   });
-  const editingArmed = onCellEdit !== undefined || rowModeArmed || batchArmed;
+  const editingArmed = armed.any;
   const editing = useMemo(
     () =>
       editingArmed

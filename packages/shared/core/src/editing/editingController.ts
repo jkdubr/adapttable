@@ -25,27 +25,9 @@ import type {
   RowValidator,
   ValidationTarget,
 } from "./editContracts";
+import { isThenable, listenerSet } from "./storePlumbing";
 
-/* ── Shared plumbing ───────────────────────────────────────────────── */
-
-/** A store's listener set. */
-function listenerSet(): {
-  readonly subscribe: (listener: () => void) => () => void;
-  readonly notify: () => void;
-} {
-  const listeners = new Set<() => void>();
-  return {
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-    notify() {
-      for (const listener of listeners) listener();
-    },
-  };
-}
+/* ── Observers ─────────────────────────────────────────────────────── */
 
 /**
  * Call an observer without letting it own the outcome. A throw is reported
@@ -67,14 +49,6 @@ export function observeEdit<TRow>(
       `an onEdit* handler threw (${detail}) — the table ignored it so the commit could finish`
     );
   }
-}
-
-function isThenable(value: unknown): value is PromiseLike<unknown> {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as { then?: unknown }).then === "function"
-  );
 }
 
 /* ── The active cell and its draft ─────────────────────────────────── */

@@ -188,12 +188,6 @@ export {
   type AgentViewState,
 } from "./editing/AgentApprovalChrome";
 export {
-  APPROVAL_PREVIEW_LIMIT,
-  type ApprovalReview,
-  approvalReview,
-  type ApprovalReviewItem,
-} from "./editing/approvalReview";
-export {
   ApprovalReviewChrome,
   type ApprovalReviewChromeProps,
   type ApprovalReviewSlots,
@@ -755,6 +749,12 @@ export type {
   TableLabels,
 } from "@adapttable/core";
 export type { Props } from "@adapttable/core";
+export {
+  APPROVAL_PREVIEW_LIMIT,
+  type ApprovalReview,
+  approvalReview,
+  type ApprovalReviewItem,
+} from "@adapttable/core";
 export { resolveDisabledReason } from "@adapttable/core";
 export {
   resolveContextTarget,
