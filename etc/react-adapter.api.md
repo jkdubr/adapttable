@@ -19,6 +19,8 @@ import { AggregateName } from '@adapttable/core';
 import { Aggregator } from '@adapttable/core';
 import { applyCollapsedColumnGroups } from '@adapttable/core/binding';
 import { AssemblyFns } from '@adapttable/core';
+import { assistantIsBusy } from '@adapttable/core/binding';
+import { assistantIsUsable } from '@adapttable/core/binding';
 import { BatchRowEdit } from '@adapttable/core';
 import { bindFeatureHostFn } from '@adapttable/core';
 import { bindMobileCardList } from '@adapttable/core';
@@ -332,7 +334,21 @@ import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { SortLevel } from '@adapttable/core';
+import { SpeechInputHandle } from '@adapttable/core/binding';
+import { SpeechInputState } from '@adapttable/core/binding';
+import { SpeechInputStatus } from '@adapttable/core/binding';
 import { SummaryRowFn as SummaryRowFn_2 } from '@adapttable/core';
+import { TableAssistantAllowanceView } from '@adapttable/core/binding';
+import { TableAssistantMessageView } from '@adapttable/core/binding';
+import { TableAssistantProgressView } from '@adapttable/core/binding';
+import { TableAssistantQuestionOption } from '@adapttable/core/binding';
+import { TableAssistantQuestionView } from '@adapttable/core/binding';
+import { TableAssistantReceiptSubject } from '@adapttable/core/binding';
+import { TableAssistantReceiptView } from '@adapttable/core/binding';
+import { TableAssistantResumableView } from '@adapttable/core/binding';
+import { TableAssistantSuggestionView } from '@adapttable/core/binding';
+import { TableAssistantUndoView } from '@adapttable/core/binding';
+import { TableAssistantView } from '@adapttable/core/binding';
 import { TableCommandOptions } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
@@ -646,11 +662,9 @@ export interface ApprovalReviewSlots {
 
 export { AssemblyFns }
 
-// @public
-export function assistantIsBusy(status: string): boolean;
+export { assistantIsBusy }
 
-// @public
-export function assistantIsUsable(status: string): boolean;
+export { assistantIsUsable }
 
 // @public
 export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> {
@@ -4418,30 +4432,11 @@ export { SortDirection }
 
 export { SortLevel }
 
-// @public
-export interface SpeechInputHandle {
-    readonly available: boolean;
-    readonly languages: readonly string[];
-    readonly setLanguage: (language: string) => void;
-    // (undocumented)
-    readonly start: () => void;
-    // (undocumented)
-    readonly state: SpeechInputState;
-    // (undocumented)
-    readonly stop: () => void;
-}
+export { SpeechInputHandle }
 
-// @public
-export interface SpeechInputState {
-    readonly error?: string;
-    readonly interim: string;
-    readonly language: string;
-    // (undocumented)
-    readonly status: SpeechInputStatus;
-}
+export { SpeechInputState }
 
-// @public
-export type SpeechInputStatus = "idle" | "listening" | "processing" | "denied" | "unsupported" | "error";
+export { SpeechInputStatus }
 
 // @public
 export interface StandardFeatureOptions<TRow> {
@@ -4536,11 +4531,7 @@ export type SummaryRowFn<TRow> = SummaryRowFn_2<TRow, ReactNode>;
 // @public
 export const TABLE_ASSISTANT: FeatureSlotKey<TableAssistantProps>;
 
-// @public
-export interface TableAssistantAllowanceView {
-    readonly capability: string;
-    readonly name?: string;
-}
+export { TableAssistantAllowanceView }
 
 // @public
 export interface TableAssistantAvatars {
@@ -4657,19 +4648,7 @@ export interface TableAssistantMenuProps {
     readonly part: string;
 }
 
-// @public
-export interface TableAssistantMessageView {
-    // (undocumented)
-    readonly id: string;
-    readonly question?: TableAssistantQuestionView;
-    // (undocumented)
-    readonly receipts?: readonly TableAssistantReceiptView[];
-    // (undocumented)
-    readonly role: "user" | "assistant";
-    readonly streaming?: boolean;
-    readonly text: string;
-    readonly transcribing?: boolean;
-}
+export { TableAssistantMessageView }
 
 // @public
 export interface TableAssistantPanelProps {
@@ -4686,12 +4665,7 @@ export interface TableAssistantPanelProps {
 // @public
 export type TableAssistantPresentation = "panel" | "sheet" | "floating";
 
-// @public
-export interface TableAssistantProgressView {
-    readonly done: number;
-    readonly label?: string;
-    readonly total?: number;
-}
+export { TableAssistantProgressView }
 
 // @public
 export interface TableAssistantProps {
@@ -4718,57 +4692,15 @@ export interface TableAssistantProps {
     readonly speech?: SpeechInputHandle;
 }
 
-// @public
-export interface TableAssistantQuestionOption {
-    // (undocumented)
-    readonly id: string;
-    // (undocumented)
-    readonly label: string;
-}
+export { TableAssistantQuestionOption }
 
-// @public
-export interface TableAssistantQuestionView {
-    readonly allowFreeText: boolean;
-    // (undocumented)
-    readonly id: string;
-    // (undocumented)
-    readonly options?: readonly TableAssistantQuestionOption[];
-    // (undocumented)
-    readonly question: string;
-}
+export { TableAssistantQuestionView }
 
-// @public
-export interface TableAssistantReceiptSubject {
-    // (undocumented)
-    readonly after?: string;
-    readonly before?: string;
-    readonly cleared?: boolean;
-    // (undocumented)
-    readonly column?: string;
-    readonly detail?: string;
-    readonly direction?: "asc" | "desc";
-    readonly kind?: string;
-    readonly row?: string;
-    readonly terms?: readonly {
-        readonly column?: string;
-        readonly value?: string;
-    }[];
-}
+export { TableAssistantReceiptSubject }
 
-// @public
-export interface TableAssistantReceiptView {
-    readonly capabilityKey?: string;
-    readonly idempotencyKey: string;
-    readonly message?: string;
-    readonly status: string;
-    readonly subject?: TableAssistantReceiptSubject;
-    readonly undoable?: boolean;
-}
+export { TableAssistantReceiptView }
 
-// @public
-export interface TableAssistantResumableView {
-    readonly text: string;
-}
+export { TableAssistantResumableView }
 
 // @public
 export interface TableAssistantSheetProps {
@@ -4799,55 +4731,11 @@ export interface TableAssistantSlots {
     readonly Window: (props: TableAssistantWindowProps) => ReactNode;
 }
 
-// @public
-export interface TableAssistantSuggestionView {
-    // (undocumented)
-    readonly description?: string;
-    // (undocumented)
-    readonly id: string;
-    readonly kind?: string;
-    // (undocumented)
-    readonly title: string;
-}
+export { TableAssistantSuggestionView }
 
-// @public
-export interface TableAssistantUndoView {
-    readonly available: boolean;
-    readonly blockedCode?: string;
-    readonly messageId: string;
-}
+export { TableAssistantUndoView }
 
-// @public
-export interface TableAssistantView {
-    readonly alwaysAllowed?: readonly TableAssistantAllowanceView[];
-    readonly answer?: (answer: {
-        optionId?: string;
-        text?: string;
-    }) => void;
-    readonly busy?: boolean;
-    // (undocumented)
-    readonly draft: string;
-    readonly error?: string;
-    readonly errorCode?: string;
-    readonly interrupted?: "stopped" | "detached";
-    // (undocumented)
-    readonly messages: readonly TableAssistantMessageView[];
-    readonly progress?: TableAssistantProgressView | null;
-    readonly resumable?: TableAssistantResumableView;
-    readonly resume?: () => void | Promise<void>;
-    readonly revokeAlwaysAllow?: (capability: string) => void;
-    // (undocumented)
-    readonly runSuggestion: (id: string) => void | Promise<void>;
-    readonly send: (text?: string) => void | Promise<void>;
-    // (undocumented)
-    readonly setDraft: (draft: string) => void;
-    readonly status: string;
-    readonly stop: () => void;
-    readonly suggestions: readonly TableAssistantSuggestionView[];
-    readonly undo?: TableAssistantUndoView | null;
-    readonly undoAction?: (idempotencyKey: string) => void | Promise<void>;
-    readonly undoTurn?: () => void | Promise<void>;
-}
+export { TableAssistantView }
 
 // @public
 export interface TableAssistantWindowProps {
