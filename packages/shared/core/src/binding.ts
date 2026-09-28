@@ -147,7 +147,13 @@ export {
   rowSpanSignature,
   rowStyleSignature,
 } from "./layout/leanAssembly";
-export { type BodyCell, cellSpanMark, type GetCellSpan } from "./rows/cellSpan";
+export {
+  type BodyCell,
+  cellSpanMark,
+  type CellSpanRequest,
+  type GetCellSpan,
+  type GetCellSpanArgs,
+} from "./rows/cellSpan";
 export {
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
@@ -232,6 +238,7 @@ export type {
   ColumnMenuSlotProps,
   PinnedSide,
 } from "./columns/columnMenuModel";
+export type { ColumnResizeHandleProps } from "./columns/columnResize";
 export type {
   ColumnGroupDef,
   ColumnGroupRecord,
@@ -264,6 +271,18 @@ export type {
   ExportWriteContext,
   ExportWriter,
 } from "./export/exportWriter";
+export type {
+  ExportAllControls,
+  ExportAllQuery,
+  ExportAllResult,
+  ExportColumnScope,
+  ExportCsvOptions,
+  ExportInfo,
+  ExportQuery,
+  ExportRequest,
+  ExportRowScope,
+  FetchAllExport,
+} from "./export/tableCsv";
 export {
   type CoreFeature,
   type CoreFeatureRegistrar,
@@ -428,6 +447,8 @@ export type { TableSource } from "./source/TableSource";
 export type {
   CollectFeatureNoticesInput,
   FeatureNotice,
+  FeatureNoticeAppearance,
+  FeatureNoticeKind,
 } from "./state/featureNotices";
 export type { CssProperties } from "./style/cssProperties";
 export type { TableStateMutators } from "./tableStateMutators";
