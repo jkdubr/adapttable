@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- 4613ab6: Move the AI view model and table agent controller out of React. `@adapttable/core/binding` adds the assistant panel's view contracts and presentation rules (`assistantBadgeTone`, `assistantComposerState`, `assistantReceiptHeadline`, `assistantFloatingStyle` and the rest), and `@adapttable/ai` adds `createTableAgentController`, which owns approval parking, always-allow memory, bridge announcements, column sampling and the WebMCP lifecycle. `@adapttable/react` and `tableAgent` in `@adapttable/ai-react` now render from them, with their public API and behaviour unchanged.
+- 4613ab6: `tableAgent` runs on `createTableAgentController` from `@adapttable/ai`. Its API is unchanged.
 - Updated dependencies [4613ab6]
 - Updated dependencies [73d62b5]
 - Updated dependencies [8c6aeda]
