@@ -5,15 +5,9 @@
  * implementations, so omitting a feature omits those components.
  */
 import {
+  COLUMN_GROUP_TOGGLE,
   COLUMN_HEADER_RENAME,
   COLUMN_SELECT,
-  FILL_HANDLE,
-  ROW_REORDER_BUTTONS,
-  ROW_REORDER_HANDLE,
-  TREE_CELL,
-} from "@adapttable/core/binding";
-import {
-  COLUMN_GROUP_TOGGLE,
   type ColumnGroupToggleProps,
   type ColumnHeaderRenameSlotProps,
   type ColumnSelectCheckboxChromeProps,
@@ -22,6 +16,7 @@ import {
   EXPAND_TOGGLE,
   type ExpandToggleSlotProps,
   FeatureSlot,
+  FILL_HANDLE,
   type FillHandleCellSlotProps,
   FILTER_HEADER,
   type FilterHeaderControlProps,
@@ -30,9 +25,12 @@ import {
   type GroupHeaderCardSlotProps,
   type GroupHeaderRowSlotProps,
   ROW_EDIT_ACTIONS,
+  ROW_REORDER_BUTTONS,
+  ROW_REORDER_HANDLE,
   type RowEditActionsProps,
   type RowReorderButtonsProps,
   type RowReorderHandleProps,
+  TREE_CELL,
   TREE_TOGGLE,
   type TreeCellProps,
   type TreeToggleProps,
