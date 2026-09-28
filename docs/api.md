@@ -733,6 +733,62 @@ EditValidationStore` — cell then row validation, with superseded checks
   gestures; `DEFAULT_EDIT_HISTORY_DEPTH` is the depth a host that sets none
   keeps. `EditHistorySnapshot`,
   `editHistoryEntry`, `cellsOfBatch`.
+- `createEditHistory(options: EditHistoryControllerOptions):
+EditHistoryController` — the history a table runs: records a gesture with
+  each cell's value before it changed and replays undo and redo through the
+  host's `CellEditHandler`. `editHistoryView` (`EditHistoryState`),
+  `resolveEditHistory` reads the `editHistory` prop, and `recordingCellEdit`
+  wraps the channel so each inline commit is one gesture.
+- `createEditConflictStore(): EditConflictStore` — the live-update
+  reconciler for the open cell, an open row form and a batch
+  (`ReconcileLiveEdit`, `ReconcileLiveRowEdit`, `ReconcileLiveBatchEdit`): a
+  field the reader never typed in takes what arrived, the rest follow
+  `onEditConflict` or the policy, and "ask" holds the question.
+  `EditConflictSnapshot`, `ContestedEditCell`, `contestedCellKey`,
+  `isCellInConflict`, `isRowContested`, `contestedRowSignature`,
+  `editConflictView` (`EditConflictState`), `liveRowChanged`,
+  `resolveConflictChoice`.
+- `createRowEditStore(options: RowEditStoreOptions): RowEditStore` — a row
+  edited as one form: seeds, drafts, one patch on save, and the seeds a live
+  update moves. `RowEditSnapshot`, `RowEditDrafts`, `rowEditSignature`,
+  `rowEditingView` (`RowEditingState`), `parseColumnDraft`.
+- `createBatchEditStore(options: BatchEditStoreOptions): BatchEditStore` —
+  many rows held and saved in one list. `BatchEditSnapshot`,
+  `BatchPendingDrafts`, `BatchEditEntry`, `batchEditingView`
+  (`BatchEditingState`).
+- `createDirtyCellStore(options: DirtyCellStoreOptions): DirtyCellStore` —
+  cells changed and not yet confirmed. `DirtyCellSnapshot`, `dirtyCellKey`,
+  `dirtyCellView` (`DirtyCellState`), and `dirtyMarkerView`, which keeps the
+  count but draws no marks when the host did not ask for them.
+- `cellEditingView` (`CellEditingState`), `editValidationView`
+  (`EditValidationState`) and `cellSaveView` (`CellSaveState`) — the state a
+  binding hands its cells, read off the session, validation and save
+  snapshots.
+- `editableCellController(options)` — one cell's commit pipeline over an
+  `EditingBundle` (with `EditConflictLabels`): the validation gate, the hold
+  while an async check decides, the send to the host, the save it watches,
+  dirty marks and the step to the next cell. `EditableCellController`,
+  `EditableCellMode`, `beginCellEdit`, `stopCellEditKeyboard`,
+  `focusEditorOnMount`.
+- The rules every binding draws the same: `resolveEditingArming`
+  (`EditingArmingProps`, `EditingArming`) — which units the props arm;
+  `editableCellPresentation` (`EditableCellPresentation`) — batch, then an
+  open row form, then the cell; `isEditActivateKey`, `editorKeyRestoresFocus`,
+  `stopEditKeys`, `handleRowEditorKey` and `rowEditSaveBlocked` — the keys;
+  `isFirstEditableColumn` — the field a row form focuses;
+  `editableCellErrorId`, `rowEditErrorId`, `batchEditErrorId`,
+  `editorValidationProps` and `editorBusyProps` (`EditorAriaState`) — ids and
+  ARIA; `editorSelectOptions`, `resolveEditableCellDisplay`;
+  `cellConflictAsk`, `controllerConflictAsk`, `customEditorConflict`
+  (`CellConflictAsk`) and `rowEditConflict` (`RowEditConflict`) — the
+  conflict questions; `resolveRowEditTrigger` (`RowEditTrigger`),
+  `rowEditControls` (`RowEditControls`, `RowEditControlsOptions`) and
+  `rowEditActionsLayout` (`RowEditActionsLayout`) — the row's controls;
+  `batchEditBarModel` (`BatchEditBarModel`) and `defaultPendingRows` — the
+  batch bar.
+- `approvalReview(pending, labels)` — the model every approval surface
+  reads: tallies, the first `APPROVAL_PREVIEW_LIMIT` changes and the summary
+  labels. `ApprovalReview`, `ApprovalReviewItem`.
 
 ### Grid focus
 

@@ -14,18 +14,20 @@
  * than each cell recording itself.
  */
 import {
-  type CellEdit,
-  createEditHistoryStack,
-  DEFAULT_EDIT_HISTORY_DEPTH,
-  editHistoryEntry,
+  createEditHistory,
+  type EditHistoryState,
+  editHistoryView,
   readCellValue as readNeutralCellValue,
+  recordingCellEdit,
+  resolveEditHistory,
 } from "@adapttable/core";
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 
 export {
   asBatchGesture,
   asGesture,
   type EditHistoryEntry,
+  type EditHistoryState,
 } from "@adapttable/core";
 
 import type { ColumnDef } from "../columnDef";
@@ -61,48 +63,8 @@ export interface UseEditHistoryOptions<TRow> {
 }
 
 /**
- * What `useEditHistory` returns.
- *
- * @public
- */
-export interface EditHistoryState<TRow> {
-  /**
-   * Whether the host armed a history at all.
-   *
-   * `canUndo` answers "is there something to put back", which is false
-   * both when the feature is off and when nothing has been edited yet.
-   * Chrome that should not exist without a history needs the other
-   * question, and this is it.
-   */
-  enabled: boolean;
-  /** Whether anything can be undone right now. */
-  canUndo: boolean;
-  /** Whether anything can be redone right now. */
-  canRedo: boolean;
-  /**
-   * Put the last gesture back, through the host's own commit channel.
-   *
-   * @returns How many cells were restored; zero when there was nothing to undo.
-   */
-  undo: () => number;
-  /**
-   * Do the last undone gesture again.
-   *
-   * @returns How many cells were rewritten; zero when there was nothing to redo.
-   */
-  redo: () => number;
-  /** Forget everything — what a host calls when the data is replaced. */
-  clear: () => void;
-  /**
-   * Record a batch as ONE gesture and apply it. Returns the edits so a caller
-   * can keep chaining; applies nothing when history is off, in which case the
-   * caller's own handler still runs.
-   */
-  record: (edits: readonly CellEdit<TRow>[]) => void;
-}
-
-/**
- * Remember edits so they can be replayed backwards.
+ * Remember edits so they can be replayed backwards. The rules live in
+ * `@adapttable/core` (`createEditHistory`); this hook subscribes to it.
  *
  * @typeParam TRow - The row type.
  * @param options - See {@link UseEditHistoryOptions}.
@@ -113,74 +75,17 @@ export interface EditHistoryState<TRow> {
 export function useEditHistory<TRow>(
   options: UseEditHistoryOptions<TRow>
 ): EditHistoryState<TRow> {
-  const {
-    enabled,
-    depth = DEFAULT_EDIT_HISTORY_DEPTH,
-    columns,
-    onCellEdit,
-  } = options;
-  const [stack] = useState(createEditHistoryStack<TRow>);
+  const [history] = useState(() => createEditHistory<TRow>(options));
+  history.configure(options);
   const counts = useSyncExternalStore(
-    stack.subscribe,
-    stack.getSnapshot,
-    stack.getSnapshot
+    history.subscribe,
+    history.getSnapshot,
+    history.getSnapshot
   );
-
-  const columnFor = useCallback(
-    (key: string) => columns.find((column) => column.key === key),
-    [columns]
-  );
-
-  const record = useCallback(
-    (edits: readonly CellEdit<TRow>[]) => {
-      if (!enabled || edits.length === 0) return;
-      stack.record(
-        editHistoryEntry(edits, (edit) => {
-          const column = columnFor(edit.columnKey);
-          return column
-            ? { value: readCellValue(edit.row, column) }
-            : undefined;
-        }),
-        depth
-      );
-    },
-    [enabled, depth, columnFor, stack]
-  );
-
-  // An undo does not rewrite the host's data: it COMMITS the previous value
-  // back through the host's own channel, so whatever wraps editing runs on
-  // the way back exactly as it ran on the way out.
-  const replay = useCallback(
-    (edits: readonly CellEdit<TRow>[]) => {
-      for (const edit of edits) {
-        onCellEdit?.(edit.row, edit.columnKey, edit.value);
-      }
-      return edits.length;
-    },
-    [onCellEdit]
-  );
-
-  const undo = useCallback(() => {
-    const entry = stack.undo();
-    return entry ? replay(entry.undo) : 0;
-  }, [replay, stack]);
-
-  const redo = useCallback(() => {
-    const entry = stack.redo();
-    return entry ? replay(entry.redo) : 0;
-  }, [replay, stack]);
-
+  const { enabled } = options;
   return useMemo(
-    () => ({
-      enabled,
-      canUndo: enabled && counts.past > 0,
-      canRedo: enabled && counts.future > 0,
-      undo,
-      redo,
-      clear: stack.clear,
-      record,
-    }),
-    [enabled, counts, undo, redo, stack, record]
+    () => editHistoryView(history, counts, enabled),
+    [history, counts, enabled]
   );
 }
 
@@ -206,9 +111,6 @@ export interface TableEditHistoryProps<TRow> {
  * they record themselves through {@link asGesture}, so that two hundred pasted
  * cells undo in one press rather than two hundred.
  *
- * Both the shell and the antd adapter build their chrome this way, and this is
- * the one place the rule lives.
- *
  * @typeParam TRow - The row type.
  * @param props - See {@link TableEditHistoryProps}.
  * @returns The history state and the commit channel to give the chrome.
@@ -221,22 +123,12 @@ export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
     ((row: TRow, key: string, nextValue: unknown) => unknown) | undefined;
 } {
   const { editHistory, columns, onCellEdit } = props;
-  const history = useEditHistory<TRow>({
-    enabled: editHistory !== undefined && editHistory !== false,
-    depth: typeof editHistory === "object" ? editHistory.depth : undefined,
-    columns,
-    onCellEdit,
-  });
+  const { enabled, depth } = resolveEditHistory(editHistory);
+  const history = useEditHistory<TRow>({ enabled, depth, columns, onCellEdit });
   const record = history.record;
-  const recording = useCallback(
-    (row: TRow, key: string, nextValue: unknown) => {
-      record([{ row, columnKey: key, value: nextValue }]);
-      // Hand back whatever the host returned: a promise is how a cell knows the
-      // value is still on its way somewhere, and swallowing it here would make
-      // every save look instant.
-      return onCellEdit?.(row, key, nextValue);
-    },
-    [record, onCellEdit]
+  const recording = useMemo(
+    () => recordingCellEdit(onCellEdit, record),
+    [onCellEdit, record]
   );
-  return { history, onCellEdit: onCellEdit ? recording : undefined };
+  return { history, onCellEdit: recording };
 }
