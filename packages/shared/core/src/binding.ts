@@ -935,3 +935,13 @@ export type {
   VirtualItemMeta,
   VirtualTableRow,
 } from "./virtual/virtualTableModel";
+
+// Building blocks every binding shares: column defaults and the data-change
+// test its table engine runs on each render.
+export {
+  columnPathText,
+  type ResolvableColumn,
+  resolveColumnDefaults,
+  resolveColumnHeaders,
+} from "./columns/resolveColumns";
+export { sameRows } from "./engine/sameRows";

@@ -17,7 +17,7 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import { sameRows } from "./sameRows";
+import { sameRows } from "@adapttable/core/binding";
 
 function revisionToken<TRow>(reader: TableEngineReader<TRow>): string {
   const revisions = reader.snapshot().revisions;
