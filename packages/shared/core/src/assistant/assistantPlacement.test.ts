@@ -9,10 +9,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  FLOATING_MIN_WIDTH,
-  floatingFits,
-  floatingStyle,
-  launcherStyle,
+  ASSISTANT_FLOATING_MIN_WIDTH as FLOATING_MIN_WIDTH,
+  assistantFloatingFits as floatingFits,
+  assistantFloatingStyle as floatingStyle,
+  assistantLauncherStyle as launcherStyle,
 } from "./assistantPlacement";
 
 describe("floatingFits", () => {
@@ -29,24 +29,24 @@ describe("floatingFits", () => {
 
 describe("floatingStyle", () => {
   it("fixes to the viewport by default", () => {
-    expect(floatingStyle("viewport").position).toBe("fixed");
+    expect(floatingStyle(false).position).toBe("fixed");
   });
 
   it("stays inside a container the host scoped it to", () => {
     // `absolute` is what keeps the window in the host's own shell; `fixed`
     // would ignore that container and sit over the whole page.
-    expect(floatingStyle({ current: null }).position).toBe("absolute");
+    expect(floatingStyle(true).position).toBe("absolute");
   });
 
   it("anchors to the inline end, so RTL moves it without a second rule", () => {
-    const style = floatingStyle("viewport");
+    const style = floatingStyle(false);
     expect(style.insetInlineEnd).toContain("24px");
     expect(style.insetBlockEnd).toContain("24px");
     expect(style).not.toHaveProperty("right");
   });
 
   it("gives back size rather than overflowing a short viewport", () => {
-    const style = floatingStyle("viewport");
+    const style = floatingStyle(false);
     // Both axes end in a `min()` against the space available, so nothing the
     // window asks for is ever a demand.
     expect(String(style.inlineSize)).toMatch(/^min\(400px,/);
@@ -58,34 +58,34 @@ describe("floatingStyle", () => {
     // 520px is the floor, not the size: a conversation on a 1440px-tall
     // screen has room for more transcript, and the cap stops it becoming a
     // full-height wall.
-    const block = String(floatingStyle("viewport").blockSize);
+    const block = String(floatingStyle(false).blockSize);
     expect(block).toContain("max(520px, 66vh)");
     expect(block).toContain("700px");
   });
 
   it("keeps the width fixed, because a wider conversation reads worse", () => {
-    expect(String(floatingStyle("viewport").inlineSize)).not.toContain("vw");
+    expect(String(floatingStyle(false).inlineSize)).not.toContain("vw");
   });
 
   it("sits above sticky headers without an arbitrary z-index", () => {
-    expect(floatingStyle("viewport").zIndex).toBe(30);
+    expect(floatingStyle(false).zIndex).toBe(30);
   });
 
   it("leaves room for the safe area on a notched screen", () => {
-    const style = floatingStyle("viewport");
+    const style = floatingStyle(false);
     expect(String(style.insetBlockEnd)).toContain("safe-area-inset-bottom");
   });
 });
 
 describe("launcherStyle", () => {
   it("rests in the corner the window opens into", () => {
-    const launcher = launcherStyle("viewport");
-    const window = floatingStyle("viewport");
+    const launcher = launcherStyle(false);
+    const window = floatingStyle(false);
     expect(launcher.insetInlineEnd).toBe(window.insetInlineEnd);
     expect(launcher.insetBlockEnd).toBe(window.insetBlockEnd);
   });
 
   it("follows the window into a host's container", () => {
-    expect(launcherStyle({ current: null }).position).toBe("absolute");
+    expect(launcherStyle(true).position).toBe("absolute");
   });
 });

@@ -13,6 +13,19 @@
  */
 import type { TableLabels } from "@adapttable/core";
 import {
+  assistantActionsName,
+  assistantInitials,
+  assistantReceiptDetail,
+  assistantReceiptHeadline,
+  assistantReceiptNeedsSave,
+  assistantReceiptWhere,
+  assistantShownReceipts,
+  assistantUndoReason,
+  assistantUndoTurnLabel,
+  assistantVoicePlaceholder,
+  assistantWorkingText,
+} from "@adapttable/core/binding";
+import {
   type ReactElement,
   type ReactNode,
   type RefObject,
@@ -43,7 +56,6 @@ import type {
   TableAssistantUndoView,
 } from "./assistantView";
 
-/** A staged write is not finished, and the panel has to say so. */
 /**
  * The assistant's own colour.
  *
@@ -54,51 +66,6 @@ import type {
  * both land somewhere sensible.
  */
 const ACCENT = "var(--adapttable-assistant-accent, currentColor)";
-
-const NEEDS_SAVE = "staged";
-
-/**
- * The card's headline.
- *
- * `assistantReceiptAction` turns the pair (what changed, what became of it)
- * into one sentence in the reader's language — "Filter applied", "Edit
- * awaiting approval". Without a kind there is still an honest fallback: the
- * status alone, never the capability key.
- */
-function headline(
-  receipt: TableAssistantReceiptView,
-  labels: TableLabels | undefined
-): string {
-  const subject = receipt.subject;
-  const fromLabels = labels?.assistantReceiptAction?.({
-    kind: subject?.kind,
-    status: receipt.status,
-    ...(subject?.cleared === undefined ? {} : { cleared: subject.cleared }),
-  });
-  if (fromLabels) return fromLabels;
-  return labels?.assistantReceiptStatus?.(receipt.status) ?? receipt.status;
-}
-
-/**
- * What the action acted on, as one line.
- *
- * A host's own `detail` wins: it was written by whoever knows the wording of
- * the surface it is shown on. Otherwise the labels join the terms, which is
- * where the reader's language lives.
- */
-function detailOf(
-  receipt: TableAssistantReceiptView,
-  labels: TableLabels | undefined
-): string | undefined {
-  const subject = receipt.subject;
-  if (!subject) return undefined;
-  if (subject.detail) return subject.detail;
-  return labels?.assistantReceiptTerms?.({
-    kind: subject.kind,
-    terms: subject.terms,
-    ...(subject.direction ? { direction: subject.direction } : {}),
-  });
-}
 
 /** The before/after pair, only when the host supplied both. */
 function ChangedValue({
@@ -159,8 +126,8 @@ function Receipt({
   const Button = slots.Button;
   const Badge = slots.Badge;
   const subject = receipt.subject;
-  const detail = detailOf(receipt, labels);
-  const where = [subject?.row, subject?.column].filter(Boolean).join(" · ");
+  const detail = assistantReceiptDetail(receipt, labels);
+  const where = assistantReceiptWhere(receipt);
   return (
     <li
       data-adapttable-part="assistant-receipt"
@@ -204,7 +171,7 @@ function Receipt({
           }}
         >
           <strong style={{ fontWeight: 700, fontSize: "1.05em" }}>
-            {headline(receipt, labels)}
+            {assistantReceiptHeadline(receipt, labels)}
           </strong>
           {/* One line under the name, not three. What it did, where it
               landed and what it became are one sentence about one action —
@@ -264,7 +231,7 @@ function Receipt({
           </span>
         ) : null}
       </span>
-      {receipt.status === NEEDS_SAVE ? (
+      {assistantReceiptNeedsSave(receipt) ? (
         <span data-adapttable-part="assistant-receipt-save">
           <Badge
             label={
@@ -318,18 +285,6 @@ function Receipt({
   );
 }
 
-/**
- * The message as it reads while a voice clip is still being transcribed: the
- * clip's placeholder until its words arrive.
- */
-function withVoicePlaceholder(
-  message: TableAssistantMessageView,
-  labels: TableLabels | undefined
-): TableAssistantMessageView {
-  if (!message.transcribing || message.text) return message;
-  return { ...message, text: labels?.assistantVoiceMessage ?? "Voice message" };
-}
-
 /** One exchange. @internal */
 export function AssistantMessage({
   message,
@@ -363,15 +318,10 @@ export function AssistantMessage({
   /** Answer this message's question. Absent when it is not asking one. */
   readonly onAnswer?: (answer: { optionId?: string; text?: string }) => void;
 }): ReactElement {
-  // A receipt says what CHANGED. Reading rows, resolving one, asking what a
-  // column means — none of that changed anything the reader can see, and the
-  // refusals they carry are written for the caller that has to recover from
-  // them: "read the rows to get their keys" is advice to a model, and a reader
-  // shown it beside a turn that then worked is being told it failed when it
-  // did not. They stay in the conversation state for a host that reads them.
-  const shown = (message.receipts ?? []).filter(
-    (receipt) => receipt.subject?.kind !== "read"
-  );
+  // A receipt says what CHANGED: "read the rows to get their keys" is advice
+  // to a model, and a reader shown it beside a turn that then worked is being
+  // told it failed when it did not.
+  const shown = assistantShownReceipts(message.receipts);
   // Closed until asked for: the reply is the answer, and what it took to get
   // there is evidence a reader opens when they want it.
   const [openActions, setOpenActions] = useState(false);
@@ -379,9 +329,7 @@ export function AssistantMessage({
   const hasActions = receipts && shown.length > 0;
   // Said once, and used wherever a blocked undo has to explain itself.
   const marks = avatars ? { avatars } : {};
-  const undoReason =
-    labels?.assistantUndoBlocked?.(undo?.blockedCode ?? "") ??
-    "The table has changed since this ran.";
+  const undoReason = assistantUndoReason(undo?.blockedCode, labels);
   // The whole-turn offer, assembled once: the group heads its list with it,
   // and a turn that changed nothing visible carries it on its own below.
   const blockedReason = undo?.available ? {} : { reason: undoReason };
@@ -449,7 +397,7 @@ export function AssistantMessage({
         {speaker}
       </span>
       <Spoken
-        message={withVoicePlaceholder(message, labels)}
+        message={assistantVoicePlaceholder(message, labels)}
         mine={mine}
         leads={leads}
         {...marks}
@@ -501,22 +449,6 @@ export function AssistantMessage({
   );
 }
 
-/**
- * A name, as the two letters every product falls back to.
- *
- * The first letter of each of the first two words. One word gives one letter;
- * a name of nothing gives none, and the built-in face stands instead.
- */
-function initialsOf(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => [...word][0] ?? "")
-    .join("")
-    .toUpperCase();
-}
-
 /** The face this speaker falls back to when the host named none. */
 function DefaultFace({ mine }: { readonly mine: boolean }): ReactElement {
   return mine ? <PersonAvatar /> : <AssistantAvatar />;
@@ -530,7 +462,7 @@ function Initials({
   readonly name: string;
   readonly mine: boolean;
 }): ReactElement {
-  const letters = initialsOf(name);
+  const letters = assistantInitials(name);
   if (!letters) return <DefaultFace mine={mine} />;
   return (
     <span
@@ -996,9 +928,7 @@ function ActionsToggle({
   readonly open: boolean;
   readonly onToggle: () => void;
 }): ReactElement {
-  const said =
-    labels?.assistantActions?.(count) ??
-    `${String(count)} action${count === 1 ? "" : "s"}`;
+  const said = assistantActionsName(count, labels);
   return (
     <span
       data-adapttable-part="assistant-receipts-toggle"
@@ -1049,10 +979,7 @@ function Receipts({
     : 0;
   // "Undo all" only when there is more than one to be all of; otherwise the
   // heading's control is simply the undo.
-  const wholeLabel =
-    perRow > 1
-      ? (labels?.assistantUndoAll ?? "Undo all")
-      : (labels?.assistantUndo ?? "Undo");
+  const wholeLabel = assistantUndoTurnLabel(perRow, labels);
   const wholeTooltip =
     undoTurn && !undoTurn.available && undoTurn.reason
       ? { tooltip: undoTurn.reason }
@@ -1174,43 +1101,6 @@ function Receipts({
 }
 
 /**
- * How far the work has got, as one phrase.
- *
- * The labels word it, because "185 of 400" is not the same sentence in every
- * language. Without a label pack there is still an honest English fallback:
- * counted against a known total, or counted alone when nobody knows how many
- * there are.
- */
-function counted(
-  progress: TableAssistantProgressView,
-  labels: TableLabels | undefined
-): string {
-  const said = labels?.assistantProgress?.(progress.done, progress.total);
-  if (said !== undefined) return said;
-  if (progress.total === undefined) return `${String(progress.done)} done`;
-  return `${String(progress.done)} of ${String(progress.total)}`;
-}
-
-/**
- * What the indicator says.
- *
- * What is happening beats that something is: a count a reader can judge
- * against, rather than a spinner they cannot. The capability's own noun leads
- * it and is shown as given — this package has no translation for a host's
- * words. Nothing reporting leaves the plain "working" it always said.
- */
-function working(
-  progress: TableAssistantProgressView | null | undefined,
-  labels: TableLabels | undefined
-): string {
-  if (!progress) {
-    return labels?.assistantConnection?.("sending") ?? "Working…";
-  }
-  const count = counted(progress, labels);
-  return progress.label ? `${progress.label} — ${count}` : count;
-}
-
-/**
  * The turn, while it is still running.
  *
  * A reader who has just pressed send has no way to tell "thinking" from
@@ -1234,7 +1124,7 @@ export function AssistantWorking({
   /** What the running capability says about itself, when it says anything. */
   readonly progress?: TableAssistantProgressView | null;
 }): ReactElement {
-  const word = working(progress, labels);
+  const word = assistantWorkingText(progress, labels);
   return (
     <li
       data-adapttable-part="assistant-working"
