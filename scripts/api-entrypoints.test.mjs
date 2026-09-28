@@ -13,11 +13,24 @@ const packageJson = (dir) =>
   JSON.parse(readFileSync(join(packageDir(dir), "package.json"), "utf8"));
 
 describe("entrypoints", () => {
-  it("covers every package under packages/", () => {
+  // A private kit placeholder advertises `exports: {}` until the pull request
+  // that builds it, so it has no entry point yet; every other package has one.
+  it("covers every package under packages/ that advertises an entry point", () => {
+    const advertising = packageNames().filter(
+      (dir) => Object.keys(packageJson(dir).exports ?? { ".": {} }).length > 0
+    );
     assert.deepEqual(
       [...new Set(ENTRIES.map((e) => e.dir))].sort(),
-      packageNames().sort()
+      advertising.sort()
     );
+  });
+
+  it("leaves only private packages without an entry point", () => {
+    for (const dir of packageNames()) {
+      const manifest = packageJson(dir);
+      if (Object.keys(manifest.exports ?? { ".": {} }).length > 0) continue;
+      assert.equal(manifest.private, true, `${dir} publishes no entry point`);
+    }
   });
 
   it("reads each package's own exports map rather than a hand-written list", () => {

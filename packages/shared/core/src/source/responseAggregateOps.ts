@@ -17,18 +17,17 @@
  * operations of a request that may never have run. Unknown is a valid answer;
  * another response's operation is not.
  */
-import type { GroupAggregateOps } from "@adapttable/core";
-import { useEffect, useRef, useState } from "react";
+import type { GroupAggregateOps } from "../grouping/groupRowLayout";
 
 /** How many requests' operations to remember. */
 const REMEMBERED = 8;
 
 /**
- * What the caller knows about the request in flight and the response drawn.
+ * What a tier knows about the request in flight and the response drawn.
  *
- * @internal
+ * @public
  */
-export interface AggregateOpsForResponse {
+export interface ResponseAggregateOpsInput {
   /** Identifies the request the table is making now. */
   readonly requestKey: string;
   /** The operations that request carries. */
@@ -57,74 +56,26 @@ export interface AggregateOpsForResponse {
 }
 
 /**
- * The operations behind the displayed response.
+ * Tracks the operations behind the displayed response, for one table.
  *
- * @param input - See {@link AggregateOpsForResponse}.
- * @returns The operations, or `undefined` when nothing is known.
- *
- * @internal
+ * @public
  */
-export function useAggregateOpsForResponse(
-  input: AggregateOpsForResponse
-): GroupAggregateOps | undefined {
-  const {
-    requestKey,
-    requested,
-    responseKey,
-    respondedAt,
-    hasData,
-    fetching,
-    failed,
-  } = input;
-  const [displayed, setDisplayed] = useState(requested);
-  const byRequest = useRef(new Map<string, GroupAggregateOps | undefined>());
-  // Which request the displayed operations belong to, and the response marker
-  // that established them.
-  const shown = useRef<{ key: string; at: number } | null>(null);
-  const concluding = useRef<{ key: string; started: boolean } | null>(null);
-
-  // Remember this request's operations before anything can answer it.
-  const remembered = byRequest.current;
-  if (!remembered.has(requestKey)) {
-    remembered.set(requestKey, requested);
-    if (remembered.size > REMEMBERED) {
-      const oldest = remembered.keys().next();
-      if (!oldest.done) remembered.delete(oldest.value);
-    }
-  }
-
-  useEffect(() => {
-    const settled = resolveOps(
-      {
-        requestKey,
-        requested,
-        responseKey,
-        respondedAt,
-        hasData,
-        fetching,
-        failed,
-      },
-      byRequest.current,
-      shown.current,
-      concluding
-    );
-    if (!settled) return;
-    shown.current = { key: settled.key, at: settled.at };
-    concluding.current = null;
-    setDisplayed((current) =>
-      same(current, settled.ops) ? current : settled.ops
-    );
-  }, [
-    requestKey,
-    requested,
-    responseKey,
-    respondedAt,
-    hasData,
-    fetching,
-    failed,
-  ]);
-
-  return displayed;
+export interface ResponseAggregateOps {
+  /**
+   * Remember a request's operations before anything can answer it. Safe to
+   * call on every read; the first call also seeds {@link current}.
+   */
+  readonly remember: (
+    requestKey: string,
+    requested: GroupAggregateOps | undefined
+  ) => void;
+  /** The operations behind the displayed response, or `undefined`. */
+  readonly current: () => GroupAggregateOps | undefined;
+  /**
+   * Settle what is displayed from what is known now, once the frame is on
+   * screen. Returns whether {@link current} changed.
+   */
+  readonly settle: (input: ResponseAggregateOpsInput) => boolean;
 }
 
 /** What the displayed operations are, and the response that established them. */
@@ -144,12 +95,46 @@ type Settled = {
 } | null;
 
 /**
+ * Create a tracker for the operations behind the displayed response.
+ *
+ * @public
+ */
+export function createResponseAggregateOps(): ResponseAggregateOps {
+  const known = new Map<string, GroupAggregateOps | undefined>();
+  let displayed: GroupAggregateOps | undefined;
+  let shown: Established | null = null;
+  const concluding: { current: Concluding } = { current: null };
+
+  return {
+    remember(requestKey, requested) {
+      if (known.size === 0) displayed = requested;
+      if (known.has(requestKey)) return;
+      known.set(requestKey, requested);
+      if (known.size > REMEMBERED) {
+        const oldest = known.keys().next();
+        if (!oldest.done) known.delete(oldest.value);
+      }
+    },
+    current: () => displayed,
+    settle(input) {
+      const settled = resolveOps(input, known, shown, concluding);
+      if (!settled) return false;
+      shown = { key: settled.key, at: settled.at };
+      concluding.current = null;
+      if (same(displayed, settled.ops)) return false;
+      displayed = settled.ops;
+      return true;
+    },
+  };
+}
+
+/**
  * Which of the four kinds of provenance applies, in order of what it can
  * establish: nothing on screen, a named response, the query's own marker,
  * and — last — a request seen only to start and stop.
  */
 function resolveOps(
-  input: AggregateOpsForResponse,
+  input: ResponseAggregateOpsInput,
   known: Map<string, GroupAggregateOps | undefined>,
   shown: Established | null,
   concluding: { current: Concluding }
@@ -206,7 +191,7 @@ function marked(
  * rather than as a request that may have been cancelled.
  */
 function concluded(
-  input: AggregateOpsForResponse,
+  input: ResponseAggregateOpsInput,
   shown: Established | null,
   concluding: { current: Concluding }
 ): Settled {
