@@ -77,10 +77,11 @@ import { ExtraFilters } from '@adapttable/core';
 import { ExtraRow } from '@adapttable/core';
 import { FacetMap } from '@adapttable/core';
 import { FailedCellSave } from '@adapttable/core';
+import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureNoticeKind } from '@adapttable/core';
-import { FeatureRegistration } from '@adapttable/core';
+import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender as FeatureRender_2 } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
@@ -119,6 +120,7 @@ import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { partitionPinnedRows } from '@adapttable/core';
+import { PatchFeature } from '@adapttable/core/binding';
 import { PIN_Z } from '@adapttable/core';
 import { PinLeads } from '@adapttable/core';
 import { PinnedCellStyle } from '@adapttable/core';
@@ -782,20 +784,13 @@ export const EMPTY_ROW_PIN_STATE: RowPinState;
 
 export { FailedCellSave }
 
-// @public
-export type FeatureApplyInput<TRow = unknown> = object & {
-    readonly __row?: TRow;
-};
+export { FeatureApplyInput }
 
 export { FeatureNotice }
 
 export { FeatureNoticeKind }
 
-// @public
-export interface FeaturePatch<TRow = unknown> {
-    readonly [key: string]: unknown;
-    readonly __row?: (row: TRow) => void;
-}
+export { FeaturePatch }
 
 // @public
 export interface FeatureProps<TRow> {
@@ -1516,7 +1511,7 @@ export interface TableElementProps extends Props {
 export { TableErrorState }
 
 // @public
-export interface TableFeature<TRow = unknown> extends FeatureRegistration<TRow> {
+export interface TableFeature<TRow = unknown> extends PatchFeature<TRow> {
     apply?(input: FeatureApplyInput<TRow>): FeaturePatch<TRow>;
     readonly id: string;
     readonly provider?: FeatureProviderContribution;

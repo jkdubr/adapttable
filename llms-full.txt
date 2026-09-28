@@ -17557,6 +17557,65 @@ CommandPaletteController` — the palette's open state, controlled or its own.
   features. `SlotFill`, `slotFillsOf`, `drawnSlotFills`, `OrderedContribution`,
   `orderedContributions` — how features fill slots, in order.
 
+#### Chrome orchestration
+
+Every binding assembles a table the same way; these are the decisions it
+shares, so a new binding calls them rather than re-deriving them.
+
+- **Feature patch layer.** `applyTableFeatures` merges each feature's `apply`
+  patch into the table's props: later features win, `assembly` is merged one
+  level deep, host props win, and a second call is a no-op.
+  `mergeFeaturePatches`, `getAppliedFeatures` and `rememberAppliedFeatures`
+  are its parts. `FeaturePatch`, `PatchFeature`, `CoreFeature`,
+  `CoreFeatureRegistrar`, `CoreRowFeatureRegistrar` and `VirtualizeInput` are
+  the types. `coreFeatures` holds every built-in factory's id and option
+  normalization; a binding spreads one and adds what it draws.
+- **Standard preset.** `standardFeatureList` (`CoreStandardFeatureFactories`,
+  `CoreStandardFeatureOptions`) builds the preset's members in order from the
+  binding's own factories.
+- **Shell pipeline.** `CHROME_EXTRA_SLOT_ORDER` and `SHELL_LIVE_STAGE_ORDER`
+  (`ShellLiveStageId`) fix the order of the extra slots and live stages.
+  `TableRuntimePublisher` projects the chrome into the runtime view through
+  `tableRuntimeView`, `renderedRowsOf`, `readableRowLabel`,
+  `liveColumnLayout` and `livePinning` (`RuntimeChromeInput`,
+  `RuntimeColumn`). `cellNavigationInput`, `exportPageOnly`,
+  `viewControlsToolbarProps`, `undoRedoToolbarProps` and `printToolbarProps`
+  build the live stages' inputs. `finishShellLive`, `overlayChromeExtras` and
+  `finishShellBody` (`PipelineShell`, `OverlayChrome`, `ShellBodyInput`)
+  finish the shell.
+- **Table chrome state.** `chromeBodyRegion` (`ChromeBodyRegion`),
+  `chromeEmptyVariant`, `chromeIsRefreshing`, `chromeShowFooter`,
+  `clearChromeFilters`, `selectionObserverIds`, `rowReorderEnablement`,
+  `groupingPanelState`, `chromeFeatureNotices` (`ChromeFeatureNoticesInput`),
+  `featureNoticesAttribute`, `applyFeatureNoticesAttribute`,
+  `FilterTriggerToggleState`, `scrollResetKeys`, `cardSetSize` and
+  `sortedColumnName` — what the frame shows before a kit draws it.
+- **Desktop assembly.** `desktopRowWiring` (`DesktopRowWiringContext`,
+  `DesktopRowWiringArgs`, `DesktopRowWiringModel`, `WiringReorder`,
+  `DesktopRowPinPart`) and `desktopRowDomProps` wire one row;
+  `desktopRowWiringEqual` over `DESKTOP_ROW_WIRING_KEYS` is its memo policy.
+  `desktopBodySlots` (`DesktopBodySlotsInput`) orders the body: summaries top,
+  pinned top, the top spacer, the rows with their extras, the bottom spacer,
+  pinned bottom, summaries bottom. `desktopStickyPlan` (`DesktopStickyPlan`),
+  `desktopPinEdges`, `desktopHeadCellStyle`, `desktopEdgeHeadStyle`,
+  `desktopEdgeBodyStyle` and `desktopTableStyle` are the sticky, pin and
+  min-width rules. `desktopHeaderLeaf` (`DesktopHeaderLeafContext`,
+  `LeafColumn`, `LeafSortProps`), `columnHeaderControllerFor`,
+  `headerSortDir` and `absoluteColumnIndex` assemble a header cell.
+- **Body windows.** `chromeRenderModel` (`ChromeRenderModel`,
+  `ChromeRenderModelInput`) and `SummaryCellsCache` build what the body
+  renders. `isBodyEligible`, `virtualizeIgnoredOnPage`,
+  `estimateBodyItemSize`, `bodySentinelCount`, `bodyCanLoadMore`,
+  `fetchNextBodyPage`, `pinnedScrollRows`, `hasLoadedChildren`,
+  `bodyWindowKind` (`BodyWindowKind`, `BodyChrome`),
+  `resolveBodyVirtualization`, `withSourceIndices` and `rowScrollTarget` plan
+  which window is armed. `WindowVirtualizer`, `asSizeEstimator`,
+  `pendingListSize`, `materializeWindowRows`, `rowWindow`, `keyedWindow` and
+  `EndReachedLatch` are the window math over any virtualizer.
+  `readColumnViewport` and `columnWindowPlan` (`ColumnViewport`,
+  `ColumnWindowPlan`) window the columns; `RowPairMeasureController`
+  measures a row with its open detail panel.
+
 ### The builder tier
 
 `@adapttable/react/adapter` publishes what the eight kits are made of, for
