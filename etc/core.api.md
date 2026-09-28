@@ -1528,10 +1528,22 @@ export function createNeutralTable<TRow>(engine: TableEngine<TRow>, tableId: str
 export function createQueryEmitter(seenKey?: string): QueryEmitter;
 
 // @public
+export function createQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(): QuerySource<TRow, TParams, TPage>;
+
+// @public
+export function createResponseAggregateOps(): ResponseAggregateOps;
+
+// @public
 export function createRowReorderController<TRow>(initial: RowReorderControllerOptions<TRow>): RowReorderController<TRow>;
 
 // @public
 export function createSavedViewsController(initial: SavedViewsControllerOptions): SavedViewsController;
+
+// @public
+export function createServerSource<TRow>(): ServerSource<TRow>;
+
+// @public
+export function createTableData<TRow>(): TableData<TRow>;
 
 // @public
 export function createTableEngine<TRow>(options: CreateTableEngineOptions<TRow>): TableEngine<TRow>;
@@ -1577,6 +1589,19 @@ export function cursorHasMore(trail: CursorTrail, page: number): boolean;
 
 // @public
 export type CursorTrail = readonly (string | undefined)[];
+
+// @public
+export function cursorTrailKey(query: {
+    readonly limit: number;
+    readonly search: string;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+    readonly groupBy: string | undefined;
+    readonly groupAggregateOverrides: GroupAggregateOverrides;
+    readonly filters: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+}): string;
 
 // @public
 export const CUSTOM_AGGREGATE = "custom";
@@ -4191,6 +4216,47 @@ export interface QueryPivotRow {
 }
 
 // @public
+export interface QuerySource<TRow, TParams extends TableQueryParams, TPage> {
+    readonly commit: () => void;
+    readonly fetchNextPage: () => void;
+    readonly params: (config: QuerySourceConfig<TRow, TParams, TPage>, view: ServerSourceViewState) => Partial<TParams>;
+    readonly refetch: () => Promise<unknown> | void;
+    readonly revision: () => number;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly update: (answer: QuerySourceAnswer<TRow, TPage>) => QuerySourceFrame<TRow>;
+}
+
+// @public
+export interface QuerySourceAnswer<TRow, TPage> {
+    readonly query: InfiniteQueryLike<TPage>;
+    readonly selectorKey?: string | number;
+    readonly selectPage?: PageSelector<TRow, TPage>;
+}
+
+// @public
+export interface QuerySourceConfig<TRow, TParams extends TableQueryParams, TPage> {
+    readonly aggregates?: readonly QueryAggregate[];
+    readonly baseParams?: Partial<TParams>;
+    readonly columns?: readonly ColumnMetadata<TRow>[];
+    readonly expandedIds?: readonly string[];
+    readonly facetKeys?: readonly string[];
+    readonly nextCursor?: (page: TPage) => string | null | undefined;
+    readonly paginationMode: ResolvedPaginationMode;
+    readonly sanitizeParams?: (params: Partial<TParams>) => Partial<TParams>;
+    readonly supports?: QuerySupport;
+}
+
+// @public
+export interface QuerySourceFrame<TRow> {
+    readonly facets: FacetMap | undefined;
+    readonly groupAggregations: GroupAggregateOps | undefined;
+    readonly hasNextPage: boolean;
+    readonly isFetchingNextPage: boolean;
+    readonly rows: readonly TRow[];
+    readonly total: number;
+}
+
+// @public
 export interface QuerySupport {
     aggregateOperations?: readonly string[];
     aggregates?: boolean;
@@ -4549,6 +4615,24 @@ export function resolveUrlAdapter(adapter: UrlStateAdapter | undefined, enabled:
 
 // @public
 export function resolveVirtualRows<TRow>(rows: readonly TRow[], rowKey: (row: TRow) => string, rowEntries?: readonly VirtualTableRow<TRow>[]): readonly VirtualTableRow<TRow>[];
+
+// @public
+export interface ResponseAggregateOps {
+    readonly current: () => GroupAggregateOps | undefined;
+    readonly remember: (requestKey: string, requested: GroupAggregateOps | undefined) => void;
+    readonly settle: (input: ResponseAggregateOpsInput) => boolean;
+}
+
+// @public
+export interface ResponseAggregateOpsInput {
+    readonly failed: boolean;
+    readonly fetching: boolean;
+    readonly hasData: boolean;
+    readonly requested: GroupAggregateOps | undefined;
+    readonly requestKey: string;
+    readonly respondedAt?: number;
+    readonly responseKey?: string;
+}
 
 // @public
 export interface ResponsiveColumns<TCol extends ColumnMetadata<never> = ColumnMetadata<never>> {
@@ -5165,6 +5249,61 @@ export interface ServerPivotOptions {
 export function serverPivotResult(page: QueryPivotPage, input: ServerPivotOptions): PivotResult;
 
 // @public
+export interface ServerSource<TRow> {
+    readonly commit: () => void;
+    readonly dispose: () => void;
+    readonly fetchNextPage: () => void;
+    readonly refetch: () => void;
+    readonly revision: () => number;
+    readonly setPage: (page: number) => void;
+    readonly subscribe: (listener: () => void) => () => void;
+    readonly update: (config: ServerSourceConfig<TRow>, view: ServerSourceViewState) => ServerSourceFrame<TRow>;
+}
+
+// @public
+export interface ServerSourceConfig<TRow> {
+    readonly aggregates?: readonly QueryAggregate[];
+    readonly columns?: readonly ColumnMetadata<TRow>[];
+    readonly error?: unknown;
+    readonly expandedIds?: readonly string[];
+    readonly facetKeys?: readonly string[];
+    readonly loading?: boolean;
+    readonly nextCursor?: string | null;
+    readonly onQueryChange?: TableQueryListener;
+    readonly paginationMode: ResolvedPaginationMode;
+    readonly responseKey?: string;
+    readonly rows: readonly TRow[];
+    readonly supports?: QuerySupport;
+    readonly total: number;
+}
+
+// @public
+export interface ServerSourceFrame<TRow> {
+    readonly groupAggregations: GroupAggregateOps | undefined;
+    readonly hasNextPage: boolean;
+    readonly isFetchingNextPage: boolean;
+    readonly isLoading: boolean;
+    readonly query: TableQuery;
+    readonly queryKey: string;
+    readonly rows: readonly TRow[];
+}
+
+// @public
+export interface ServerSourceViewState {
+    readonly extra: ExtraFilters;
+    readonly filterTree: QueryFilterGroup | undefined;
+    readonly groupAggregateOverrides: GroupAggregateOverrides;
+    readonly groupBy: string | undefined;
+    readonly limit: number;
+    readonly page: number;
+    readonly search: string;
+    readonly setPage: (page: number) => void;
+    readonly sortBy: string | undefined;
+    readonly sortDir: SortDirection | undefined;
+    readonly sortLevels: readonly SortLevel[];
+}
+
+// @public
 export function setFilterTreeCombinator(tree: QueryFilterGroup, path: readonly number[], combinator: QueryFilterGroup["combinator"]): QueryFilterGroup;
 
 // @public
@@ -5284,6 +5423,45 @@ export interface TableCommandOptions {
 
 // @public
 export function tableCommands(options: TableCommandOptions): Command[];
+
+// @public
+export interface TableData<TRow> {
+    readonly commit: () => void;
+    readonly dispose: () => void;
+    readonly finish: (sources: {
+        readonly resolved: TableSource<TRow>;
+        readonly frontend: TableSource<TRow>;
+    }) => TableSource<TRow>;
+    readonly loadOptions: () => () => void;
+    readonly plan: (config: TableDataConfig<TRow>) => TableDataPlan<TRow>;
+    readonly revision: () => number;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface TableDataConfig<TRow> {
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly data?: readonly TRow[];
+    readonly declaredFilters?: readonly FilterDef<TRow>[];
+    readonly engine: FilterEngine | undefined;
+    readonly facetKeys?: readonly string[];
+    readonly featureHost?: FeatureHostState;
+    readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterTypes?: readonly FilterTypeSpec[];
+    readonly locale?: string;
+    readonly mode?: "frontend" | "server";
+    readonly onQueryChange?: TableQueryListener;
+    readonly source?: TableSource<TRow>;
+}
+
+// @public
+export interface TableDataPlan<TRow> {
+    readonly facetKeys: readonly string[] | undefined;
+    readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterTreeFn: ((row: TRow, tree: QueryFilterGroup) => boolean) | undefined;
+    readonly runtime: FilterRuntime<TRow>;
+    readonly tier: DataTier;
+}
 
 // @public
 export type TableDensity = "comfortable" | "compact";

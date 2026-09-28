@@ -1,0 +1,19 @@
+{
+  "name": "@adapttable/angular-material",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AdaptTable's Angular DataTable rendered with Angular Material components. Not built yet: a private placeholder for #467.",
+  "license": "MIT",
+  "author": "Orwa Mahmoud",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orwa-mahmoud/adapttable.git",
+    "directory": "packages/angular/adapter-material"
+  },
+  "bugs": "https://github.com/orwa-mahmoud/adapttable/issues",
+  "type": "module",
+  "exports": {},
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
