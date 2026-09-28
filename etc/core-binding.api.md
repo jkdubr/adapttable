@@ -161,6 +161,78 @@ export interface AssemblyFns<TRow = unknown> {
 }
 
 // @public
+export const ASSISTANT_FLOATING_MIN_WIDTH = 640;
+
+// @public
+export function assistantActionsName(count: number, labels: TableLabels | undefined): string;
+
+// @public
+export function assistantBadgeTone(status: string): TableAssistantBadgeTone;
+
+// @public
+export function assistantComposerState(assistant: TableAssistantView): TableAssistantComposerState;
+
+// @public
+export function assistantFloatingFits(viewportWidth: number): boolean;
+
+// @public
+export function assistantFloatingStyle(contained: boolean): TableAssistantPlacement;
+
+// @public
+export function assistantInitials(name: string): string;
+
+// @public
+export function assistantIsBusy(status: string): boolean;
+
+// @public
+export function assistantIsUsable(status: string): boolean;
+
+// @public
+export function assistantLauncherName(labels: TableLabels | undefined, waiting: boolean): string;
+
+// @public
+export function assistantLauncherStyle(contained: boolean): TableAssistantPlacement;
+
+// @public
+export function assistantProgressText(progress: TableAssistantProgressView, labels: TableLabels | undefined): string;
+
+// @public
+export function assistantQuestion(messages: readonly TableAssistantMessageView[]): TableAssistantQuestionView | undefined;
+
+// @public
+export function assistantReceiptDetail(receipt: TableAssistantReceiptView, labels: TableLabels | undefined): string | undefined;
+
+// @public
+export function assistantReceiptHeadline(receipt: TableAssistantReceiptView, labels: TableLabels | undefined): string;
+
+// @public
+export function assistantReceiptNeedsSave(receipt: TableAssistantReceiptView): boolean;
+
+// @public
+export function assistantReceiptWhere(receipt: TableAssistantReceiptView): string;
+
+// @public
+export function assistantRejoinable(assistant: TableAssistantView): boolean;
+
+// @public
+export function assistantShownReceipts(receipts: readonly TableAssistantReceiptView[] | undefined): readonly TableAssistantReceiptView[];
+
+// @public
+export function assistantUndoReason(blockedCode: string | undefined, labels: TableLabels | undefined): string;
+
+// @public
+export function assistantUndoTurnLabel(undoableRows: number, labels: TableLabels | undefined): string;
+
+// @public
+export function assistantVoicePlaceholder(message: TableAssistantMessageView, labels: TableLabels | undefined): TableAssistantMessageView;
+
+// @public
+export function assistantWithGreeting(messages: readonly TableAssistantMessageView[], greeting: string | undefined, labels: TableLabels | undefined): readonly TableAssistantMessageView[];
+
+// @public
+export function assistantWorkingText(progress: TableAssistantProgressView | null | undefined, labels: TableLabels | undefined): string;
+
+// @public
 export function asSizeEstimator(estimateSize: number | ((index: number) => number)): (index: number) => number;
 
 // @public
@@ -3094,11 +3166,197 @@ export function sourceWindowStart(source: {
 }): number;
 
 // @public
+export interface SpeechInputHandle {
+    readonly available: boolean;
+    readonly languages: readonly string[];
+    readonly setLanguage: (language: string) => void;
+    // (undocumented)
+    readonly start: () => void;
+    // (undocumented)
+    readonly state: SpeechInputState;
+    // (undocumented)
+    readonly stop: () => void;
+}
+
+// @public
+export interface SpeechInputState {
+    readonly error?: string;
+    readonly interim: string;
+    readonly language: string;
+    // (undocumented)
+    readonly status: SpeechInputStatus;
+}
+
+// @public
+export type SpeechInputStatus = "idle" | "listening" | "processing" | "denied" | "unsupported" | "error";
+
+// @public
 export function standardFeatureList<TFeature, TBulk, TFilter, TViews>(factories: CoreStandardFeatureFactories<TFeature, TBulk, TFilter, TViews>, options?: CoreStandardFeatureOptions<TBulk, TFilter, TViews>): TFeature[];
 
 // @public
 export class SummaryCellsCache<TCells> {
     read<TRow>(summaryRow: ((rows: readonly TRow[]) => TCells) | undefined, rows: readonly TRow[]): TCells | undefined;
+}
+
+// @public
+export interface TableAssistantAllowanceView {
+    readonly capability: string;
+    readonly name?: string;
+}
+
+// @public
+export type TableAssistantBadgeTone = "neutral" | "busy" | "warning" | "danger";
+
+// @public
+export interface TableAssistantComposerState {
+    readonly answering: boolean;
+    readonly busy: boolean | undefined;
+    readonly send: () => void;
+}
+
+// @public
+export interface TableAssistantMessageView {
+    // (undocumented)
+    readonly id: string;
+    readonly question?: TableAssistantQuestionView;
+    // (undocumented)
+    readonly receipts?: readonly TableAssistantReceiptView[];
+    // (undocumented)
+    readonly role: "user" | "assistant";
+    readonly streaming?: boolean;
+    readonly text: string;
+    readonly transcribing?: boolean;
+}
+
+// @public
+export interface TableAssistantPlacement {
+    // (undocumented)
+    readonly blockSize?: string;
+    // (undocumented)
+    readonly display: "flex";
+    // (undocumented)
+    readonly flexDirection?: "column";
+    // (undocumented)
+    readonly inlineSize?: string;
+    // (undocumented)
+    readonly insetBlockEnd: string;
+    // (undocumented)
+    readonly insetInlineEnd: string;
+    // (undocumented)
+    readonly minHeight?: number;
+    // (undocumented)
+    readonly position: "absolute" | "fixed";
+    // (undocumented)
+    readonly zIndex: number;
+}
+
+// @public
+export interface TableAssistantProgressView {
+    readonly done: number;
+    readonly label?: string;
+    readonly total?: number;
+}
+
+// @public
+export interface TableAssistantQuestionOption {
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly label: string;
+}
+
+// @public
+export interface TableAssistantQuestionView {
+    readonly allowFreeText: boolean;
+    // (undocumented)
+    readonly id: string;
+    // (undocumented)
+    readonly options?: readonly TableAssistantQuestionOption[];
+    // (undocumented)
+    readonly question: string;
+}
+
+// @public
+export interface TableAssistantReceiptSubject {
+    // (undocumented)
+    readonly after?: string;
+    readonly before?: string;
+    readonly cleared?: boolean;
+    // (undocumented)
+    readonly column?: string;
+    readonly detail?: string;
+    readonly direction?: "asc" | "desc";
+    readonly kind?: string;
+    readonly row?: string;
+    readonly terms?: readonly {
+        readonly column?: string;
+        readonly value?: string;
+    }[];
+}
+
+// @public
+export interface TableAssistantReceiptView {
+    readonly capabilityKey?: string;
+    readonly idempotencyKey: string;
+    readonly message?: string;
+    readonly status: string;
+    readonly subject?: TableAssistantReceiptSubject;
+    readonly undoable?: boolean;
+}
+
+// @public
+export interface TableAssistantResumableView {
+    readonly text: string;
+}
+
+// @public
+export interface TableAssistantSuggestionView {
+    // (undocumented)
+    readonly description?: string;
+    // (undocumented)
+    readonly id: string;
+    readonly kind?: string;
+    // (undocumented)
+    readonly title: string;
+}
+
+// @public
+export interface TableAssistantUndoView {
+    readonly available: boolean;
+    readonly blockedCode?: string;
+    readonly messageId: string;
+}
+
+// @public
+export interface TableAssistantView {
+    readonly alwaysAllowed?: readonly TableAssistantAllowanceView[];
+    readonly answer?: (answer: {
+        optionId?: string;
+        text?: string;
+    }) => void;
+    readonly busy?: boolean;
+    // (undocumented)
+    readonly draft: string;
+    readonly error?: string;
+    readonly errorCode?: string;
+    readonly interrupted?: "stopped" | "detached";
+    // (undocumented)
+    readonly messages: readonly TableAssistantMessageView[];
+    readonly progress?: TableAssistantProgressView | null;
+    readonly resumable?: TableAssistantResumableView;
+    readonly resume?: () => void | Promise<void>;
+    readonly revokeAlwaysAllow?: (capability: string) => void;
+    // (undocumented)
+    readonly runSuggestion: (id: string) => void | Promise<void>;
+    readonly send: (text?: string) => void | Promise<void>;
+    // (undocumented)
+    readonly setDraft: (draft: string) => void;
+    readonly status: string;
+    readonly stop: () => void;
+    readonly suggestions: readonly TableAssistantSuggestionView[];
+    readonly undo?: TableAssistantUndoView | null;
+    readonly undoAction?: (idempotencyKey: string) => void | Promise<void>;
+    readonly undoTurn?: () => void | Promise<void>;
 }
 
 // @public

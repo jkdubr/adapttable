@@ -1683,6 +1683,19 @@ sets the assistant's opening line, and an empty one opens the panel silent. The 
 `TableAssistantReceiptSubject` — what an action changed, supplied by whoever
 ran it — and `TableAssistantSuggestionView`, plus `assistantIsBusy` and
 `assistantIsUsable`.
+The panel's presentation rules are `@adapttable/core/binding`'s, so every
+binding draws the same conversation: `assistantBadgeTone`
+(`TableAssistantBadgeTone`), `assistantLauncherName`, `assistantQuestion`,
+`assistantRejoinable`, `assistantComposerState`
+(`TableAssistantComposerState`), `assistantWithGreeting`,
+`assistantVoicePlaceholder`, `assistantInitials`, and for receipts
+`assistantShownReceipts`, `assistantReceiptHeadline`, `assistantReceiptDetail`,
+`assistantReceiptWhere`, `assistantReceiptNeedsSave`, `assistantUndoReason`,
+`assistantUndoTurnLabel` and `assistantActionsName`. Progress reads through
+`assistantProgressText` and `assistantWorkingText`. The floating window's
+placement is `assistantFloatingStyle` and `assistantLauncherStyle`, each a
+`TableAssistantPlacement`, with `assistantFloatingFits` and
+`ASSISTANT_FLOATING_MIN_WIDTH` deciding when it becomes the kit's sheet.
 Each published kit exports
 `agentApproval` and `AgentApproval` (`AgentApprovalProps`). Core chrome
 exports `AgentApprovalChrome` (`AgentApprovalChromeProps`),
@@ -2488,6 +2501,20 @@ runtime view, `capabilityKind` and `alwaysAllowFor` are what `mayAlwaysAllow`
 is asked with, `perItemRefusal` refuses every undecided row with the reader's
 stated reason, and `exclusionKey` makes an exclusion list comparable.
 `@adapttable/ai-react`'s `tableAgent` is this binding for React.
+
+**A table agent controller.** `createTableAgentController(inputs)` is everything
+a binding's table agent does on top of that session, with no framework in it:
+it parks a write on the table's own approval surface, remembers what the reader
+waved through, republishes a changed manifest, announces approvals to the
+bridge, samples the columns that asked, and offers the table to a browser agent.
+`TableAgentControllerInputs` carries the binding's live
+`TableAgentControllerOptions` (the runtime options plus `bridge` and `webmcp`,
+narrowed by `TableAgentWebMcpOptions`), its runtime and its commit hooks. The
+`TableAgentController` it returns has `subscribe` and `getState` — a
+`TableAgentState` holding the session, the open approval, the always-allow
+list, progress and a `TableAgentViewReader` — plus `sync`, called after each
+commit, and `disconnect`, called when the table goes away. `tableAgent` in
+`@adapttable/ai-react` is a thin subscriber to it.
 
 **Row and bulk actions.** `tableActionCapabilities(declared, source)` turns a
 table's `DeclaredTableActions` into one `AgentCapabilityDefinition` per action,

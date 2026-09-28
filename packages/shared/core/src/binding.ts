@@ -9,6 +9,55 @@
  * @packageDocumentation
  */
 export {
+  assistantActionsName,
+  assistantBadgeTone,
+  assistantComposerState,
+  assistantInitials,
+  assistantLauncherName,
+  assistantProgressText,
+  assistantQuestion,
+  assistantReceiptDetail,
+  assistantReceiptHeadline,
+  assistantReceiptNeedsSave,
+  assistantReceiptWhere,
+  assistantRejoinable,
+  assistantShownReceipts,
+  assistantUndoReason,
+  assistantUndoTurnLabel,
+  assistantVoicePlaceholder,
+  assistantWithGreeting,
+  assistantWorkingText,
+  type TableAssistantBadgeTone,
+  type TableAssistantComposerState,
+} from "./assistant/assistantModel";
+export {
+  ASSISTANT_FLOATING_MIN_WIDTH,
+  assistantFloatingFits,
+  assistantFloatingStyle,
+  assistantLauncherStyle,
+  type TableAssistantPlacement,
+} from "./assistant/assistantPlacement";
+export {
+  assistantIsBusy,
+  assistantIsUsable,
+  type TableAssistantAllowanceView,
+  type TableAssistantMessageView,
+  type TableAssistantProgressView,
+  type TableAssistantQuestionOption,
+  type TableAssistantQuestionView,
+  type TableAssistantReceiptSubject,
+  type TableAssistantReceiptView,
+  type TableAssistantResumableView,
+  type TableAssistantSuggestionView,
+  type TableAssistantUndoView,
+  type TableAssistantView,
+} from "./assistant/assistantView";
+export type {
+  SpeechInputHandle,
+  SpeechInputState,
+  SpeechInputStatus,
+} from "./assistant/speechView";
+export {
   columnMenuActions,
   filterColumnMenuRows,
   hideAllColumns,

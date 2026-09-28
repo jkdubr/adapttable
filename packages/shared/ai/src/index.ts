@@ -187,6 +187,15 @@ export {
 } from "./pagination";
 export { createAgentSession, type CreateAgentSessionOptions } from "./session";
 export {
+  createTableAgentController,
+  type TableAgentController,
+  type TableAgentControllerInputs,
+  type TableAgentControllerOptions,
+  type TableAgentState,
+  type TableAgentViewReader,
+  type TableAgentWebMcpOptions,
+} from "./tableAgentController";
+export {
   alwaysAllowFor,
   bindLiveSession,
   capabilityKind,
