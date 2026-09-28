@@ -1,40 +1,22 @@
 import {
-  appendBaseKey,
-  appendedRows,
-  type AppendStash,
-  buildTableQuery,
-  canRequestCursorPage,
-  clampedPage,
   type ColumnMetadata,
-  createFirstLoadLatch,
-  createQueryEmitter,
-  cursorHasMore,
-  type CursorTrail,
-  devWarn,
-  effectiveQueryAggregates,
-  EMPTY_CURSOR_TRAIL,
+  createServerSource,
   type FacetMap,
   type PaginationMode,
   type QueryAggregate,
-  queryAggregateOps,
-  queryGroupBy,
   type QuerySupport,
-  recordCursor,
   resolvePaginationMode,
-  stableKey,
-  staleAppendStash,
+  type ServerSource,
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
-import { useEventCallback } from "../hooks/useEventCallback";
 import { useIsMobile } from "../hooks/useIsMobile";
 import {
   useTableUrlState,
   type UseTableUrlStateOptions,
 } from "../url/useTableUrlState";
-import { useAggregateOpsForResponse } from "./aggregateOpsForResponse";
 
 /**
  * One consolidated snapshot of everything a server query needs.
@@ -176,9 +158,9 @@ export interface UseServerDataOptions<TRow> extends Pick<
 export function useServerData<TRow>(
   options: UseServerDataOptions<TRow>
 ): TableSource<TRow> {
-  // Every table's base bundle carries this hook. Its options arrive as a fresh
-  // object on each render and each derived value is memoized explicitly, so
-  // the compiler's cache would add weight without adding hits.
+  // The source is mutable and must see every render's inputs, and every
+  // table's base bundle carries this hook: the compiler's cache would skip
+  // updates and add weight without adding hits.
   "use no memo";
   const {
     rows,
@@ -202,232 +184,66 @@ export function useServerData<TRow>(
   const mediaMobile = useIsMobile(mobileBreakpoint);
   const isMobile = forceMobile ?? mediaMobile;
   const resolvedMode = resolvePaginationMode(paginationMode, isMobile);
-  const paged = resolvedMode === "paged";
 
   const state = useTableUrlState(urlOptions);
-  const {
-    page,
-    limit,
-    search,
-    sortBy,
-    sortDir,
-    groupBy,
-    groupAggregateOverrides,
-    sortLevels,
-    extra,
-  } = state;
-  const effectiveAggregates = useMemo(
-    () =>
-      effectiveQueryAggregates(
-        aggregates,
-        groupAggregateOverrides,
-        columns,
-        supports
-      ),
-    [aggregates, columns, groupAggregateOverrides, supports]
-  );
-  const effectiveGroupBy = useMemo(() => queryGroupBy(groupBy), [groupBy]);
-  // Cursor mode keeps the trail of every token the server has handed out —
-  // what lets the user page back through what they have already seen.
-  const cursorMode = supports?.cursor === true;
-  const [cursors, setCursors] = useState<CursorTrail>(EMPTY_CURSOR_TRAIL);
-  const cursor = cursorMode ? cursors[page - 1] : undefined;
+  const [source] = useState<ServerSource<TRow>>(createServerSource);
+  // The source's own state — an append, the cursor trail, a refetch, the
+  // aggregate operations — re-renders through its subscription.
+  useSyncExternalStore(source.subscribe, source.revision, source.revision);
 
-  const query = useMemo<TableQuery>(
-    () =>
-      buildTableQuery({
-        page,
-        limit,
-        search,
-        sortBy,
-        sortDir,
-        sortLevels,
-        filters: extra,
-        groupBy: effectiveGroupBy,
-        aggregates: effectiveAggregates,
-        cursor,
-        expandedIds,
-        filterTree: state.filterTree,
-        facets: facetKeys,
-        supports,
-      }),
-    [
-      page,
-      limit,
-      search,
-      sortBy,
-      sortDir,
-      sortLevels,
-      extra,
-      effectiveGroupBy,
-      effectiveAggregates,
-      cursor,
+  const frame = source.update(
+    {
+      rows,
+      total,
+      nextCursor,
+      loading,
+      error,
+      paginationMode: resolvedMode,
       supports,
+      aggregates,
+      columns,
+      responseKey,
       expandedIds,
-      state.filterTree,
       facetKeys,
-    ]
+      onQueryChange,
+    },
+    state
   );
-  // Value-keyed, so re-renders and StrictMode double-mounts never re-fire
-  // an identical query; `refetch` bumps the generation to force one.
-  const queryKey = stableKey(query);
-
-  // What the request asks for. What the rows on screen were asked for is the
-  // same only while nothing is in flight — the host reports that as `loading`.
-  const requestedOps = useMemo(
-    () => queryAggregateOps(effectiveAggregates),
-    [effectiveAggregates]
-  );
-  const groupAggregations = useAggregateOpsForResponse({
-    requestKey: queryKey,
-    requested: requestedOps,
-    // The host can say outright which query these rows answer; without it the
-    // hook watches the request it emitted start and finish, and a failure or
-    // a request that never started leaves the rows described as they were.
-    responseKey,
-    hasData: rows.length > 0,
-    fetching: loading,
-    failed: error !== null,
+  // Once React accepts the render: send a changed query, latch the first
+  // load, clamp, record the cursor, and settle the aggregate operations.
+  useEffect(() => {
+    source.commit();
   });
-
-  const [generation, setGeneration] = useState(0);
-
-  const [emitter] = useState(createQueryEmitter);
-
-  // Emits the LATEST query / handler when the value-keyed query changes,
-  // without re-subscribing on every render. The emitter aborts the request
-  // a newer one supersedes; the returned abort runs when the table unmounts.
-  const emitQuery = useEventCallback(() =>
-    onQueryChange ? emitter.emit(onQueryChange, query, queryKey) : undefined
-  );
-
-  useEffect(() => emitQuery(), [queryKey, generation, emitQuery]);
-
-  // `isLoading` covers the FIRST load only — TanStack's reference
-  // semantics: fetching with no data yet. Once rows have ever been present
-  // or one load has completed (loading transitions true → false), later
-  // refreshes never re-raise it — even a refresh that empties `rows`.
-  // Latched in an idempotent effect body so StrictMode's simulated remount
-  // cannot mark it early.
-  const rowsPresent = rows.length > 0;
-  const [firstLoad] = useState(createFirstLoadLatch);
-  useEffect(() => {
-    firstLoad.observe(loading, rowsPresent);
-  }, [firstLoad, loading, rowsPresent]);
-  const isLoading = firstLoad.isLoading(loading, rowsPresent);
-
-  // Clamp out-of-range pages (hand-edited / stale shared links) once the
-  // total is known and nothing is in flight — mirrors useQuerySource, so a
-  // ?page=999 deep link self-heals to the last real page (and the URL is
-  // rewritten) instead of showing an empty state the pager disagrees with.
-  const { setPage } = state;
-  useEffect(() => {
-    // Cursor mode has no offset arithmetic to clamp against — a page is
-    // reachable only if its token is already in hand, which the trail below
-    // enforces directly.
-    if (cursorMode || loading) return;
-    const lastPage = clampedPage(page, limit, total);
-    if (lastPage !== undefined) setPage(lastPage);
-  }, [cursorMode, loading, total, limit, page, setPage]);
-
-  // Record the token for the page after the one on screen, so "next" has
-  // something to send and a later "back" can retrace the trail.
-  useEffect(() => {
-    if (!cursorMode || loading || nextCursor === null) return;
-    setCursors((prev) => recordCursor(prev, page, nextCursor));
-  }, [cursorMode, loading, nextCursor, page]);
-
-  // Infinite-append accumulation: `fetchNextPage` stashes the rows already
-  // on screen (plus the CURRENT `rows` prop identity) and advances the
-  // page; the stashed rows alone stay on screen until the caller hands
-  // back a NEW `rows` array for the advanced page, which is then appended.
-  // Any base-query change (sort/filter/search/limit), a direct page jump,
-  // or an error invalidates the stash, falling back to replacement.
-  const baseKey = appendBaseKey({
-    limit,
-    search,
-    sortBy,
-    sortDir,
-    sortLevels,
-    filters: extra,
-  });
-  const [stash, setStash] = useState<AppendStash<TRow> | null>(null);
-  useEffect(() => {
-    // Memory hygiene + failure recovery: a stash for a superseded base
-    // query can never apply, and an errored append stops accumulating.
-    if (staleAppendStash(stash, baseKey, error !== null)) setStash(null);
-  }, [stash, baseKey, error]);
-
-  // A new sort, filter, search or page size makes every token the server
-  // issued meaningless — they describe a position in a result set that no
-  // longer exists. Drop the trail and start again from page 1.
-  const cursorBaseRef = useRef(baseKey);
-  useEffect(() => {
-    if (!cursorMode || cursorBaseRef.current === baseKey) return;
-    cursorBaseRef.current = baseKey;
-    setCursors(EMPTY_CURSOR_TRAIL);
-    setPage(1);
-  }, [cursorMode, baseKey, setPage]);
-
-  const appended = useMemo(
-    () => appendedRows(stash, baseKey, page, rows),
-    [stash, baseKey, page, rows]
-  );
-  const displayRows = appended.rows;
-  const appendPending = appended.pending;
-
-  // Offset mode knows the end from the count; cursor mode only knows there
-  // is more because the server said so by returning another token.
-  const moreToLoad = cursorMode
-    ? cursorHasMore(cursors, page)
-    : page * limit < total;
-  const hasNextPage = !paged && moreToLoad;
-  // Without a token a page cannot be requested at all, so in cursor mode
-  // navigation is limited to pages already visited plus the next one. A pager
-  // click beyond that is ignored rather than silently re-serving page 1,
-  // which is what sending an absent cursor would do.
-  const setPageSafely = useEventCallback((next: number) => {
-    if (cursorMode && !canRequestCursorPage(cursors, next)) return;
-    setPage(next);
-  });
-
-  const fetchNextPage = useEventCallback(() => {
-    if (paged || loading || appendPending || !hasNextPage) return;
-    setStash({
-      key: baseKey,
-      page: page + 1,
-      rows: displayRows,
-      prevProp: rows,
-    });
-    setPage(page + 1);
-  });
+  // The request in flight is aborted when the table unmounts; a remount
+  // sends it again.
+  useEffect(() => source.dispose, [source]);
 
   return {
-    rows: displayRows,
+    rows: frame.rows,
     total,
-    page,
-    limit,
+    page: state.page,
+    limit: state.limit,
     defaultLimit: state.defaultLimit,
-    search,
-    sortBy,
-    sortDir,
-    groupBy,
-    groupAggregateOverrides,
-    groupAggregations,
+    search: state.search,
+    sortBy: state.sortBy,
+    sortDir: state.sortDir,
+    groupBy: state.groupBy,
+    groupAggregateOverrides: state.groupAggregateOverrides,
+    groupAggregations: frame.groupAggregations,
     queryAggregates: aggregates,
     aggregateOperations: supports?.aggregateOperations,
     honorsAggregates:
       Boolean(supports?.aggregates) || Boolean(supports?.aggregateOperations),
-    extra,
+    extra: state.extra,
     facets,
     filterTree: state.filterTree,
-    isLoading,
+    isLoading: frame.isLoading,
     isFetching: loading,
-    isFetchingNextPage: appendPending,
-    hasNextPage,
+    isFetchingNextPage: frame.isFetchingNextPage,
+    hasNextPage: frame.hasNextPage,
     error,
     paginationMode: resolvedMode,
-    setPage: setPageSafely,
+    setPage: source.setPage,
     setLimit: state.setLimit,
     setSort: state.setSort,
     setGroupBy: state.setGroupBy,
@@ -441,17 +257,7 @@ export function useServerData<TRow>(
     setFilterTree: state.setFilterTree,
     clearExtras: state.clearExtras,
     clearAll: state.clearAll,
-    fetchNextPage,
-    refetch: () => {
-      // Re-emitting the query IS this tier's fetch mechanism — the caller
-      // runs the request. Without a handler there is nothing to re-run.
-      if (!onQueryChange) {
-        devWarn(
-          "refetch() has nothing to re-run without an `onQueryChange` handler."
-        );
-        return;
-      }
-      setGeneration((g) => g + 1);
-    },
+    fetchNextPage: source.fetchNextPage,
+    refetch: source.refetch,
   };
 }

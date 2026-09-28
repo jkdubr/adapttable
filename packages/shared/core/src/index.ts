@@ -608,6 +608,7 @@ export {
   createQueryEmitter,
   cursorHasMore,
   type CursorTrail,
+  cursorTrailKey,
   type DataTier,
   effectiveQueryAggregates,
   EMPTY_CURSOR_TRAIL,
@@ -636,6 +637,31 @@ export {
   type FrontendSourceViewState,
   resolvePaginationMode,
 } from "./source/frontendSource";
+export {
+  createQuerySource,
+  type QuerySource,
+  type QuerySourceAnswer,
+  type QuerySourceConfig,
+  type QuerySourceFrame,
+} from "./source/querySource";
+export {
+  createResponseAggregateOps,
+  type ResponseAggregateOps,
+  type ResponseAggregateOpsInput,
+} from "./source/responseAggregateOps";
+export {
+  createServerSource,
+  type ServerSource,
+  type ServerSourceConfig,
+  type ServerSourceFrame,
+  type ServerSourceViewState,
+} from "./source/serverSource";
+export {
+  createTableData,
+  type TableData,
+  type TableDataConfig,
+  type TableDataPlan,
+} from "./source/tableData";
 export type { TableSource } from "./source/TableSource";
 export type {
   SummaryRowFn,
