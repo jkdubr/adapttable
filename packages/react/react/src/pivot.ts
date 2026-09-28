@@ -76,6 +76,9 @@ export {
   type ServerPivotOptions,
   serverPivotResult,
 } from "@adapttable/core";
+// Everything `@adapttable/core/pivot` exports, so a kit's pivot entry passes
+// this binding on and never imports core itself.
+export * from "@adapttable/core/pivot";
 
 /**
  * The member types the signatures above hand back.

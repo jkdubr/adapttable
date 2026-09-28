@@ -5,6 +5,7 @@
 ```ts
 
 import { ActionConfirm } from '@adapttable/core';
+import { ACTIONS_COLUMN_KEY } from '@adapttable/core';
 import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
 import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
@@ -38,6 +39,7 @@ import { ApprovalReviewSlots as ApprovalReviewSlots_2 } from '@adapttable/core/b
 import { AssemblyFns } from '@adapttable/core';
 import { assistantIsBusy } from '@adapttable/core/binding';
 import { assistantIsUsable } from '@adapttable/core/binding';
+import { autoSizeColumns } from '@adapttable/core';
 import { BATCH_EDIT_BAR } from '@adapttable/core/binding';
 import { BatchEditBarProps } from '@adapttable/core/binding';
 import { BatchEditBarSlots as BatchEditBarSlots_2 } from '@adapttable/core/binding';
@@ -49,6 +51,7 @@ import { bindMobileCardList } from '@adapttable/core';
 import { TableBodyCell as BodyCell } from '@adapttable/core';
 import { BodyCell as BodyCell_2 } from '@adapttable/core/binding';
 import { bodyCellsHaveRowSpan } from '@adapttable/core/binding';
+import { bodyRowEntries } from '@adapttable/core';
 import { buildBodyCells } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
@@ -91,6 +94,7 @@ import { ChromeGroupEntry } from '@adapttable/core/binding';
 import { ChromeGroupSlot } from '@adapttable/core/binding';
 import { ChromeRowSlot } from '@adapttable/core/binding';
 import { ChromeVirtualPadSlot } from '@adapttable/core/binding';
+import { ColorScheme } from '@adapttable/core';
 import { COLUMN_DND_MIME } from '@adapttable/core';
 import { COLUMN_GROUP_ID_SEP } from '@adapttable/core/binding';
 import { COLUMN_GROUP_RENDER_PREFIX } from '@adapttable/core/binding';
@@ -127,9 +131,11 @@ import { ColumnMenuChromeProps } from '@adapttable/core';
 import { ColumnMenuItem } from '@adapttable/core';
 import { ColumnMenuLabels } from '@adapttable/core';
 import { ColumnMenuRow } from '@adapttable/core';
+import { columnMenuRows } from '@adapttable/core';
 import { ColumnMenuSlotProps } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
 import { ColumnResizeHandleProps } from '@adapttable/core';
+import { columnResizeHandleProps } from '@adapttable/core';
 import { ColumnSelectCheckboxChromeProps as ColumnSelectCheckboxChromeProps_2 } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
 import { ColumnSelectSlots as ColumnSelectSlots_2 } from '@adapttable/core/binding';
@@ -156,11 +162,15 @@ import { ContextMenuPoint } from '@adapttable/core';
 import { ContextMenuSlots as ContextMenuSlots_2 } from '@adapttable/core/binding';
 import { ContextMenuSurfaceProps as ContextMenuSurfaceProps_2 } from '@adapttable/core/binding';
 import { ContextMenuTarget } from '@adapttable/core';
+import { createFilterRegistry } from '@adapttable/core';
 import { CSSProperties } from 'react';
 import { CustomCellEditorConflict } from '@adapttable/core';
 import { CustomCellEditorCtrl } from '@adapttable/core';
 import { CustomCellEditorRender } from '@adapttable/core';
 import { DEFAULT_CARD_SIZE_PX } from '@adapttable/core';
+import { defaultConfirm } from '@adapttable/core';
+import { defaultFilterRegistry } from '@adapttable/core';
+import { defaultLabels } from '@adapttable/core';
 import { DependencyList } from 'react';
 import { deriveRuntimeOperations } from '@adapttable/core/binding';
 import { deriveSortByOptions } from '@adapttable/core';
@@ -172,6 +182,7 @@ import { Direction } from '@adapttable/core';
 import { DirtyCellState } from '@adapttable/core';
 import { DisplayValue } from '@adapttable/core';
 import { DragEvent as DragEvent_2 } from 'react';
+import { edgePinStyle } from '@adapttable/core';
 import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
 import { EditableCellButtonProps } from '@adapttable/core/binding';
 import { EditableCellController } from '@adapttable/core';
@@ -192,6 +203,7 @@ import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
 import { editorBusyProps } from '@adapttable/core';
+import { editorInputType } from '@adapttable/core';
 import { editorValidationProps } from '@adapttable/core';
 import { EditUnit } from '@adapttable/core';
 import { EditValidationState } from '@adapttable/core';
@@ -255,6 +267,7 @@ import { FillHandleCellSlotProps as FillHandleCellSlotProps_2 } from '@adapttabl
 import { FillHandleSlotProps } from '@adapttable/core/binding';
 import { FillHandleSlots as FillHandleSlots_2 } from '@adapttable/core/binding';
 import { FILTER_HEADER } from '@adapttable/core/binding';
+import { FILTER_TYPES } from '@adapttable/core';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
 import { FilterFormSource } from '@adapttable/core/binding';
@@ -267,12 +280,14 @@ import { FilterHeaderRowProps as FilterHeaderRowProps_2 } from '@adapttable/core
 import { FilterHeaderSearchProps } from '@adapttable/core/binding';
 import { FilterHeaderSelectProps } from '@adapttable/core/binding';
 import { FilterHeaderSlots as FilterHeaderSlots_2 } from '@adapttable/core/binding';
+import { filterLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
 import { FilterOptionsSource } from '@adapttable/core';
 import { FilterOverlaySlotProps as FilterOverlaySlotProps_2 } from '@adapttable/core/binding';
 import { FilterRuntime } from '@adapttable/core';
 import { FILTERS_FORM } from '@adapttable/core/binding';
 import { FiltersFormSlotProps } from '@adapttable/core/binding';
+import { filterStateKeys } from '@adapttable/core';
 import { FilterTreeBuilderProps } from '@adapttable/core/binding';
 import { FilterTreeButtonProps } from '@adapttable/core/binding';
 import { FilterTreeClassNames } from '@adapttable/core/binding';
@@ -287,6 +302,7 @@ import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { FilterWidgetKind } from '@adapttable/core';
+import { filterWidgetKind } from '@adapttable/core';
 import { FilterWidgetRenderProps } from '@adapttable/core';
 import { FIND_BAR } from '@adapttable/core/binding';
 import { FIND_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
@@ -301,11 +317,15 @@ import { flattenColumnTree } from '@adapttable/core/binding';
 import { FlattenedColumns } from '@adapttable/core';
 import { focusEditorOnMount } from '@adapttable/core';
 import { FORCED_COLORS_CSS } from '@adapttable/core/binding';
+import { formatMultiDraft } from '@adapttable/core';
 import { FullscreenLiveSlotProps as FullscreenLiveSlotProps_2 } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GetCellSpanArgs } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
 import { GridFocusControllerOptions } from '@adapttable/core';
+import { groupAggregateEntries } from '@adapttable/core';
+import { groupAggregateNode } from '@adapttable/core';
+import { GroupAggregateOps } from '@adapttable/core';
 import { GroupAggregateOverride } from '@adapttable/core';
 import { GroupAggregateOverrides } from '@adapttable/core';
 import { GroupAggregatesFn } from '@adapttable/core';
@@ -339,12 +359,15 @@ import { GroupingPanelSlotProps as GroupingPanelSlotProps_2 } from '@adapttable/
 import { GroupingPanelSlots as GroupingPanelSlots_2 } from '@adapttable/core/binding';
 import { GroupingPanelState } from '@adapttable/core';
 import { GroupingPanelSurfaceProps as GroupingPanelSurfaceProps_2 } from '@adapttable/core/binding';
+import { groupLeafCount } from '@adapttable/core';
 import { GroupMoreButtonProps } from '@adapttable/core/binding';
 import { GroupMoreButtonSlotProps } from '@adapttable/core/binding';
 import { GroupMoreButtonSlots as GroupMoreButtonSlots_2 } from '@adapttable/core/binding';
 import { GroupNode } from '@adapttable/core';
 import { GroupRowKind } from '@adapttable/core/binding';
+import { groupRowLayout } from '@adapttable/core';
 import { groupRowParts } from '@adapttable/core/binding';
+import { groupSelectionState } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
 import { hasActiveHeaderFilter } from '@adapttable/core';
 import { HeaderGroupCell } from '@adapttable/core/binding';
@@ -357,14 +380,20 @@ import { htmlGroupedHeaderPlan } from '@adapttable/core/binding';
 import { inflateBodyCellRowSpans } from '@adapttable/core/binding';
 import { insertExtraRows } from '@adapttable/core/binding';
 import { insertExtrasBeforeRows } from '@adapttable/core/binding';
+import { isBooleanEditor } from '@adapttable/core';
 import { isColumnGroupRenderKey } from '@adapttable/core/binding';
 import { isColumnGroupStubKey } from '@adapttable/core/binding';
 import { isColumnGroupSummaryKey } from '@adapttable/core/binding';
 import { isCurrentMatchCell } from '@adapttable/core/binding';
+import { isDeclarativeFilters } from '@adapttable/core';
+import { isDraftChecked } from '@adapttable/core';
 import { isExtraEntry } from '@adapttable/core/binding';
 import { isMatchedCell } from '@adapttable/core/binding';
+import { isMultiSelectEditor } from '@adapttable/core';
 import { isPinnedSummaryRowId } from '@adapttable/core';
 import { isSelectedCell } from '@adapttable/core/binding';
+import { isSelectEditor } from '@adapttable/core';
+import { joinRelativeToken } from '@adapttable/core';
 import { JSX } from 'react';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
 import { KeyedVirtualization } from '@adapttable/core';
@@ -384,13 +413,17 @@ import { nextPinSide } from '@adapttable/core';
 import { normalizeEditorOptions } from '@adapttable/core';
 import { orderedCardEntries } from '@adapttable/core/binding';
 import { OVERLAY_MOTION } from '@adapttable/core/binding';
+import { pageSizeOptions } from '@adapttable/core';
+import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationItem } from '@adapttable/core';
 import { paginationItems } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
 import { paginationSlots } from '@adapttable/core';
+import { partitionPinnedRows } from '@adapttable/core';
 import { PatchFeature } from '@adapttable/core/binding';
+import { PIN_Z } from '@adapttable/core';
 import { pinActionLabel } from '@adapttable/core';
 import { PinLeads } from '@adapttable/core';
 import { PinLeads as PinLeads_2 } from '@adapttable/core/binding';
@@ -399,6 +432,7 @@ import { PINNED_SUMMARY_BOTTOM_PART } from '@adapttable/core';
 import { PINNED_SUMMARY_TOP_PART } from '@adapttable/core';
 import { PINNED_TOP_PART } from '@adapttable/core/binding';
 import { PinnedCellStyle } from '@adapttable/core';
+import { pinnedCellStyle } from '@adapttable/core';
 import { pinnedColumnWidth } from '@adapttable/core';
 import { pinnedRowCellStyle } from '@adapttable/core/binding';
 import { pinnedRowPart } from '@adapttable/core/binding';
@@ -434,17 +468,25 @@ import { QueryGroupRow } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
+import { readMultiDraft } from '@adapttable/core';
 import { ReconcileLiveBatchEdit } from '@adapttable/core';
 import { ReconcileLiveEdit } from '@adapttable/core';
 import { ReconcileLiveRowEdit } from '@adapttable/core';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
+import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
+import { RELATIVE_PRESETS } from '@adapttable/core';
+import { renderRegisteredFilter } from '@adapttable/core';
+import { REORDER_COLUMN_KEY } from '@adapttable/core';
 import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
 import { resetColumnLayout } from '@adapttable/core/binding';
 import { resolveContextTarget } from '@adapttable/core';
 import { ResolvedContextTarget } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
 import { ResolvedPaginationMode } from '@adapttable/core';
+import { resolveFilterMode } from '@adapttable/core';
+import { resolveFilterRegistry } from '@adapttable/core';
+import { resolveLabels } from '@adapttable/core';
 import { resolveMobileLabel } from '@adapttable/core/binding';
 import { resolveRowEditTrigger } from '@adapttable/core';
 import { resolveRowHeight } from '@adapttable/core/binding';
@@ -506,6 +548,7 @@ import { rowStyleSignature } from '@adapttable/core/binding';
 import { RowTreeMoveHandler } from '@adapttable/core';
 import { RowTreeParentRef } from '@adapttable/core';
 import { RowValidator } from '@adapttable/core';
+import { runRowAction } from '@adapttable/core';
 import { SavedView } from '@adapttable/core';
 import { SavedViewControlKey } from '@adapttable/core/binding';
 import { SavedViewMigration } from '@adapttable/core';
@@ -530,6 +573,7 @@ import { shallowEqualByKeys } from '@adapttable/core/binding';
 import { SHARED_DESKTOP_ROW_KEYS } from '@adapttable/core/binding';
 import { Shortcut } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
+import { showSimpleFilterFields } from '@adapttable/core';
 import { SidePanelChromeProps as SidePanelChromeProps_2 } from '@adapttable/core/binding';
 import { SidePanelCloseProps } from '@adapttable/core/binding';
 import { SidePanelFrameProps as SidePanelFrameProps_2 } from '@adapttable/core/binding';
@@ -543,6 +587,7 @@ import { SortLevel } from '@adapttable/core';
 import { SpeechInputHandle } from '@adapttable/core/binding';
 import { SpeechInputState } from '@adapttable/core/binding';
 import { SpeechInputStatus } from '@adapttable/core/binding';
+import { splitRelativeToken } from '@adapttable/core';
 import { StatusBarChromeProps as StatusBarChromeProps_2 } from '@adapttable/core/binding';
 import { StatusBarItem } from '@adapttable/core/binding';
 import { StatusBarSlotProps as StatusBarSlotProps_2 } from '@adapttable/core/binding';
@@ -579,6 +624,7 @@ import { TableDensity } from '@adapttable/core';
 import { TableErrorState } from '@adapttable/core';
 import { tableErrorState } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
+import { tableMinWidth } from '@adapttable/core';
 import { TableOptions } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
@@ -593,8 +639,10 @@ import { TableVirtualization } from '@adapttable/core';
 import { toggleCollapsedColumnGroup } from '@adapttable/core/binding';
 import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
 import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
+import { toolbarShowsFilters } from '@adapttable/core';
 import { TotalCountCapability } from '@adapttable/core';
 import { TREE_TOGGLE } from '@adapttable/core/binding';
+import { treeCardStyle } from '@adapttable/core';
 import { TreeCellProps as TreeCellProps_2 } from '@adapttable/core/binding';
 import { TreeEntry } from '@adapttable/core';
 import { TreeToggleButtonProps } from '@adapttable/core/binding';
@@ -608,10 +656,13 @@ import { ValidationTarget } from '@adapttable/core';
 import { virtualColumnSpan } from '@adapttable/core';
 import { VirtualItemMeta } from '@adapttable/core';
 import { VirtualTableRow } from '@adapttable/core';
+import { visibleRowActions } from '@adapttable/core';
 import { WidthColumn } from '@adapttable/core';
 import { windowGroupedEntries } from '@adapttable/core';
 
 export { ActionConfirm }
+
+export { ACTIONS_COLUMN_KEY }
 
 export { ACTIVE_FILTER_CHIPS }
 
@@ -832,6 +883,8 @@ export { assistantIsBusy }
 
 export { assistantIsUsable }
 
+export { autoSizeColumns }
+
 // @public
 export interface BaseDataTableProps<TRow> extends TableOptions<TRow, ReactNode> {
     columns: ColumnInput_2<TRow>[];
@@ -885,6 +938,8 @@ export { bindMobileCardList }
 export { BodyCell }
 
 export { bodyCellsHaveRowSpan }
+
+export { bodyRowEntries }
 
 export { buildBodyCells }
 
@@ -1046,6 +1101,8 @@ export type ChromeExtraSlotProps<TRow = never> = ChromeExtraSlotProps_2<TableChr
     urlKey?: string;
 }, ReactNode>;
 
+export { ColorScheme }
+
 export { COLUMN_DND_MIME }
 
 export { COLUMN_GROUP_ID_SEP }
@@ -1167,6 +1224,8 @@ export { ColumnMenuLabels }
 
 export { ColumnMenuRow }
 
+export { columnMenuRows }
+
 export { ColumnMenuSlotProps }
 
 // @public
@@ -1195,6 +1254,8 @@ export interface ColumnReorderKeyProps {
 }
 
 export { ColumnResizeHandleProps }
+
+export { columnResizeHandleProps }
 
 // @public
 export interface ColumnRowDragProps {
@@ -1374,6 +1435,8 @@ export function createAdapterTableAssistantFeature(TableAssistant: AdapterFeatur
 // @public
 export function createDesktopRow<TRow, TProps extends DesktopRowWiring<TRow>>(RowBase: (props: Readonly<TProps>) => ReactElement, extraEqual?: (prev: Readonly<TProps>, next: Readonly<TProps>) => boolean): MemoExoticComponent<(props: Readonly<TProps>) => ReactElement>;
 
+export { createFilterRegistry }
+
 export { CustomCellEditorConflict }
 
 export { CustomCellEditorCtrl }
@@ -1508,6 +1571,12 @@ export function DataTableShellView<TRow>(input: {
 }): ReactNode;
 
 export { DEFAULT_CARD_SIZE_PX }
+
+export { defaultConfirm }
+
+export { defaultFilterRegistry }
+
+export { defaultLabels }
 
 // @public
 export type Density = TableDensity;
@@ -1743,6 +1812,8 @@ export const DISABLED_FIND: FindInTableState;
 // @public
 export function disabledHistory<TRow>(): EditHistoryState<TRow>;
 
+export { edgePinStyle }
+
 // @public
 export const EDIT_HISTORY_LIVE: FeatureSlotKey<EditHistoryLiveSlotProps<never>>;
 
@@ -1850,6 +1921,8 @@ export const EDITING_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 export { EditLifecycle }
 
 export { editorBusyProps }
+
+export { editorInputType }
 
 export { editorValidationProps }
 
@@ -2164,6 +2237,8 @@ export { FILTER_HEADER }
 // @public
 export const FILTER_POPOVER: FeatureSlotKey<FilterOverlaySlotProps>;
 
+export { FILTER_TYPES }
+
 export { filterColumnMenuRows }
 
 export { FilterDef }
@@ -2206,6 +2281,8 @@ export { FilterHeaderSelectProps }
 // @public
 export type FilterHeaderSlots = FilterHeaderSlots_2<ReactNode>;
 
+export { filterLabel }
+
 export { FilterOption }
 
 export { FilterOptionsSource }
@@ -2221,6 +2298,8 @@ export { FiltersFormSlotProps }
 
 // @public
 export function FiltersIcon(): ReactElement;
+
+export { filterStateKeys }
 
 export { FilterTreeBuilderProps }
 
@@ -2265,6 +2344,8 @@ export { FilterTypeSpec }
 export { FilterValue }
 
 export { FilterWidgetKind }
+
+export { filterWidgetKind }
 
 export { FilterWidgetRenderProps }
 
@@ -2327,6 +2408,8 @@ export { FORCED_COLORS_CSS }
 
 // @public
 export function ForcedColorsStyle(): null;
+
+export { formatMultiDraft }
 
 // @public
 export const FULLSCREEN_LIVE: FeatureSlotKey<FullscreenLiveSlotProps>;
@@ -2398,6 +2481,12 @@ export const GROUP_HEADER_CARD: FeatureSlotKey<GroupHeaderCardSlotProps<never>>;
 
 // @public
 export const GROUP_HEADER_ROW: FeatureSlotKey<GroupHeaderRowSlotProps<never>>;
+
+export { groupAggregateEntries }
+
+export { groupAggregateNode }
+
+export { GroupAggregateOps }
 
 export { GroupAggregateOverride }
 
@@ -2514,6 +2603,8 @@ export { GroupingPanelState }
 // @public
 export type GroupingPanelSurfaceProps = GroupingPanelSurfaceProps_2<ReactNode, DragEvent_2>;
 
+export { groupLeafCount }
+
 // @public
 export function GroupMoreButtonChrome(input: Readonly<GroupMoreButtonChromeProps>): ReactElement;
 
@@ -2533,7 +2624,11 @@ export { GroupNode }
 
 export { GroupRowKind }
 
+export { groupRowLayout }
+
 export { groupRowParts }
+
+export { groupSelectionState }
 
 export { GroupSort }
 
@@ -2569,6 +2664,8 @@ export { insertExtraRows }
 
 export { insertExtrasBeforeRows }
 
+export { isBooleanEditor }
+
 export { isColumnGroupRenderKey }
 
 export { isColumnGroupStubKey }
@@ -2577,13 +2674,23 @@ export { isColumnGroupSummaryKey }
 
 export { isCurrentMatchCell }
 
+export { isDeclarativeFilters }
+
+export { isDraftChecked }
+
 export { isExtraEntry }
 
 export { isMatchedCell }
 
+export { isMultiSelectEditor }
+
 export { isPinnedSummaryRowId }
 
 export { isSelectedCell }
+
+export { isSelectEditor }
+
+export { joinRelativeToken }
 
 // @public
 export const KEYED_WINDOW: FeatureSlotKey<KeyedWindowSlotProps>;
@@ -2679,6 +2786,10 @@ export interface OverlayTransition {
     state: "open" | "closed";
 }
 
+export { pageSizeOptions }
+
+export { PaginatedResponse }
+
 export { PaginationInfo }
 
 export { PaginationItem }
@@ -2690,6 +2801,10 @@ export { PaginationMode }
 export { PaginationSlot }
 
 export { paginationSlots }
+
+export { partitionPinnedRows }
+
+export { PIN_Z }
 
 export { pinActionLabel }
 
@@ -2707,6 +2822,8 @@ export { PINNED_SUMMARY_TOP_PART }
 export { PINNED_TOP_PART }
 
 export { PinnedCellStyle }
+
+export { pinnedCellStyle }
 
 export { pinnedColumnWidth }
 
@@ -2818,14 +2935,24 @@ export interface ReactUseColumnLayoutResult<TRow> extends Omit<UseColumnLayoutRe
     visibleColumns: ColumnDef<TRow>[];
 }
 
+export { readMultiDraft }
+
 export { ReconcileLiveBatchEdit }
 
 export { ReconcileLiveEdit }
 
 export { ReconcileLiveRowEdit }
 
+export { RELATIVE_PRESET_LABEL_KEYS }
+
+export { RELATIVE_PRESETS }
+
 // @public
 export function rememberFeatureHost(props: object, host: FeatureHostState | undefined): void;
+
+export { renderRegisteredFilter }
+
+export { REORDER_COLUMN_KEY }
 
 export { REORDER_COLUMN_WIDTH }
 
@@ -2849,6 +2976,12 @@ export interface ResolvedDensity {
 export { resolveDisabledReason }
 
 export { ResolvedPaginationMode }
+
+export { resolveFilterMode }
+
+export { resolveFilterRegistry }
+
+export { resolveLabels }
 
 export { resolveMobileLabel }
 
@@ -3131,6 +3264,8 @@ export { RowTreeParentRef }
 
 export { RowValidator }
 
+export { runRowAction }
+
 // @public
 export const SAVED_VIEWS: FeatureSlotKey<SavedViewsSlotProps>;
 
@@ -3328,6 +3463,8 @@ export { Shortcut }
 
 export { showAllColumns }
 
+export { showSimpleFilterFields }
+
 // @public
 export const SIDE_PANEL: FeatureSlotKey<Omit<SidePanelChromeProps, "slots">>;
 
@@ -3407,6 +3544,8 @@ export { SpeechInputHandle }
 export { SpeechInputState }
 
 export { SpeechInputStatus }
+
+export { splitRelativeToken }
 
 // @public
 export interface StandardFeatureOptions<TRow> {
@@ -3681,6 +3820,8 @@ export interface TableFeatureHost<TRow = unknown> extends NeutralFeatureHost<TRo
 
 export { TableLabels }
 
+export { tableMinWidth }
+
 export { TableQuery }
 
 // @public
@@ -3781,6 +3922,8 @@ export interface ToolbarChromeProps<TRow> {
 
 export { ToolbarExtrasSlotProps }
 
+export { toolbarShowsFilters }
+
 // @public
 export type ToolbarSlots = TableToolbarSlots<ReactNode>;
 
@@ -3796,6 +3939,8 @@ export const TREE_CELL: FeatureSlotKey<TreeCellProps<never>>;
 export const TREE_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 
 export { TREE_TOGGLE }
+
+export { treeCardStyle }
 
 // @public
 export function TreeCellChrome<TRow>(input: Readonly<TreeCellChromeProps<TRow>>): ReactElement;
@@ -4112,6 +4257,8 @@ export { virtualColumnSpan }
 export { VirtualItemMeta }
 
 export { VirtualTableRow }
+
+export { visibleRowActions }
 
 export { WidthColumn }
 
