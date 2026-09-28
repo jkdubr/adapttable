@@ -1,5 +1,24 @@
 # @adapttable/core
 
+## 3.6.0
+
+### Minor Changes
+
+- 4613ab6: Move the AI view model and table agent controller out of React. `@adapttable/core/binding` adds the assistant panel's view contracts and presentation rules (`assistantBadgeTone`, `assistantComposerState`, `assistantReceiptHeadline`, `assistantFloatingStyle` and the rest), and `@adapttable/ai` adds `createTableAgentController`, which owns approval parking, always-allow memory, bridge announcements, column sampling and the WebMCP lifecycle. `@adapttable/react` and `tableAgent` in `@adapttable/ai-react` now render from them, with their public API and behaviour unchanged.
+- 73d62b5: Move chrome orchestration from the React binding into `@adapttable/core/binding`, so every binding assembles a table the same way.
+  
+  - **Feature patch layer.** `applyTableFeatures`, `mergeFeaturePatches`, `getAppliedFeatures` and `rememberAppliedFeatures`, the `FeaturePatch` and `PatchFeature` types, and one `core*` export per built-in feature factory (`coreCellSpan`, `coreGrouping`, …): its id and option normalization.
+  - **Standard preset.** `standardFeatureList` owns the preset's members, their order and the `findButton` flag.
+  - **Shell pipeline.** `CHROME_EXTRA_SLOT_ORDER`, `SHELL_LIVE_STAGE_ORDER`, `TableRuntimePublisher` with its runtime view, `cellNavigationInput`, the toolbar prop builders, `finishShellLive`, `overlayChromeExtras` and `finishShellBody`.
+  - **Table chrome state.** Body region, empty and refreshing variants, footer, clear filters, the selection observer, reorder enablement, grouping-panel state, feature notices, `FilterTriggerToggleState` and the scroll-reset keys.
+  - **Desktop assembly.** Row wiring and its memo policy, body slot order, the sticky plan, pin edges, head and edge styles, the table style and header leaves.
+  - **Body windows.** `chromeRenderModel`, `SummaryCellsCache`, the body window plan, the virtual window math, the column window and `RowPairMeasureController`.
+  
+  `@adapttable/react` now delegates to these. Its public API is unchanged: the types it re-exports from core keep their names and shapes.
+- 8c6aeda: The editing pipeline is framework-neutral: `@adapttable/core` now holds the live-update conflict reconciler (`createEditConflictStore`), the cell commit pipeline (`editableCellController` — the validation gate, the hold while an async check decides, the send to the host, dirty marks and commit-and-advance), the row-form, batch and dirty-cell stores (`createRowEditStore`, `createBatchEditStore`, `createDirtyCellStore`), the edit history controller (`createEditHistory`), the gate rules every binding draws the same (`resolveEditingArming`, `editableCellPresentation`, the activate and row-form keys, `resolveRowEditTrigger`, `rowEditConflict`, the row and batch control layouts) and the approval review model (`approvalReview`). Each store has a `*View` that builds the state a binding hands its cells. React's editing hooks run on these stores with their API unchanged.
+- 6bec4e8: The query-library tier and the table data controller are framework-neutral: `createQuerySource` in `@adapttable/core` holds the rules `useQuerySource` ran on — merging base params under the live view, gating capabilities, projecting pages to rows, the cursor trail, clamping and the aggregate operations on screen — and `createTableData` holds `useTableData`'s — the tier choice, the merged filter runtime, facet keys, facets computed from the searched rows, async filter options and a frontend table's change notices. Both hooks run on them with their APIs unchanged. The cursor trail now restarts on the same inputs in both server tiers (`cursorTrailKey`: sort levels, grouping and the filter tree included), and `useQuerySource` returns to page 1 when it does, instead of asking for a later page without its token.
+- 1bce1a4: The server tier is framework-neutral: `createServerSource` in `@adapttable/core` holds the rules a table whose host fetches each page runs on — one consolidated query per real change with the superseded request aborted, `isLoading` for the first load only, clamping a page past the end, the cursor trail, appending infinite pages, and which aggregate operations the rows on screen were computed with (`createResponseAggregateOps`). `useServerData` runs on the source with its API unchanged.
+
 ## 3.5.0
 
 ### Minor Changes
