@@ -9,17 +9,19 @@
         data-adapttable-part="header-row"
         [adaptAttrs]="v.table.headerRowAttrs()"
       >
+        @if (v.reorder) {
+          <th
+            data-adapttable-part="reorder-header"
+            scope="col"
+            [attr.aria-label]="v.table.labels().reorderRow"
+          ></th>
+        }
         @if (v.selection; as selection) {
           <th data-adapttable-part="selection-header" scope="col">
             <input
               data-adapttable-part="checkbox"
               [adaptAttrs]="selection.headerCheckboxAttrs()"
             />
-          </th>
-        }
-        @if (v.reorder) {
-          <th data-adapttable-part="reorder-header" scope="col">
-            <span class="visually-hidden">Reorder</span>
           </th>
         }
         @for (column of v.table.columns(); track column.key; let col = $index) {
@@ -103,42 +105,23 @@
               .onDrop($event)
           "
         >
+          @if (v.reorder; as reorder) {
+            <td data-adapttable-part="reorder-cell">
+              <ng-container
+                [adaptSlot]="reorderHandleSlot"
+                [adaptSlotProps]="
+                  reorderHandleProps(reorder(), entry.row, entry.index)
+                "
+                [adaptSlotTable]="v.table"
+              />
+            </td>
+          }
           @if (v.selection; as selection) {
             <td data-adapttable-part="selection-cell">
               <input
                 data-adapttable-part="checkbox"
                 [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
               />
-            </td>
-          }
-          @if (v.reorder; as reorder) {
-            <td data-adapttable-part="reorder-cell">
-              <button
-                type="button"
-                data-adapttable-part="reorder-handle"
-                [attr.draggable]="true"
-                [attr.aria-label]="'Reorder row'"
-                (dragstart)="
-                  reorder()
-                    .dragProps(rowId(entry.row), entry.index)
-                    .onDragStart($event)
-                "
-                (dragend)="
-                  reorder().dragProps(rowId(entry.row), entry.index).onDragEnd()
-                "
-                (keydown)="
-                  reorder().handleKeyDown(
-                    $event,
-                    rowId(entry.row),
-                    entry.index,
-                    entry.row,
-                    v.table.windowStart(),
-                    v.table.source().rows.length
-                  )
-                "
-              >
-                ⋮⋮
-              </button>
             </td>
           }
           @for (

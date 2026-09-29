@@ -55,6 +55,7 @@ import {
   injectTableVirtualization,
   isBodyEligible,
   type PaginationMode,
+  ROW_REORDER_ANNOUNCER,
   type RowAction,
   rowActionsFor,
   type RowActionsLayout,
@@ -372,6 +373,8 @@ export class AdaptDataTable<TRow> implements OnInit {
   protected readonly bulkBarSlot = BULK_BAR;
   /** The grouping strip's slot. @internal */
   protected readonly groupingPanelSlot = GROUPING_PANEL;
+  /** The row-reorder announcer slot. @internal */
+  protected readonly reorderAnnouncerSlot = ROW_REORDER_ANNOUNCER;
   /** The Filters button's glyph. @internal */
   protected readonly filtersIcon = FILTERS_ICON;
   /**

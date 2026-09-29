@@ -3039,7 +3039,12 @@ controls: the host writes its own markup.
   hands its controls in `slots`. `AdaptGroupingPanelChrome` is the grouping
   strip — chips, insertion carets, aggregations and the ungroup target —
   with `GroupingPanelSlots`, `AngularGroupingPanelSurfaceProps` and
-  `AngularGroupingPanelAggregationItemProps`. `groupingPanel` (with
+  `AngularGroupingPanelAggregationItemProps`. `AdaptRowReorderHandleChrome`,
+  `AdaptRowReorderButtonsChrome` and `AdaptRowReorderAnnouncer` are the
+  reorder grip, mobile up/down pair and live region, with
+  `RowReorderHandleSlots` / `RowReorderButtonsSlots`; kits fill
+  `ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and `ROW_REORDER_ANNOUNCER`.
+  `groupingPanel` (with
   `GroupingPanelExtras`) is the feature that owns the group-by state;
   `injectGroupingPanelState` (`GroupingPanelStateOptions`) publishes the
   strip's props for the `GROUPING_PANEL` slot. `virtualize`

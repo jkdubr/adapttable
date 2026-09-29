@@ -163,6 +163,13 @@
       [adaptLiveRegion]="v.table.statusAnnouncement()"
       part="table-status-announcer"
     ></div>
+    @if (v.reorder; as reorder) {
+      <ng-container
+        [adaptSlot]="reorderAnnouncerSlot"
+        [adaptSlotProps]="{ announcement: reorder().announcement }"
+        [adaptSlotTable]="v.table"
+      />
+    }
     @if (v.grid; as grid) {
       <output
         [adaptLiveRegion]="grid.announcement()"

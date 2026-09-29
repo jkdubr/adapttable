@@ -70,6 +70,7 @@ export {
   runRowAction,
   visibleRowActions,
 } from "@adapttable/core";
+export { restoreFocusSoon } from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,
@@ -108,6 +109,11 @@ export type {
   GroupingPanelRestoreProps,
   GroupingPanelSelectProps,
   GroupingPanelSlotProps,
+} from "@adapttable/core/binding";
+export type {
+  RowMoveMenuSlotProps,
+  RowReorderLabels,
+  RowReorderMoveButtonProps,
 } from "@adapttable/core/binding";
 export {
   coreGrouping,
@@ -150,3 +156,8 @@ export {
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
 export { coreSavedViews, SAVED_VIEWS } from "@adapttable/core/binding";
+export {
+  ROW_REORDER_ANNOUNCER,
+  ROW_REORDER_BUTTONS,
+  ROW_REORDER_HANDLE,
+} from "@adapttable/core/binding";

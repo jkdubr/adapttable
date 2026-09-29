@@ -141,10 +141,20 @@ import { REORDER_COLUMN_KEY } from '@adapttable/core';
 import { resolveCellEditor } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
 import { resolveVirtualRows } from '@adapttable/core';
+import { restoreFocusSoon } from '@adapttable/core';
+import { ROW_REORDER_ANNOUNCER } from '@adapttable/core/binding';
+import { ROW_REORDER_BUTTONS } from '@adapttable/core/binding';
+import { ROW_REORDER_HANDLE } from '@adapttable/core/binding';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
 import { RowEditingState } from '@adapttable/core';
+import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
+import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/core/binding';
+import { RowReorderHandleProps as RowReorderHandleProps_2 } from '@adapttable/core/binding';
 import { RowReorderHandler } from '@adapttable/core';
+import { RowReorderHandleSlotProps as RowReorderHandleSlotProps_2 } from '@adapttable/core/binding';
+import { RowReorderLabels } from '@adapttable/core/binding';
+import { RowReorderMoveButtonProps } from '@adapttable/core/binding';
 import { RowReorderOptions } from '@adapttable/core';
 import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
 import { rowSourceIndex } from '@adapttable/core';
@@ -303,7 +313,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "setExtras" | "facets">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "facets" | "extra" | "setExtra" | "setExtras">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -513,6 +523,169 @@ export class AdaptLiveRegion {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptLiveRegion, never>;
+}
+
+// @public
+export class AdaptRowReorderAnnouncer {
+    readonly props: InputSignal<    {
+    readonly announcement: string;
+    }>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptRowReorderAnnouncer, "adapt-row-reorder-announcer", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowReorderAnnouncer, never>;
+}
+
+// @public
+export class AdaptRowReorderButtonsChrome<TRow> {
+    readonly className: InputSignal<string | undefined>;
+    readonly downClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly downProps: Signal<RowReorderMoveButtonProps>;
+    readonly labels: InputSignal<RowReorderLabels>;
+    readonly localIndex: InputSignal<number>;
+    // (undocumented)
+    protected readonly menu: Signal<RowMoveMenuSlotProps | undefined>;
+    // (undocumented)
+    protected readonly moveLocked: Signal<boolean>;
+    readonly reorder: InputSignal<RowReorderState<TRow>>;
+    readonly row: InputSignal<TRow>;
+    readonly rowCount: InputSignal<number>;
+    readonly slots: InputSignal<RowReorderButtonsSlots>;
+    readonly upClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly upProps: Signal<RowReorderMoveButtonProps>;
+    readonly windowStart: InputSignal<number>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptRowReorderButtonsChrome<any>, "adapt-row-reorder-buttons-chrome", never, {
+        "reorder": {
+            "alias": "reorder";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "localIndex": {
+            "alias": "localIndex";
+            "required": true;
+            "isSignal": true;
+        };
+        "row": {
+            "alias": "row";
+            "required": true;
+            "isSignal": true;
+        };
+        "windowStart": {
+            "alias": "windowStart";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowCount": {
+            "alias": "rowCount";
+            "required": true;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "upClassName": {
+            "alias": "upClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "downClassName": {
+            "alias": "downClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowReorderButtonsChrome<any>, never>;
+}
+
+// @public
+export class AdaptRowReorderHandleChrome<TRow> {
+    readonly className: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly handleProps: Signal<RowReorderHandleSlotProps>;
+    readonly labels: InputSignal<RowReorderLabels>;
+    readonly localIndex: InputSignal<number>;
+    // (undocumented)
+    protected readonly menu: Signal<RowMoveMenuSlotProps | undefined>;
+    // (undocumented)
+    protected readonly moveLocked: Signal<boolean>;
+    readonly reorder: InputSignal<RowReorderState<TRow>>;
+    readonly row: InputSignal<TRow>;
+    readonly rowCount: InputSignal<number>;
+    readonly rowId: InputSignal<string>;
+    readonly slots: InputSignal<RowReorderHandleSlots>;
+    readonly windowStart: InputSignal<number>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptRowReorderHandleChrome<any>, "adapt-row-reorder-handle-chrome", never, {
+        "reorder": {
+            "alias": "reorder";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowId": {
+            "alias": "rowId";
+            "required": true;
+            "isSignal": true;
+        };
+        "localIndex": {
+            "alias": "localIndex";
+            "required": true;
+            "isSignal": true;
+        };
+        "row": {
+            "alias": "row";
+            "required": true;
+            "isSignal": true;
+        };
+        "windowStart": {
+            "alias": "windowStart";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowCount": {
+            "alias": "rowCount";
+            "required": true;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowReorderHandleChrome<any>, never>;
 }
 
 // @public
@@ -1273,6 +1446,14 @@ export interface ResolvedRenderer<TContext> {
 
 export { resolveVirtualRows }
 
+export { restoreFocusSoon }
+
+export { ROW_REORDER_ANNOUNCER }
+
+export { ROW_REORDER_BUTTONS }
+
+export { ROW_REORDER_HANDLE }
+
 export { RowAction }
 
 // @public
@@ -1313,10 +1494,37 @@ export interface RowEditingInjectOptions<TRow> {
 
 export { RowEditingState }
 
+export { RowMoveMenuSlotProps }
+
 // @public
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;
 
+// @public
+export type RowReorderButtonsProps<TRow> = RowReorderButtonsProps_2<TRow, RowReorderState<TRow>>;
+
+// @public
+export interface RowReorderButtonsSlots {
+    readonly Button: Type<unknown>;
+    readonly Menu: Type<unknown>;
+}
+
+// @public
+export type RowReorderHandleProps<TRow> = RowReorderHandleProps_2<TRow, RowReorderState<TRow>>;
+
 export { RowReorderHandler }
+
+// @public
+export type RowReorderHandleSlotProps = RowReorderHandleSlotProps_2<KeyboardEvent, DragEvent>;
+
+// @public
+export interface RowReorderHandleSlots {
+    readonly Handle: Type<unknown>;
+    readonly Menu: Type<unknown>;
+}
+
+export { RowReorderLabels }
+
+export { RowReorderMoveButtonProps }
 
 export { RowReorderOptions }
 

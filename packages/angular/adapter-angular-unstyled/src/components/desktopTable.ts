@@ -11,6 +11,9 @@ import {
   FILTER_HEADER,
   parseCellEditValue,
   resolveCellEditor,
+  ROW_REORDER_HANDLE,
+  type RowReorderHandleProps,
+  type RowReorderState,
 } from "@adapttable/angular";
 import {
   ChangeDetectionStrategy,
@@ -49,6 +52,11 @@ export class AdaptDesktopTable<TRow> {
 
   /** The header-filter slot. @internal */
   protected readonly filterSlots = { header: FILTER_HEADER };
+  /** The row-reorder grip slot. @internal */
+  protected readonly reorderHandleSlot = ROW_REORDER_HANDLE;
+
+  private handlePropsCache = new Map<string, RowReorderHandleProps<never>>();
+  private handlePropsToken = "";
 
   /**
    * The scroll box that owns `maxHeight`, when virtualization tracks it.
@@ -74,6 +82,51 @@ export class AdaptDesktopTable<TRow> {
    */
   protected rowId(row: TRow): string {
     return this.rowKey()(row);
+  }
+
+  /**
+   * Props for the reorder grip slot on one body row. Cached per change-detection
+   * token so AdaptSlot does not see a new object every tick.
+   *
+   * @internal
+   */
+  protected reorderHandleProps(
+    reorder: RowReorderState<TRow>,
+    row: TRow,
+    localIndex: number
+  ): RowReorderHandleProps<never> {
+    const view = this.view();
+    const windowStart = view.table.windowStart();
+    const rowCount = view.table.source().rows.length;
+    const token = [
+      reorder.lifted?.rowId ?? "",
+      String(reorder.overIndex ?? ""),
+      reorder.overPosition ?? "",
+      String(reorder.hostConfirmPending),
+      reorder.announcement,
+      String(windowStart),
+      String(rowCount),
+      reorder.pendingMove ? "1" : "0",
+    ].join("|");
+    if (token !== this.handlePropsToken) {
+      this.handlePropsCache = new Map();
+      this.handlePropsToken = token;
+    }
+    const rowId = this.rowId(row);
+    const key = `${rowId}:${String(localIndex)}`;
+    const cached = this.handlePropsCache.get(key);
+    if (cached) return cached;
+    const props = {
+      reorder,
+      labels: view.table.labels(),
+      rowId,
+      localIndex,
+      row,
+      windowStart,
+      rowCount,
+    } as unknown as RowReorderHandleProps<never>;
+    this.handlePropsCache.set(key, props);
+    return props;
   }
 
   /**

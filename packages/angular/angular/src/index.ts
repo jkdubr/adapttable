@@ -128,6 +128,16 @@ export {
   type RowReorderStateOptions,
 } from "./rows/rowReorder";
 export {
+  AdaptRowReorderAnnouncer,
+  AdaptRowReorderButtonsChrome,
+  AdaptRowReorderHandleChrome,
+  type RowReorderButtonsProps,
+  type RowReorderButtonsSlots,
+  type RowReorderHandleProps,
+  type RowReorderHandleSlotProps,
+  type RowReorderHandleSlots,
+} from "./rows/rowReorderHandle";
+export {
   injectRowSelection,
   type RowSelection,
   type RowSelectionOptions,

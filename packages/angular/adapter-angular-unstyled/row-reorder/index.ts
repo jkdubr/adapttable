@@ -4,11 +4,20 @@
  * @packageDocumentation
  */
 import {
+  AdaptRowReorderAnnouncer,
   type AdaptTableFeature,
+  extendFeature,
+  ROW_REORDER_ANNOUNCER,
+  ROW_REORDER_BUTTONS,
+  ROW_REORDER_HANDLE,
   rowReorder as coreAngularRowReorder,
   type RowReorderHandler,
   type RowReorderOptions,
+  slotRender,
 } from "@adapttable/angular";
+
+import { AdaptRowReorderButtons } from "./rowReorderButtons";
+import { AdaptRowReorderGrip } from "./rowReorderGrip";
 
 /**
  * Let rows be dragged, or moved with the keyboard, into a new order. The
@@ -23,5 +32,9 @@ export function rowReorder<TRow>(
   onRowReorder: RowReorderHandler<TRow>,
   options?: RowReorderOptions<TRow>
 ): AdaptTableFeature {
-  return coreAngularRowReorder(onRowReorder, options);
+  return extendFeature(coreAngularRowReorder(onRowReorder, options), [
+    slotRender(ROW_REORDER_HANDLE, () => AdaptRowReorderGrip),
+    slotRender(ROW_REORDER_BUTTONS, () => AdaptRowReorderButtons),
+    slotRender(ROW_REORDER_ANNOUNCER, () => AdaptRowReorderAnnouncer),
+  ]);
 }

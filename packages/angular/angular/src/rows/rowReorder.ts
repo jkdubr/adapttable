@@ -64,12 +64,34 @@ function rowReorderFeatureOf<TRow>(
   );
 }
 
-function asDrag(event: DragEvent): RowDragEvent {
-  return event as unknown as RowDragEvent;
+/**
+ * Map a DOM drag event to core's drag shape. A null `dataTransfer` (some
+ * browsers during cancelled gestures) yields `undefined` so the controller
+ * is never handed a lie.
+ */
+function toRowDrag(event: DragEvent): RowDragEvent | undefined {
+  const { dataTransfer } = event;
+  if (!dataTransfer) return undefined;
+  return {
+    dataTransfer,
+    clientY: event.clientY,
+    currentTarget: event.currentTarget as RowDragEvent["currentTarget"],
+    preventDefault: () => {
+      event.preventDefault();
+    },
+  };
 }
 
-function asKey(event: KeyboardEvent): RowKeyEvent {
-  return event as unknown as RowKeyEvent;
+/** Map a DOM key event to core's key shape. */
+function toRowKey(event: KeyboardEvent): RowKeyEvent {
+  return {
+    key: event.key,
+    currentTarget:
+      event.currentTarget instanceof HTMLElement ? event.currentTarget : null,
+    preventDefault: () => {
+      event.preventDefault();
+    },
+  };
 }
 
 /**
@@ -132,7 +154,12 @@ export function injectRowReorder<TRow>(
       dragProps: (rowId, localIndex) => ({
         draggable: true,
         onDragStart: (event) => {
-          controller.dragStart(asDrag(event), rowId, localIndex);
+          const drag = toRowDrag(event);
+          if (!drag) {
+            event.preventDefault();
+            return;
+          }
+          controller.dragStart(drag, rowId, localIndex);
         },
         onDragEnd: () => {
           controller.dragEnd();
@@ -140,14 +167,18 @@ export function injectRowReorder<TRow>(
       }),
       dropProps: (localIndex, row, windowStart) => ({
         onDragOver: (event) => {
-          controller.dragOver(asDrag(event), localIndex);
+          const drag = toRowDrag(event);
+          if (!drag) return;
+          controller.dragOver(drag, localIndex);
         },
         onDrop: (event) => {
-          controller.drop(asDrag(event), localIndex, row, windowStart);
+          const drag = toRowDrag(event);
+          if (!drag) return;
+          controller.drop(drag, localIndex, row, windowStart);
         },
       }),
       handleKeyDown: (event, rowId, localIndex, row, windowStart, rowCount) => {
-        controller.keyDown(asKey(event), {
+        controller.keyDown(toRowKey(event), {
           rowId,
           localIndex,
           row,
