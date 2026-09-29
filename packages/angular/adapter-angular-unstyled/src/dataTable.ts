@@ -15,9 +15,12 @@ import {
   AdaptLiveRegion,
   AdaptSlot,
   type AdaptTableFeature,
+  beginCellEdit,
   BULK_BAR,
   type BulkAction,
   type BulkBarSlotProps,
+  type CellEditHandler,
+  type CellEditingState,
   COLUMN_MENU,
   type ColumnDef,
   type ColumnLayoutState,
@@ -41,6 +44,7 @@ import {
   type GridFocus,
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
+  injectCellEditing,
   injectDataTable,
   injectDensity,
   injectExportCsv,
@@ -54,6 +58,8 @@ import {
   injectTableVirtualization,
   isBodyEligible,
   type PaginationMode,
+  parseCellEditValue,
+  resolveCellEditor,
   type RowAction,
   rowActionsFor,
   type RowActionsLayout,
@@ -217,6 +223,10 @@ export interface TableView<TRow> {
     Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
   /** Row reorder state, when the feature is composed. */
   readonly reorder: Signal<RowReorderState<TRow>> | undefined;
+  /** Cell editing state, when `editing()` is composed. */
+  readonly editing: Signal<CellEditingState> | undefined;
+  /** The host's cell-edit write, when editing is composed. */
+  readonly onCellEdit: CellEditHandler<TRow> | undefined;
   /** The body window — every row when virtualization is off. */
   readonly virtualization: Signal<TableVirtualization<TRow>>;
   /** Column span for spacer/detail cells. */
@@ -403,6 +413,50 @@ export class AdaptDataTable<TRow> implements OnInit {
         typeof maxHeight === "number" ? `${String(maxHeight)}px` : maxHeight,
       overflow: "auto",
     };
+  }
+
+  /**
+   * Open the in-place editor for a cell when editing is composed.
+   *
+   * @internal
+   */
+  protected beginEdit(row: TRow, column: ColumnDef<TRow>): void {
+    const view = this.view();
+    if (!view?.editing || !view.onCellEdit) return;
+    beginCellEdit(view.editing(), row, column, (entry) => this.rowKey()(entry));
+  }
+
+  /**
+   * Commit the active draft through the host's write.
+   *
+   * @internal
+   */
+  protected commitEdit(): void {
+    const view = this.view();
+    if (!view?.editing || !view.onCellEdit) return;
+    const commit = view.editing().commit();
+    if (!commit) return;
+    const row = view.table
+      .rows()
+      .find((entry) => this.rowKey()(entry) === commit.rowId);
+    const column = view.table
+      .columns()
+      .find((entry) => entry.key === commit.columnKey);
+    if (!row || !column) return;
+    const editor = resolveCellEditor(column);
+    const value = editor
+      ? parseCellEditValue(editor, commit.draft)
+      : commit.draft;
+    void view.onCellEdit(row, commit.columnKey, value);
+  }
+
+  /**
+   * Abandon the active draft.
+   *
+   * @internal
+   */
+  protected cancelEdit(): void {
+    this.view()?.editing?.().cancel();
   }
 
   /** Start the table from the inputs it reads once. */
@@ -621,6 +675,11 @@ export class AdaptDataTable<TRow> implements OnInit {
       features,
       injector,
     });
+    const onCellEdit = featureOptions.onCellEdit as
+      CellEditHandler<TRow> | undefined;
+    const editing = onCellEdit
+      ? injectCellEditing<TRow>({ injector })
+      : undefined;
     const virtualization = bodyVirtualizationFor({
       table,
       source,
@@ -653,6 +712,8 @@ export class AdaptDataTable<TRow> implements OnInit {
       savedViews,
       groupingPanel,
       reorder,
+      editing,
+      onCellEdit,
       virtualization,
       bodyColSpan,
       rowActionsLayout: featureOptions.rowActionsLayout as

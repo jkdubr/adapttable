@@ -11,6 +11,7 @@ import { AdaptTableFeature } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
 import { CellEditHandler } from '@adapttable/angular';
+import { CellEditingState } from '@adapttable/angular';
 import { CellNavigationOptions } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
 import { ColumnLayoutState } from '@adapttable/angular';
@@ -58,7 +59,11 @@ import { WritableSignal } from '@angular/core';
 // @public
 export class AdaptDataTable<TRow> implements OnInit {
     // @internal
+    protected beginEdit(row: TRow, column: ColumnDef<TRow>): void;
+    // @internal
     protected readonly bulkBarSlot: FeatureSlotKey<BulkBarSlotProps<unknown>>;
+    // @internal
+    protected cancelEdit(): void;
     readonly cellNavigation: InputSignal<boolean>;
     // @internal
     protected readonly cellTemplates: Signal<readonly AdaptCellTemplate[]>;
@@ -68,6 +73,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly columnMenuSlot: FeatureSlotKey<ColumnMenuSlotProps<never>>;
     readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
+    // @internal
+    protected commitEdit(): void;
     readonly confirm: InputSignal<ConfirmHandler | undefined>;
     readonly data: InputSignal<readonly TRow[]>;
     readonly defaultColumnLayout: InputSignal<Partial<ColumnLayoutState> | undefined>;
@@ -344,9 +351,11 @@ export interface TableView<TRow> {
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
     readonly confirm: ConfirmHandler;
     readonly density: Signal<TableDensity>;
+    readonly editing: Signal<CellEditingState> | undefined;
     readonly filters: FiltersView | undefined;
     readonly grid: GridFocus<TRow> | undefined;
     readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
+    readonly onCellEdit: CellEditHandler<TRow> | undefined;
     readonly reorder: Signal<RowReorderState<TRow>> | undefined;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;

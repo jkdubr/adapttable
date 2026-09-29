@@ -150,6 +150,7 @@ export {
   virtualize,
   type VirtualizeOptions,
 } from "./virtualize";
+export type { CellEditingState } from "@adapttable/core";
 export type { RowReorderHandler, RowReorderOptions } from "@adapttable/core";
 export type {
   CellRange,
@@ -166,6 +167,13 @@ export type {
   TableSource,
   TableVirtualization,
   VirtualTableRow,
+} from "@adapttable/core";
+export {
+  beginCellEdit,
+  isCellEditable,
+  parseCellEditValue,
+  readEditableCellValue,
+  resolveCellEditor,
 } from "@adapttable/core";
 export {
   devWarn,

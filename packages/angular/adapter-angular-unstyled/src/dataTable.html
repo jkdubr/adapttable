@@ -359,10 +359,31 @@
                           ? v.grid.cellAttrs(column, entry.index, col)
                           : v.table.cellAttrs(column)
                       "
-                      [adaptCell]="column"
-                      [adaptCellRow]="entry.row"
-                      [adaptCellIndex]="entry.index"
-                    ></td>
+                      (dblclick)="beginEdit(entry.row, column)"
+                    >
+                      @if (
+                        v.editing?.().isActive(rowId(entry.row), column.key)
+                      ) {
+                        <input
+                          data-adapttable-part="cell-editor"
+                          [value]="v.editing?.().draft"
+                          (input)="
+                            v.editing
+                              ?.()
+                              .setDraft(($any($event.target)).value)
+                          "
+                          (keydown.enter)="commitEdit()"
+                          (keydown.escape)="cancelEdit()"
+                          (blur)="commitEdit()"
+                        />
+                      } @else {
+                        <span
+                          [adaptCell]="column"
+                          [adaptCellRow]="entry.row"
+                          [adaptCellIndex]="entry.index"
+                        ></span>
+                      }
+                    </td>
                   }
                   @if (v.rowActions(); as actions) {
                     <td data-adapttable-part="actions-cell">

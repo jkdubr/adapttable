@@ -8,6 +8,7 @@ import { ACTIONS_COLUMN_KEY } from '@adapttable/core';
 import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
 import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
+import { beginCellEdit } from '@adapttable/core';
 import { bindHeaderFilterDismiss } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
 import { BULK_BAR } from '@adapttable/core/binding';
@@ -111,6 +112,7 @@ import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { isBodyEligible } from '@adapttable/core/binding';
+import { isCellEditable } from '@adapttable/core';
 import { joinRelativeToken } from '@adapttable/core';
 import { KeyedVirtualization } from '@adapttable/core';
 import { listFilterValues } from '@adapttable/core';
@@ -119,6 +121,7 @@ import { offersAllMatching } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
+import { parseCellEditValue } from '@adapttable/core';
 import { PIN_ICON } from '@adapttable/core/binding';
 import { pinActionLabel } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
@@ -126,10 +129,12 @@ import { PinSide } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { RangeFieldWidget } from '@adapttable/core';
 import { RangeOp } from '@adapttable/core';
+import { readEditableCellValue } from '@adapttable/core';
 import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
 import { RELATIVE_PRESETS } from '@adapttable/core';
 import { RelativePreset } from '@adapttable/core';
 import { REORDER_COLUMN_KEY } from '@adapttable/core';
+import { resolveCellEditor } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
 import { resolveVirtualRows } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
@@ -572,6 +577,8 @@ export type AngularGroupingPanelSurfaceProps = GroupingPanelSurfaceProps<Templat
 // @public
 export type Attrs = Readonly<Record<string, unknown>>;
 
+export { beginCellEdit }
+
 export { bindHeaderFilterDismiss }
 
 // @public
@@ -618,6 +625,8 @@ export interface CellEditingOptions<TRow = unknown> {
     readonly onEditCancel?: EditEventHandler<TRow>;
     readonly onEditStart?: EditEventHandler<TRow>;
 }
+
+export { CellEditingState }
 
 // @public
 export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
@@ -1142,6 +1151,8 @@ export function injectTableVirtualizer<TRow>(options: TableVirtualizationOptions
 
 export { isBodyEligible }
 
+export { isCellEditable }
+
 // @public
 export interface IsMobileOptions {
     readonly breakpoint?: number;
@@ -1182,6 +1193,8 @@ export { PaginationMode }
 
 export { PaginationSlot }
 
+export { parseCellEditValue }
+
 export { PIN_ICON }
 
 export { pinActionLabel }
@@ -1198,6 +1211,8 @@ export function rangeFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: 
 
 export { RangeOp }
 
+export { readEditableCellValue }
+
 export { RELATIVE_PRESET_LABEL_KEYS }
 
 export { RELATIVE_PRESETS }
@@ -1208,6 +1223,8 @@ export { RelativePreset }
 export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
 
 export { REORDER_COLUMN_KEY }
+
+export { resolveCellEditor }
 
 // @public
 export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale?: string): ColumnDef<TRow>[];
