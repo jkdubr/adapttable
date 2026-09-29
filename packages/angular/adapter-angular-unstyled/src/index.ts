@@ -4,4 +4,6 @@
  *
  * @packageDocumentation
  */
+export { AdaptColumnMenu } from "./columnMenu";
 export { AdaptDataTable } from "./dataTable";
+export { columnMenu } from "./features";

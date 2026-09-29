@@ -9,7 +9,12 @@ import {
   AdaptCellTemplate,
   AdaptHeader,
   AdaptLiveRegion,
+  AdaptSlot,
+  type AdaptTableFeature,
+  COLUMN_MENU,
   type ColumnDef,
+  type ColumnLayoutState,
+  type ColumnMenuSlotProps,
   type DataTable,
   type Direction,
   type ExtraFilters,
@@ -28,12 +33,15 @@ import {
   Component,
   computed,
   contentChildren,
+  type ElementRef,
   inject,
   Injector,
   input,
   type OnInit,
   output,
+  type Signal,
   signal,
+  viewChild,
 } from "@angular/core";
 
 /**
@@ -48,6 +56,10 @@ interface TableView<TRow> {
   readonly selection: RowSelection | undefined;
   /** Cell navigation, when it is on. */
   readonly grid: GridFocus<TRow> | undefined;
+  /** Whether the Columns menu is composed. */
+  readonly columnMenu: boolean;
+  /** The Columns menu's props. */
+  readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
 }
 
 /**
@@ -59,7 +71,7 @@ interface TableView<TRow> {
  */
 @Component({
   selector: "adapt-data-table",
-  imports: [AdaptAttrs, AdaptCell, AdaptHeader, AdaptLiveRegion],
+  imports: [AdaptAttrs, AdaptCell, AdaptHeader, AdaptLiveRegion, AdaptSlot],
   templateUrl: "./dataTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -94,8 +106,24 @@ export class AdaptDataTable<TRow> implements OnInit {
   readonly selectedIds = input<readonly string[]>();
   /** Arrow keys move between cells. Read once. */
   readonly cellNavigation = input(false);
+  /**
+   * The features this table composes, such as `columnMenu()`. Read once,
+   * when the table starts.
+   */
+  readonly features = input<readonly AdaptTableFeature[]>([]);
+  /** The column layout, to control it. */
+  readonly columnLayout = input<ColumnLayoutState>();
+  /** The layout an uncontrolled table starts from. Read once. */
+  readonly defaultColumnLayout = input<Partial<ColumnLayoutState>>();
+  /**
+   * Called when the user renames a column. With it, the Columns menu offers
+   * a rename. Read once.
+   */
+  readonly onColumnRename = input<(key: string, name: string) => void>();
   /** Every selection change, as the full list of selected ids. */
   readonly selectionChange = output<string[]>();
+  /** Every column-layout change. */
+  readonly columnLayoutChange = output<ColumnLayoutState>();
 
   /**
    * Cell templates the host declares inside the table's element.
@@ -118,7 +146,10 @@ export class AdaptDataTable<TRow> implements OnInit {
     () => this.view()?.table.emptyVariant() === "noResults"
   );
 
+  /** The Columns menu's slot. @internal */
+  protected readonly columnMenuSlot = COLUMN_MENU;
   private readonly injector = inject(Injector);
+  private readonly root = viewChild<ElementRef<HTMLElement>>("root");
 
   /**
    * A row's id, for `@for` to track rows by. A track expression reads only
@@ -172,11 +203,45 @@ export class AdaptDataTable<TRow> implements OnInit {
       forceMobile: isMobile,
       cellTemplates: this.cellTemplates,
       selection,
+      features: this.features(),
+      columnLayout: this.columnLayout,
+      onColumnLayoutChange: (next) => {
+        this.columnLayoutChange.emit(next);
+      },
+      defaultColumnLayout: this.defaultColumnLayout(),
+      onColumnRename: this.onColumnRename(),
       injector,
     });
     const grid = this.cellNavigation()
       ? injectGridFocus({ table, enabled: true, injector })
       : undefined;
-    this.view.set({ table, selection, grid });
+    const root = (): HTMLElement | null => this.root()?.nativeElement ?? null;
+    const columnMenuProps = computed((): ColumnMenuSlotProps<never> => ({
+      allColumns: table.allColumns() as never,
+      layout: table.layout(),
+      labels: table.labels(),
+      dir: table.dir(),
+      sortBy: table.sortBy(),
+      sortDir: table.sortDir(),
+      onAutoSize: () => {
+        table.autoSizeColumns(root());
+      },
+      onAutoSizeColumn: (key) => {
+        table.autoSizeColumn(root(), key);
+      },
+      onSortColumn: (key, dir) => {
+        table.source().setSort(key, dir);
+      },
+      onRenameColumn: this.onColumnRename()
+        ? table.layout().setName
+        : undefined,
+    }));
+    this.view.set({
+      table,
+      selection,
+      grid,
+      columnMenu: table.featureOptions.enableColumnMenu === true,
+      columnMenuProps,
+    });
   }
 }

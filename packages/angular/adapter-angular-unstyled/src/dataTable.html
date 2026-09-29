@@ -1,5 +1,5 @@
 @if (view(); as v) {
-  <div data-adapttable-part="root" [attr.dir]="v.table.dir()">
+  <div #root data-adapttable-part="root" [attr.dir]="v.table.dir()">
     <div data-adapttable-part="toolbar">
       <div data-adapttable-part="search-field">
         <input
@@ -7,6 +7,13 @@
           [adaptAttrs]="v.table.searchInputAttrs()"
         />
       </div>
+      @if (v.columnMenu && !v.table.isMobile()) {
+        <ng-container
+          [adaptSlot]="columnMenuSlot"
+          [adaptSlotProps]="v.columnMenuProps()"
+          [adaptSlotTable]="v.table"
+        />
+      }
     </div>
 
     @switch (v.table.bodyRegion()) {

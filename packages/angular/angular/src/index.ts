@@ -21,6 +21,14 @@ export {
   type Renderer,
   resolveColumns,
 } from "./columnDef";
+export { type ColumnLayout, type ColumnLayoutOptions } from "./columnLayout";
+export {
+  type ColumnDrag,
+  type ColumnRenameEditorOptions,
+  type ColumnRenameEditorState,
+  injectColumnDrag,
+  injectColumnRenameEditor,
+} from "./columnMenu";
 export {
   type DataTable,
   type DataTableOptions,
@@ -29,7 +37,9 @@ export {
 export {
   ADAPTTABLE_FEATURES,
   type AdaptTableFeature,
+  extendFeature,
   provideAdaptTableFeatures,
+  type SlotComponent,
 } from "./features";
 export { type FrontendDataOptions, injectFrontendData } from "./frontendData";
 export {
@@ -37,6 +47,8 @@ export {
   type GridFocusOptions,
   injectGridFocus,
 } from "./gridFocus";
+export { AdaptIcon } from "./icon";
+export * from "./kitExports";
 export { AdaptLiveRegion } from "./liveRegion";
 export { injectIsMobile, type IsMobileOptions } from "./mobile";
 export {
@@ -44,6 +56,12 @@ export {
   type RowSelection,
   type RowSelectionOptions,
 } from "./selection";
+export {
+  AdaptSlot,
+  ADAPTTABLE_SLOT_TABLE,
+  type SlotFills,
+  type SlotTable,
+} from "./slots";
 export {
   type ExternalStore,
   fromStore,

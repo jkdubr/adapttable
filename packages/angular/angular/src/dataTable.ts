@@ -5,6 +5,7 @@
  * its own markup and applies the attributes with {@link AdaptAttrs}.
  */
 import {
+  autoSizeColumns,
   columnFlexShares,
   computePagination,
   deriveSortByOptions,
@@ -17,6 +18,8 @@ import {
   type PaginationInfo,
   type PaginationSlot,
   paginationSlots,
+  PIN_Z,
+  pinnedCellStyle,
   resolveLabels,
   resolveTableStatus,
   SEARCH_DEBOUNCE_MS,
@@ -36,6 +39,7 @@ import {
   chromeEmptyVariant,
   chromeShowFooter,
   clearChromeFilters,
+  type CssProperties,
   type FeatureHostState,
   fetchNextBodyPage,
   headerCellAttributes,
@@ -62,9 +66,20 @@ import {
 import type { Attrs } from "./attrs";
 import type { AdaptCellTemplate } from "./cell";
 import { type CellContext, type ColumnDef, resolveColumns } from "./columnDef";
-import { type AdaptTableFeature, featureHostFor } from "./features";
+import {
+  type ColumnLayout,
+  columnLayoutFor,
+  type ColumnLayoutOptions,
+} from "./columnLayout";
+import {
+  type AdaptTableFeature,
+  featureHostFor,
+  featureOptionsOf,
+  featureSlotFillsOf,
+} from "./features";
 import { createSearchInput } from "./searchInput";
 import type { RowSelection } from "./selection";
+import type { SlotFills } from "./slots";
 import { type MaybeSignal, type MaybeSignalOptional, readMaybe } from "./store";
 
 /**
@@ -72,7 +87,7 @@ import { type MaybeSignal, type MaybeSignalOptional, readMaybe } from "./store";
  *
  * @public
  */
-export interface DataTableOptions<TRow> {
+export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
   /** The rows and view state, from `injectFrontendData` or your own tier. */
   readonly source: Signal<TableSource<TRow>>;
   /** Column definitions. */
@@ -131,6 +146,13 @@ export interface DataTable<TRow> {
   readonly isEmpty: Signal<boolean>;
   /** The columns visible in the current layout, defaults filled. */
   readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+  /** Every declared column, hidden ones included, defaults filled. */
+  readonly allColumns: Signal<readonly ColumnDef<TRow>[]>;
+  /**
+   * The user's column layout: hidden, ordered, pinned, resized and renamed
+   * columns, and every change a column menu makes.
+   */
+  readonly layout: Signal<ColumnLayout<TRow>>;
   /** Whether the mobile layout's columns show. */
   readonly isMobile: Signal<boolean>;
   /** Labels: English defaults with the overrides merged. */
@@ -180,6 +202,15 @@ export interface DataTable<TRow> {
   readonly statusAnnouncement: Signal<string>;
   /** The features composed on this table. */
   readonly featureHost: FeatureHostState;
+  /**
+   * The configuration the features merge (`enableColumnMenu`,
+   * `densityChooser` and the rest), read once, when the table starts.
+   */
+  readonly featureOptions: Readonly<Record<string, unknown>>;
+  /** Which components the features draw into each slot. */
+  readonly slotFills: SlotFills;
+  /** Whether any feature fills a slot. */
+  readonly hasSlot: (slot: { readonly id: string }) => boolean;
   /** Advance a column's sort: ascending, descending, then off. */
   readonly toggleSort: (key: string) => void;
   /** Commit a search term now, trimmed. */
@@ -192,6 +223,13 @@ export interface DataTable<TRow> {
   readonly setLimit: (limit: number) => void;
   /** Clear every filter, then call `onClearFilters`. */
   readonly clearFilters: () => void;
+  /**
+   * Size every visible column to its rendered content, measured under
+   * `root`, and keep the widths in the layout.
+   */
+  readonly autoSizeColumns: (root: Element | null) => void;
+  /** Size one column to its rendered content. */
+  readonly autoSizeColumn: (root: Element | null, key: string) => void;
   /** Load the next rows of an infinite list, unless they are loading. */
   readonly loadMore: () => void;
   /** A row's stable id. */
@@ -288,20 +326,36 @@ export function injectDataTable<TRow>(
     { injector }
   );
 
+  const layout = columnLayoutFor(allColumns, options, injector);
   const columns = computed(() =>
-    visibleColumns(allColumns(), isMobile() ? "mobile" : "desktop")
+    visibleColumns(
+      layout().visibleColumns as ColumnDef<TRow>[],
+      isMobile() ? "mobile" : "desktop"
+    )
   );
+  // A width the user dragged lives in the layout; the host's own widths win.
+  const widths = computed(() => ({
+    ...layout().state.widths,
+    ...columnWidths(),
+  }));
   const flexShares = computed(() =>
     columnFlexShares({
       columns: columns(),
       fitColumns: readMaybe(options.fitColumns ?? false),
-      widths: columnWidths(),
+      widths: widths(),
     })
   );
   const sizing = computed(() => ({
     flexShares: flexShares(),
-    columnWidths: columnWidths(),
+    columnWidths: widths(),
   }));
+  /** A pinned column's sticky style, at the header's layer or the body's. */
+  const pinStyle = (key: string, header: boolean): CssProperties => ({
+    ...pinnedCellStyle(
+      layout().pinOffset(key),
+      header ? PIN_Z.headerPinned : PIN_Z.body
+    ),
+  });
 
   const search = computed(() => source().search);
   const searchInput = createSearchInput(
@@ -346,6 +400,8 @@ export function injectDataTable<TRow>(
     injector
   );
 
+  const slotFills = featureSlotFillsOf(options.features ?? []);
+
   const toggleSort = (key: string): void => {
     const current = source();
     const next = nextSort({ key: current.sortBy, dir: current.sortDir }, key);
@@ -357,6 +413,8 @@ export function injectDataTable<TRow>(
     rows: computed(() => source().rows),
     isEmpty,
     columns,
+    allColumns,
+    layout,
     isMobile,
     labels,
     dir,
@@ -396,6 +454,9 @@ export function injectDataTable<TRow>(
     windowStart,
     statusAnnouncement,
     featureHost: featureHostFor(injector, options.features),
+    featureOptions: featureOptionsOf(options.features ?? []),
+    slotFills,
+    hasSlot: (slot) => slotFills.has(slot.id),
     toggleSort,
     setSearch: searchInput.commit,
     setSearchValue: searchInput.setValue,
@@ -406,6 +467,16 @@ export function injectDataTable<TRow>(
       source().setLimit(limit);
     },
     loadMore,
+    autoSizeColumns: (root) => {
+      autoSizeColumns(
+        root,
+        columns().map((column) => column.key),
+        layout().setWidth
+      );
+    },
+    autoSizeColumn: (root, key) => {
+      autoSizeColumns(root, [key], layout().setWidth);
+    },
     clearFilters: () => {
       clearChromeFilters(source(), options.onClearFilters);
     },
@@ -427,11 +498,16 @@ export function injectDataTable<TRow>(
     headerRowAttrs: () => headerRowAttributes(),
     headerCellAttrs: (column) => {
       const { sortBy, sortDir, sortLevels } = source();
-      return headerCellAttributes(
+      const attributes = headerCellAttributes(
         column,
         { sortBy, sortDir, sortLevels },
         sizing()
       );
+      return {
+        ...attributes,
+        "data-pinned": layout().pinOffset(column.key)?.side,
+        style: { ...attributes.style, ...pinStyle(column.key, true) },
+      };
     },
     sortButtonAttrs: (column) =>
       sortButtonAttributes(column, {
@@ -453,7 +529,14 @@ export function injectDataTable<TRow>(
         ),
       };
     },
-    cellAttrs: (column) => cellAttributes(column, sizing()),
+    cellAttrs: (column) => {
+      const attributes = cellAttributes(column, sizing());
+      return {
+        ...attributes,
+        "data-pinned": layout().pinOffset(column.key)?.side,
+        style: { ...attributes.style, ...pinStyle(column.key, false) },
+      };
+    },
     loadMoreAttrs: () => ({ ref: loadMoreSentinel }),
     loadMoreButtonAttrs: () => ({
       type: "button",
