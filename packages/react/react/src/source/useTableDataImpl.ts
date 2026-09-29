@@ -16,6 +16,7 @@ import {
   type TableDataPlan,
   type TableSource,
 } from "@adapttable/core";
+import type { UseTableDataResult } from "@adapttable/core/binding";
 import {
   type ReactNode,
   useEffect,
@@ -33,6 +34,7 @@ import {
   useServerData,
   type UseServerDataOptions,
 } from "./useServerData";
+export type { UseTableDataResult } from "@adapttable/core/binding";
 
 export type { UseServerDataOptions };
 
@@ -119,18 +121,6 @@ export interface UseTableDataOptions<TRow> extends Pick<
   facets?: FacetMap;
   /** The host of THIS table — filter-type plugins resolve from here. */
   featureHost?: FeatureHostState;
-}
-
-/**
- * Result of {@link useTableData}.
- *
- * @public
- */
-export interface UseTableDataResult<TRow> {
-  /** The resolved source, whichever tier provided it. */
-  source: TableSource<TRow>;
-  /** The merged declarative-filter runtime (defs, chips, URL keys, predicate). */
-  runtime: FilterRuntime<TRow>;
 }
 
 /**

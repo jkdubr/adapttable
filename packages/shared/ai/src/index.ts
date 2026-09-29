@@ -8,6 +8,7 @@
  *
  * @packageDocumentation
  */
+export { TABLE_AGENT_STATE } from "./agentStateKey";
 export {
   type AggregationInputs,
   aggregationsFor,

@@ -1,5 +1,4 @@
 import {
-  type BulkAction,
   type BulkActionContext,
   bulkActionErrorMessage,
   type BulkActionOutcome,
@@ -7,9 +6,11 @@ import {
   type ConfirmHandler,
   type TableLabels,
 } from "@adapttable/core";
+import type { BulkBarState } from "@adapttable/core/binding";
 
 import type { SelectionState } from "../selection/useSelection";
 import { useBulkActionRunner } from "./useBulkActionRunner";
+export type { BulkBarState } from "@adapttable/core/binding";
 
 export type { BulkActionContext };
 
@@ -27,36 +28,6 @@ export interface UseBulkBarStateOptions {
   confirm: ConfirmHandler;
   /** Resolved labels. */
   labels: Required<TableLabels>;
-}
-
-/**
- * The derived bulk-bar state every adapter renders from.
- *
- * @public
- */
-export interface BulkBarState {
-  /** Number of rows currently selected. */
-  selectedCount: number;
-  /** Selected ids as a fresh array (safe to pass to `run`). */
-  ids: string[];
-  /** Key of the action currently running, or `null`. */
-  pending: string | null;
-  /**
-   * Message of the last failed run, or `null`. The selection is KEPT on
-   * failure (so the user can retry); adapters render this in the bar,
-   * ideally in a live region.
-   */
-  errorMessage: string | null;
-  /** Run a bulk action against `ids` (and `scope` when "all matching" is on). */
-  run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
-  /** Clear the selection. */
-  clear: () => void;
-  /** Whether the "select all N matching" banner should show. */
-  expandable: boolean;
-  /** Bulk-action scope: the whole matching set when active, else `undefined`. */
-  scope: BulkActionContext | undefined;
-  /** The banner's text, action label, and click handler for the current state. */
-  banner: { text: string; action: string; onClick: () => void };
 }
 
 /**

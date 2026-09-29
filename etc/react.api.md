@@ -33,6 +33,7 @@ import { CellValidator } from '@adapttable/core';
 import { CHECKLIST_ITEM_HEIGHT } from '@adapttable/core';
 import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
 import { CHECKLIST_VIRTUALIZE_AT } from '@adapttable/core';
+import { ChecklistFilterState } from '@adapttable/core/binding';
 import { ChecklistValue } from '@adapttable/core';
 import { ChipLabelResolver } from '@adapttable/core';
 import { collectChecklistValues } from '@adapttable/core';
@@ -109,7 +110,6 @@ import { filterDefForColumn } from '@adapttable/core';
 import { FilterFormSource } from '@adapttable/core/binding';
 import { filterOpLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
-import { FilterRuntime } from '@adapttable/core';
 import { filterTreeChipLabel } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
@@ -122,19 +122,23 @@ import { GRID_CELL_ATTR } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
 import { gridCellAttr } from '@adapttable/core';
 import { GridFocusControllerOptions } from '@adapttable/core';
-import { GroupAggregateOverrides } from '@adapttable/core';
+import { GridFocusState } from '@adapttable/core/binding';
 import { GroupAggregatesFn } from '@adapttable/core';
 import { GroupByInput } from '@adapttable/core';
+import { GroupCollapseState } from '@adapttable/core/binding';
 import { GroupedFlatEntry } from '@adapttable/core';
 import { GroupingPanelState } from '@adapttable/core';
-import { GroupPaging } from '@adapttable/core';
+import { GroupPagingState } from '@adapttable/core/binding';
 import { headerFilterFieldIsComplete } from '@adapttable/core';
 import { HeaderFilterOpenHost } from '@adapttable/core';
+import { HeaderSelectionState } from '@adapttable/core/binding';
 import { HighlightedCell } from '@adapttable/core';
+import { HighlightState } from '@adapttable/core/binding';
 import { InfiniteQueryLike } from '@adapttable/core';
 import { isDeclarativeFilters } from '@adapttable/core';
 import { KeyboardEvent as KeyboardEvent_2 } from 'react';
 import { LayoutStorage } from '@adapttable/core';
+import { LazyChildrenState } from '@adapttable/core/binding';
 import { listFilterValues } from '@adapttable/core';
 import { liveRowChanged } from '@adapttable/core';
 import { MobileCardField } from '@adapttable/core';
@@ -175,22 +179,22 @@ import { ReconcileLiveRowEdit } from '@adapttable/core';
 import { RefCallback } from 'react';
 import { RefObject } from 'react';
 import { RowAction } from '@adapttable/core';
-import { RowDropPosition } from '@adapttable/core';
 import { RowEditDrafts } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
+import { RowExpansionState } from '@adapttable/core/binding';
 import { RowHeight } from '@adapttable/core';
-import { RowMoveMenuModel } from '@adapttable/core';
-import { RowMoveRequest } from '@adapttable/core';
-import { RowMoveTarget } from '@adapttable/core';
+import { RowMutationsState } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
 import { RowPinLabels } from '@adapttable/core';
+import { RowPinningState } from '@adapttable/core/binding';
 import { RowPinSide } from '@adapttable/core';
 import { RowPinState } from '@adapttable/core';
 import { RowReorderControllerOptions } from '@adapttable/core';
 import { RowReorderDecision } from '@adapttable/core';
 import { RowReorderHandler } from '@adapttable/core';
 import { RowReorderLabels } from '@adapttable/core';
+import { RowReorderState } from '@adapttable/core/binding';
 import { RowStyle } from '@adapttable/core';
 import { RowValidator } from '@adapttable/core';
 import { SAVED_VIEW_VERSION } from '@adapttable/core';
@@ -200,6 +204,8 @@ import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
 import { scalarFilterText } from '@adapttable/core';
+import { SearchInputState } from '@adapttable/core/binding';
+import { SelectionState } from '@adapttable/core/binding';
 import { HEADER_FILTER_SESSION_ATTR as SESSION_ATTR } from '@adapttable/core';
 import { Shortcut } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
@@ -214,15 +220,23 @@ import { TableOptions } from '@adapttable/core';
 import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
-import { TableStateMutators } from '@adapttable/core';
 import { TableToolbarSlots } from '@adapttable/core';
 import { TableVirtualization } from '@adapttable/core';
 import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
 import { TreeEntry } from '@adapttable/core';
+import { TreeExpansionState } from '@adapttable/core/binding';
 import { UNPIN_ROW_ACTION_KEY } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
+import { UseColumnLayoutStorageStateResult } from '@adapttable/core/binding';
+import { UseColumnLayoutUrlStateResult } from '@adapttable/core/binding';
+import { UseDensityUrlStateResult } from '@adapttable/core/binding';
+import { UseGroupCollapseUrlStateResult } from '@adapttable/core/binding';
+import { UseRowPinningUrlStateResult } from '@adapttable/core/binding';
+import { UseSavedViewsResult } from '@adapttable/core/binding';
+import { UseTableDataResult } from '@adapttable/core/binding';
+import { UseTableUrlStateResult } from '@adapttable/core/binding';
 import { ValidationCheckResult } from '@adapttable/core';
 import { ValidationTarget } from '@adapttable/core';
 
@@ -304,19 +318,7 @@ export { CHECKLIST_LIST_HEIGHT }
 
 export { CHECKLIST_VIRTUALIZE_AT }
 
-// @public
-export interface ChecklistFilterState {
-    available: boolean;
-    clear: () => void;
-    items: readonly ChecklistValue[];
-    query: string;
-    selectAllVisible: () => void;
-    selected: readonly string[];
-    setQuery: (next: string) => void;
-    toggle: (value: string, on: boolean) => void;
-    virtualize: boolean;
-    visible: readonly ChecklistValue[];
-}
+export { ChecklistFilterState }
 
 export { ChecklistValue }
 
@@ -724,53 +726,11 @@ export { GRID_CELL_ATTR }
 
 export { gridCellAttr }
 
-// @public
-export interface GridFocusState {
-    active: GridCell | null;
-    announcement: string;
-    cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
-    columnCheckbox: boolean;
-    copyCells: (cell?: GridCell, cut?: boolean) => void;
-    enabled: boolean;
-    fillHandleCell: GridCell | null;
-    fillHandleLabel: string;
-    fillPreview: CellRange | null;
-    focusCell: (cell: GridCell) => void;
-    getCellProps: (cell: GridCell) => Record<string, unknown>;
-    getCellPropsAt: (windowIndex: number, col: number) => Record<string, unknown>;
-    getColumnHeaderProps: (col: number, options?: {
-        sortable?: boolean;
-    }) => Record<string, unknown>;
-    getFillHandleProps: () => Record<string, unknown>;
-    getGridProps: () => Record<string, unknown>;
-    getRowProps: (rowIndex: number) => Record<string, unknown>;
-    getRowPropsAt: (windowIndex: number) => Record<string, unknown>;
-    isColumnSelected: (col: number) => boolean;
-    range: CellRange | null;
-    selectColumn: (col: number, extend?: boolean) => void;
-    selectRange: (range: CellRange | null) => void;
-    toggleColumn: (col: number) => void;
-}
+export { GridFocusState }
 
-// @public
-export interface GroupCollapseState {
-    collapseAll: (groupKeys: readonly string[]) => void;
-    collapsedGroupIds: ReadonlySet<string>;
-    collapseToDepth: (depth: number, groups: readonly {
-        key: string;
-        level: number;
-    }[]) => void;
-    expandAll: () => void;
-    isCollapsed: (groupKey: string) => boolean;
-    toggle: (groupKey: string) => void;
-}
+export { GroupCollapseState }
 
-// @public
-export interface GroupPagingState {
-    paging: GroupPaging;
-    reset: () => void;
-    showMore: (pageSize: number, groupKey?: string) => void;
-}
+export { GroupPagingState }
 
 export { headerFilterFieldIsComplete }
 
@@ -792,20 +752,11 @@ export interface HeaderFilterSessionProps {
 // @public
 export function headerFilterStickTop(sticky: boolean, base: CSSProperties | undefined, top: number, stickyExtras?: CSSProperties): CSSProperties | undefined;
 
-// @public
-export type HeaderSelectionState = "all" | "some" | "none";
+export { HeaderSelectionState }
 
 export { HighlightedCell }
 
-// @public
-export interface HighlightState {
-    animated: boolean;
-    clear: () => void;
-    flashCell: (cell: HighlightedCell) => void;
-    flashRow: (rowId: string) => void;
-    isCellHighlighted: (rowId: string, columnKey: string) => boolean;
-    isRowHighlighted: (rowId: string) => boolean;
-}
+export { HighlightState }
 
 // @public
 export interface HorizontalOverflow<E extends HTMLElement> {
@@ -819,12 +770,7 @@ export { isDeclarativeFilters }
 
 export { LayoutStorage }
 
-// @public
-export interface LazyChildrenState<TRow> {
-    failedIds: ReadonlySet<string>;
-    loadIfNeeded: (row: TRow) => void;
-    loadingIds: ReadonlySet<string>;
-}
+export { LazyChildrenState }
 
 export { listFilterValues }
 
@@ -964,12 +910,7 @@ export interface RowElementProps extends Props {
     role: string;
 }
 
-// @public
-export interface RowExpansionState {
-    expandedIds: ReadonlySet<string>;
-    isExpanded: (id: string) => boolean;
-    toggle: (id: string) => void;
-}
+export { RowExpansionState }
 
 // @public
 export interface RowMutationHandlers<TRow> {
@@ -979,25 +920,13 @@ export interface RowMutationHandlers<TRow> {
     onDuplicateRow?: (row: TRow) => unknown;
 }
 
-// @public
-export interface RowMutationsState<TRow> {
-    actions: readonly RowAction<TRow>[];
-    addRow: () => void;
-    canAdd: boolean;
-}
+export { RowMutationsState }
 
 export { RowPairMeasurer }
 
 export { RowPinLabels }
 
-// @public
-export interface RowPinningState<TRow> {
-    actions: readonly RowAction<TRow>[];
-    pin: (rowId: string, side: RowPinSide) => void;
-    sideOf: (rowId: string) => RowPinSide | undefined;
-    state: RowPinState;
-    unpin: (rowId: string) => void;
-}
+export { RowPinningState }
 
 export { RowPinSide }
 
@@ -1037,28 +966,9 @@ export interface SearchInputElementProps extends Props {
     value: string;
 }
 
-// @public
-export interface SearchInputState {
-    setValue: (next: string) => void;
-    value: string;
-}
+export { SearchInputState }
 
-// @public
-export interface SelectionState {
-    acrossPages: boolean;
-    allMatching: boolean;
-    clear: () => void;
-    headerState: HeaderSelectionState;
-    isSelected: (id: string) => boolean;
-    replace: (ids: readonly string[] | undefined) => void;
-    selectAllMatching: () => void;
-    selectedCount: number;
-    selectedIds: ReadonlySet<string>;
-    toggle: (id: string) => void;
-    toggleAll: () => void;
-    toggleGroupLeaves: (leafIds: readonly string[]) => void;
-    visibleIds: string[];
-}
+export { SelectionState }
 
 export { SESSION_ATTR }
 
@@ -1219,38 +1129,7 @@ export interface TableFeatureHost<TRow = unknown> extends NeutralFeatureHost<TRo
 export { TableQuery }
 
 // @public
-export interface TableRowReorderState<TRow> {
-    announcement: string;
-    cancelMove: () => void;
-    confirmMove: () => void;
-    dragProps: (rowId: string, localIndex: number) => {
-        draggable: true;
-        onDragStart: (event: DragEvent_2<HTMLElement>) => void;
-        onDragEnd: () => void;
-    };
-    dropProps: (localIndex: number, row: TRow, windowStart: number) => {
-        onDragOver: (event: DragEvent_2<HTMLElement>) => void;
-        onDrop: (event: DragEvent_2<HTMLElement>) => void;
-    };
-    handleKeyDown: (event: KeyboardEvent_2<HTMLElement>, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
-    hostConfirmPending: boolean;
-    isLifted: (rowId: string) => boolean;
-    isMovePending?: (row: TRow) => boolean;
-    lifted: {
-        rowId: string;
-        from: number;
-    } | null;
-    moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
-    moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
-    overIndex: number | null;
-    overPosition: RowDropPosition | null;
-    pendingMove: RowMoveRequest<TRow> | null;
-    rowAttrs: (rowId: string, localIndex: number) => {
-        "data-dragging"?: "";
-        "data-drop"?: RowDropPosition;
-    };
-    selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
-}
+export type TableRowReorderState<TRow> = RowReorderState<TRow, DragEvent_2<HTMLElement>, KeyboardEvent_2<HTMLElement>>;
 
 export { TextFieldWidget }
 
@@ -1259,15 +1138,7 @@ export { TextOp }
 // @public
 export type ToolbarSlots = TableToolbarSlots<ReactNode>;
 
-// @public
-export interface TreeExpansionState {
-    collapseAll: () => void;
-    expand: (id: string) => void;
-    expandAll: (ids: readonly string[]) => void;
-    expandedIds: ReadonlySet<string>;
-    isExpanded: (id: string) => boolean;
-    toggle: (id: string) => void;
-}
+export { TreeExpansionState }
 
 export { UNPIN_ROW_ACTION_KEY }
 
@@ -1367,11 +1238,7 @@ export interface UseColumnLayoutStorageStateOptions {
     storageKey: string;
 }
 
-// @public
-export interface UseColumnLayoutStorageStateResult {
-    layout: ColumnLayoutState;
-    onLayoutChange: (next: ColumnLayoutState) => void;
-}
+export { UseColumnLayoutStorageStateResult }
 
 // @public
 export function useColumnLayoutUrlState(options?: UseColumnLayoutUrlStateOptions): UseColumnLayoutUrlStateResult;
@@ -1384,11 +1251,7 @@ export interface UseColumnLayoutUrlStateOptions {
     urlSync?: boolean;
 }
 
-// @public
-export interface UseColumnLayoutUrlStateResult {
-    layout: ColumnLayoutState;
-    onLayoutChange: (next: ColumnLayoutState) => void;
-}
+export { UseColumnLayoutUrlStateResult }
 
 // @public
 export function useDataTable<TRow>(options: UseDataTableOptions<TRow>): UseDataTableResult<TRow>;
@@ -1460,11 +1323,7 @@ export interface UseDensityUrlStateOptions {
     urlSync?: boolean;
 }
 
-// @public
-export interface UseDensityUrlStateResult {
-    density: Density;
-    onDensityChange: (next: Density) => void;
-}
+export { UseDensityUrlStateResult }
 
 // @public
 export function useDirtyCells(options?: UseDirtyCellsOptions): DirtyCellState;
@@ -1580,11 +1439,7 @@ export interface UseGroupCollapseUrlStateOptions {
     urlSync?: boolean;
 }
 
-// @public
-export interface UseGroupCollapseUrlStateResult {
-    collapsedGroupIds: string[];
-    onCollapsedGroupIdsChange: (ids: string[]) => void;
-}
+export { UseGroupCollapseUrlStateResult }
 
 // @public
 export function useGroupPaging(): GroupPagingState;
@@ -1719,11 +1574,7 @@ export interface UseRowPinningUrlStateOptions {
     urlSync?: boolean;
 }
 
-// @public
-export interface UseRowPinningUrlStateResult {
-    onPinnedRowIdsChange: (next: RowPinState) => void;
-    pinnedRowIds: RowPinState;
-}
+export { UseRowPinningUrlStateResult }
 
 // @public
 export function useRowReorder<TRow>(options: RowReorderControllerOptions<TRow>): TableRowReorderState<TRow>;
@@ -1736,18 +1587,7 @@ export interface UseSavedViewsOptions extends Omit<SavedViewsControllerOptions, 
     storage?: LayoutStorage;
 }
 
-// @public
-export interface UseSavedViewsResult {
-    apply: (name: string) => void;
-    defaultView: SavedView | undefined;
-    move: (name: string, delta: -1 | 1) => void;
-    reload: () => void;
-    remove: (name: string) => void;
-    rename: (from: string, to: string) => void;
-    save: (name: string) => void;
-    setDefault: (name: string) => void;
-    views: readonly SavedView[];
-}
+export { UseSavedViewsResult }
 
 // @public
 export function useScrollToTableTop(input: UseScrollToTableTopOptions): void;
@@ -1848,11 +1688,7 @@ export interface UseTableDataOptions<TRow> extends Pick<UseTableUrlStateOptions,
     total?: number;
 }
 
-// @public
-export interface UseTableDataResult<TRow> {
-    runtime: FilterRuntime<TRow>;
-    source: TableSource<TRow>;
-}
+export { UseTableDataResult }
 
 // @public
 export function useTableEditHistory<TRow>(props: TableEditHistoryProps<TRow>): {
@@ -1878,19 +1714,7 @@ export interface UseTableUrlStateOptions {
     urlSync?: boolean;
 }
 
-// @public
-export interface UseTableUrlStateResult extends TableStateMutators {
-    defaultLimit: number;
-    extra: ExtraFilters;
-    filterTree: QueryFilterGroup | undefined;
-    groupAggregateOverrides: GroupAggregateOverrides;
-    groupBy: string | undefined;
-    limit: number;
-    page: number;
-    search: string;
-    sortBy: string | undefined;
-    sortDir: SortDirection | undefined;
-}
+export { UseTableUrlStateResult }
 
 // @public
 export function useTableVirtualization<TRow>(input: UseTableVirtualizationOptions<TRow>): TableVirtualization<TRow>;

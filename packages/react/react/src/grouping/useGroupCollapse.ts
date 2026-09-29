@@ -1,34 +1,9 @@
 import { groupCollapseActions, idSetReader } from "@adapttable/core";
+import type { GroupCollapseState } from "@adapttable/core/binding";
 import { useCallback, useMemo, useState } from "react";
 
 import { useControllableStore } from "../hooks/useControllableStore";
-
-/**
- * Collapse state + actions returned by `useGroupCollapse`.
- *
- * @public
- */
-export interface GroupCollapseState {
-  /** Ids of currently collapsed groups (`group:…` keys). */
-  collapsedGroupIds: ReadonlySet<string>;
-  /** Whether a group is collapsed. */
-  isCollapsed: (groupKey: string) => boolean;
-  /** Toggle a group's collapsed state. */
-  toggle: (groupKey: string) => void;
-  /** Expand every group (clear the collapsed set). */
-  expandAll: () => void;
-  /** Collapse every group in `groupKeys`. */
-  collapseAll: (groupKeys: readonly string[]) => void;
-  /**
-   * Show the tree down to `depth` and no further: every group at that depth or
-   * deeper closes, everything above it opens. Depth 0 collapses the top level,
-   * so only the outermost headers show.
-   */
-  collapseToDepth: (
-    depth: number,
-    groups: readonly { key: string; level: number }[]
-  ) => void;
-}
+export type { GroupCollapseState } from "@adapttable/core/binding";
 
 /**
  * Headless collapse state for row groups, at any depth. Ephemeral — not

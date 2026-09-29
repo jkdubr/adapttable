@@ -5,6 +5,9 @@
 ```ts
 
 // @public
+export function acceptColumnDrag(event: ColumnDragEvent): void;
+
+// @public
 export interface ActionAiOptions {
     readonly approval?: {
         readonly policy?: ActionApprovalPolicy;
@@ -1193,7 +1196,35 @@ export interface ColumnAiOptions {
 }
 
 // @public
+export interface ColumnDataTransfer {
+    dropEffect: string;
+    effectAllowed: string;
+    getData: (format: string) => string;
+    setData: (format: string, data: string) => void;
+    readonly types: readonly string[];
+}
+
+// @public
 export function columnDragAllowed(target: ColumnDragTarget | null): boolean;
+
+// @public
+export interface ColumnDragController {
+    readonly dragOver: (event: ColumnDragEvent, index: number) => void;
+    readonly dragStart: (event: ColumnDragEvent, key: string, index: number) => void;
+    readonly drop: (event: ColumnDragEvent, index: number, move: (key: string, toIndex: number) => void) => void;
+    readonly end: () => void;
+    readonly getSnapshot: () => ColumnDragSnapshot;
+    readonly rowAttrs: (key: string, index: number) => ColumnDragRowAttrs;
+    readonly subscribe: (listener: () => void) => () => void;
+}
+
+// @public
+export interface ColumnDragEvent {
+    readonly dataTransfer: ColumnDataTransfer | null;
+    readonly defaultPrevented: boolean;
+    preventDefault: () => void;
+    readonly target: EventTarget | null;
+}
 
 // @public
 export interface ColumnDragRowAttrs {
@@ -1203,6 +1234,12 @@ export interface ColumnDragRowAttrs {
 
 // @public
 export function columnDragRowAttrs(drag: ColumnDragSource | null, overIndex: number | null, key: string, index: number): ColumnDragRowAttrs;
+
+// @public
+export interface ColumnDragSnapshot {
+    readonly drag: ColumnDragSource | null;
+    readonly overIndex: number | null;
+}
 
 // @public
 export interface ColumnDragSource {
@@ -1566,6 +1603,16 @@ export interface ColumnRenameEditorSnapshot {
 
 // @public
 export type ColumnRenameSubmit = "invalid" | "unchanged" | "renamed";
+
+// @public
+export function columnReorderKeyDown(event: ColumnReorderKeyEvent, key: string, index: number, move: (key: string, toIndex: number) => void, isRtl: (element: EventTarget | null) => boolean): void;
+
+// @public
+export interface ColumnReorderKeyEvent {
+    readonly currentTarget: EventTarget | null;
+    readonly key: string;
+    preventDefault: () => void;
+}
 
 // @public
 export function columnReorderKeyStep(key: string, rtl: boolean): -1 | 1 | undefined;
@@ -2016,6 +2063,9 @@ export function createCellSaveStore<TRow>(options?: CellSaveStoreOptions<TRow>):
 export function createChangedCellFlashStore(initial: ChangedCellFlashOptions): ChangedCellFlashStore;
 
 // @public
+export function createColumnDragController(): ColumnDragController;
+
+// @public
 export function createColumnLayoutController<TRow, TColumn extends ColumnMetadata<TRow> = ColumnMetadata<TRow>>(defaultColumnLayout?: Partial<ColumnLayoutState>): ColumnLayoutController<TRow, TColumn>;
 
 // @public
@@ -2420,6 +2470,9 @@ export function downloadTableCsv<TRow>(options: {
     onBeforeExport?: NonNullable<ExportCsvOptions<TRow>["onBeforeExport"]>;
     onAfterExport?: NonNullable<ExportCsvOptions<TRow>["onAfterExport"]>;
 }): void;
+
+// @public
+export function dropColumn(event: ColumnDragEvent, index: number, move: (key: string, toIndex: number) => void): void;
 
 // @public
 export const DUPLICATE_ROW_ACTION_KEY = "adapttable:duplicate-row";
@@ -7446,6 +7499,9 @@ export function stableKey(input: unknown): string;
 
 // @public
 export function staleAppendStash<TRow>(stash: AppendStash<TRow> | null, baseKey: string, failed: boolean): boolean;
+
+// @public
+export function startColumnDrag(event: ColumnDragEvent, key: string): void;
 
 // @public
 export interface StatusBarItem {

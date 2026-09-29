@@ -26,7 +26,9 @@ import {
   type RowPatchStreamStatus,
   type StreamSocket,
 } from "@adapttable/core";
+import type { RowPatchStreamState } from "@adapttable/core/binding";
 import { useCallback, useEffect, useRef, useState } from "react";
+export type { RowPatchStreamState } from "@adapttable/core/binding";
 
 /**
  * What {@link useRowPatchStream} needs.
@@ -71,20 +73,6 @@ export interface UseRowPatchStreamOptions<TRow> {
   ) => StreamSocket | undefined;
   /** Build the EventSource yourself. Same reasons as `createWebSocket`. */
   createEventSource?: (url: string) => StreamSocket | undefined;
-}
-
-/**
- * What the hook reports back.
- *
- * @public
- */
-export interface RowPatchStreamState {
-  /** What the connection is doing. */
-  status: RowPatchStreamStatus;
-  /** Why it gave up, when it did. */
-  error: Error | null;
-  /** Close it for good. */
-  close: () => void;
 }
 
 /**

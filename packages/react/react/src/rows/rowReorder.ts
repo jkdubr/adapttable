@@ -12,15 +12,13 @@ import {
   createRowReorderController,
   isRowMovePending,
   type RowDropPosition,
-  type RowMoveMenuModel,
-  type RowMoveRequest,
-  type RowMoveTarget,
   type RowReorderControllerOptions,
   rowReorderRowAttributes,
 } from "@adapttable/core";
 import {
   rowReorderDropStyle as coreRowReorderDropStyle,
   rowReorderSignature as coreRowReorderSignature,
+  type RowReorderState as NeutralRowReorderState,
 } from "@adapttable/core/binding";
 import {
   type CSSProperties,
@@ -61,83 +59,16 @@ export function rowReorderDropStyle(
 }
 
 /**
- * Headless reorder state returned by `useRowReorder`.
+ * Headless reorder state returned by `useRowReorder` — `@adapttable/core`'s
+ * `RowReorderState` with React's drag and key events.
  *
  * @public
  */
-export interface RowReorderState<TRow> {
-  /** The lifted row, or `null` when idle. */
-  lifted: { rowId: string; from: number } | null;
-  /** Hovered drop index (local), or `null`. */
-  overIndex: number | null;
-  /** Hovered edge, including the middle tree re-parent target. */
-  overPosition: RowDropPosition | null;
-  /** Move awaiting kit-owned confirmation, or `null`. */
-  pendingMove: RowMoveRequest<TRow> | null;
-  /**
-   * Host-owned `confirmMove` is awaiting a decision. Kits disable grips,
-   * buttons and menu items while this is true; they must not draw a second
-   * confirmation surface.
-   */
-  hostConfirmPending: boolean;
-  /** Live-region text. Empty until something happens. */
-  announcement: string;
-  /** Whether this row is the one being moved. */
-  isLifted: (rowId: string) => boolean;
-  /** Whether this row owns the open move confirmation. */
-  isMovePending?: (row: TRow) => boolean;
-  /** Pointer: start a drag from this row. */
-  dragProps: (
-    rowId: string,
-    localIndex: number
-  ) => {
-    draggable: true;
-    onDragStart: (event: DragEvent<HTMLElement>) => void;
-    onDragEnd: () => void;
-  };
-  /** Pointer: this row is a drop target. */
-  dropProps: (
-    localIndex: number,
-    row: TRow,
-    windowStart: number
-  ) => {
-    onDragOver: (event: DragEvent<HTMLElement>) => void;
-    onDrop: (event: DragEvent<HTMLElement>) => void;
-  };
-  /** Keyboard: Space lifts / drops, arrows move, Escape cancels. */
-  handleKeyDown: (
-    event: KeyboardEvent<HTMLElement>,
-    rowId: string,
-    localIndex: number,
-    row: TRow,
-    windowStart: number,
-    rowCount: number
-  ) => void;
-  /** Mobile: swap with the neighbour. */
-  moveBy: (
-    localIndex: number,
-    delta: -1 | 1,
-    row: TRow,
-    windowStart: number,
-    rowCount: number
-  ) => void;
-  /** Keyboard/touch destinations for this row, when nested. */
-  moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
-  /** Select a destination from the move menu. */
-  selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
-  /** Confirm the move shown by the kit confirmation surface. */
-  confirmMove: () => void;
-  /** Cancel the move shown by the kit confirmation surface. */
-  cancelMove: () => void;
-  /** Indicator attributes for a row. */
-  rowAttrs: (
-    rowId: string,
-    localIndex: number
-  ) => {
-    "data-dragging"?: "";
-    "data-drop"?: RowDropPosition;
-  };
-}
+export type RowReorderState<TRow> = NeutralRowReorderState<
+  TRow,
+  DragEvent<HTMLElement>,
+  KeyboardEvent<HTMLElement>
+>;
 
 /**
  * Per-row digest so a memoized row repaints when IT is lifted or is the drop

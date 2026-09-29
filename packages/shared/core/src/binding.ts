@@ -935,3 +935,74 @@ export type {
   VirtualItemMeta,
   VirtualTableRow,
 } from "./virtual/virtualTableModel";
+
+// Building blocks every binding shares: column defaults and the data-change
+// test its table engine runs on each render.
+export {
+  columnPathText,
+  type ResolvableColumn,
+  resolveColumnDefaults,
+  resolveColumnHeaders,
+} from "./columns/resolveColumns";
+export { sameRows } from "./engine/sameRows";
+
+// Shared state shapes the bindings return from their hooks.
+export type { BulkBarState } from "./actions/actionsBindingState";
+export type { UseColumnLayoutStorageStateResult } from "./columns/columnsBindingState";
+export type { ExportHandlerState } from "./export/exportBindingState";
+export type {
+  ChecklistFilterState,
+  ChecklistWindowState,
+} from "./filters/filtersBindingState";
+export type { GridFocusState } from "./focus/focusBindingState";
+export type {
+  GroupCollapseState,
+  GroupPagingState,
+} from "./grouping/groupingBindingState";
+export {
+  DENSITY_STATE,
+  type DensityFeatureState,
+  type ResolvedDensity,
+} from "./layout/densityContract";
+export type { FullscreenState } from "./layout/layoutBindingState";
+export type { UsePivotUrlStateResult } from "./pivot/pivotBindingState";
+export { ROW_REORDER, type RowReorderState } from "./rows/rowReorderContract";
+export type {
+  ChangedCellFlashState,
+  HighlightState,
+  RowExpansionState,
+  RowMutationsState,
+  RowPinningState,
+} from "./rows/rowsBindingState";
+export type { SelectionState } from "./selection/selectionBindingState";
+export type { HeaderSelectionState } from "./selection/selectionState";
+export type {
+  SearchInputState,
+  UseTableDataResult,
+} from "./source/sourceBindingState";
+export type { RowPatchStreamState } from "./stream/streamBindingState";
+export type {
+  LazyChildrenState,
+  TreeExpansionState,
+} from "./tree/treeBindingState";
+export type {
+  UseColumnLayoutUrlStateResult,
+  UseDensityUrlStateResult,
+  UseGroupCollapseUrlStateResult,
+  UseRowPinningUrlStateResult,
+  UseSavedViewsResult,
+  UseTableUrlStateResult,
+} from "./url/urlBindingState";
+// Types the shared state shapes above hand back.
+export type { ChecklistWindow } from "./filters/checklistModel";
+export type { HighlightedCell } from "./rows/highlightStore";
+export type { RowPatchEvent } from "./rows/patch";
+export type {
+  RowDropPosition,
+  RowMoveMenuModel,
+  RowMoveRequest,
+  RowMoveTarget,
+  RowTreeParentRef,
+} from "./rows/rowMove";
+export type { RowPatchStreamStatus } from "./stream/status";
+export type { TableDensity } from "./url/viewStateSlices";

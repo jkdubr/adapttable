@@ -2,12 +2,11 @@
  * Angular columns: core's column model, with renderers that are Angular
  * templates or components.
  */
+import type { ColumnMetadata } from "@adapttable/core";
 import {
-  type ColumnMetadata,
-  getPath,
-  humanizeKey,
-  localizedColumnPath,
-} from "@adapttable/core";
+  columnPathText,
+  resolveColumnDefaults,
+} from "@adapttable/core/binding";
 import type { TemplateRef, Type } from "@angular/core";
 
 /**
@@ -72,16 +71,7 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
  * text a cell or an attribute should show.
  */
 export function primitiveText(value: unknown): string | null {
-  switch (typeof value) {
-    case "string":
-      return value;
-    case "number":
-    case "boolean":
-    case "bigint":
-      return String(value);
-    default:
-      return null;
-  }
+  return columnPathText(value);
 }
 
 /**
@@ -99,17 +89,5 @@ export function resolveColumns<TRow>(
   columns: readonly ColumnDef<TRow>[],
   locale?: string
 ): ColumnDef<TRow>[] {
-  return columns.map((column) => {
-    const needsHeader = column.header === undefined;
-    const needsAccessor = !column.accessor;
-    if (!needsHeader && !needsAccessor) return column;
-    const path = localizedColumnPath(column, locale);
-    return {
-      ...column,
-      header: needsHeader ? humanizeKey(column.key) : column.header,
-      accessor: needsAccessor
-        ? (row: TRow) => primitiveText(getPath(row, path))
-        : column.accessor,
-    };
-  });
+  return resolveColumnDefaults<TRow, ColumnDef<TRow>>(columns, locale);
 }

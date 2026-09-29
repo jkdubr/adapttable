@@ -11,9 +11,11 @@
  * grouping's state travels with the link.
  */
 import { groupCollapseSlice } from "@adapttable/core";
+import type { UseGroupCollapseUrlStateResult } from "@adapttable/core/binding";
 
 import type { UrlStateAdapter } from "./adapter";
 import { useUrlSlice } from "./useUrlSlice";
+export type { UseGroupCollapseUrlStateResult } from "@adapttable/core/binding";
 
 /**
  * What {@link useGroupCollapseUrlState} needs.
@@ -29,18 +31,6 @@ export interface UseGroupCollapseUrlStateOptions {
   urlKey?: string;
   /** Groups collapsed before the URL says otherwise. */
   defaultCollapsedGroupIds?: readonly string[];
-}
-
-/**
- * The controlled pair `<DataTable>` takes.
- *
- * @public
- */
-export interface UseGroupCollapseUrlStateResult {
-  /** The collapsed group keys. */
-  collapsedGroupIds: string[];
-  /** Hand this to `onCollapsedGroupIdsChange`. */
-  onCollapsedGroupIdsChange: (ids: string[]) => void;
 }
 
 /**

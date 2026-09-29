@@ -20,30 +20,9 @@
  * browser's own control, another element being promoted. A remembered flag
  * would say "on" while the page had already left.
  */
+import type { FullscreenState } from "@adapttable/core/binding";
 import { useCallback, useEffect, useState } from "react";
-
-/**
- * What {@link useFullscreen} returns.
- *
- * @public
- */
-export interface FullscreenState {
-  /** Whether the table is the fullscreen element right now. */
-  active: boolean;
-  /** Whether the browser will allow it at all. */
-  supported: boolean;
-  /** Go fullscreen, or leave. */
-  toggle: () => void;
-  /** Leave, if it is on. */
-  exit: () => void;
-  /**
-   * Where overlays must portal while fullscreen is on, and `undefined`
-   * otherwise. Hand this to each kit's portal target — Mantine's
-   * `portalProps`, MUI's `container`, antd's `getPopupContainer` — or the
-   * kit's menus will render into a document nobody can see.
-   */
-  container: HTMLElement | undefined;
-}
+export type { FullscreenState } from "@adapttable/core/binding";
 
 /** Whether this document can do fullscreen at all. */
 function canFullscreen(): boolean {

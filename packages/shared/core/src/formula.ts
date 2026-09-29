@@ -67,3 +67,6 @@ export type {
 } from "./columnModel";
 export type { ColumnAiOptions } from "./columnModel";
 export type { DisplayValue } from "./display";
+
+// The result a binding's formula URL-state hook returns.
+export type { UseFormulaUrlStateResult } from "./formula/formulaBindingState";

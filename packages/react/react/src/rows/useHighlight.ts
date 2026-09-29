@@ -24,36 +24,13 @@ import {
   createHighlightStore,
   highlightCellKey,
   highlightDuration,
-  type HighlightedCell,
 } from "@adapttable/core";
+import type { HighlightState } from "@adapttable/core/binding";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
-
 export type { HighlightedCell } from "@adapttable/core";
-
-/**
- * What {@link useHighlight} returns.
- *
- * @public
- */
-export interface HighlightState {
-  /** Mark a row. Repeating it restarts the clock rather than stacking. */
-  flashRow: (rowId: string) => void;
-  /** Mark one cell. */
-  flashCell: (cell: HighlightedCell) => void;
-  /** Drop every mark now. */
-  clear: () => void;
-  /** Whether this row is marked. */
-  isRowHighlighted: (rowId: string) => boolean;
-  /** Whether this cell is marked. */
-  isCellHighlighted: (rowId: string, columnKey: string) => boolean;
-  /**
-   * Whether the mark should animate. False when the user asked for reduced
-   * motion — the mark still appears, it simply does not move.
-   */
-  animated: boolean;
-}
+export type { HighlightState } from "@adapttable/core/binding";
 
 /**
  * Highlight rows and cells for a moment.

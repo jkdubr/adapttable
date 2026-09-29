@@ -2,28 +2,10 @@
  * How much of a paged group model has been asked for — the React side of
  * core's group paging controller.
  */
-import {
-  createGroupPagingController,
-  type GroupPaging,
-} from "@adapttable/core";
+import { createGroupPagingController } from "@adapttable/core";
+import type { GroupPagingState } from "@adapttable/core/binding";
 import { useMemo, useState, useSyncExternalStore } from "react";
-
-/**
- * Paging state and the one action that changes it.
- *
- * @public
- */
-export interface GroupPagingState {
-  /** What the model reads. */
-  paging: GroupPaging;
-  /**
-   * Reveal one more page. `groupKey` names the group whose leaves to extend;
-   * omit it for the top-level groups.
-   */
-  showMore: (pageSize: number, groupKey?: string) => void;
-  /** Back to the first page of everything — what new data calls for. */
-  reset: () => void;
-}
+export type { GroupPagingState } from "@adapttable/core/binding";
 
 /**
  * Track how much of a paged group model is showing.

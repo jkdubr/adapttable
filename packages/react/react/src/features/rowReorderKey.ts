@@ -7,13 +7,19 @@
  * would put the hook back in every table's graph, which is what the feature
  * exists to avoid.
  */
+import {
+  type FeatureStateKey,
+  ROW_REORDER as NEUTRAL_ROW_REORDER,
+} from "@adapttable/core/binding";
+
 import type { RowReorderState } from "../rows/rowReorder";
-import { featureStateKey } from "./providers";
 
 /**
- * Row-reorder state, published by the `rowReorder()` feature.
+ * Row-reorder state, published by the `rowReorder()` feature —
+ * `@adapttable/core`'s key, carrying React's reorder state.
  *
  * @public
  */
-export const ROW_REORDER =
-  featureStateKey<RowReorderState<unknown>>("row-reorder");
+export const ROW_REORDER = NEUTRAL_ROW_REORDER as FeatureStateKey<
+  RowReorderState<unknown>
+>;

@@ -8,10 +8,11 @@
  * host has not taken control.
  */
 import { rowPinningSlice } from "@adapttable/core";
+import type { UseRowPinningUrlStateResult } from "@adapttable/core/binding";
 
-import type { RowPinState } from "../rows/rowPinning";
 import type { UrlStateAdapter } from "./adapter";
 import { useUrlSlice } from "./useUrlSlice";
+export type { UseRowPinningUrlStateResult } from "@adapttable/core/binding";
 
 /** Pinned rows take no configuration. */
 const NO_CONFIG = {};
@@ -28,18 +29,6 @@ export interface UseRowPinningUrlStateOptions {
   urlSync?: boolean;
   /** Namespace, when several tables share a page. */
   urlKey?: string;
-}
-
-/**
- * The controlled pair `<DataTable>` takes.
- *
- * @public
- */
-export interface UseRowPinningUrlStateResult {
-  /** The pin lists. */
-  pinnedRowIds: RowPinState;
-  /** Hand this to `onPinnedRowIdsChange`. */
-  onPinnedRowIdsChange: (next: RowPinState) => void;
 }
 
 /**

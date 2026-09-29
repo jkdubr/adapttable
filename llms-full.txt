@@ -17643,6 +17643,13 @@ its own controls to.
   `columnDragRowAttrs(drag: ColumnDragSource | null, overIndex, key, index):
 ColumnDragRowAttrs` — the column-menu reorder: which drags start, which arrow
   moves a column in either writing direction, and the drop edge.
+- `createColumnDragController(): ColumnDragController` — the column menu's
+  drag in progress (`ColumnDragSnapshot`: the dragged column and the hovered
+  index), fed the drag events a binding receives. `startColumnDrag`,
+  `acceptColumnDrag`, `dropColumn` and `columnReorderKeyDown` are its steps
+  on their own: they read any DOM-shaped event (`ColumnDragEvent` with its
+  `ColumnDataTransfer`, `ColumnReorderKeyEvent`), a browser's or a
+  framework's wrapper.
 - `createColumnRenameEditor(options: ColumnRenameEditorOptions):
 ColumnRenameEditor` — the inline rename form. `ColumnRenameEditorSnapshot`;
   `submit()` returns a `ColumnRenameSubmit`.
@@ -17776,6 +17783,16 @@ ChangedCellFlashStore` (`changedRowFields`, `patchTouchedKeys`,
   `pivotMeasureAggName` and `PIVOT_AGGREGATIONS` model its panel.
 
 ### `@adapttable/core/binding` — the Chrome model
+
+A binding also finds here what its hooks share with every other binding: the
+state shapes they return (`SelectionState`, `GridFocusState`,
+`ChecklistWindowState`, `TreeExpansionState`, `RowPinningState`, the URL-state
+results and the rest), the feature-state keys `DENSITY_STATE`
+(`DensityFeatureState`) and `ROW_REORDER`, `resolveColumnDefaults`
+(`ResolvableColumn`) and `resolveColumnHeaders` for a column's declarative
+defaults, `columnPathText` for a data-path value as cell text, and
+`sameRows` — whether a new `data` array holds the same rows, so a table
+engine does not rebuild for an inline array.
 
 - `chromeColumnPlan` (`ChromeColumnPlan`) — the columns a desktop table draws,
   with selection, expansion and action lanes.

@@ -12,9 +12,11 @@
  * silently overrode it would be a second source of truth.
  */
 import { densitySlice, type TableDensity } from "@adapttable/core";
+import type { UseDensityUrlStateResult } from "@adapttable/core/binding";
 
 import type { UrlStateAdapter } from "./adapter";
 import { useUrlSlice } from "./useUrlSlice";
+export type { UseDensityUrlStateResult } from "@adapttable/core/binding";
 
 /**
  * The two layouts a table has.
@@ -39,18 +41,6 @@ export interface UseDensityUrlStateOptions {
   urlKey?: string;
   /** The density before anyone has chosen one. Defaults to comfortable. */
   defaultDensity?: Density;
-}
-
-/**
- * The controlled pair to spread onto the table.
- *
- * @public
- */
-export interface UseDensityUrlStateResult {
-  /** Current row density. */
-  density: Density;
-  /** Switches density. */
-  onDensityChange: (next: Density) => void;
 }
 
 /**

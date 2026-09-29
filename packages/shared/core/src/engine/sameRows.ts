@@ -11,6 +11,8 @@
  * never looks inside a row. A patched array carries its own log and is
  * compared by identity alone, because the log is what continues the
  * incremental view.
+ *
+ * @public
  */
 export function sameRows<TRow>(
   a: readonly TRow[],

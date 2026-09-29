@@ -19,9 +19,11 @@ import {
   rowMutationActions,
   type TableLabels,
 } from "@adapttable/core";
+import type { RowMutationsState } from "@adapttable/core/binding";
 import { useMemo } from "react";
 
 import { useEventCallback } from "../hooks/useEventCallback";
+export type { RowMutationsState } from "@adapttable/core/binding";
 
 /**
  * How a table asks for a row to be added, copied or removed.
@@ -54,23 +56,6 @@ export interface RowMutationHandlers<TRow> {
    * delete is reversible — turn it off.
    */
   confirmDeleteRow?: boolean;
-}
-
-/**
- * Row-mutation state: the toolbar's control and the per-row actions.
- *
- * @public
- */
-export interface RowMutationsState<TRow> {
-  /** Whether an Add control should render. */
-  canAdd: boolean;
-  /** Ask for a new row. Inert without `onAddRow`. */
-  addRow: () => void;
-  /**
-   * Duplicate and Delete, in that order — empty when the host wired neither.
-   * Appended to the host's own `rowActions`, so a delete stays last.
-   */
-  actions: readonly RowAction<TRow>[];
 }
 
 /**

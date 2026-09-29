@@ -10,9 +10,11 @@
  * evaluation happens later, in the engine, on purpose.
  */
 import { type FormulaColumnSpec, formulaSlice } from "@adapttable/core";
+import type { UseFormulaUrlStateResult } from "@adapttable/core/formula";
 
 import type { UrlStateAdapter } from "../url/adapter";
 import { useUrlSlice } from "../url/useUrlSlice";
+export type { UseFormulaUrlStateResult } from "@adapttable/core/formula";
 
 export type { UrlStateAdapter };
 
@@ -32,18 +34,6 @@ export interface UseFormulaUrlStateOptions {
   urlKey?: string;
   /** The columns applied while the URL carries none. Defaults to none. */
   defaultFormulas?: readonly FormulaColumnSpec[];
-}
-
-/**
- * The controlled pair to hand a formula bar and {@link buildFormulaColumns}.
- *
- * @public
- */
-export interface UseFormulaUrlStateResult {
-  /** The columns — from the URL, or the default while the URL is silent. */
-  formulas: readonly FormulaColumnSpec[];
-  /** Persist a new list. Wire to whatever adds and removes a column. */
-  onFormulasChange: (next: readonly FormulaColumnSpec[]) => void;
 }
 
 /**

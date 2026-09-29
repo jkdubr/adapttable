@@ -1,17 +1,19 @@
 import {
-  COLUMN_DND_MIME,
-  columnDragAllowed,
+  acceptColumnDrag,
   type ColumnDragRowAttrs,
   columnDragRowAttrs,
-  type ColumnDragSource,
-  columnReorderKeyStep,
+  columnReorderKeyDown,
+  createColumnDragController,
+  dropColumn,
   isRtlElement,
+  startColumnDrag,
 } from "@adapttable/core";
 import {
   type DragEvent,
   type KeyboardEvent,
   useCallback,
   useState,
+  useSyncExternalStore,
 } from "react";
 
 export type { ColumnDragRowAttrs } from "@adapttable/core";
@@ -41,16 +43,9 @@ export interface ColumnRowDragProps {
 export function columnRowDragProps(key: string): ColumnRowDragProps {
   return {
     draggable: true,
-    onDragStart: (event) => {
-      // A drag starting on an interactive control (the eye/pin buttons)
-      // would hijack its click; the reorder grip is exempt.
-      if (!columnDragAllowed(event.target as HTMLElement | null)) {
-        event.preventDefault();
-        return;
-      }
-      event.dataTransfer.setData(COLUMN_DND_MIME, key);
-      event.dataTransfer.effectAllowed = "move";
-    },
+    // A drag starting on an interactive control (the eye/pin buttons) would
+    // hijack its click; the reorder grip is exempt.
+    onDragStart: (event) => startColumnDrag(event, key),
   };
 }
 
@@ -96,17 +91,12 @@ export function columnReorderKeyProps(
     tabIndex: 0,
     "aria-label": label,
     "data-adapttable-grip": "",
-    onKeyDown: (event) => {
-      // An explicit `[dir]` ancestor wins (what the adapters set on the
-      // root), falling back to the resolved CSS `direction`.
-      const step = columnReorderKeyStep(
-        event.key,
-        isRtlElement(event.currentTarget)
-      );
-      if (step === undefined) return;
-      event.preventDefault();
-      move(key, index + step);
-    },
+    // An explicit `[dir]` ancestor wins (what the adapters set on the root),
+    // falling back to the resolved CSS `direction`.
+    onKeyDown: (event) =>
+      columnReorderKeyDown(event, key, index, move, (element) =>
+        isRtlElement(element as HTMLElement | null)
+      ),
   };
 }
 
@@ -136,17 +126,8 @@ export function columnDropProps(
   move: (key: string, toIndex: number) => void
 ): ColumnDropProps {
   return {
-    onDragOver: (event) => {
-      if (!event.dataTransfer.types.includes(COLUMN_DND_MIME)) return;
-      event.preventDefault();
-      event.dataTransfer.dropEffect = "move";
-    },
-    onDrop: (event) => {
-      const key = event.dataTransfer.getData(COLUMN_DND_MIME);
-      if (key === "") return;
-      event.preventDefault();
-      move(key, index);
-    },
+    onDragOver: acceptColumnDrag,
+    onDrop: (event) => dropColumn(event, index, move),
   };
 }
 
@@ -187,54 +168,31 @@ export interface ColumnDragState {
  * @public
  */
 export function useColumnDragState(): ColumnDragState {
-  const [drag, setDrag] = useState<ColumnDragSource | null>(null);
-  const [overIndex, setOverIndex] = useState<number | null>(null);
-
-  const reset = useCallback(() => {
-    setDrag(null);
-    setOverIndex(null);
-  }, []);
-
+  const [controller] = useState(createColumnDragController);
+  const { drag, overIndex } = useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot,
+    controller.getSnapshot
+  );
   const rowDragProps = useCallback<ColumnDragState["rowDragProps"]>(
-    (key, index) => {
-      const base = columnRowDragProps(key);
-      return {
-        ...base,
-        onDragStart: (event) => {
-          base.onDragStart(event);
-          // The base handler cancels drags that start on interactive
-          // controls — only track the ones it allowed.
-          if (!event.defaultPrevented) setDrag({ key, from: index });
-        },
-        onDragEnd: reset,
-      };
-    },
-    [reset]
+    (key, index) => ({
+      draggable: true,
+      onDragStart: (event) => controller.dragStart(event, key, index),
+      onDragEnd: controller.end,
+    }),
+    [controller]
   );
-
   const dropProps = useCallback<ColumnDragState["dropProps"]>(
-    (index, move) => {
-      const base = columnDropProps(index, move);
-      return {
-        onDragOver: (event) => {
-          base.onDragOver(event);
-          // Only a column drag (accepted above) marks a target.
-          if (event.defaultPrevented) setOverIndex(index);
-        },
-        onDrop: (event) => {
-          base.onDrop(event);
-          reset();
-        },
-      };
-    },
-    [reset]
+    (index, move) => ({
+      onDragOver: (event) => controller.dragOver(event, index),
+      onDrop: (event) => controller.drop(event, index, move),
+    }),
+    [controller]
   );
-
   const rowAttrs = useCallback<ColumnDragState["rowAttrs"]>(
     (key, index) => columnDragRowAttrs(drag, overIndex, key, index),
     [drag, overIndex]
   );
-
   return {
     draggingKey: drag?.key ?? null,
     overIndex,

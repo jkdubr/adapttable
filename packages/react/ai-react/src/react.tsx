@@ -9,6 +9,7 @@
 import {
   type AgentSession,
   createTableAgentController,
+  TABLE_AGENT_STATE,
   type TableAgentBridge as NeutralBridge,
   type TableAgentController,
   type TableAgentControllerOptions,
@@ -20,7 +21,6 @@ import {
   AGENT_VIEW_STATE,
   type AgentApprovalPending,
   type FeatureProviderProps,
-  featureStateKey,
   FeatureStateScope,
   type StaticTableFeature,
   useTableRuntime,
@@ -45,12 +45,9 @@ export type { SharedApproval, TableAgentColumnPatch } from "@adapttable/ai";
 // working.
 export type TableAgentBridge = NeutralBridge<AgentApprovalPending>;
 
-/**
- * Feature-state key for the live {@link AgentSession}.
- *
- * @public
- */
-export const TABLE_AGENT_STATE = featureStateKey<AgentSession>("table-agent");
+// The live session's key is `@adapttable/ai`'s, so every agent binding
+// publishes and reads the same one.
+export { TABLE_AGENT_STATE };
 
 /**
  * Options for {@link tableAgent}.

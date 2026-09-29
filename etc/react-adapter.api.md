@@ -56,6 +56,7 @@ import { buildBodyCells } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionContext } from '@adapttable/core';
 import { bulkActionErrorMessage } from '@adapttable/core';
+import { BulkBarState } from '@adapttable/core/binding';
 import { CellConflictAsk } from '@adapttable/core';
 import { CellEdit } from '@adapttable/core';
 import { CellEditCommit } from '@adapttable/core';
@@ -217,6 +218,7 @@ import { exportButtonLabel } from '@adapttable/core';
 import { ExportColumnScope } from '@adapttable/core';
 import { ExportContext } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
+import { ExportHandlerState } from '@adapttable/core/binding';
 import { ExportInfo } from '@adapttable/core';
 import { ExportLiveSlotProps as ExportLiveSlotProps_2 } from '@adapttable/core/binding';
 import { ExportPayload } from '@adapttable/core';
@@ -319,10 +321,12 @@ import { focusEditorOnMount } from '@adapttable/core';
 import { FORCED_COLORS_CSS } from '@adapttable/core/binding';
 import { formatMultiDraft } from '@adapttable/core';
 import { FullscreenLiveSlotProps as FullscreenLiveSlotProps_2 } from '@adapttable/core/binding';
+import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
 import { GetCellSpanArgs } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
 import { GridFocusControllerOptions } from '@adapttable/core';
+import { GridFocusState } from '@adapttable/core/binding';
 import { groupAggregateEntries } from '@adapttable/core';
 import { groupAggregateNode } from '@adapttable/core';
 import { GroupAggregateOps } from '@adapttable/core';
@@ -330,6 +334,7 @@ import { GroupAggregateOverride } from '@adapttable/core';
 import { GroupAggregateOverrides } from '@adapttable/core';
 import { GroupAggregatesFn } from '@adapttable/core';
 import { GroupByInput } from '@adapttable/core';
+import { GroupCollapseState } from '@adapttable/core/binding';
 import { GroupedFlatEntry } from '@adapttable/core';
 import { GroupedHeaderAlign } from '@adapttable/core';
 import { groupedHeaderAlign } from '@adapttable/core/binding';
@@ -373,6 +378,7 @@ import { hasActiveHeaderFilter } from '@adapttable/core';
 import { HeaderGroupCell } from '@adapttable/core/binding';
 import { headerGroupRow } from '@adapttable/core/binding';
 import { headerGroupRows } from '@adapttable/core/binding';
+import { HeaderSelectionState } from '@adapttable/core/binding';
 import { hideAllColumns } from '@adapttable/core/binding';
 import { HTMLAttributes } from 'react';
 import { HtmlGroupedHeaderCell } from '@adapttable/core/binding';
@@ -482,6 +488,7 @@ import { REORDER_COLUMN_WIDTH } from '@adapttable/core/binding';
 import { resetColumnLayout } from '@adapttable/core/binding';
 import { resolveContextTarget } from '@adapttable/core';
 import { ResolvedContextTarget } from '@adapttable/core';
+import { ResolvedDensity } from '@adapttable/core/binding';
 import { resolveDisabledReason } from '@adapttable/core';
 import { ResolvedPaginationMode } from '@adapttable/core';
 import { resolveFilterMode } from '@adapttable/core';
@@ -515,6 +522,7 @@ import { RowEditDrafts } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowEditTrigger } from '@adapttable/core';
+import { RowExpansionState } from '@adapttable/core/binding';
 import { rowFlashSignature } from '@adapttable/core';
 import { RowGroupLevel } from '@adapttable/core';
 import { RowGroupMoveHandler } from '@adapttable/core';
@@ -528,7 +536,9 @@ import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
 import { RowMovePolicy } from '@adapttable/core';
 import { RowMoveRequest } from '@adapttable/core';
 import { RowMoveTarget } from '@adapttable/core';
+import { RowMutationsState } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
+import { RowPinningState } from '@adapttable/core/binding';
 import { RowPinSide } from '@adapttable/core';
 import { rowPinSignature } from '@adapttable/core/binding';
 import { RowPinState } from '@adapttable/core';
@@ -541,6 +551,7 @@ import { RowReorderHandleSlots as RowReorderHandleSlots_2 } from '@adapttable/co
 import { RowReorderLabels } from '@adapttable/core';
 import { RowReorderMoveButtonProps } from '@adapttable/core/binding';
 import { RowReorderOptions } from '@adapttable/core';
+import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
 import { rowSourceIndex } from '@adapttable/core/binding';
 import { rowSpanSignature } from '@adapttable/core/binding';
 import { RowStyle } from '@adapttable/core';
@@ -563,6 +574,8 @@ import { SavedViewsPanelSurfaceProps as SavedViewsPanelSurfaceProps_2 } from '@a
 import { SavedViewsSlotProps as SavedViewsSlotProps_2 } from '@adapttable/core/binding';
 import { SavedViewsStore } from '@adapttable/core';
 import { SavedViewVisibility } from '@adapttable/core';
+import { SearchInputState } from '@adapttable/core/binding';
+import { SelectionState } from '@adapttable/core/binding';
 import { SelectionStatPart } from '@adapttable/core/binding';
 import { SelectionStats } from '@adapttable/core';
 import { SelectionStatsChromeProps as SelectionStatsChromeProps_2 } from '@adapttable/core/binding';
@@ -645,6 +658,7 @@ import { TREE_TOGGLE } from '@adapttable/core/binding';
 import { treeCardStyle } from '@adapttable/core';
 import { TreeCellProps as TreeCellProps_2 } from '@adapttable/core/binding';
 import { TreeEntry } from '@adapttable/core';
+import { TreeExpansionState } from '@adapttable/core/binding';
 import { TreeToggleButtonProps } from '@adapttable/core/binding';
 import { TreeToggleProps } from '@adapttable/core/binding';
 import { TreeToggleSlots as TreeToggleSlots_2 } from '@adapttable/core/binding';
@@ -961,22 +975,7 @@ export interface BulkBarChromeProps {
     total: number;
 }
 
-// @public
-export interface BulkBarState {
-    banner: {
-        text: string;
-        action: string;
-        onClick: () => void;
-    };
-    clear: () => void;
-    errorMessage: string | null;
-    expandable: boolean;
-    ids: string[];
-    pending: string | null;
-    run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
-    scope: BulkActionContext | undefined;
-    selectedCount: number;
-}
+export { BulkBarState }
 
 // @public
 export const CELL_NAV_LIVE: FeatureSlotKey<CellNavLiveSlotProps<never>>;
@@ -1975,17 +1974,7 @@ export { ExportContext }
 
 export { ExportCsvOptions }
 
-// @public
-export interface ExportHandlerState {
-    exportAnnouncement: string;
-    exportBusy: boolean;
-    exportDisabled: boolean;
-    exportDisabledReason: string;
-    exportLabel: string;
-    exportProgressState: ExportProgressState | null;
-    exportStatus: ExportStatus;
-    onExportCsv: (() => void) | undefined;
-}
+export { ExportHandlerState }
 
 export { ExportInfo }
 
@@ -2417,14 +2406,7 @@ export const FULLSCREEN_LIVE: FeatureSlotKey<FullscreenLiveSlotProps>;
 // @public
 export type FullscreenLiveSlotProps = FullscreenLiveSlotProps_2<FullscreenState, ReactNode>;
 
-// @public
-export interface FullscreenState {
-    active: boolean;
-    container: HTMLElement | undefined;
-    exit: () => void;
-    supported: boolean;
-    toggle: () => void;
-}
+export { FullscreenState }
 
 export { GetCellSpan }
 
@@ -2445,33 +2427,7 @@ export interface GridFocusAnnouncerProps {
     focus: GridFocusState;
 }
 
-// @public
-export interface GridFocusState {
-    active: GridCell | null;
-    announcement: string;
-    cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
-    columnCheckbox: boolean;
-    copyCells: (cell?: GridCell, cut?: boolean) => void;
-    enabled: boolean;
-    fillHandleCell: GridCell | null;
-    fillHandleLabel: string;
-    fillPreview: CellRange | null;
-    focusCell: (cell: GridCell) => void;
-    getCellProps: (cell: GridCell) => Record<string, unknown>;
-    getCellPropsAt: (windowIndex: number, col: number) => Record<string, unknown>;
-    getColumnHeaderProps: (col: number, options?: {
-        sortable?: boolean;
-    }) => Record<string, unknown>;
-    getFillHandleProps: () => Record<string, unknown>;
-    getGridProps: () => Record<string, unknown>;
-    getRowProps: (rowIndex: number) => Record<string, unknown>;
-    getRowPropsAt: (windowIndex: number) => Record<string, unknown>;
-    isColumnSelected: (col: number) => boolean;
-    range: CellRange | null;
-    selectColumn: (col: number, extend?: boolean) => void;
-    selectRange: (range: CellRange | null) => void;
-    toggleColumn: (col: number) => void;
-}
+export { GridFocusState }
 
 // @public
 export function GripIcon(): ReactElement;
@@ -2496,18 +2452,7 @@ export { GroupAggregatesFn }
 
 export { GroupByInput }
 
-// @public
-export interface GroupCollapseState {
-    collapseAll: (groupKeys: readonly string[]) => void;
-    collapsedGroupIds: ReadonlySet<string>;
-    collapseToDepth: (depth: number, groups: readonly {
-        key: string;
-        level: number;
-    }[]) => void;
-    expandAll: () => void;
-    isCollapsed: (groupKey: string) => boolean;
-    toggle: (groupKey: string) => void;
-}
+export { GroupCollapseState }
 
 export { GroupedFlatEntry }
 
@@ -2643,8 +2588,7 @@ export { headerGroupRow }
 
 export { headerGroupRows }
 
-// @public
-export type HeaderSelectionState = "all" | "some" | "none";
+export { HeaderSelectionState }
 
 export { hideAllColumns }
 
@@ -2967,11 +2911,7 @@ export { resolveContextTarget }
 
 export { ResolvedContextTarget }
 
-// @public
-export interface ResolvedDensity {
-    readonly density: Density;
-    readonly onDensityChange: (next: Density) => void;
-}
+export { ResolvedDensity }
 
 export { resolveDisabledReason }
 
@@ -3095,12 +3035,7 @@ export interface RowElementProps extends Props {
     role: string;
 }
 
-// @public
-export interface RowExpansionState {
-    expandedIds: ReadonlySet<string>;
-    isExpanded: (id: string) => boolean;
-    toggle: (id: string) => void;
-}
+export { RowExpansionState }
 
 export { rowFlashSignature }
 
@@ -3131,12 +3066,7 @@ export { RowMoveRequest }
 
 export { RowMoveTarget }
 
-// @public
-export interface RowMutationsState<TRow> {
-    actions: readonly RowAction<TRow>[];
-    addRow: () => void;
-    canAdd: boolean;
-}
+export { RowMutationsState }
 
 // @public
 export type RowOf<P> = P extends {
@@ -3145,14 +3075,7 @@ export type RowOf<P> = P extends {
 
 export { RowPairMeasurer }
 
-// @public
-export interface RowPinningState<TRow> {
-    actions: readonly RowAction<TRow>[];
-    pin: (rowId: string, side: RowPinSide) => void;
-    sideOf: (rowId: string) => RowPinSide | undefined;
-    state: RowPinState;
-    unpin: (rowId: string) => void;
-}
+export { RowPinningState }
 
 export { RowPinSide }
 
@@ -3214,38 +3137,7 @@ export { RowReorderOptions }
 export function rowReorderSignature<TRow>(reorder: RowReorderState<TRow> | undefined, rowId: string, localIndex: number): string | null;
 
 // @public
-export interface RowReorderState<TRow> {
-    announcement: string;
-    cancelMove: () => void;
-    confirmMove: () => void;
-    dragProps: (rowId: string, localIndex: number) => {
-        draggable: true;
-        onDragStart: (event: DragEvent_2<HTMLElement>) => void;
-        onDragEnd: () => void;
-    };
-    dropProps: (localIndex: number, row: TRow, windowStart: number) => {
-        onDragOver: (event: DragEvent_2<HTMLElement>) => void;
-        onDrop: (event: DragEvent_2<HTMLElement>) => void;
-    };
-    handleKeyDown: (event: KeyboardEvent_2<HTMLElement>, rowId: string, localIndex: number, row: TRow, windowStart: number, rowCount: number) => void;
-    hostConfirmPending: boolean;
-    isLifted: (rowId: string) => boolean;
-    isMovePending?: (row: TRow) => boolean;
-    lifted: {
-        rowId: string;
-        from: number;
-    } | null;
-    moveBy: (localIndex: number, delta: -1 | 1, row: TRow, windowStart: number, rowCount: number) => void;
-    moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
-    overIndex: number | null;
-    overPosition: RowDropPosition | null;
-    pendingMove: RowMoveRequest<TRow> | null;
-    rowAttrs: (rowId: string, localIndex: number) => {
-        "data-dragging"?: "";
-        "data-drop"?: RowDropPosition;
-    };
-    selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
-}
+export type RowReorderState<TRow> = RowReorderState_2<TRow, DragEvent_2<HTMLElement>, KeyboardEvent_2<HTMLElement>>;
 
 // @public
 export const RowScrollContext: Context<((row: never) => void) | null>;
@@ -3321,11 +3213,7 @@ export interface SearchInputElementProps extends Props {
     value: string;
 }
 
-// @public
-export interface SearchInputState {
-    setValue: (next: string) => void;
-    value: string;
-}
+export { SearchInputState }
 
 // @public
 export const SELECTION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
@@ -3333,22 +3221,7 @@ export const SELECTION_LIVE: FeatureSlotKey<ChromeExtraSlotProps<never>>;
 // @public
 export const SELECTION_STATS_LIVE: FeatureSlotKey<SelectionStatsLiveSlotProps<never>>;
 
-// @public
-export interface SelectionState {
-    acrossPages: boolean;
-    allMatching: boolean;
-    clear: () => void;
-    headerState: HeaderSelectionState;
-    isSelected: (id: string) => boolean;
-    replace: (ids: readonly string[] | undefined) => void;
-    selectAllMatching: () => void;
-    selectedCount: number;
-    selectedIds: ReadonlySet<string>;
-    toggle: (id: string) => void;
-    toggleAll: () => void;
-    toggleGroupLeaves: (leafIds: readonly string[]) => void;
-    visibleIds: string[];
-}
+export { SelectionState }
 
 export { SelectionStatPart }
 
@@ -3955,15 +3828,7 @@ export type TreeCellProps<TRow> = TreeCellProps_2<TRow, ReactNode>;
 
 export { TreeEntry }
 
-// @public
-export interface TreeExpansionState {
-    collapseAll: () => void;
-    expand: (id: string) => void;
-    expandAll: (ids: readonly string[]) => void;
-    expandedIds: ReadonlySet<string>;
-    isExpanded: (id: string) => boolean;
-    toggle: (id: string) => void;
-}
+export { TreeExpansionState }
 
 export { TreeToggleButtonProps }
 

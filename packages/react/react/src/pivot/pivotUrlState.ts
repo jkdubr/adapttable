@@ -16,10 +16,12 @@
  * other end is a server that never renders.
  */
 import { type PivotConfig, pivotSlice } from "@adapttable/core";
+import type { UsePivotUrlStateResult } from "@adapttable/core/binding";
 import { useCallback, useMemo } from "react";
 
 import type { UrlStateAdapter } from "../url/adapter";
 import { useUrlSlice } from "../url/useUrlSlice";
+export type { UsePivotUrlStateResult } from "@adapttable/core/binding";
 
 export type { UrlStateAdapter };
 
@@ -39,25 +41,6 @@ export interface UsePivotUrlStateOptions {
   urlKey?: string;
   /** The pivot before anyone has built one. Defaults to empty. */
   defaultConfig?: PivotConfig;
-}
-
-/**
- * The controlled state to hand the panel and the engine.
- *
- * @public
- */
-export interface UsePivotUrlStateResult {
-  /** What to pivot, and how. Give it to the panel and to `pivot`. */
-  config: PivotConfig;
-  /** Persist a new configuration. Wire to the panel's `onChange`. */
-  onConfigChange: (next: PivotConfig) => void;
-  /**
-   * The folded subtotal lines, by key — `pivot`'s `collapsed` option, so the
-   * link and the rendering agree without the host holding a second copy.
-   */
-  collapsed: ReadonlySet<string>;
-  /** Persist a new folded set. Wire to whatever folds a subtotal line. */
-  onCollapsedChange: (next: ReadonlySet<string>) => void;
 }
 
 /**

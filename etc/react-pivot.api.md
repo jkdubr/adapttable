@@ -60,6 +60,7 @@ import { setMeasureAgg } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
+import { UsePivotUrlStateResult } from '@adapttable/core/binding';
 
 export { AggregateName }
 
@@ -207,13 +208,7 @@ export interface UsePivotUrlStateOptions {
     urlSync?: boolean;
 }
 
-// @public
-export interface UsePivotUrlStateResult {
-    collapsed: ReadonlySet<string>;
-    config: PivotConfig;
-    onCollapsedChange: (next: ReadonlySet<string>) => void;
-    onConfigChange: (next: PivotConfig) => void;
-}
+export { UsePivotUrlStateResult }
 
 
 export * from "@adapttable/core/pivot";
