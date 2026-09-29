@@ -6,14 +6,19 @@
 import {
   type AdaptTableFeature,
   type CellEditHandler,
+  EDITABLE_CELL,
   editing as coreAngularEditing,
+  extendFeature,
   type RowEditHandler,
   rowEditing as coreAngularRowEditing,
+  slotRender,
 } from "@adapttable/angular";
+import { AdaptEditableCell } from "@adapttable/angular-unstyled";
 
 /**
  * Edit a single cell in place. The host's write receives the row, column
- * key and committed value; the table never mutates the array.
+ * key and committed value; the table never mutates the array. Fills
+ * {@link EDITABLE_CELL} with this kit's native editors.
  *
  * @param onCellEdit - Called when a draft commits.
  * @param extras - Optional lifecycle observers merged into the patch.
@@ -24,7 +29,9 @@ export function editing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
   extras: Record<string, unknown> = {}
 ): AdaptTableFeature {
-  return coreAngularEditing(onCellEdit, extras);
+  return extendFeature(coreAngularEditing(onCellEdit, extras), [
+    slotRender(EDITABLE_CELL, () => AdaptEditableCell),
+  ]);
 }
 
 /**
@@ -39,5 +46,7 @@ export function rowEditing<TRow>(
   onRowEdit: RowEditHandler<TRow>,
   extras: Record<string, unknown> = {}
 ): AdaptTableFeature {
-  return coreAngularRowEditing(onRowEdit, extras);
+  return extendFeature(coreAngularRowEditing(onRowEdit, extras), [
+    slotRender(EDITABLE_CELL, () => AdaptEditableCell),
+  ]);
 }

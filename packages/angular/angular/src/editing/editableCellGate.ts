@@ -89,6 +89,8 @@ export interface EditableCellEditorCtrl {
   editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
   /** Choices for a select editor, empty for other shapes. */
   selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
+  /** Accessible name for the editor control. */
+  label: string;
   /** A validator's message for this cell, when the last commit was rejected. */
   error?: string;
   /** Whether an async validator is still deciding. */
@@ -432,6 +434,7 @@ export class AdaptEditableCellGate<TRow> {
       commitOnBlur: ctrl.commitOnBlur,
       editor: ctrl.editor!,
       selectOptions: ctrl.selectOptions,
+      label: this.editLabel(),
       error: ctrl.error,
       validating: ctrl.validating,
       errorId,

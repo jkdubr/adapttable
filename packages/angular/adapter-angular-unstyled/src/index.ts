@@ -12,6 +12,7 @@ export { AdaptAutoFilterForm } from "./components/autoFilterForm";
 export { AdaptBulkBar } from "./components/bulkActionBar";
 export { AdaptColumnMenu } from "./components/columnMenu";
 export { AdaptDesktopTable } from "./components/desktopTable";
+export { AdaptEditableCell } from "./components/editableCell";
 export { AdaptFilterDrawer, AdaptFiltersForm } from "./components/filterPanel";
 export { AdaptFilterPopover } from "./components/filterPopover";
 export { AdaptGroupingPanel } from "./components/groupingPanel";

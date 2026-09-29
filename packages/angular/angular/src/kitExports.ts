@@ -71,6 +71,15 @@ export {
   visibleRowActions,
 } from "@adapttable/core";
 export { restoreFocusSoon } from "@adapttable/core";
+export {
+  editorInputType,
+  isBooleanEditor,
+  isDraftChecked,
+  isMultiSelectEditor,
+  isSelectEditor,
+  readMultiDraft,
+  resolveEditableCellDisplay,
+} from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,
@@ -160,4 +169,8 @@ export {
   ROW_REORDER_ANNOUNCER,
   ROW_REORDER_BUTTONS,
   ROW_REORDER_HANDLE,
+} from "@adapttable/core/binding";
+export {
+  EDITABLE_CELL,
+  type EditableCellSlotProps,
 } from "@adapttable/core/binding";

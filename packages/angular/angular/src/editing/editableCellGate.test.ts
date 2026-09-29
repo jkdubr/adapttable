@@ -307,6 +307,7 @@ describe("editable cell helpers", () => {
         commitOnBlur,
         editor: "boolean",
         selectOptions: [],
+        label: "Edit cell",
         validating: false,
         errorId: "e",
         focusRef: () => undefined,

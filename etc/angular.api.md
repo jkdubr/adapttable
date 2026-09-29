@@ -54,11 +54,13 @@ import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
 import { devWarn } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { EDITABLE_CELL } from '@adapttable/core/binding';
 import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
 import { EditableCellButtonProps } from '@adapttable/core/binding';
 import { EditableCellController } from '@adapttable/core';
 import { EditableCellMode } from '@adapttable/core';
 import { EditableCellPresentation } from '@adapttable/core';
+import { EditableCellSlotProps } from '@adapttable/core/binding';
 import { EditableColumnLike } from '@adapttable/core';
 import { EditConflictLabels } from '@adapttable/core';
 import { EditEvent } from '@adapttable/core';
@@ -66,6 +68,7 @@ import { EditEventHandler } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
 import { editorBusyProps } from '@adapttable/core';
+import { editorInputType } from '@adapttable/core';
 import { editorValidationProps } from '@adapttable/core';
 import { EditUnit } from '@adapttable/core';
 import { EditValidationState } from '@adapttable/core';
@@ -132,7 +135,11 @@ import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { isBodyEligible } from '@adapttable/core/binding';
+import { isBooleanEditor } from '@adapttable/core';
 import { isCellEditable } from '@adapttable/core';
+import { isDraftChecked } from '@adapttable/core';
+import { isMultiSelectEditor } from '@adapttable/core';
+import { isSelectEditor } from '@adapttable/core';
 import { joinRelativeToken } from '@adapttable/core';
 import { KeyedVirtualization } from '@adapttable/core';
 import { listFilterValues } from '@adapttable/core';
@@ -150,12 +157,14 @@ import { QueryFilterGroup } from '@adapttable/core';
 import { RangeFieldWidget } from '@adapttable/core';
 import { RangeOp } from '@adapttable/core';
 import { readEditableCellValue } from '@adapttable/core';
+import { readMultiDraft } from '@adapttable/core';
 import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
 import { RELATIVE_PRESETS } from '@adapttable/core';
 import { RelativePreset } from '@adapttable/core';
 import { REORDER_COLUMN_KEY } from '@adapttable/core';
 import { resolveCellEditor } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
+import { resolveEditableCellDisplay } from '@adapttable/core';
 import { resolveVirtualRows } from '@adapttable/core';
 import { restoreFocusSoon } from '@adapttable/core';
 import { ROW_REORDER_ANNOUNCER } from '@adapttable/core/binding';
@@ -1255,6 +1264,8 @@ export { devWarn }
 
 export { Direction }
 
+export { EDITABLE_CELL }
+
 // @public
 export type EditableCellActivateProps = EditableCellActivateProps_2<unknown>;
 
@@ -1287,6 +1298,7 @@ export interface EditableCellEditorCtrl {
     focusRef: (node: {
         focus: () => void;
     } | null) => void;
+    label: string;
     onEditorKeyDown: (event: {
         key: string;
         preventDefault: () => void;
@@ -1298,6 +1310,8 @@ export interface EditableCellEditorCtrl {
 }
 
 export { EditableCellMode }
+
+export { EditableCellSlotProps }
 
 // @public
 export interface EditableCellSlots {
@@ -1325,6 +1339,8 @@ export interface EditingLifecycleExtras<TRow = unknown> {
 export { EditLifecycle }
 
 export { editorBusyProps }
+
+export { editorInputType }
 
 export { editorValidationProps }
 
@@ -1654,13 +1670,21 @@ export function injectTableVirtualizer<TRow>(options: TableVirtualizationOptions
 
 export { isBodyEligible }
 
+export { isBooleanEditor }
+
 export { isCellEditable }
+
+export { isDraftChecked }
 
 // @public
 export interface IsMobileOptions {
     readonly breakpoint?: number;
     readonly injector?: Injector;
 }
+
+export { isMultiSelectEditor }
+
+export { isSelectEditor }
 
 export { joinRelativeToken }
 
@@ -1719,6 +1743,8 @@ export { RangeOp }
 
 export { readEditableCellValue }
 
+export { readMultiDraft }
+
 export { RELATIVE_PRESET_LABEL_KEYS }
 
 export { RELATIVE_PRESETS }
@@ -1743,6 +1769,8 @@ export interface ResolvedRenderer<TContext> {
     readonly inputs: Record<string, unknown>;
     readonly template: TemplateRef<TContext> | null;
 }
+
+export { resolveEditableCellDisplay }
 
 export { resolveVirtualRows }
 

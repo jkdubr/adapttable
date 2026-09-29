@@ -3056,8 +3056,15 @@ controls: the host writes its own markup.
   on the keyboard grid; `injectGridFocus` is the underlying hook.
   `rowReorder` / `injectRowReorder` (`RowReorderStateOptions`) publish the
   drag and keyboard grab model. `editing` / `injectCellEditing`
-  (`CellEditHandler`, `CellEditingOptions`) arm in-place cell edits;
-  `rowEditing` / `injectRowEditing` (`RowEditHandler`,
+  (`CellEditHandler`, `CellEditingOptions`, `EditingLifecycleExtras`) arm
+  in-place cell edits; `injectEditValidation` (`EditValidationInjectOptions`)
+  and `injectCellSaveState` (`CellSaveStateInjectOptions`) track validators
+  and rejected saves. `AdaptEditableCellGate` draws the activate control and
+  editor slot (`EDITABLE_CELL`, `EditableCellSlotProps`,
+  `EditableCellSlots`, `EditableCellEditorCtrl`, `EditableCellActivateProps`,
+  `EditableCellButtonProps`); `AdaptCellConflictNotice`
+  (`CellConflictNoticeProps`) is the keep/take question when a live row moves
+  under the editor. `rowEditing` / `injectRowEditing` (`RowEditHandler`,
   `RowEditingInjectOptions`) and `batchEditing` / `injectBatchEditing`
   (`BatchEditHandler`, `BatchEditingInjectOptions`) arm whole-row and
   batch commits.
@@ -3074,21 +3081,35 @@ controls: the host writes its own markup.
 - `fromStore(store, options)` turns any core store, an `ExternalStore`, into a
   read-only signal that ends with its injector (`FromStoreOptions`).
   `MaybeSignal` and `MaybeSignalOptional` are the option types that take a
-  value or a signal of one.
+  value or a signal of one. Secondary entries `./formula`, `./pivot`,
+  `./sparkline` and `./stream` currently export only the reserved markers
+  `__angularFormulaReserved`, `__angularPivotReserved`,
+  `__angularSparklineReserved` and `__angularStreamReserved` until those
+  surfaces land.
 
 `@adapttable/angular-unstyled` is the Angular table drawn with native HTML,
 unpublished while it reaches parity with the React kits. `AdaptDataTable`
 (`<adapt-data-table>`) takes the rows, columns and row key as inputs and
 renders search, sorting, paging, the phone card layout, row selection and
 keyboard cell navigation with the `data-adapttable-part` names every kit
-shares. Its `features` input composes factories from secondary entries —
-`columnMenu`, `filters`, `headerFilters`, `bulkActions`, `rowActions`
-(`RowActionsFeatureOptions`), `densityChooser`, `fullscreen`, `exportCsv`,
-`savedViews`, `groupingPanel`, `virtualize`, `cellNavigation`, `rowReorder`,
-`editing`, `rowEditing` and `batchEditing` — each importable from its own
+shares. `AdaptDesktopTable` and `AdaptMobileCards` are the desktop body and
+phone card list; `AdaptPaginationFooter` is the pager. Its `features` input
+composes factories from secondary entries —
+`columnMenu` (`AdaptColumnMenu`), `filters` (`AdaptFiltersForm`,
+`AdaptFilterDrawer`, `AdaptFilterPopover`, `AdaptFilterChips`,
+`AdaptAutoFilterForm`), `headerFilters`, `bulkActions` (`AdaptBulkBar`),
+`rowActions` (`RowActionsFeatureOptions`), `densityChooser`
+(`AdaptDensityButton`), `fullscreen` (`AdaptFullscreenButton`), `exportCsv`
+(`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`), `groupingPanel`
+(`AdaptGroupingPanel`), `virtualize`, `cellNavigation`, `rowReorder`,
+`editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL`) and
+`batchEditing` — each importable from its own
 subpath (or from `@adapttable/angular-unstyled/features`); `standardPreset`
-(`@adapttable/angular-unstyled/preset`) assembles the zero-configuration
-set. `filtersMode` (`FiltersMode`) picks the anchored popover or the drawer.
+(`@adapttable/angular-unstyled/preset`, `StandardPresetOptions`) assembles
+the zero-configuration
+set. Overlay helpers `menuPopover` / `MenuPopover`, `OVERLAY_Z` and
+`placeOverlayBelowTrigger` position kit menus. `filtersMode` (`FiltersMode`)
+picks the anchored popover or the drawer.
 Each feature draws the kit's own native controls. `AdaptGroupingPanel` draws
 the grouping strip with those same native controls. `paginationMode` and
 `maxHeight` arm infinite lists and a scroll-box window. `TableView` is what

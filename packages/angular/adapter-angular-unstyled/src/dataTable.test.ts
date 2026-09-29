@@ -270,7 +270,8 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(cell).toBeTruthy();
     cell?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
     await settle();
-    expect(part("cell-editor")).toBeNull();
+    expect(part("edit-cell-editor")).toBeNull();
+    expect(part("edit-cell-activate")).toBeNull();
   });
 
   it("opens, commits and cancels an in-place cell editor", async () => {
@@ -278,11 +279,11 @@ describe("unstyled Angular editing and virtualize", () => {
     const { part, parts, settle } = await mountFeatures({
       features: [editing(onCellEdit)],
     });
-    const cell = parts("cell")[0];
-    expect(cell).toBeTruthy();
-    cell?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    const activate = parts("edit-cell-activate")[0];
+    expect(activate).not.toBeNull();
+    activate?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
     await settle();
-    const editor = part<HTMLInputElement>("cell-editor");
+    const editor = part<HTMLInputElement>("edit-cell-editor");
     expect(editor).not.toBeNull();
     if (!editor) return;
     editor.value = "Renamed";
@@ -295,17 +296,17 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(onCellEdit.mock.calls[0]?.[1]).toBe("name");
     expect(onCellEdit.mock.calls[0]?.[2]).toBe("Renamed");
 
-    parts("cell")[0]?.dispatchEvent(
+    parts("edit-cell-activate")[0]?.dispatchEvent(
       new MouseEvent("dblclick", { bubbles: true })
     );
     await settle();
-    const again = part<HTMLInputElement>("cell-editor");
+    const again = part<HTMLInputElement>("edit-cell-editor");
     expect(again).not.toBeNull();
     again?.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
     );
     await settle();
-    expect(part("cell-editor")).toBeNull();
+    expect(part("edit-cell-editor")).toBeNull();
   });
 
   it("warns when virtualize is composed on a paged table", async () => {

@@ -8,20 +8,26 @@ import { ActiveFilterChip } from '@adapttable/angular';
 import { ActiveFilterChipsSlotProps } from '@adapttable/angular';
 import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptTableFeature } from '@adapttable/angular';
+import { AfterViewInit } from '@angular/core';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionRunnerState } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
-import { CellEditHandler } from '@adapttable/angular';
-import { CellEditingState } from '@adapttable/angular';
 import { ChecklistSlots } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
 import { ColumnDrag } from '@adapttable/angular';
 import { ColumnLayoutState } from '@adapttable/angular';
 import { ColumnMenuRow } from '@adapttable/angular';
 import { ColumnMenuSlotProps } from '@adapttable/angular';
+import { ColumnModel } from '@adapttable/core';
 import { ConfirmHandler } from '@adapttable/angular';
 import { DataTable } from '@adapttable/angular';
 import { Direction } from '@adapttable/angular';
+import { EditableCellEditing } from '@adapttable/angular';
+import { EditableCellEditorCtrl } from '@adapttable/angular';
+import { EditableCellSlotProps } from '@adapttable/angular';
+import { EditableCellSlots } from '@adapttable/angular';
+import { editorInputType } from '@adapttable/angular';
+import { editorValidationProps } from '@adapttable/angular';
 import { ElementRef } from '@angular/core';
 import { ExtraFilters } from '@adapttable/angular';
 import { FeatureSlotKey } from '@adapttable/angular';
@@ -38,11 +44,19 @@ import * as i0 from '@angular/core';
 import { IconDescriptor } from '@adapttable/angular';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
+import { isBooleanEditor } from '@adapttable/angular';
+import { isDraftChecked } from '@adapttable/angular';
+import { isMultiSelectEditor } from '@adapttable/angular';
+import { isSelectEditor } from '@adapttable/angular';
+import { multiDraftFromSelect } from '@adapttable/angular';
 import { OnInit } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
 import { PaginationMode } from '@adapttable/angular';
+import { readMultiDraft } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
+import { RowReorderButtonsProps } from '@adapttable/core/binding';
+import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/angular';
 import { RowReorderHandleProps } from '@adapttable/core/binding';
 import { RowReorderHandleProps as RowReorderHandleProps_2 } from '@adapttable/angular';
 import { RowReorderState } from '@adapttable/angular';
@@ -378,9 +392,8 @@ export class AdaptDensityButton {
 
 // @internal
 export class AdaptDesktopTable<TRow> {
-    protected beginEdit(row: TRow, column: ColumnDef<TRow>): void;
-    protected cancelEdit(): void;
-    protected commitEdit(): void;
+    protected editableCellProps(editing: EditableCellEditing<TRow>, row: TRow, column: ColumnDef<TRow>, rowIndex: number): EditableCellSlotProps<never>;
+    protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
     protected readonly filterSlots: {
         header: FeatureSlotKey<FilterHeaderControlProps<never>>;
     };
@@ -413,6 +426,33 @@ export class AdaptDesktopTable<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDesktopTable<any>, never>;
+}
+
+// @public
+export class AdaptEditableCell<TRow> {
+    // @internal
+    protected column(): ColumnDef<TRow>;
+    // @internal
+    protected columns(): readonly ColumnDef<TRow>[];
+    // @internal
+    protected editing(): EditableCellEditing<TRow> | undefined;
+    // (undocumented)
+    protected readonly editor: typeof AdaptNativeCellEditor;
+    readonly props: InputSignal<EditableCellSlotProps<TRow, unknown, ColumnModel<TRow>, unknown>>;
+    // @internal
+    protected resolvedDisplay(): unknown;
+    // (undocumented)
+    protected readonly slots: EditableCellSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptEditableCell<any>, "adapt-editable-cell", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptEditableCell<any>, never>;
 }
 
 // @internal
@@ -530,6 +570,8 @@ export class AdaptGroupingPanel<TRow> {
 
 // @internal
 export class AdaptMobileCards<TRow> {
+    protected reorderButtonsProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderButtonsProps_2<never>;
+    protected readonly reorderButtonsSlot: FeatureSlotKey<RowReorderButtonsProps<never, unknown>>;
     protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     readonly view: InputSignal<TableView<TRow>>;
@@ -646,11 +688,10 @@ export interface TableView<TRow> {
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
     readonly confirm: ConfirmHandler;
     readonly density: Signal<TableDensity>;
-    readonly editing: Signal<CellEditingState> | undefined;
+    readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
     readonly filters: FiltersView | undefined;
     readonly grid: GridFocus<TRow> | undefined;
     readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
-    readonly onCellEdit: CellEditHandler<TRow> | undefined;
     readonly reorder: Signal<RowReorderState<TRow>> | undefined;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;

@@ -136,20 +136,19 @@
                   ? v.grid.cellAttrs(column, entry.index, col)
                   : v.table.cellAttrs(column)
               "
-              (dblclick)="beginEdit(entry.row, column)"
             >
-              @if (
-                v.editing?.().state.isActive(rowId(entry.row), column.key)
-              ) {
-                <input
-                  data-adapttable-part="cell-editor"
-                  [value]="v.editing?.().state.draft"
-                  (input)="
-                    v.editing?.().state.setDraft($any($event.target).value)
+              @if (v.editing; as editing) {
+                <ng-container
+                  [adaptSlot]="editableCellSlot"
+                  [adaptSlotProps]="
+                    editableCellProps(
+                      editing(),
+                      entry.row,
+                      column,
+                      entry.index
+                    )
                   "
-                  (keydown.enter)="finishCellEdit(entry.row, column)"
-                  (keydown.escape)="cancelEdit()"
-                  (blur)="finishCellEdit(entry.row, column)"
+                  [adaptSlotTable]="v.table"
                 />
               } @else {
                 <span

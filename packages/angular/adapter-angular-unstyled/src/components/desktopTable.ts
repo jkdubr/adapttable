@@ -6,9 +6,10 @@ import {
   AdaptCell,
   AdaptHeader,
   AdaptSlot,
-  beginCellEdit,
   type ColumnDef,
-  editableCellController,
+  EDITABLE_CELL,
+  type EditableCellEditing,
+  type EditableCellSlotProps,
   FILTER_HEADER,
   ROW_REORDER_HANDLE,
   type RowReorderHandleProps,
@@ -29,9 +30,8 @@ import { AdaptRowActions } from "./rowActionButtons";
  * The desktop table drawn with native elements: sticky header, body rows,
  * selection, reorder and in-place cell editors.
  *
- * Cell commits go through core's {@link editableCellController} (same path
- * as {@link AdaptEditableCellGate}); the inline text editor is replaced by
- * the gate Chrome in a later part.
+ * Editable cells go through the {@link EDITABLE_CELL} slot when editing is
+ * composed; otherwise the column cell renders as usual.
  *
  * @internal
  */
@@ -57,9 +57,13 @@ export class AdaptDesktopTable<TRow> {
   protected readonly filterSlots = { header: FILTER_HEADER };
   /** The row-reorder grip slot. @internal */
   protected readonly reorderHandleSlot = ROW_REORDER_HANDLE;
+  /** The editable-cell slot. @internal */
+  protected readonly editableCellSlot = EDITABLE_CELL;
 
   private handlePropsCache = new Map<string, RowReorderHandleProps<never>>();
   private handlePropsToken = "";
+  private editablePropsCache = new Map<string, EditableCellSlotProps<never>>();
+  private editablePropsToken = "";
 
   /**
    * The scroll box that owns `maxHeight`, when virtualization tracks it.
@@ -133,6 +137,51 @@ export class AdaptDesktopTable<TRow> {
   }
 
   /**
+   * Props for the editable-cell slot on one body cell. Cached so AdaptSlot
+   * does not see a new object every tick.
+   *
+   * @internal
+   */
+  protected editableCellProps(
+    editing: EditableCellEditing<TRow>,
+    row: TRow,
+    column: ColumnDef<TRow>,
+    rowIndex: number
+  ): EditableCellSlotProps<never> {
+    const view = this.view();
+    const labels = view.table.labels();
+    const active = editing.state.active;
+    const token = [
+      active ? `${active.rowId}:${active.columnKey}` : "",
+      editing.state.draft,
+      String(view.table.rows().length),
+      String(view.table.columns().length),
+    ].join("|");
+    if (token !== this.editablePropsToken) {
+      this.editablePropsCache = new Map();
+      this.editablePropsToken = token;
+    }
+    const rowId = this.rowId(row);
+    const key = `${rowId}:${column.key}`;
+    const cached = this.editablePropsCache.get(key);
+    if (cached) return cached;
+    const props = {
+      editing,
+      row,
+      column,
+      rowId,
+      rowIndex,
+      rows: view.table.rows(),
+      columns: view.table.columns(),
+      rowKey: (entry: TRow) => this.rowKey()(entry),
+      editLabel: labels.editCell,
+      undoLabel: labels.undoEdit,
+    } as unknown as EditableCellSlotProps<never>;
+    this.editablePropsCache.set(key, props);
+    return props;
+  }
+
+  /**
    * Style for the scroll box when `maxHeight` is set.
    *
    * @internal
@@ -145,46 +194,5 @@ export class AdaptDesktopTable<TRow> {
         typeof maxHeight === "number" ? `${String(maxHeight)}px` : maxHeight,
       overflow: "auto",
     };
-  }
-
-  /**
-   * Open the in-place editor for a cell when editing is composed.
-   *
-   * @internal
-   */
-  protected beginEdit(row: TRow, column: ColumnDef<TRow>): void {
-    const editing = this.view().editing?.();
-    if (!editing) return;
-    beginCellEdit(editing.state, row, column, (entry) => this.rowKey()(entry));
-  }
-
-  /**
-   * Commit the active draft through core's editableCellController (parseValue,
-   * validators, async save tracking and lifecycle).
-   *
-   * @internal
-   */
-  protected finishCellEdit(row: TRow, column: ColumnDef<TRow>): void {
-    const view = this.view();
-    const editing = view.editing?.();
-    if (!editing) return;
-    editableCellController({
-      editing,
-      row,
-      column,
-      rowId: this.rowKey()(row),
-      rows: view.table.rows(),
-      columns: view.table.columns(),
-      rowKey: (entry) => this.rowKey()(entry),
-    }).commit();
-  }
-
-  /**
-   * Abandon the active draft.
-   *
-   * @internal
-   */
-  protected cancelEdit(): void {
-    this.view().editing?.().state.cancel();
   }
 }
