@@ -23,15 +23,25 @@ export type {
 } from "./columns/columnRenameEditor";
 export { createColumnRenameEditor } from "./columns/columnRenameEditor";
 export type {
+  ColumnDataTransfer,
+  ColumnDragController,
+  ColumnDragEvent,
   ColumnDragRowAttrs,
+  ColumnDragSnapshot,
   ColumnDragSource,
   ColumnDragTarget,
+  ColumnReorderKeyEvent,
 } from "./columns/columnReorderModel";
 export {
+  acceptColumnDrag,
   COLUMN_DND_MIME,
   columnDragAllowed,
   columnDragRowAttrs,
+  columnReorderKeyDown,
   columnReorderKeyStep,
+  createColumnDragController,
+  dropColumn,
+  startColumnDrag,
 } from "./columns/columnReorderModel";
 export type { ActiveFilterChipsOptions } from "./filters/activeFilterChips";
 export {
