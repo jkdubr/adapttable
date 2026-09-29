@@ -3,7 +3,13 @@ import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptDataTable } from "./dataTable";
-import { densityChooser, exportCsv, fullscreen, savedViews } from "./features";
+import {
+  densityChooser,
+  exportCsv,
+  fullscreen,
+  rowActions,
+  savedViews,
+} from "./features";
 
 interface City {
   id: string;
@@ -105,7 +111,7 @@ describe("the unstyled Angular toolbar controls", () => {
     const requests: Element[] = [];
     HTMLElement.prototype.requestFullscreen = function request(this: Element) {
       requests.push(this);
-      current = this;
+      current = requests.at(-1) ?? null;
       document.dispatchEvent(new Event("fullscreenchange"));
       return Promise.resolve();
     };
@@ -154,6 +160,24 @@ describe("the unstyled Angular toolbar controls", () => {
     expect(files[0]?.name).toBe("cities.csv");
     expect(files[0]?.csv).toContain("Dubai");
     expect(part("export-announcer")?.textContent).not.toBe("");
+  });
+
+  it("closes the views on Escape, back on its button", async () => {
+    const { part, settle } = await mount([
+      savedViews({ storageKey: "esc-views", storage: null }),
+    ]);
+    part<HTMLButtonElement>("views-button")?.click();
+    await settle();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    await settle();
+    expect(part("views-panel")).toBeNull();
+    expect(document.activeElement).toBe(part("views-button"));
+  });
+
+  it("exports with the defaults, beside an empty actions list", async () => {
+    const { part } = await mount([exportCsv(), rowActions()]);
+    expect(part("export-csv-button")).not.toBeNull();
+    expect(part("actions-header")).toBeNull();
   });
 
   it("saves the current view under a name, and applies it later", async () => {

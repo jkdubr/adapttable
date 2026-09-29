@@ -11,6 +11,7 @@ import { type ColumnDef, resolveColumns } from "./columnDef";
 import { injectDataTable } from "./dataTable";
 import { injectFrontendData } from "./frontendData";
 import { injectIsMobile } from "./mobile";
+import { injectRowSelection } from "./selection";
 import { fromStore } from "./store";
 import { ADAPTTABLE_URL_ADAPTER, injectTableUrlState } from "./url";
 
@@ -320,5 +321,40 @@ describe("injectDataTable", () => {
         rowKey: (row) => row.id,
       })
     ).toThrow();
+  });
+});
+
+describe("injectRowSelection", () => {
+  it("selects across pages, a group's leaves, and a replacement set", () => {
+    const changes: string[][] = [];
+    const selection = run(() =>
+      injectRowSelection<Row>({
+        rows: signal(ROWS.slice(0, 2)),
+        rowKey: (row) => row.id,
+        onSelectionChange: (ids) => changes.push(ids),
+      })
+    );
+    selection.toggleAll();
+    selection.selectAllMatching();
+    expect(selection.allMatching()).toBe(true);
+    expect(selection.state().allMatching).toBe(true);
+    selection.toggleGroupLeaves(["3"]);
+    expect(selection.allMatching()).toBe(false);
+    expect([...selection.selectedIds()]).toEqual(["1", "2", "3"]);
+    selection.replace(["2"]);
+    expect([...selection.selectedIds()]).toEqual(["2"]);
+    selection.replace(undefined);
+    expect(selection.selectedCount()).toBe(0);
+    expect(changes).toHaveLength(4);
+  });
+});
+
+describe("column auto-size", () => {
+  it("fits every column, or one, to its content", () => {
+    const dataTable = table({ columnLayout: undefined });
+    const root = document.createElement("div");
+    dataTable.autoSizeColumns(root);
+    dataTable.autoSizeColumn(root, "name");
+    expect(dataTable.layout().state.widths).toBeDefined();
   });
 });

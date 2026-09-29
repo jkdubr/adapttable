@@ -339,6 +339,107 @@ describe("the unstyled Angular filters", () => {
     await settle();
   });
 
+  it("keeps focus inside the drawer in both directions", async () => {
+    const { part, parts, openFilters } = await mount([filters(DEFS)], "drawer");
+    await openFilters();
+    const panel = part("filters-panel");
+    if (!panel) return;
+    const focusables = [
+      ...panel.querySelectorAll<HTMLElement>("button, input, select"),
+    ];
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    first?.focus();
+    document.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
+    );
+    expect(document.activeElement).toBe(last);
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+    expect(document.activeElement).toBe(first);
+    part<HTMLButtonElement>("filters-button")?.focus();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+    expect(document.activeElement).toBe(first);
+    expect(parts("filters-panel")).toHaveLength(1);
+  });
+
+  it("keeps the popover open for a press inside it or on a removed node", async () => {
+    const { part, openFilters, settle } = await mount();
+    await openFilters();
+    part("filters-popover")?.click();
+    document.createElement("div").click();
+    const detached = document.createElement("span");
+    document.body.append(detached);
+    detached.addEventListener("click", () => {
+      detached.remove();
+    });
+    detached.click();
+    await settle();
+    expect(part("filters-popover")).not.toBeNull();
+  });
+
+  it("closes once when its open button is pressed, and keeps a focused field", async () => {
+    const { part, openFilters, settle } = await mount();
+    await openFilters();
+    const input = part("filters-popover")?.querySelector("input");
+    input?.focus();
+    document.body.click();
+    await settle();
+    expect(part("filters-popover")).not.toBeNull();
+    const button = part<HTMLButtonElement>("filters-button");
+    button?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+    button?.click();
+    await settle();
+    expect(part("filters-popover")).toBeNull();
+  });
+
+  it("ignores other keys in the drawer", async () => {
+    const { part, openFilters, settle } = await mount(
+      [filters(DEFS)],
+      "drawer"
+    );
+    await openFilters();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+    await settle();
+    expect(part("filters-panel")).not.toBeNull();
+  });
+
+  it("offers header funnels without the Filters button", async () => {
+    const { part, parts } = await mount([filters(), headerFilters()]);
+    expect(part("filters-button")).not.toBeNull();
+    const headerOnly = await mount([headerFilters()]);
+    expect(headerOnly.part("filters-button")).toBeNull();
+    expect(parts("filter-header-trigger")).toHaveLength(0);
+  });
+
+  it("filters by a checklist of every value, with counts and search", async () => {
+    const { part, parts, ids, settle, openFilters } = await mount([
+      filters<Person>([{ key: "city", type: "checklist" }]),
+    ]);
+    await openFilters();
+    const boxes = () =>
+      parts<HTMLInputElement>("filter-checkbox").map((label) =>
+        label.querySelector("input")
+      );
+    expect(boxes()).toHaveLength(2);
+    expect(part("filter-checklist-count")?.textContent).toBeTruthy();
+    boxes()[0]?.click();
+    await settle();
+    expect(ids()).toHaveLength(1);
+    const search = part<HTMLInputElement>("filter-checklist-search");
+    if (search) {
+      search.value = "zzz";
+      search.dispatchEvent(new Event("input"));
+      await settle();
+    }
+    expect(boxes()).toHaveLength(0);
+    const [, clear] = [
+      ...(part("filter-checklist-actions")?.querySelectorAll("button") ?? []),
+    ];
+    clear?.click();
+    await settle();
+    expect(ids()).toHaveLength(3);
+  });
+
   it("says nothing matched when a filter leaves no rows", async () => {
     const { part, field, type, openFilters } = await mount();
     await openFilters();

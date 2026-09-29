@@ -253,6 +253,18 @@ describe("the unstyled Angular Columns menu", () => {
     expect(part("column-menu-submenu", item(0))).toBeNull();
   });
 
+  it("sizes one column to its content from its submenu", async () => {
+    const { part, parts, open, item, settle } = await mount();
+    await open();
+    part<HTMLButtonElement>("column-menu-more", item(0))?.click();
+    await settle();
+    parts<HTMLButtonElement>("column-menu-action", item(0))
+      .find((action) => action.textContent?.trim() === "Size column to content")
+      ?.click();
+    await settle();
+    expect(part("column-menu-submenu", item(0))).toBeNull();
+  });
+
   it("renames a column, checks the name and announces it", async () => {
     const { fixture, part, parts, headers, open, item, settle } = await mount();
     await open();

@@ -133,6 +133,32 @@ describe("the unstyled Angular bulk actions", () => {
     expect(seen).toEqual([5, { allMatching: true, total: 12 }]);
   });
 
+  it("asks before an action that declares a confirmation", async () => {
+    const ran: number[] = [];
+    const { part, parts, settle } = await mount([
+      bulkActions([
+        {
+          key: "purge",
+          label: "Purge",
+          confirm: {
+            title: "Purge?",
+            message: (count) => `Purge ${String(count)}?`,
+            confirmLabel: "Purge",
+          },
+          onClick: (ids) => {
+            ran.push(ids.length);
+          },
+        },
+      ]),
+    ]);
+    parts<HTMLInputElement>("checkbox")[1]?.click();
+    await settle();
+    parts<HTMLButtonElement>("bulk-button")[0]?.click();
+    await settle();
+    expect(ran).toEqual([1]);
+    expect(part("bulk-bar")).toBeNull();
+  });
+
   it("clears the selection from the bar, and says when an action fails", async () => {
     const { part, parts, settle } = await mount([
       bulkActions([

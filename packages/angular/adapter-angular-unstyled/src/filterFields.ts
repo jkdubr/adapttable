@@ -111,10 +111,10 @@ export class AdaptTextFilterField<TRow> {
     return filterOpLabel(this.labels(), key);
   }
 
+  /** The select offers only the widget's operators. */
   protected pickOp(value: string): void {
     const w = this.widget();
-    const next = w.ops.find((op: TextOp) => op === value);
-    if (next) w.write(next, w.value);
+    w.write(value as TextOp, w.value);
   }
 }
 
@@ -157,10 +157,9 @@ export class AdaptBooleanFilterField<TRow> {
   protected readonly stack = FIELD_STACK;
   protected readonly widget = booleanFilterFor(this.def, this.source);
 
+  /** The select offers only the three choices. */
   protected pick(value: string): void {
-    if (value === "" || value === "true" || value === "false") {
-      this.widget().write(value);
-    }
+    this.widget().write(value as "" | "true" | "false");
   }
 }
 
@@ -413,11 +412,14 @@ export class AdaptRangeFilterField<TRow> {
     w.write(next, w.a, w.b);
   }
 
+  /** The select offers only the presets. */
   protected pickPreset(value: string): void {
-    const next = RELATIVE_PRESETS.find((preset) => preset === value);
-    if (!next) return;
     const w = this.widget();
-    w.write(w.op, joinRelativeToken(next, this.relative().n), "");
+    w.write(
+      w.op,
+      joinRelativeToken(value as RelativePreset, this.relative().n),
+      ""
+    );
   }
 
   protected pickCount(value: string): void {
