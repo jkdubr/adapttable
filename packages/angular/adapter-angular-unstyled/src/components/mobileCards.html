@@ -30,6 +30,15 @@
           ></span>
         </div>
       }
+      @if (v.reorder; as reorder) {
+        <ng-container
+          [adaptSlot]="reorderButtonsSlot"
+          [adaptSlotProps]="
+            reorderButtonsProps(reorder(), entry.row, entry.index)
+          "
+          [adaptSlotTable]="v.table"
+        />
+      }
       @if (v.rowActions(); as actions) {
         <div data-adapttable-part="card-actions">
           <adapt-row-actions

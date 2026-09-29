@@ -87,6 +87,7 @@ function stubReorder(
       [defaults]="{ limit: 10 }"
       [features]="features"
       [paginationMode]="paginationMode()"
+      [forceMobile]="forceMobile()"
     />
   `,
 })
@@ -97,11 +98,18 @@ class ReorderHost {
   readonly onRowReorder = vi.fn();
   readonly features = [rowReorder(this.onRowReorder)];
   readonly paginationMode = input<PaginationMode>("paged");
+  readonly forceMobile = input<boolean | undefined>(undefined);
 }
 
-async function mount(mode: PaginationMode) {
+async function mount(
+  mode: PaginationMode,
+  options: { forceMobile?: boolean } = {}
+) {
   const fixture = TestBed.createComponent(ReorderHost);
   fixture.componentRef.setInput("paginationMode", mode);
+  if (options.forceMobile !== undefined) {
+    fixture.componentRef.setInput("forceMobile", options.forceMobile);
+  }
   fixture.autoDetectChanges();
   await fixture.whenStable();
   const element = fixture.nativeElement as HTMLElement;
@@ -123,6 +131,25 @@ describe("row reorder feature factory", () => {
     const feature = rowReorder(vi.fn(), { movePolicy: "confirm" });
     expect(feature.id).toBe("row-reorder");
     expect(feature.renders?.length).toBe(3);
+  });
+});
+
+describe("row reorder on phones", () => {
+  it("moves a card down through onRowReorder with the right indexes", async () => {
+    const { element, onRowReorder, settle } = await mount("paged", {
+      forceMobile: true,
+    });
+    const cards = [
+      ...element.querySelectorAll<HTMLElement>('[data-adapttable-part="card"]'),
+    ];
+    expect(cards.length).toBeGreaterThanOrEqual(2);
+    const down = cards[0]!.querySelector<HTMLButtonElement>(
+      '[data-adapttable-part="row-reorder-down"]'
+    );
+    expect(down).not.toBeNull();
+    down!.click();
+    await settle();
+    expect(onRowReorder).toHaveBeenCalledExactlyOnceWith(0, 1, ROWS[0]);
   });
 });
 
