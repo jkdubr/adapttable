@@ -4,37 +4,158 @@
 
 ```ts
 
+import { ACTIONS_COLUMN_KEY } from '@adapttable/core';
+import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
+import { ActiveFilterChip } from '@adapttable/core';
+import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
+import { bindHeaderFilterDismiss } from '@adapttable/core';
+import { BooleanFieldWidget } from '@adapttable/core';
+import { BULK_BAR } from '@adapttable/core/binding';
+import { BulkAction } from '@adapttable/core';
+import { BulkActionContext } from '@adapttable/core';
+import { bulkActionErrorMessage } from '@adapttable/core';
+import { BulkActionOutcome } from '@adapttable/core';
+import { BulkBarSlotProps } from '@adapttable/core/binding';
 import { CellRange } from '@adapttable/core';
+import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
+import { ChecklistButtonProps } from '@adapttable/core/binding';
+import { ChecklistCheckboxProps } from '@adapttable/core/binding';
+import { ChecklistSearchProps } from '@adapttable/core/binding';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
+import { COLUMN_MENU } from '@adapttable/core/binding';
+import { ColumnLayoutState } from '@adapttable/core';
+import { columnMenuActions } from '@adapttable/core/binding';
+import { ColumnMenuChoice } from '@adapttable/core';
+import { ColumnMenuItem } from '@adapttable/core';
+import { ColumnMenuLabels } from '@adapttable/core';
+import { ColumnMenuRow } from '@adapttable/core';
+import { columnMenuRows } from '@adapttable/core';
+import { ColumnMenuSlotProps } from '@adapttable/core/binding';
 import { ColumnMetadata } from '@adapttable/core';
+import { ConfirmHandler } from '@adapttable/core';
+import { coreBulkActions } from '@adapttable/core/binding';
+import { coreColumnMenu } from '@adapttable/core/binding';
+import { coreDensityChooser } from '@adapttable/core/binding';
+import { coreExportCsv } from '@adapttable/core/binding';
+import { coreFilters } from '@adapttable/core/binding';
+import { coreFullscreen } from '@adapttable/core/binding';
+import { coreHeaderFilters } from '@adapttable/core/binding';
+import { coreRowActions } from '@adapttable/core/binding';
+import { coreSavedViews } from '@adapttable/core/binding';
+import { defaultConfirm } from '@adapttable/core';
+import { defaultFilterRegistry } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
+import { ExportCsvOptions } from '@adapttable/core';
+import { ExportHandlerState } from '@adapttable/core/binding';
 import { ExtraFilters } from '@adapttable/core';
+import { eyeIcon } from '@adapttable/core/binding';
+import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
+import { FeaturePatch } from '@adapttable/core/binding';
+import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
+import { FeatureSlotKey } from '@adapttable/core/binding';
+import { FILTER_DRAWER } from '@adapttable/core/binding';
+import { FILTER_HEADER } from '@adapttable/core/binding';
+import { FILTER_POPOVER } from '@adapttable/core/binding';
+import { filterColumnMenuRows } from '@adapttable/core/binding';
+import { FilterDef } from '@adapttable/core';
+import { filterDefForColumn } from '@adapttable/core';
+import { FilterFormSource } from '@adapttable/core';
+import { FilterHeaderControlProps } from '@adapttable/core/binding';
+import { filterLabel } from '@adapttable/core';
+import { filterOpLabel } from '@adapttable/core';
+import { FilterOption } from '@adapttable/core';
+import { FilterOverlaySlotProps } from '@adapttable/core/binding';
+import { FilterRuntime } from '@adapttable/core';
+import { FILTERS_FORM } from '@adapttable/core/binding';
+import { FILTERS_ICON } from '@adapttable/core/binding';
+import { FiltersFormSlotProps } from '@adapttable/core/binding';
+import { FilterTreeButtonProps } from '@adapttable/core/binding';
+import { FilterTreeDisclosureProps } from '@adapttable/core/binding';
+import { FilterTreeInputProps } from '@adapttable/core/binding';
+import { FilterTreeSelectProps } from '@adapttable/core/binding';
+import { FilterTriggerToggleState } from '@adapttable/core/binding';
+import { FilterTypeRegistry } from '@adapttable/core';
+import { FilterTypeSpec } from '@adapttable/core';
+import { FilterValue } from '@adapttable/core';
+import { filterWidgetKind } from '@adapttable/core';
+import { FullscreenState } from '@adapttable/core/binding';
 import { GridCell } from '@adapttable/core';
+import { GRIP_ICON } from '@adapttable/core/binding';
+import { hasActiveHeaderFilter } from '@adapttable/core';
+import { headerFilterInsideSelector } from '@adapttable/core';
 import { HeaderSelectionState } from '@adapttable/core/binding';
+import { hideAllColumns } from '@adapttable/core/binding';
 import * as i0 from '@angular/core';
+import { IconDescriptor } from '@adapttable/core/binding';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
+import { joinRelativeToken } from '@adapttable/core';
+import { listFilterValues } from '@adapttable/core';
+import { nextPinSide } from '@adapttable/core';
+import { offersAllMatching } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
+import { PIN_ICON } from '@adapttable/core/binding';
+import { pinActionLabel } from '@adapttable/core';
+import { PinOffset } from '@adapttable/core';
+import { PinSide } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
+import { RangeFieldWidget } from '@adapttable/core';
+import { RangeOp } from '@adapttable/core';
+import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
+import { RELATIVE_PRESETS } from '@adapttable/core';
+import { RelativePreset } from '@adapttable/core';
+import { REORDER_COLUMN_KEY } from '@adapttable/core';
+import { resolveDisabledReason } from '@adapttable/core';
+import { RowAction } from '@adapttable/core';
+import { RowActionsLayout } from '@adapttable/core';
+import { runRowAction } from '@adapttable/core';
+import { SAVED_VIEWS } from '@adapttable/core/binding';
+import { SavedView } from '@adapttable/core';
+import { SavedViewsControllerOptions } from '@adapttable/core';
+import { SavedViewsSlotProps } from '@adapttable/core/binding';
+import { SelectionState } from '@adapttable/core/binding';
+import { showAllColumns } from '@adapttable/core/binding';
+import { showSimpleFilterFields } from '@adapttable/core';
 import { SidePanelEntry } from '@adapttable/core/binding';
 import { Signal } from '@angular/core';
+import { SlotFill } from '@adapttable/core/binding';
+import { slotRender } from '@adapttable/core/binding';
 import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
+import { splitRelativeToken } from '@adapttable/core';
+import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
 import { TableViewState } from '@adapttable/core';
 import { TableViewStore } from '@adapttable/core';
 import { TemplateRef } from '@angular/core';
+import { TextFieldWidget } from '@adapttable/core';
+import { TextOp } from '@adapttable/core';
+import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
+import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
 import { Type } from '@angular/core';
+import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
+import { UseColumnLayoutResult } from '@adapttable/core';
+import { UseSavedViewsResult } from '@adapttable/core/binding';
+import { visibleRowActions } from '@adapttable/core';
+import { watchOverlayDismiss } from '@adapttable/core';
+
+export { ACTIONS_COLUMN_KEY }
+
+export { ACTIVE_FILTER_CHIPS }
+
+export { ActiveFilterChip }
+
+export { ActiveFilterChipsSlotProps }
 
 // @public
 export class AdaptAttrs {
@@ -100,6 +221,160 @@ export class AdaptCellTemplate {
 }
 
 // @public
+export class AdaptChecklistChrome<TRow> {
+    constructor();
+    readonly def: InputSignal<FilterDef<TRow>>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    // (undocumented)
+    protected readonly listStyle: {
+        "max-height": string;
+        overflow: string;
+        display: string;
+        "flex-wrap": string;
+        "align-items": string;
+        gap: string;
+    };
+    // (undocumented)
+    protected readonly model: Signal<    {
+    label: string;
+    search: ChecklistSearchProps;
+    selectAll: ChecklistButtonProps;
+    clear: ChecklistButtonProps;
+    virtualize: boolean;
+    padTop: number;
+    padBottom: number;
+    empty: boolean;
+    noValues: string;
+    rows: ChecklistRow[];
+    } | undefined>;
+    // (undocumented)
+    protected readonly optionStyle: {
+        flex: string;
+        display: string;
+        "align-items": string;
+        "max-width": string;
+    };
+    protected read(): void;
+    readonly slots: InputSignal<ChecklistSlots>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "setExtras" | "facets">>;
+    // (undocumented)
+    protected readonly windowedListStyle: {
+        "max-height": null;
+        height: string;
+        "align-items": string;
+        "align-content": string;
+        overflow: string;
+        display: string;
+        "flex-wrap": string;
+        gap: string;
+    };
+    // (undocumented)
+    protected readonly windowedOptionStyle: {
+        flex: string;
+        "min-width": string;
+        display: string;
+        "align-items": string;
+        "max-width": string;
+    };
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptChecklistChrome<any>, "adapt-checklist-chrome", never, {
+        "def": {
+            "alias": "def";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptChecklistChrome<any>, never>;
+}
+
+// @public
+export class AdaptControl<TProps> {
+    constructor();
+    readonly component: InputSignal<Type<unknown>>;
+    readonly props: InputSignal<TProps>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptControl<any>, "[adaptControl]", never, {
+        "component": {
+            "alias": "adaptControl";
+            "required": true;
+            "isSignal": true;
+        };
+        "props": {
+            "alias": "adaptControlProps";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptControl<any>, never>;
+}
+
+// @public
+export class AdaptFilterTreeChrome<TRow> {
+    readonly defaultExpanded: InputSignal<boolean>;
+    readonly defs: InputSignal<readonly FilterDef<TRow>[]>;
+    // (undocumented)
+    protected readonly disclosure: Signal<AngularFilterTreeDisclosureProps | undefined>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    readonly registry: InputSignal<FilterTypeRegistry>;
+    readonly slots: InputSignal<FilterTreeSlots>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "filterTree" | "setFilterTree">>;
+    // (undocumented)
+    protected readonly view: Signal<TreeView>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterTreeChrome<any>, "adapt-filter-tree-chrome", never, {
+        "defs": {
+            "alias": "defs";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "registry": {
+            "alias": "registry";
+            "required": false;
+            "isSignal": true;
+        };
+        "defaultExpanded": {
+            "alias": "defaultExpanded";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterTreeChrome<any>, never>;
+}
+
+// @public
 export class AdaptHeader<TRow> {
     readonly column: InputSignal<ColumnDef<TRow>>;
     protected readonly context: Signal<HeaderContext<TRow>>;
@@ -114,6 +389,21 @@ export class AdaptHeader<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptHeader<any>, never>;
+}
+
+// @public
+export class AdaptIcon {
+    readonly adaptIcon: InputSignal<IconDescriptor>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptIcon, "svg[adaptIcon]", never, {
+        "adaptIcon": {
+            "alias": "adaptIcon";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptIcon, never>;
 }
 
 // @public
@@ -138,16 +428,82 @@ export class AdaptLiveRegion {
 }
 
 // @public
+export class AdaptSlot<TProps> {
+    constructor();
+    readonly props: InputSignal<TProps>;
+    readonly slot: InputSignal<FeatureSlotKey<TProps>>;
+    readonly table: InputSignal<SlotTable>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptSlot<any>, "[adaptSlot]", never, {
+        "slot": {
+            "alias": "adaptSlot";
+            "required": true;
+            "isSignal": true;
+        };
+        "props": {
+            "alias": "adaptSlotProps";
+            "required": true;
+            "isSignal": true;
+        };
+        "table": {
+            "alias": "adaptSlotTable";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSlot<any>, never>;
+}
+
+// @public
 export const ADAPTTABLE_FEATURES: InjectionToken<readonly AdaptTableFeature[]>;
+
+// @public
+export const ADAPTTABLE_SLOT_TABLE: InjectionToken<SlotTable>;
 
 // @public
 export const ADAPTTABLE_URL_ADAPTER: InjectionToken<UrlStateAdapter>;
 
 // @public
-export type AdaptTableFeature = FeatureSetup<unknown, SidePanelEntry>;
+export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry> {
+    apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+    readonly id?: string;
+    readonly renders?: readonly FeatureRender<never, SlotComponent>[];
+}
+
+// @public
+export type AngularFilterTreeDisclosureProps = FilterTreeDisclosureProps<TemplateRef<unknown>>;
 
 // @public
 export type Attrs = Readonly<Record<string, unknown>>;
+
+export { bindHeaderFilterDismiss }
+
+// @public
+export function booleanFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<BooleanFieldWidget>;
+
+export { BULK_BAR }
+
+export { BulkAction }
+
+export { bulkActionErrorMessage }
+
+// @public
+export interface BulkActionRunnerOptions {
+    readonly cancelLabel: string;
+    readonly confirm: ConfirmHandler;
+    readonly injector?: Injector;
+    readonly onComplete?: (outcome: BulkActionOutcome) => void;
+}
+
+// @public
+export interface BulkActionRunnerState {
+    readonly error: Signal<unknown>;
+    readonly pending: Signal<string | null>;
+    readonly run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
+}
+
+export { BulkBarSlotProps }
 
 // @public
 export interface CellContext<TRow> {
@@ -160,7 +516,24 @@ export interface CellContext<TRow> {
 
 export { CellRange }
 
+export { CHECKLIST_LIST_HEIGHT }
+
+export { ChecklistButtonProps }
+
+export { ChecklistCheckboxProps }
+
+export { ChecklistSearchProps }
+
+// @public
+export interface ChecklistSlots {
+    readonly Button: Type<unknown>;
+    readonly Checkbox: Type<unknown>;
+    readonly Search: Type<unknown>;
+}
+
 export { ChromeBodyRegion }
+
+export { COLUMN_MENU }
 
 // @public
 export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
@@ -171,7 +544,91 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
 }
 
 // @public
+export interface ColumnDrag {
+    readonly gripAttrs: (key: string, index: number, move: MoveColumn, label: string) => Attrs;
+    readonly rowAttrs: (key: string, index: number, move: MoveColumn) => Attrs;
+}
+
+// @public
+export type ColumnLayout<TRow> = UseColumnLayoutResult<TRow>;
+
+// @public
+export interface ColumnLayoutOptions {
+    readonly columnLayout?: MaybeSignalOptional<ColumnLayoutState>;
+    readonly defaultColumnLayout?: Partial<ColumnLayoutState>;
+    readonly onColumnLayoutChange?: (next: ColumnLayoutState) => void;
+    readonly onColumnRename?: (key: string, name: string) => void;
+}
+
+export { ColumnLayoutState }
+
+export { columnMenuActions }
+
+export { ColumnMenuChoice }
+
+export { ColumnMenuItem }
+
+export { ColumnMenuLabels }
+
+export { ColumnMenuRow }
+
+export { columnMenuRows }
+
+export { ColumnMenuSlotProps }
+
+// @public
+export interface ColumnRenameEditorOptions {
+    readonly column: Signal<{
+        readonly key: string;
+        readonly name: string;
+        readonly onRename: (key: string, name: string) => void;
+        readonly requiredMessage: string;
+        readonly renamedMessage: (info: {
+            previous: string;
+            name: string;
+        }) => string;
+    }>;
+    readonly injector?: Injector;
+}
+
+// @public
+export interface ColumnRenameEditorState {
+    readonly announcement: Signal<string>;
+    readonly begin: () => void;
+    readonly cancel: () => void;
+    readonly editing: Signal<boolean>;
+    readonly error: Signal<string | undefined>;
+    readonly errorId: string;
+    readonly inputAttrs: () => Attrs;
+    readonly inputId: string;
+    readonly submit: () => boolean;
+}
+
+export { ConfirmHandler }
+
+export { coreBulkActions }
+
+export { coreColumnMenu }
+
+export { coreDensityChooser }
+
+export { coreExportCsv }
+
+export { coreFilters }
+
+export { coreFullscreen }
+
+export { coreHeaderFilters }
+
+export { coreRowActions }
+
+export { coreSavedViews }
+
+// @public
 export interface DataTable<TRow> {
+    readonly allColumns: Signal<readonly ColumnDef<TRow>[]>;
+    readonly autoSizeColumn: (root: Element | null, key: string) => void;
+    readonly autoSizeColumns: (root: Element | null) => void;
     readonly bodyRegion: Signal<ChromeBodyRegion>;
     readonly canLoadMore: Signal<boolean>;
     readonly cardAttrs: (row: TRow, index: number) => Attrs;
@@ -182,11 +639,16 @@ export interface DataTable<TRow> {
     readonly dir: Signal<Direction>;
     readonly emptyVariant: Signal<"noData" | "noResults">;
     readonly featureHost: FeatureHostState;
+    readonly featureOptions: Readonly<Record<string, unknown>>;
+    readonly hasSlot: (slot: {
+        readonly id: string;
+    }) => boolean;
     readonly headerCellAttrs: (column: ColumnDef<TRow>) => Attrs;
     readonly headerRowAttrs: () => Attrs;
     readonly isEmpty: Signal<boolean>;
     readonly isMobile: Signal<boolean>;
     readonly labels: Signal<Required<TableLabels>>;
+    readonly layout: Signal<ColumnLayout<TRow>>;
     readonly loadMore: () => void;
     readonly loadMoreAttrs: () => Attrs;
     readonly loadMoreButtonAttrs: () => Attrs;
@@ -204,6 +666,7 @@ export interface DataTable<TRow> {
     readonly setSearch: (term: string) => void;
     readonly setSearchValue: (text: string) => void;
     readonly showFooter: Signal<boolean>;
+    readonly slotFills: SlotFills;
     readonly sortButtonAttrs: (column: ColumnDef<TRow>) => Attrs;
     readonly sortBy: Signal<string | undefined>;
     readonly sortByOptions: Signal<SortByOption[]>;
@@ -216,7 +679,8 @@ export interface DataTable<TRow> {
 }
 
 // @public
-export interface DataTableOptions<TRow> {
+export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
+    readonly activeFilterCount?: Signal<number>;
     readonly cellTemplates?: Signal<readonly AdaptCellTemplate[]>;
     readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
     readonly columnWidths?: MaybeSignalOptional<Readonly<Record<string, number>>>;
@@ -236,7 +700,40 @@ export interface DataTableOptions<TRow> {
     readonly tableLabel?: MaybeSignalOptional<string>;
 }
 
+export { defaultConfirm }
+
+export { defaultFilterRegistry }
+
+// @public
+export interface DensityOptions extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "urlKey"> {
+    readonly defaultDensity?: TableDensity;
+    readonly injector?: Injector;
+}
+
+// @public
+export interface DensityState {
+    readonly density: Signal<TableDensity>;
+    readonly setDensity: (next: TableDensity) => void;
+}
+
 export { Direction }
+
+// @public
+export interface ExportCsvHandlerOptions<TRow> {
+    readonly columns: Signal<readonly ColumnMetadata<TRow>[]>;
+    readonly exportCsv: boolean | ExportCsvOptions<TRow>;
+    readonly featureHost?: FeatureHostState;
+    readonly injector?: Injector;
+    readonly labels: Signal<Required<TableLabels>>;
+    readonly source: Signal<TableSource<TRow>>;
+}
+
+export { ExportCsvOptions }
+
+export { ExportHandlerState }
+
+// @public
+export function extendFeature(base: AdaptTableFeature, renders: readonly FeatureRender<never, SlotComponent>[]): AdaptTableFeature;
 
 // @public
 export interface ExternalStore<T> {
@@ -245,6 +742,99 @@ export interface ExternalStore<T> {
 }
 
 export { ExtraFilters }
+
+export { eyeIcon }
+
+// @public
+export function featureOptionsOf(features: readonly AdaptTableFeature[]): Readonly<Record<string, unknown>>;
+
+export { FeatureRender }
+
+export { FeatureSlotKey }
+
+export { FILTER_DRAWER }
+
+export { FILTER_HEADER }
+
+export { FILTER_POPOVER }
+
+// @public
+export function filterChipsFor<TRow>(source: Signal<TableSource<TRow>>, runtime: Signal<FilterRuntime<TRow>>, labels: Signal<Required<TableLabels>>, extraChips?: MaybeSignal<readonly ActiveFilterChip[]>): Signal<{
+    readonly chips: readonly ActiveFilterChip[];
+    readonly count: number;
+}>;
+
+export { filterColumnMenuRows }
+
+export { FilterDef }
+
+export { filterDefForColumn }
+
+export { FilterFormSource }
+
+export { FilterHeaderControlProps }
+
+export { filterLabel }
+
+export { filterOpLabel }
+
+export { FilterOption }
+
+// @public
+export function filterOptionsFor<TRow>(def: Pick<FilterDef<TRow>, "key" | "options">, injector: Injector): Signal<FilterOptionsState>;
+
+// @public
+export interface FilterOptionsState {
+    readonly loading: boolean;
+    readonly options: readonly FilterOption[];
+}
+
+export { FilterOverlaySlotProps }
+
+export { FilterRuntime }
+
+// @public
+export function filterRuntimeFor<TRow>(options: FilterRuntimeOptions<TRow>): TableFilters<TRow>;
+
+// @public
+export interface FilterRuntimeOptions<TRow> {
+    readonly columns: MaybeSignal<readonly ColumnMetadata<TRow>[]>;
+    readonly data: MaybeSignal<readonly TRow[]>;
+    readonly defs: readonly FilterDef<TRow>[] | undefined;
+    readonly featureHost?: Signal<FeatureHostState | undefined>;
+    readonly filterTypes?: readonly FilterTypeSpec[];
+    readonly locale?: Signal<string | undefined>;
+}
+
+export { FILTERS_FORM }
+
+export { FILTERS_ICON }
+
+export { FiltersFormSlotProps }
+
+export { FilterTreeButtonProps }
+
+export { FilterTreeInputProps }
+
+export { FilterTreeSelectProps }
+
+// @public
+export interface FilterTreeSlots {
+    readonly Button: Type<unknown>;
+    readonly Disclosure: Type<unknown>;
+    readonly Input: Type<unknown>;
+    readonly Select: Type<unknown>;
+}
+
+export { FilterTriggerToggleState }
+
+export { FilterTypeRegistry }
+
+export { FilterTypeSpec }
+
+export { FilterValue }
+
+export { filterWidgetKind }
 
 // @public
 export function fromStore<T>(store: ExternalStore<T>, options?: FromStoreOptions): Signal<T>;
@@ -270,6 +860,8 @@ export interface FrontendDataOptions<TRow> extends Omit<TableUrlStateOptions, "i
     readonly paginationMode?: MaybeSignal<PaginationMode>;
 }
 
+export { FullscreenState }
+
 export { GridCell }
 
 // @public
@@ -293,19 +885,47 @@ export interface GridFocusOptions<TRow> {
     readonly table: DataTable<TRow>;
 }
 
+export { GRIP_ICON }
+
+export { hasActiveHeaderFilter }
+
 // @public
 export interface HeaderContext<TRow> {
     readonly $implicit: ColumnDef<TRow>;
     readonly column: ColumnDef<TRow>;
 }
 
+export { headerFilterInsideSelector }
+
 export { HeaderSelectionState }
+
+export { hideAllColumns }
+
+export { IconDescriptor }
+
+// @public
+export function injectBulkActionRunner(options: BulkActionRunnerOptions): BulkActionRunnerState;
+
+// @public
+export function injectColumnDrag(injector?: Injector): ColumnDrag;
+
+// @public
+export function injectColumnRenameEditor(options: ColumnRenameEditorOptions): ColumnRenameEditorState;
 
 // @public
 export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTable<TRow>;
 
 // @public
+export function injectDensity(options?: DensityOptions): DensityState;
+
+// @public
+export function injectExportCsv<TRow>(options: ExportCsvHandlerOptions<TRow>): Signal<ExportHandlerState>;
+
+// @public
 export function injectFrontendData<TRow>(options: FrontendDataOptions<TRow>): Signal<TableSource<TRow>>;
+
+// @public
+export function injectFullscreen(element: Signal<HTMLElement | undefined>, injector?: Injector): Signal<FullscreenState>;
 
 // @public
 export function injectGridFocus<TRow>(options: GridFocusOptions<TRow>): GridFocus<TRow>;
@@ -317,6 +937,9 @@ export function injectIsMobile(options?: IsMobileOptions): Signal<boolean>;
 export function injectRowSelection<TRow>(options: RowSelectionOptions<TRow>): RowSelection;
 
 // @public
+export function injectSavedViews(options: SavedViewsOptions): SavedViewsState;
+
+// @public
 export function injectTableUrlState(options?: TableUrlStateOptions): TableUrlState;
 
 // @public
@@ -325,24 +948,55 @@ export interface IsMobileOptions {
     readonly injector?: Injector;
 }
 
+export { joinRelativeToken }
+
+export { listFilterValues }
+
 // @public
 export type MaybeSignal<T> = T | Signal<T>;
 
 // @public
 export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
 
+export { nextPinSide }
+
+export { offersAllMatching }
+
 export { PaginationInfo }
 
 export { PaginationSlot }
+
+export { PIN_ICON }
+
+export { pinActionLabel }
+
+export { PinOffset }
+
+export { PinSide }
 
 // @public
 export function provideAdaptTableFeatures(...features: readonly AdaptTableFeature[]): EnvironmentProviders;
 
 // @public
+export function rangeFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<RangeFieldWidget>;
+
+export { RangeOp }
+
+export { RELATIVE_PRESET_LABEL_KEYS }
+
+export { RELATIVE_PRESETS }
+
+export { RelativePreset }
+
+// @public
 export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
+
+export { REORDER_COLUMN_KEY }
 
 // @public
 export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale?: string): ColumnDef<TRow>[];
+
+export { resolveDisabledReason }
 
 // @public
 export interface ResolvedRenderer<TContext> {
@@ -351,22 +1005,47 @@ export interface ResolvedRenderer<TContext> {
     readonly template: TemplateRef<TContext> | null;
 }
 
+export { RowAction }
+
+// @public
+export function rowActionsFor<TRow>(options: RowActionsOptions<TRow>): Signal<{
+    readonly rowActions: RowAction<TRow>[] | undefined;
+    readonly hasRowActions: boolean;
+}>;
+
+export { RowActionsLayout }
+
+// @public
+export interface RowActionsOptions<TRow> {
+    readonly actions?: MaybeSignalOptional<readonly RowAction<TRow>[]>;
+    readonly confirmDeleteRow?: boolean;
+    readonly hidden: Signal<boolean>;
+    readonly labels: Signal<Required<TableLabels>>;
+    readonly onDeleteRow?: (row: TRow) => void;
+    readonly onDuplicateRow?: (row: TRow) => void;
+}
+
 // @public
 export interface RowSelection {
+    readonly allMatching: Signal<boolean>;
     readonly clear: () => void;
     readonly headerCheckboxAttrs: () => Attrs;
     readonly headerState: Signal<HeaderSelectionState>;
     readonly isSelected: (id: string) => boolean;
-    readonly replace: (ids: readonly string[]) => void;
+    readonly replace: (ids: readonly string[] | undefined) => void;
     readonly rowCheckboxAttrs: (id: string) => Attrs;
+    readonly selectAllMatching: () => void;
     readonly selectedCount: Signal<number>;
     readonly selectedIds: Signal<ReadonlySet<string>>;
+    readonly state: Signal<SelectionState>;
     readonly toggle: (id: string) => void;
     readonly toggleAll: () => void;
+    readonly toggleGroupLeaves: (ids: readonly string[]) => void;
 }
 
 // @public
 export interface RowSelectionOptions<TRow> {
+    readonly acrossPages?: boolean;
     readonly labels?: MaybeSignalOptional<TableLabels>;
     readonly onSelectionChange?: (ids: string[]) => void;
     readonly rowKey: (row: TRow) => string;
@@ -374,7 +1053,61 @@ export interface RowSelectionOptions<TRow> {
     readonly selectedIds?: MaybeSignalOptional<readonly string[]>;
 }
 
+export { runRowAction }
+
+export { SAVED_VIEWS }
+
+export { SavedView }
+
+export { SavedViewsControllerOptions }
+
+// @public
+export interface SavedViewsOptions extends SavedViewsControllerOptions {
+    readonly injector?: Injector;
+}
+
+export { SavedViewsSlotProps }
+
+// @public
+export interface SavedViewsState extends Omit<UseSavedViewsResult, "views" | "defaultView"> {
+    readonly defaultView: Signal<SavedView | undefined>;
+    readonly views: Signal<readonly SavedView[]>;
+}
+
+export { SelectionState }
+
+export { showAllColumns }
+
+export { showSimpleFilterFields }
+
+// @public
+export type SlotComponent = Type<unknown>;
+
+// @public
+export type SlotFills = ReadonlyMap<string, readonly SlotFill<SlotComponent>[]>;
+
+export { slotRender }
+
+// @public
+export interface SlotTable {
+    readonly featureHost: FeatureHostState;
+    readonly slotFills: SlotFills;
+}
+
 export { SortDirection }
+
+export { splitRelativeToken }
+
+export { TableDensity }
+
+// @public
+export interface TableFilters<TRow> {
+    readonly arrayExtraKeys: readonly string[];
+    readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filterTreeFn: (row: TRow, tree: QueryFilterGroup) => boolean;
+    readonly numberExtraKeys: readonly string[];
+    readonly runtime: Signal<FilterRuntime<TRow>>;
+}
 
 export { TableLabels }
 
@@ -399,6 +1132,26 @@ export interface TableUrlStateOptions {
     readonly urlKey?: string;
     readonly urlSync?: boolean;
 }
+
+// @public
+export function textFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<TextFieldWidget>;
+
+export { TextOp }
+
+export { TOOLBAR_EXTRAS }
+
+export { ToolbarExtrasSlotProps }
+
+export { unpinAllColumns }
+
+// @public
+export function urlAdapterFor(options: Pick<TableUrlStateOptions, "urlAdapter" | "urlSync">, injector: Injector): UrlStateAdapter;
+
+export { UrlStateAdapter }
+
+export { visibleRowActions }
+
+export { watchOverlayDismiss }
 
 // (No @packageDocumentation comment for this package)
 
