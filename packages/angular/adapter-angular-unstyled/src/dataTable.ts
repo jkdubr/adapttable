@@ -38,12 +38,15 @@ import {
   FILTERS_ICON,
   type FilterTypeSpec,
   type GridFocus,
+  GROUPING_PANEL,
+  type GroupingPanelSlotProps,
   injectDataTable,
   injectDensity,
   injectExportCsv,
   injectFrontendData,
   injectFullscreen,
   injectGridFocus,
+  injectGroupingPanelState,
   injectIsMobile,
   injectRowSelection,
   type RowAction,
@@ -119,6 +122,9 @@ export interface TableView<TRow> {
   /** The saved-views menu's props, when it is composed. */
   readonly savedViews:
     Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
+  /** The grouping strip's props, when the panel feature is composed. */
+  readonly groupingPanel:
+    Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
 }
 
 /**
@@ -246,6 +252,8 @@ export class AdaptDataTable<TRow> implements OnInit {
   protected readonly toolbarExtrasSlot = TOOLBAR_EXTRAS;
   /** The selection bar's slot. @internal */
   protected readonly bulkBarSlot = BULK_BAR;
+  /** The grouping strip's slot. @internal */
+  protected readonly groupingPanelSlot = GROUPING_PANEL;
   /** The Filters button's glyph. @internal */
   protected readonly filtersIcon = FILTERS_ICON;
   private readonly filtersForm = viewChild<TemplateRef<unknown>>("filtersForm");
@@ -466,6 +474,12 @@ export class AdaptDataTable<TRow> implements OnInit {
         : undefined,
       hasRowActions: rowActions().hasRowActions,
     }));
+    const groupingPanel = injectGroupingPanelState({
+      table,
+      source,
+      features,
+      injector,
+    });
     this.view.set({
       table,
       selection,
@@ -478,6 +492,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       density,
       toolbarExtras,
       savedViews,
+      groupingPanel,
       rowActionsLayout: featureOptions.rowActionsLayout as
         RowActionsLayout | undefined,
       confirm,

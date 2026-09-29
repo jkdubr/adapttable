@@ -1,14 +1,26 @@
-import type { ColumnDef } from "@adapttable/angular";
-import { type GroupingPanelState, resolveLabels } from "@adapttable/core";
+import {
+  type ColumnDef,
+  type GroupingPanelSlotProps,
+} from "@adapttable/angular";
+import { resolveLabels, type GroupingPanelState } from "@adapttable/core";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
+import { AdaptDataTable } from "./dataTable";
+import { groupingPanel } from "./features";
 import { AdaptGroupingPanel } from "./groupingPanel";
 
 interface Row {
   id: string;
+  team: string;
+  budget: number;
 }
+
+const ROWS: Row[] = [
+  { id: "1", team: "A", budget: 10 },
+  { id: "2", team: "B", budget: 20 },
+];
 
 const COLUMNS: ColumnDef<Row>[] = [
   { key: "team", header: "Team" },
@@ -32,12 +44,16 @@ function state(
       onKeyDown: () => undefined,
     }),
     dropProps: () => ({}),
-    removeDropProps: () => ({}),
+    removeDropProps: () => ({
+      onDragEnter: () => undefined,
+      onDragOver: () => undefined,
+      onDragLeave: () => undefined,
+      onDrop: () => undefined,
+    }),
     add: () => undefined,
     remove: () => undefined,
     moveBy: () => undefined,
     setAggregate: () => undefined,
-    drag: { key: "team", source: "chip" },
     aggregations: {
       items: [
         {
@@ -65,22 +81,13 @@ function state(
 
 @Component({
   imports: [AdaptGroupingPanel],
-  template: `
-    <adapt-grouping-panel
-      [state]="panel()"
-      [columns]="columns"
-      [labels]="labels"
-      [mobile]="false"
-    />
-  `,
+  template: `<adapt-grouping-panel [props]="panel()" />`,
 })
 class Host {
-  readonly labels = resolveLabels(undefined);
-  readonly columns = COLUMNS;
   readonly added: string[] = [];
   readonly removed: string[] = [];
-  readonly panel = signal<GroupingPanelState>(
-    state({
+  readonly panel = signal<GroupingPanelSlotProps<ColumnDef<Row>>>({
+    state: state({
       add: (key) => {
         this.added.push(key);
       },
@@ -90,8 +97,31 @@ class Host {
       addAggregate: (key) => {
         this.added.push(`agg:${key}`);
       },
-    })
-  );
+      drag: { key: "team", source: "chip", overRemove: true },
+    }),
+    columns: COLUMNS,
+    labels: resolveLabels(undefined),
+    mobile: false,
+  });
+}
+
+@Component({
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="data"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+      [features]="features"
+    />
+  `,
+})
+class TableHost {
+  readonly data = ROWS;
+  readonly columns = COLUMNS;
+  readonly rowKey = (row: Row) => row.id;
+  readonly features = [groupingPanel(["team"]), groupingPanel()];
 }
 
 describe("AdaptGroupingPanel", () => {
@@ -120,6 +150,13 @@ describe("AdaptGroupingPanel", () => {
     );
     handle?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
     handle?.dispatchEvent(new Event("dragstart"));
+    const zone = element.querySelector(
+      '[data-adapttable-part="grouping-remove-zone"]'
+    );
+    zone?.dispatchEvent(new Event("dragenter"));
+    zone?.dispatchEvent(new Event("dragover"));
+    zone?.dispatchEvent(new Event("dragleave"));
+    zone?.dispatchEvent(new Event("drop"));
     const picker = element.querySelector<HTMLSelectElement>(
       '[data-adapttable-part="grouping-aggregation-add"]'
     );
@@ -136,5 +173,15 @@ describe("AdaptGroupingPanel", () => {
       element.querySelector('[data-adapttable-part="grouping-announcer"]')
         ?.textContent
     ).toBe("Grouped by Team");
+  });
+
+  it("composes the groupingPanel feature on the table", async () => {
+    const fixture = TestBed.createComponent(TableHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(
+      element.querySelector('[data-adapttable-part="grouping-panel"]')
+    ).not.toBeNull();
   });
 });

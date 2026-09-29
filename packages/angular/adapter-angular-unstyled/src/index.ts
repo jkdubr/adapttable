@@ -12,6 +12,7 @@ export {
   exportCsv,
   filters,
   fullscreen,
+  groupingPanel,
   headerFilters,
   rowActions,
   type RowActionsFeatureOptions,

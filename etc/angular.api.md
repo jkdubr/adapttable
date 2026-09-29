@@ -39,6 +39,8 @@ import { coreDensityChooser } from '@adapttable/core/binding';
 import { coreExportCsv } from '@adapttable/core/binding';
 import { coreFilters } from '@adapttable/core/binding';
 import { coreFullscreen } from '@adapttable/core/binding';
+import { coreGrouping } from '@adapttable/core/binding';
+import { coreGroupingPanel } from '@adapttable/core/binding';
 import { coreHeaderFilters } from '@adapttable/core/binding';
 import { coreRowActions } from '@adapttable/core/binding';
 import { coreSavedViews } from '@adapttable/core/binding';
@@ -84,6 +86,7 @@ import { filterWidgetKind } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GridCell } from '@adapttable/core';
 import { GRIP_ICON } from '@adapttable/core/binding';
+import { GROUPING_PANEL } from '@adapttable/core/binding';
 import { GroupingPanelAggregationRemoveProps } from '@adapttable/core/binding';
 import { GroupingPanelChecklistProps } from '@adapttable/core/binding';
 import { GroupingPanelChipProps } from '@adapttable/core/binding';
@@ -91,6 +94,7 @@ import { GroupingPanelDropZoneProps } from '@adapttable/core/binding';
 import { GroupingPanelRemoveZoneProps } from '@adapttable/core/binding';
 import { GroupingPanelRestoreProps } from '@adapttable/core/binding';
 import { GroupingPanelSelectProps } from '@adapttable/core/binding';
+import { GroupingPanelSlotProps } from '@adapttable/core/binding';
 import { GroupingPanelState } from '@adapttable/core/binding';
 import { GroupingPanelState as GroupingPanelState_2 } from '@adapttable/core';
 import { GroupingPanelSurfaceProps } from '@adapttable/core/binding';
@@ -274,7 +278,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "setExtras" | "facets">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "extra" | "setExtras" | "allFilteredRows" | "setExtra" | "facets">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -694,6 +698,10 @@ export { coreFilters }
 
 export { coreFullscreen }
 
+export { coreGrouping }
+
+export { coreGroupingPanel }
+
 export { coreHeaderFilters }
 
 export { coreRowActions }
@@ -963,6 +971,11 @@ export interface GridFocusOptions<TRow> {
 
 export { GRIP_ICON }
 
+export { GROUPING_PANEL }
+
+// @public
+export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string[], extras?: GroupingPanelExtras<TRow>): AdaptTableFeature;
+
 export { GroupingPanelAggregationRemoveProps }
 
 export { GroupingPanelChecklistProps }
@@ -971,11 +984,18 @@ export { GroupingPanelChipProps }
 
 export { GroupingPanelDropZoneProps }
 
+// @public
+export interface GroupingPanelExtras<TRow = unknown> {
+    readonly groupAggregates?: (rows: readonly TRow[]) => unknown;
+}
+
 export { GroupingPanelRemoveZoneProps }
 
 export { GroupingPanelRestoreProps }
 
 export { GroupingPanelSelectProps }
+
+export { GroupingPanelSlotProps }
 
 // @public
 export interface GroupingPanelSlots {
@@ -991,6 +1011,14 @@ export interface GroupingPanelSlots {
 }
 
 export { GroupingPanelState }
+
+// @public
+export interface GroupingPanelStateOptions<TRow> {
+    readonly features: readonly AdaptTableFeature[];
+    readonly injector?: Injector;
+    readonly source: Signal<TableSource<TRow>>;
+    readonly table: DataTable<TRow>;
+}
 
 export { hasActiveHeaderFilter }
 
@@ -1034,6 +1062,9 @@ export function injectFullscreen(element: Signal<HTMLElement | undefined>, injec
 
 // @public
 export function injectGridFocus<TRow>(options: GridFocusOptions<TRow>): GridFocus<TRow>;
+
+// @public
+export function injectGroupingPanelState<TRow>(options: GroupingPanelStateOptions<TRow>): Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
 
 // @public
 export function injectIsMobile(options?: IsMobileOptions): Signal<boolean>;

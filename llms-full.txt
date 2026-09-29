@@ -19809,7 +19809,10 @@ controls: the host writes its own markup.
   hands its controls in `slots`. `AdaptGroupingPanelChrome` is the grouping
   strip — chips, insertion carets, aggregations and the ungroup target —
   with `GroupingPanelSlots`, `AngularGroupingPanelSurfaceProps` and
-  `AngularGroupingPanelAggregationItemProps`.
+  `AngularGroupingPanelAggregationItemProps`. `groupingPanel` (with
+  `GroupingPanelExtras`) is the feature that owns the group-by state;
+  `injectGroupingPanelState` (`GroupingPanelStateOptions`) publishes the
+  strip's props for the `GROUPING_PANEL` slot.
 - Actions: `injectBulkActionRunner` runs bulk actions and returns a
   `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
   actions column's list, with Duplicate and Delete appended for the host's
@@ -19832,7 +19835,8 @@ renders search, sorting, paging, the phone card layout, row selection and
 keyboard cell navigation with the `data-adapttable-part` names every kit
 shares. Its `features` input composes `columnMenu`, `filters`,
 `headerFilters`, `bulkActions`, `rowActions` (`RowActionsFeatureOptions`),
-`densityChooser`, `fullscreen`, `exportCsv` and `savedViews`; `filtersMode`
+`densityChooser`, `fullscreen`, `exportCsv`, `savedViews` and
+`groupingPanel`; `filtersMode`
 (`FiltersMode`) picks the anchored popover or the drawer. Each feature draws
 the kit's own native controls. `AdaptGroupingPanel` draws the grouping
 strip with those same native controls. `TableView` is what the table renders from

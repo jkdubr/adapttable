@@ -74,6 +74,12 @@ export {
   injectGridFocus,
 } from "./gridFocus";
 export {
+  groupingPanel,
+  type GroupingPanelExtras,
+  type GroupingPanelStateOptions,
+  injectGroupingPanelState,
+} from "./grouping";
+export {
   AdaptGroupingPanelChrome,
   type AngularGroupingPanelAggregationItemProps,
   type AngularGroupingPanelSurfaceProps,

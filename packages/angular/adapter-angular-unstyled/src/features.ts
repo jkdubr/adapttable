@@ -25,6 +25,9 @@ import {
   FILTER_POPOVER,
   type FilterDef,
   FILTERS_FORM,
+  GROUPING_PANEL,
+  groupingPanel as coreAngularGroupingPanel,
+  type GroupingPanelExtras,
   type RowAction,
   type RowActionsLayout,
   SAVED_VIEWS,
@@ -42,6 +45,7 @@ import {
   AdaptFiltersForm,
   AdaptHeaderFilterTrigger,
 } from "./filterOverlays";
+import { AdaptGroupingPanel } from "./groupingPanel";
 import { AdaptSavedViewsMenu } from "./savedViews";
 import {
   AdaptDensityButton,
@@ -214,5 +218,24 @@ export function savedViews(
 ): AdaptTableFeature {
   return extendFeature(coreSavedViews(options), [
     slotRender(SAVED_VIEWS, () => AdaptSavedViewsMenu),
+  ]);
+}
+
+/**
+ * The interactive grouping strip: chips, carets, aggregations and the
+ * ungroup target, drawn with native controls. The panel owns the group-by
+ * state; composing it turns grouping on.
+ *
+ * @param groupBy - Initial grouping keys; a URL that already carries one keeps it.
+ * @param extras - Row-aware aggregate options.
+ *
+ * @public
+ */
+export function groupingPanel<TRow = unknown>(
+  groupBy?: string | readonly string[],
+  extras: GroupingPanelExtras<TRow> = {}
+): AdaptTableFeature {
+  return extendFeature(coreAngularGroupingPanel(groupBy, extras), [
+    slotRender(GROUPING_PANEL, () => AdaptGroupingPanel),
   ]);
 }

@@ -107,6 +107,12 @@ export type {
   GroupingPanelRemoveZoneProps,
   GroupingPanelRestoreProps,
   GroupingPanelSelectProps,
+  GroupingPanelSlotProps,
+} from "@adapttable/core/binding";
+export {
+  coreGrouping,
+  coreGroupingPanel,
+  GROUPING_PANEL,
 } from "@adapttable/core/binding";
 export {
   COLUMN_MENU,

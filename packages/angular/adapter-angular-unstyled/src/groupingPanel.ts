@@ -7,7 +7,6 @@ import {
   type AngularGroupingPanelAggregationItemProps,
   type AngularGroupingPanelSurfaceProps,
   type ColumnDef,
-  type Direction,
   type GroupingPanelAggregationRemoveProps,
   type GroupingPanelChecklistProps,
   type GroupingPanelChipProps,
@@ -15,9 +14,8 @@ import {
   type GroupingPanelRemoveZoneProps,
   type GroupingPanelRestoreProps,
   type GroupingPanelSelectProps,
+  type GroupingPanelSlotProps,
   type GroupingPanelSlots,
-  type GroupingPanelState,
-  type TableLabels,
 } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
@@ -294,7 +292,8 @@ const SLOTS: GroupingPanelSlots = {
 };
 
 /**
- * The grouping strip drawn with native controls.
+ * The grouping strip drawn with native controls. A slot fill receives the
+ * panel's props through one `props` input.
  *
  * @public
  */
@@ -304,27 +303,20 @@ const SLOTS: GroupingPanelSlots = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
+    @let p = props();
     <adapt-grouping-panel-chrome
-      [state]="state()"
-      [columns]="columns()"
-      [labels]="labels()"
-      [mobile]="mobile()"
-      [dir]="dir()"
+      [state]="p.state"
+      [columns]="p.columns"
+      [labels]="p.labels"
+      [mobile]="p.mobile"
+      [dir]="p.dir"
       [slots]="slots"
     />
   `,
 })
 export class AdaptGroupingPanel<TRow> {
-  /** Live grouping interactions and the fields already grouped. */
-  readonly state = input.required<GroupingPanelState>();
-  /** Every column the add control and the chips can name. */
-  readonly columns = input.required<readonly ColumnDef<TRow>[]>();
-  /** Resolved labels. */
-  readonly labels = input.required<Required<TableLabels>>();
-  /** Whether the strip uses the compact mobile treatment. */
-  readonly mobile = input(false);
-  /** Logical text direction. */
-  readonly dir = input<Direction>();
+  /** The strip's state and columns, from the table's grouping feature. */
+  readonly props = input.required<GroupingPanelSlotProps<ColumnDef<TRow>>>();
 
   protected readonly slots = SLOTS;
 }

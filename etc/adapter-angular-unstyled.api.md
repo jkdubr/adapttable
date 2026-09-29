@@ -24,8 +24,9 @@ import { FilterHeaderControlProps } from '@adapttable/angular';
 import { FilterOverlaySlotProps } from '@adapttable/angular';
 import { FiltersFormSlotProps } from '@adapttable/angular';
 import { GridFocus } from '@adapttable/angular';
+import { GroupingPanelExtras } from '@adapttable/angular';
+import { GroupingPanelSlotProps } from '@adapttable/angular';
 import { GroupingPanelSlots } from '@adapttable/angular';
-import { GroupingPanelState } from '@adapttable/angular';
 import * as i0 from '@angular/core';
 import { IconDescriptor } from '@adapttable/angular';
 import { InputSignal } from '@angular/core';
@@ -80,6 +81,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     };
     readonly filtersMode: InputSignal<FiltersMode>;
     readonly forceMobile: InputSignal<boolean | undefined>;
+    // @internal
+    protected readonly groupingPanelSlot: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
     readonly labels: InputSignal<TableLabels | undefined>;
     ngOnInit(): void;
     // @internal
@@ -228,38 +231,14 @@ export class AdaptDataTable<TRow> implements OnInit {
 
 // @public
 export class AdaptGroupingPanel<TRow> {
-    readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
-    readonly dir: InputSignal<Direction | undefined>;
-    readonly labels: InputSignal<Required<TableLabels>>;
-    readonly mobile: InputSignal<boolean>;
+    readonly props: InputSignal<GroupingPanelSlotProps<ColumnDef<TRow>>>;
     // (undocumented)
     protected readonly slots: GroupingPanelSlots;
-    readonly state: InputSignal<GroupingPanelState>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupingPanel<any>, "adapt-grouping-panel", never, {
-        "state": {
-            "alias": "state";
+        "props": {
+            "alias": "props";
             "required": true;
-            "isSignal": true;
-        };
-        "columns": {
-            "alias": "columns";
-            "required": true;
-            "isSignal": true;
-        };
-        "labels": {
-            "alias": "labels";
-            "required": true;
-            "isSignal": true;
-        };
-        "mobile": {
-            "alias": "mobile";
-            "required": false;
-            "isSignal": true;
-        };
-        "dir": {
-            "alias": "dir";
-            "required": false;
             "isSignal": true;
         };
     }, {}, never, never, true, never>;
@@ -304,6 +283,9 @@ export interface FiltersView {
 export function fullscreen(): AdaptTableFeature;
 
 // @public
+export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string[], extras?: GroupingPanelExtras<TRow>): AdaptTableFeature;
+
+// @public
 export function headerFilters(): AdaptTableFeature;
 
 // @public
@@ -329,6 +311,7 @@ export interface TableView<TRow> {
     readonly density: Signal<TableDensity>;
     readonly filters: FiltersView | undefined;
     readonly grid: GridFocus<TRow> | undefined;
+    readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
     readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;

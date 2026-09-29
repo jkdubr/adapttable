@@ -97,6 +97,14 @@
       />
     }
 
+    @if (v.groupingPanel; as groupingPanel) {
+      <ng-container
+        [adaptSlot]="groupingPanelSlot"
+        [adaptSlotProps]="groupingPanel()"
+        [adaptSlotTable]="v.table"
+      />
+    }
+
     @switch (v.table.bodyRegion()) {
       @case ("skeleton") {
         <div
