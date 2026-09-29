@@ -22,12 +22,28 @@
           <span data-adapttable-part="card-label">{{
             column.mobileLabel ?? column.header
           }}</span>
-          <span
-            data-adapttable-part="card-value"
-            [adaptCell]="column"
-            [adaptCellRow]="entry.row"
-            [adaptCellIndex]="entry.index"
-          ></span>
+          <span data-adapttable-part="card-value">
+            @if (v.editing; as editing) {
+              <ng-container
+                [adaptSlot]="editableCellSlot"
+                [adaptSlotProps]="
+                  editableCellProps(
+                    editing(),
+                    entry.row,
+                    column,
+                    entry.index
+                  )
+                "
+                [adaptSlotTable]="v.table"
+              />
+            } @else {
+              <span
+                [adaptCell]="column"
+                [adaptCellRow]="entry.row"
+                [adaptCellIndex]="entry.index"
+              ></span>
+            }
+          </span>
         </div>
       }
       @if (v.reorder; as reorder) {
