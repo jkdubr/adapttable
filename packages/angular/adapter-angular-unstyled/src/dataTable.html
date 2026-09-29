@@ -72,6 +72,14 @@
       />
     }
 
+    @if (v.bulkBar; as bulkBar) {
+      <ng-container
+        [adaptSlot]="bulkBarSlot"
+        [adaptSlotProps]="bulkBar()"
+        [adaptSlotTable]="v.table"
+      />
+    }
+
     @switch (v.table.bodyRegion()) {
       @case ("skeleton") {
         <div
@@ -117,6 +125,17 @@
                     [adaptCellRow]="row"
                     [adaptCellIndex]="i"
                   ></span>
+                </div>
+              }
+              @if (v.rowActions(); as actions) {
+                <div data-adapttable-part="card-actions">
+                  <adapt-row-actions
+                    [row]="row"
+                    [actions]="actions"
+                    [confirm]="v.confirm"
+                    [labels]="v.table.labels()"
+                    [layout]="v.rowActionsLayout"
+                  />
                 </div>
               }
             </li>
@@ -181,6 +200,11 @@
                     }
                   </th>
                 }
+                @if (v.rowActions()) {
+                  <th data-adapttable-part="actions-header" scope="col">
+                    {{ v.table.labels().actions }}
+                  </th>
+                }
               </tr>
             </thead>
             <tbody data-adapttable-part="tbody">
@@ -214,6 +238,17 @@
                       [adaptCellRow]="row"
                       [adaptCellIndex]="i"
                     ></td>
+                  }
+                  @if (v.rowActions(); as actions) {
+                    <td data-adapttable-part="actions-cell">
+                      <adapt-row-actions
+                        [row]="row"
+                        [actions]="actions"
+                        [confirm]="v.confirm"
+                        [labels]="v.table.labels()"
+                        [layout]="v.rowActionsLayout"
+                      />
+                    </td>
                   }
                 </tr>
               }

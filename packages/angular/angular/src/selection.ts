@@ -7,13 +7,18 @@
  * `onSelectionChange`, leaving the host to decide.
  */
 import {
+  applyGroupLeafSelection,
+  createAllMatchingScope,
   headerSelectionOf,
   resolveLabels,
   type TableLabels,
   toggleId,
   toggleIds,
 } from "@adapttable/core";
-import type { HeaderSelectionState } from "@adapttable/core/binding";
+import type {
+  HeaderSelectionState,
+  SelectionState,
+} from "@adapttable/core/binding";
 import { computed, type Signal, signal } from "@angular/core";
 
 import type { Attrs } from "./attrs";
@@ -35,6 +40,11 @@ export interface RowSelectionOptions<TRow> {
   readonly onSelectionChange?: (ids: string[]) => void;
   /** Labels for the checkboxes' accessible names, over the English defaults. */
   readonly labels?: MaybeSignalOptional<TableLabels>;
+  /**
+   * Whether the source can answer for rows beyond the ones on screen, so
+   * "select all N matching" can be offered. Defaults to `true`.
+   */
+  readonly acrossPages?: boolean;
 }
 
 /**
@@ -57,8 +67,19 @@ export interface RowSelection {
   readonly toggleAll: () => void;
   /** Clear the selection. */
   readonly clear: () => void;
-  /** Replace the selection with these ids. */
-  readonly replace: (ids: readonly string[]) => void;
+  /** Replace the selection with these ids, or clear it when omitted. */
+  readonly replace: (ids: readonly string[] | undefined) => void;
+  /** Flip a group's leaves as one: select the missing, or clear them all. */
+  readonly toggleGroupLeaves: (ids: readonly string[]) => void;
+  /** Whether the reader chose every matching row, across every page. */
+  readonly allMatching: Signal<boolean>;
+  /** Extend the selection to every matching row. */
+  readonly selectAllMatching: () => void;
+  /**
+   * The selection in the shape every binding hands a kit's controls — what
+   * the bulk-actions bar reads.
+   */
+  readonly state: Signal<SelectionState>;
   /** A row's checkbox: its name, its state and its toggle. */
   readonly rowCheckboxAttrs: (id: string) => Attrs;
   /** The select-all checkbox: its name, its tri-state and its toggle. */
@@ -91,7 +112,16 @@ export function injectRowSelection<TRow>(
     resolveLabels(options.labels && readMaybe(options.labels))
   );
 
+  const scope = createAllMatchingScope();
+  const allMatching = signal(scope.getSnapshot());
+  scope.subscribe(() => {
+    allMatching.set(scope.getSnapshot());
+  });
+  const acrossPages = options.acrossPages ?? true;
+
   const commit = (next: ReadonlySet<string>): void => {
+    // Any explicit change narrows the scope back to concrete ids.
+    scope.narrow();
     if (controlled() === undefined) own.set(next);
     options.onSelectionChange?.([...next]);
   };
@@ -102,6 +132,18 @@ export function injectRowSelection<TRow>(
   const toggleAll = (): void => {
     commit(toggleIds(selectedIds(), visibleIds()));
   };
+  const clear = (): void => {
+    commit(new Set());
+  };
+  const replace = (ids: readonly string[] | undefined): void => {
+    commit(new Set(ids));
+  };
+  const toggleGroupLeaves = (ids: readonly string[]): void => {
+    commit(applyGroupLeafSelection(ids, selectedIds()));
+  };
+  const selectAllMatching = (): void => {
+    scope.select(acrossPages);
+  };
 
   return {
     selectedIds,
@@ -110,12 +152,26 @@ export function injectRowSelection<TRow>(
     isSelected,
     toggle,
     toggleAll,
-    clear: () => {
-      commit(new Set());
-    },
-    replace: (ids) => {
-      commit(new Set(ids));
-    },
+    clear,
+    replace,
+    toggleGroupLeaves,
+    allMatching: allMatching.asReadonly(),
+    selectAllMatching,
+    state: computed(() => ({
+      selectedIds: selectedIds(),
+      selectedCount: selectedIds().size,
+      headerState: headerState(),
+      isSelected,
+      toggle,
+      toggleGroupLeaves,
+      toggleAll,
+      clear,
+      replace,
+      visibleIds: visibleIds(),
+      allMatching: allMatching(),
+      selectAllMatching,
+      acrossPages,
+    })),
     rowCheckboxAttrs: (id) => ({
       type: "checkbox",
       "aria-label": labels().selectRow,

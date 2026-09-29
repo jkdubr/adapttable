@@ -15,15 +15,21 @@ export type {
 export type {
   ActiveFilterChip,
   FilterDef,
-  FilterTypeSpec,
   FilterFormSource,
   FilterOption,
   FilterRuntime,
   FilterTypeRegistry,
+  FilterTypeSpec,
   FilterValue,
   RangeOp,
   RelativePreset,
   TextOp,
+} from "@adapttable/core";
+export type {
+  BulkAction,
+  ConfirmHandler,
+  RowAction,
+  RowActionsLayout,
 } from "@adapttable/core";
 export {
   ACTIONS_COLUMN_KEY,
@@ -50,6 +56,14 @@ export {
   splitRelativeToken,
   watchOverlayDismiss,
 } from "@adapttable/core";
+export {
+  bulkActionErrorMessage,
+  defaultConfirm,
+  offersAllMatching,
+  resolveDisabledReason,
+  runRowAction,
+  visibleRowActions,
+} from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,
@@ -67,6 +81,10 @@ export type {
   FilterTreeButtonProps,
   FilterTreeInputProps,
   FilterTreeSelectProps,
+} from "@adapttable/core/binding";
+export type {
+  BulkBarSlotProps,
+  SelectionState,
 } from "@adapttable/core/binding";
 export {
   COLUMN_MENU,
@@ -91,4 +109,9 @@ export {
   FILTERS_FORM,
   FILTERS_ICON,
   FilterTriggerToggleState,
+} from "@adapttable/core/binding";
+export {
+  BULK_BAR,
+  coreBulkActions,
+  coreRowActions,
 } from "@adapttable/core/binding";

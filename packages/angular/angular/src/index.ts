@@ -7,6 +7,13 @@
  *
  * @packageDocumentation
  */
+export {
+  type BulkActionRunnerOptions,
+  type BulkActionRunnerState,
+  injectBulkActionRunner,
+  rowActionsFor,
+  type RowActionsOptions,
+} from "./actions";
 export { AdaptAttrs, type Attrs } from "./attrs";
 export {
   AdaptCell,

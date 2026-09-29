@@ -4,6 +4,7 @@
  * this kit's kit, so every control a reader uses is the browser's own.
  */
 import {
+  ACTIONS_COLUMN_KEY,
   ACTIVE_FILTER_CHIPS,
   type ActiveFilterChip,
   AdaptAttrs,
@@ -14,11 +15,16 @@ import {
   AdaptLiveRegion,
   AdaptSlot,
   type AdaptTableFeature,
+  BULK_BAR,
+  type BulkAction,
+  type BulkBarSlotProps,
   COLUMN_MENU,
   type ColumnDef,
   type ColumnLayoutState,
   type ColumnMenuSlotProps,
+  type ConfirmHandler,
   type DataTable,
+  defaultConfirm,
   type Direction,
   type ExtraFilters,
   featureOptionsOf,
@@ -36,7 +42,11 @@ import {
   injectGridFocus,
   injectIsMobile,
   injectRowSelection,
+  type RowAction,
+  rowActionsFor,
+  type RowActionsLayout,
   type RowSelection,
+  type SelectionState,
   type TableLabels,
   type TableQueryParams,
 } from "@adapttable/angular";
@@ -58,6 +68,7 @@ import {
   viewChild,
 } from "@angular/core";
 
+import { AdaptRowActions } from "./actions";
 import {
   type FiltersMode,
   type FiltersView,
@@ -82,6 +93,14 @@ interface TableView<TRow> {
   readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
   /** The filters, when a filters feature is composed. */
   readonly filters: FiltersView | undefined;
+  /** The selection bar's props, when bulk actions are composed. */
+  readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
+  /** The actions column's list, absent while hidden or empty. */
+  readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
+  /** A strip of buttons, or a menu. */
+  readonly rowActionsLayout: RowActionsLayout | undefined;
+  /** Asks before an action that declares a `confirm`. */
+  readonly confirm: ConfirmHandler;
 }
 
 /**
@@ -95,6 +114,7 @@ interface TableView<TRow> {
   selector: "adapt-data-table",
   imports: [
     NgTemplateOutlet,
+    AdaptRowActions,
     AdaptAttrs,
     AdaptCell,
     AdaptHeader,
@@ -159,6 +179,11 @@ export class AdaptDataTable<TRow> implements OnInit {
   readonly closeHeaderFilterOnSelect = input(false);
   /** The host's own chips, shown after the table's filter chips. */
   readonly extraChips = input<readonly ActiveFilterChip[]>([]);
+  /**
+   * Asks before an action that declares a `confirm`. Defaults to the
+   * browser's `confirm`. Read once.
+   */
+  readonly confirm = input<ConfirmHandler>();
   /** Every selection change, as the full list of selected ids. */
   readonly selectionChange = output<string[]>();
   /** Every column-layout change. */
@@ -195,6 +220,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     chips: ACTIVE_FILTER_CHIPS,
     header: FILTER_HEADER,
   };
+  /** The selection bar's slot. @internal */
+  protected readonly bulkBarSlot = BULK_BAR;
   /** The Filters button's glyph. @internal */
   protected readonly filtersIcon = FILTERS_ICON;
   private readonly filtersForm = viewChild<TemplateRef<unknown>>("filtersForm");
@@ -257,17 +284,22 @@ export class AdaptDataTable<TRow> implements OnInit {
       numberExtraKeys: runtime?.numberExtraKeys,
       injector,
     });
-    const selection = this.selectable()
-      ? injectRowSelection<TRow>({
-          rows: computed(() => source().rows),
-          rowKey: (row) => this.rowKey()(row),
-          selectedIds: this.selectedIds,
-          onSelectionChange: (ids) => {
-            this.selectionChange.emit(ids);
-          },
-          labels,
-        })
+    const declaredBulk = featureOptions.bulkActions;
+    const bulk = Array.isArray(declaredBulk)
+      ? (declaredBulk as BulkAction[])
       : undefined;
+    const selection =
+      this.selectable() || bulk
+        ? injectRowSelection<TRow>({
+            rows: computed(() => source().rows),
+            rowKey: (row) => this.rowKey()(row),
+            selectedIds: this.selectedIds,
+            onSelectionChange: (ids) => {
+              this.selectionChange.emit(ids);
+            },
+            labels,
+          })
+        : undefined;
     const table = injectDataTable<TRow>({
       source,
       columns: this.columns,
@@ -304,6 +336,27 @@ export class AdaptDataTable<TRow> implements OnInit {
         })
       : undefined;
     filtersRef.current = filters;
+    const confirm = this.confirm() ?? defaultConfirm;
+    const rowActions = rowActionsFor<TRow>({
+      actions: featureOptions.rowActions as RowAction<TRow>[] | undefined,
+      onDuplicateRow: featureOptions.onDuplicateRow as
+        ((row: TRow) => void) | undefined,
+      onDeleteRow: featureOptions.onDeleteRow as
+        ((row: TRow) => void) | undefined,
+      confirmDeleteRow: featureOptions.confirmDeleteRow as boolean | undefined,
+      labels: table.labels,
+      hidden: computed(() => table.layout().isHidden(ACTIONS_COLUMN_KEY)),
+    });
+    const bulkBar =
+      bulk && selection
+        ? computed((): BulkBarSlotProps<SelectionState> => ({
+            selection: selection.state(),
+            total: source().total,
+            bulkActions: bulk,
+            confirm,
+            labels: table.labels(),
+          }))
+        : undefined;
     const grid = this.cellNavigation()
       ? injectGridFocus({ table, enabled: true, injector })
       : undefined;
@@ -327,6 +380,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       onRenameColumn: this.onColumnRename()
         ? table.layout().setName
         : undefined,
+      hasRowActions: rowActions().hasRowActions,
     }));
     this.view.set({
       table,
@@ -335,6 +389,11 @@ export class AdaptDataTable<TRow> implements OnInit {
       columnMenu: table.featureOptions.enableColumnMenu === true,
       columnMenuProps,
       filters,
+      bulkBar,
+      rowActions: computed(() => rowActions().rowActions),
+      rowActionsLayout: featureOptions.rowActionsLayout as
+        RowActionsLayout | undefined,
+      confirm,
     });
   }
 }

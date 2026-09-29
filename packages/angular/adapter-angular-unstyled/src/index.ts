@@ -4,9 +4,17 @@
  *
  * @packageDocumentation
  */
+export { AdaptBulkBar, AdaptRowActions } from "./actions";
 export { AdaptColumnMenu } from "./columnMenu";
 export { AdaptDataTable } from "./dataTable";
-export { columnMenu, filters, headerFilters } from "./features";
+export {
+  bulkActions,
+  columnMenu,
+  filters,
+  headerFilters,
+  rowActions,
+  type RowActionsFeatureOptions,
+} from "./features";
 export { AdaptAutoFilterForm } from "./filterFields";
 export {
   AdaptFilterChips,
