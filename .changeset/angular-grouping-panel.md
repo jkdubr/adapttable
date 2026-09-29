@@ -2,4 +2,4 @@
 "@adapttable/angular": minor
 ---
 
-Add the grouping-panel Chrome and mount it: the strip's structure in the binding, native controls in the unstyled kit, and a feature that owns the group-by state.
+Add Angular row virtualization on `@tanstack/angular-virtual`, mount the grouping panel, and ship the grouping-panel Chrome: `virtualize()` windows the body; the panel owns group-by state with native unstyled controls.

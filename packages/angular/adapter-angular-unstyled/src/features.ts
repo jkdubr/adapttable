@@ -34,6 +34,8 @@ import {
   type SavedViewsControllerOptions,
   slotRender,
   TOOLBAR_EXTRAS,
+  virtualize as coreAngularVirtualize,
+  type VirtualizeOptions,
 } from "@adapttable/angular";
 
 import { AdaptBulkBar } from "./actions";
@@ -238,4 +240,19 @@ export function groupingPanel<TRow = unknown>(
   return extendFeature(coreAngularGroupingPanel(groupBy, extras), [
     slotRender(GROUPING_PANEL, () => AdaptGroupingPanel),
   ]);
+}
+
+/**
+ * Render only the rows in view. Compose with `paginationMode="infinite"`
+ * (or a grouped/tree page): a flat paged table already bounds what is
+ * mounted, so the window stays off.
+ *
+ * @param options - Master switch or the windowing knobs.
+ *
+ * @public
+ */
+export function virtualize(
+  options: VirtualizeOptions = true
+): AdaptTableFeature {
+  return coreAngularVirtualize(options);
 }

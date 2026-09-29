@@ -130,13 +130,26 @@
         </output>
       }
       @case ("mobile") {
-        <ul data-adapttable-part="cards" style="margin: 0; padding: 0">
-          @for (row of v.table.rows(); track rowId(row); let i = $index) {
-            <li style="display: block" [adaptAttrs]="v.table.cardAttrs(row, i)">
+        <ul
+          data-adapttable-part="cards"
+          style="margin: 0; padding: 0"
+          [style.padding-top.px]="v.virtualization().paddingTop || null"
+          [style.padding-bottom.px]="v.virtualization().paddingBottom || null"
+        >
+          @for (
+            entry of v.virtualization().rows;
+            track entry.key;
+            let i = $index
+          ) {
+            <li
+              style="display: block"
+              [adaptAttrs]="v.table.cardAttrs(entry.row, entry.index)"
+              [attr.data-index]="entry.index"
+            >
               @if (v.selection; as selection) {
                 <input
                   data-adapttable-part="checkbox"
-                  [adaptAttrs]="selection.rowCheckboxAttrs(rowId(row))"
+                  [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
                 />
               }
               @for (column of v.table.columns(); track column.key) {
@@ -147,15 +160,15 @@
                   <span
                     data-adapttable-part="card-value"
                     [adaptCell]="column"
-                    [adaptCellRow]="row"
-                    [adaptCellIndex]="i"
+                    [adaptCellRow]="entry.row"
+                    [adaptCellIndex]="entry.index"
                   ></span>
                 </div>
               }
               @if (v.rowActions(); as actions) {
                 <div data-adapttable-part="card-actions">
                   <adapt-row-actions
-                    [row]="row"
+                    [row]="entry.row"
                     [actions]="actions"
                     [confirm]="v.confirm"
                     [labels]="v.table.labels()"
@@ -168,7 +181,11 @@
         </ul>
       }
       @case ("desktop") {
-        <div data-adapttable-part="scroll-box">
+        <div
+          #scrollBox
+          data-adapttable-part="scroll-box"
+          [style]="scrollBoxStyle()"
+        >
           <table
             data-adapttable-part="table"
             [adaptAttrs]="v.grid ? v.grid.tableAttrs() : v.table.tableAttrs()"
@@ -233,17 +250,33 @@
               </tr>
             </thead>
             <tbody data-adapttable-part="tbody">
-              @for (row of v.table.rows(); track rowId(row); let i = $index) {
+              @if (v.virtualization().paddingTop > 0) {
+                <tr aria-hidden="true" data-adapttable-part="virtual-pad-top">
+                  <td
+                    [attr.colspan]="v.bodyColSpan()"
+                    [style.height.px]="v.virtualization().paddingTop"
+                  ></td>
+                </tr>
+              }
+              @for (
+                entry of v.virtualization().rows;
+                track entry.key;
+                let i = $index
+              ) {
                 <tr
                   [adaptAttrs]="
-                    v.grid ? v.grid.rowAttrs(row, i) : v.table.rowAttrs(row, i)
+                    v.grid
+                      ? v.grid.rowAttrs(entry.row, entry.index)
+                      : v.table.rowAttrs(entry.row, entry.index)
                   "
                 >
                   @if (v.selection; as selection) {
                     <td data-adapttable-part="selection-cell">
                       <input
                         data-adapttable-part="checkbox"
-                        [adaptAttrs]="selection.rowCheckboxAttrs(rowId(row))"
+                        [adaptAttrs]="
+                          selection.rowCheckboxAttrs(rowId(entry.row))
+                        "
                       />
                     </td>
                   }
@@ -256,18 +289,18 @@
                       data-adapttable-part="cell"
                       [adaptAttrs]="
                         v.grid
-                          ? v.grid.cellAttrs(column, i, col)
+                          ? v.grid.cellAttrs(column, entry.index, col)
                           : v.table.cellAttrs(column)
                       "
                       [adaptCell]="column"
-                      [adaptCellRow]="row"
-                      [adaptCellIndex]="i"
+                      [adaptCellRow]="entry.row"
+                      [adaptCellIndex]="entry.index"
                     ></td>
                   }
                   @if (v.rowActions(); as actions) {
                     <td data-adapttable-part="actions-cell">
                       <adapt-row-actions
-                        [row]="row"
+                        [row]="entry.row"
                         [actions]="actions"
                         [confirm]="v.confirm"
                         [labels]="v.table.labels()"
@@ -275,6 +308,17 @@
                       />
                     </td>
                   }
+                </tr>
+              }
+              @if (v.virtualization().paddingBottom > 0) {
+                <tr
+                  aria-hidden="true"
+                  data-adapttable-part="virtual-pad-bottom"
+                >
+                  <td
+                    [attr.colspan]="v.bodyColSpan()"
+                    [style.height.px]="v.virtualization().paddingBottom"
+                  ></td>
                 </tr>
               }
             </tbody>

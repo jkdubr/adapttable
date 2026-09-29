@@ -16,6 +16,7 @@ import { ColumnMenuSlotProps } from '@adapttable/angular';
 import { ConfirmHandler } from '@adapttable/angular';
 import { DataTable } from '@adapttable/angular';
 import { Direction } from '@adapttable/angular';
+import { ElementRef } from '@angular/core';
 import { ExportCsvOptions } from '@adapttable/angular';
 import { ExtraFilters } from '@adapttable/angular';
 import { FeatureSlotKey } from '@adapttable/angular';
@@ -32,6 +33,7 @@ import { IconDescriptor } from '@adapttable/angular';
 import { InputSignal } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
+import { PaginationMode } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
 import { RowSelection } from '@adapttable/angular';
@@ -42,8 +44,10 @@ import { Signal } from '@angular/core';
 import { TableDensity } from '@adapttable/angular';
 import { TableLabels } from '@adapttable/angular';
 import { TableQueryParams } from '@adapttable/angular';
+import { TableVirtualization } from '@adapttable/angular';
 import { TemplateRef } from '@angular/core';
 import { ToolbarExtrasSlotProps } from '@adapttable/angular';
+import { VirtualizeOptions } from '@adapttable/angular';
 import { WritableSignal } from '@angular/core';
 
 // @public
@@ -84,15 +88,21 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly groupingPanelSlot: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
     readonly labels: InputSignal<TableLabels | undefined>;
+    readonly maxHeight: InputSignal<string | number | undefined>;
     ngOnInit(): void;
     // @internal
     protected readonly noResults: Signal<boolean>;
     readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
+    readonly paginationMode: InputSignal<PaginationMode | undefined>;
     // @internal
     protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
+    // @internal
+    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
+    // @internal
+    protected scrollBoxStyle(): Record<string, string> | null;
     readonly searchPlaceholder: InputSignal<string | undefined>;
     readonly selectable: InputSignal<boolean>;
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
@@ -158,6 +168,16 @@ export class AdaptDataTable<TRow> implements OnInit {
         };
         "defaults": {
             "alias": "defaults";
+            "required": false;
+            "isSignal": true;
+        };
+        "paginationMode": {
+            "alias": "paginationMode";
+            "required": false;
+            "isSignal": true;
+        };
+        "maxHeight": {
+            "alias": "maxHeight";
             "required": false;
             "isSignal": true;
         };
@@ -304,6 +324,7 @@ export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeat
 
 // @public
 export interface TableView<TRow> {
+    readonly bodyColSpan: Signal<number>;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
     readonly columnMenu: boolean;
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
@@ -318,7 +339,11 @@ export interface TableView<TRow> {
     readonly selection: RowSelection | undefined;
     readonly table: DataTable<TRow>;
     readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
+    readonly virtualization: Signal<TableVirtualization<TRow>>;
 }
+
+// @public
+export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

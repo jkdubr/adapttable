@@ -25,6 +25,7 @@ import {
   type ConfirmHandler,
   type DataTable,
   defaultConfirm,
+  devWarn,
   type Direction,
   type ExportCsvOptions,
   type ExtraFilters,
@@ -49,6 +50,9 @@ import {
   injectGroupingPanelState,
   injectIsMobile,
   injectRowSelection,
+  injectTableVirtualization,
+  isBodyEligible,
+  type PaginationMode,
   type RowAction,
   rowActionsFor,
   type RowActionsLayout,
@@ -60,9 +64,12 @@ import {
   type TableDensity,
   type TableLabels,
   type TableQueryParams,
+  type TableVirtualization,
   TOOLBAR_EXTRAS,
   type ToolbarExtrasSlotProps,
   urlAdapterFor,
+  virtualColumnSpan,
+  virtualizeIgnoredOnPage,
 } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -88,6 +95,87 @@ import {
   type FiltersView,
   filtersViewFor,
 } from "./tableFilters";
+
+/**
+ * The body window for a composed {@link virtualize} feature, or every row
+ * when the feature is absent.
+ */
+function bodyVirtualizationFor<TRow>(options: {
+  readonly table: DataTable<TRow>;
+  readonly source: Signal<ReturnType<DataTable<TRow>["source"]>>;
+  readonly featureOptions: Readonly<Record<string, unknown>>;
+  readonly rowKey: (row: TRow) => string;
+  readonly maxHeight: number | string | undefined;
+  readonly scrollBox: () => HTMLElement | null;
+  readonly injector: Injector;
+}): Signal<TableVirtualization<TRow>> {
+  const {
+    table,
+    source,
+    featureOptions,
+    rowKey,
+    maxHeight,
+    scrollBox,
+    injector,
+  } = options;
+  const wantVirtualize = featureOptions.virtualize === true;
+  const bodyChrome = computed(() => ({
+    body: table.bodyRegion(),
+    isPaged: source().paginationMode === "paged",
+    source: source(),
+    grouping: undefined,
+    tree: undefined,
+    isMobile: table.isMobile(),
+  }));
+  if (wantVirtualize && virtualizeIgnoredOnPage(true, bodyChrome())) {
+    devWarn(
+      'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it, or group the rows: an expanded page is windowed.'
+    );
+  }
+  if (!wantVirtualize) {
+    return computed(() => ({
+      enabled: false,
+      rows: source().rows.map((row, index) => ({
+        row,
+        index,
+        key: rowKey(row),
+      })),
+      paddingTop: 0,
+      paddingBottom: 0,
+    }));
+  }
+  const estimateRowSize =
+    typeof featureOptions.estimateRowSize === "number"
+      ? featureOptions.estimateRowSize
+      : 56;
+  const estimateCardSize =
+    typeof featureOptions.estimateCardSize === "number"
+      ? featureOptions.estimateCardSize
+      : 140;
+  const virtualOverscan =
+    typeof featureOptions.virtualOverscan === "number"
+      ? featureOptions.virtualOverscan
+      : undefined;
+  const virtualScrollMargin =
+    typeof featureOptions.virtualScrollMargin === "number"
+      ? featureOptions.virtualScrollMargin
+      : undefined;
+  return injectTableVirtualization<TRow>({
+    rows: computed(() => source().rows),
+    rowKey,
+    enabled: computed(() => isBodyEligible(bodyChrome())),
+    estimateSize: computed(() =>
+      table.isMobile() ? estimateCardSize : estimateRowSize
+    ),
+    overscan: virtualOverscan,
+    scrollMargin: virtualScrollMargin,
+    getScrollElement: maxHeight != null ? () => scrollBox() : undefined,
+    onEndReached: () => {
+      table.loadMore();
+    },
+    injector,
+  });
+}
 
 /**
  * What the table renders from once its inputs have arrived.
@@ -125,6 +213,10 @@ export interface TableView<TRow> {
   /** The grouping strip's props, when the panel feature is composed. */
   readonly groupingPanel:
     Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
+  /** The body window — every row when virtualization is off. */
+  readonly virtualization: Signal<TableVirtualization<TRow>>;
+  /** Column span for spacer/detail cells. */
+  readonly bodyColSpan: Signal<number>;
 }
 
 /**
@@ -174,6 +266,17 @@ export class AdaptDataTable<TRow> implements OnInit {
   readonly defaults = input<
     Partial<TableQueryParams> & { extra?: ExtraFilters }
   >();
+  /**
+   * Pagination mode. Defaults to `"auto"` (phone → infinite). Pass
+   * `"infinite"` with {@link virtualize} so the body windows.
+   * Read once.
+   */
+  readonly paginationMode = input<PaginationMode>();
+  /**
+   * Cap the table body's height; the body scrolls inside the box and a
+   * composed {@link virtualize} tracks the box instead of the page.
+   */
+  readonly maxHeight = input<number | string>();
   /** Offer a checkbox on every row. Read once. */
   readonly selectable = input(false);
   /** The selected row ids, to control the selection. */
@@ -256,6 +359,13 @@ export class AdaptDataTable<TRow> implements OnInit {
   protected readonly groupingPanelSlot = GROUPING_PANEL;
   /** The Filters button's glyph. @internal */
   protected readonly filtersIcon = FILTERS_ICON;
+  /**
+   * The scroll box that owns `maxHeight`, when virtualization tracks it.
+   *
+   * @internal
+   */
+  protected readonly scrollBox =
+    viewChild<ElementRef<HTMLElement>>("scrollBox");
   private readonly filtersForm = viewChild<TemplateRef<unknown>>("filtersForm");
   private readonly filtersTrigger =
     viewChild<TemplateRef<unknown>>("filtersTrigger");
@@ -270,6 +380,21 @@ export class AdaptDataTable<TRow> implements OnInit {
    */
   protected rowId(row: TRow): string {
     return this.rowKey()(row);
+  }
+
+  /**
+   * Style for the scroll box when `maxHeight` is set.
+   *
+   * @internal
+   */
+  protected scrollBoxStyle(): Record<string, string> | null {
+    const maxHeight = this.maxHeight();
+    if (maxHeight == null) return null;
+    return {
+      maxHeight:
+        typeof maxHeight === "number" ? `${String(maxHeight)}px` : maxHeight,
+      overflow: "auto",
+    };
   }
 
   /** Start the table from the inputs it reads once. */
@@ -313,6 +438,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       urlAdapter,
       urlKey: this.urlKey(),
       defaults: this.defaults(),
+      paginationMode: this.paginationMode(),
       filterFn: runtime?.filterFn,
       filterTreeFn: runtime?.filterTreeFn,
       arrayExtraKeys: runtime?.arrayExtraKeys,
@@ -480,6 +606,22 @@ export class AdaptDataTable<TRow> implements OnInit {
       features,
       injector,
     });
+    const virtualization = bodyVirtualizationFor({
+      table,
+      source,
+      featureOptions,
+      rowKey: (row) => this.rowKey()(row),
+      maxHeight: this.maxHeight(),
+      scrollBox: () => this.scrollBox()?.nativeElement ?? null,
+      injector,
+    });
+    const bodyColSpan = computed(() =>
+      virtualColumnSpan(
+        table.columns().length,
+        selection !== undefined,
+        rowActions().hasRowActions
+      )
+    );
     this.view.set({
       table,
       selection,
@@ -493,6 +635,8 @@ export class AdaptDataTable<TRow> implements OnInit {
       toolbarExtras,
       savedViews,
       groupingPanel,
+      virtualization,
+      bodyColSpan,
       rowActionsLayout: featureOptions.rowActionsLayout as
         RowActionsLayout | undefined,
       confirm,

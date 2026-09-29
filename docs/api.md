@@ -3042,7 +3042,12 @@ controls: the host writes its own markup.
   `AngularGroupingPanelAggregationItemProps`. `groupingPanel` (with
   `GroupingPanelExtras`) is the feature that owns the group-by state;
   `injectGroupingPanelState` (`GroupingPanelStateOptions`) publishes the
-  strip's props for the `GROUPING_PANEL` slot.
+  strip's props for the `GROUPING_PANEL` slot. `virtualize`
+  (`VirtualizeOptions`) windows the body through `@tanstack/angular-virtual`;
+  `injectTableVirtualization` / `injectKeyedVirtualization` (with
+  `TableVirtualizationOptions` / `KeyedVirtualizationOptions`) and the
+  `injectTableVirtualizer` / `injectKeyedVirtualizer` scroll helpers are the
+  headless hooks kits call.
 - Actions: `injectBulkActionRunner` runs bulk actions and returns a
   `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
   actions column's list, with Duplicate and Delete appended for the host's
@@ -3065,11 +3070,12 @@ renders search, sorting, paging, the phone card layout, row selection and
 keyboard cell navigation with the `data-adapttable-part` names every kit
 shares. Its `features` input composes `columnMenu`, `filters`,
 `headerFilters`, `bulkActions`, `rowActions` (`RowActionsFeatureOptions`),
-`densityChooser`, `fullscreen`, `exportCsv`, `savedViews` and
-`groupingPanel`; `filtersMode`
+`densityChooser`, `fullscreen`, `exportCsv`, `savedViews`,
+`groupingPanel` and `virtualize`; `filtersMode`
 (`FiltersMode`) picks the anchored popover or the drawer. Each feature draws
 the kit's own native controls. `AdaptGroupingPanel` draws the grouping
-strip with those same native controls. `TableView` is what the table renders from
+strip with those same native controls. `paginationMode` and `maxHeight` arm
+infinite lists and a scroll-box window. `TableView` is what the table renders from
 once its inputs have arrived, and `FiltersView` is the filters on that view:
 the button, the open panel, and the form, overlay, chips and header funnels.
 

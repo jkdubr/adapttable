@@ -46,6 +46,7 @@ import { coreRowActions } from '@adapttable/core/binding';
 import { coreSavedViews } from '@adapttable/core/binding';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
+import { devWarn } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
 import { ExportCsvOptions } from '@adapttable/core';
@@ -107,7 +108,9 @@ import { IconDescriptor } from '@adapttable/core/binding';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
+import { isBodyEligible } from '@adapttable/core/binding';
 import { joinRelativeToken } from '@adapttable/core';
+import { KeyedVirtualization } from '@adapttable/core';
 import { listFilterValues } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { offersAllMatching } from '@adapttable/core';
@@ -126,8 +129,10 @@ import { RELATIVE_PRESETS } from '@adapttable/core';
 import { RelativePreset } from '@adapttable/core';
 import { REORDER_COLUMN_KEY } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
+import { resolveVirtualRows } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
+import { rowSourceIndex } from '@adapttable/core';
 import { runRowAction } from '@adapttable/core';
 import { SAVED_VIEWS } from '@adapttable/core/binding';
 import { SavedView } from '@adapttable/core';
@@ -150,6 +155,7 @@ import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
 import { TableViewState } from '@adapttable/core';
 import { TableViewStore } from '@adapttable/core';
+import { TableVirtualization } from '@adapttable/core';
 import { TemplateRef } from '@angular/core';
 import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
@@ -160,6 +166,10 @@ import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { UseSavedViewsResult } from '@adapttable/core/binding';
+import { virtualColumnSpan } from '@adapttable/core';
+import { virtualizeIgnoredOnPage } from '@adapttable/core/binding';
+import { VirtualizeInput } from '@adapttable/core/binding';
+import { VirtualTableRow } from '@adapttable/core';
 import { visibleRowActions } from '@adapttable/core';
 import { watchOverlayDismiss } from '@adapttable/core';
 
@@ -278,7 +288,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "extra" | "setExtras" | "allFilteredRows" | "setExtra" | "facets">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "extra" | "setExtra" | "setExtras" | "facets">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -800,6 +810,8 @@ export interface DensityState {
     readonly setDensity: (next: TableDensity) => void;
 }
 
+export { devWarn }
+
 export { Direction }
 
 // @public
@@ -1070,6 +1082,15 @@ export function injectGroupingPanelState<TRow>(options: GroupingPanelStateOption
 export function injectIsMobile(options?: IsMobileOptions): Signal<boolean>;
 
 // @public
+export function injectKeyedVirtualization(options: KeyedVirtualizationOptions): Signal<KeyedVirtualization>;
+
+// @public
+export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
+    readonly virtualization: Signal<KeyedVirtualization>;
+    readonly scrollToIndex: (index: number) => void;
+};
+
+// @public
 export function injectRowSelection<TRow>(options: RowSelectionOptions<TRow>): RowSelection;
 
 // @public
@@ -1079,12 +1100,37 @@ export function injectSavedViews(options: SavedViewsOptions): SavedViewsState;
 export function injectTableUrlState(options?: TableUrlStateOptions): TableUrlState;
 
 // @public
+export function injectTableVirtualization<TRow>(options: TableVirtualizationOptions<TRow>): Signal<TableVirtualization<TRow>>;
+
+// @public
+export function injectTableVirtualizer<TRow>(options: TableVirtualizationOptions<TRow>): {
+    readonly virtualization: Signal<TableVirtualization<TRow>>;
+    readonly scrollToIndex: (index: number) => void;
+};
+
+export { isBodyEligible }
+
+// @public
 export interface IsMobileOptions {
     readonly breakpoint?: number;
     readonly injector?: Injector;
 }
 
 export { joinRelativeToken }
+
+export { KeyedVirtualization }
+
+// @public
+export interface KeyedVirtualizationOptions {
+    readonly enabled?: Signal<boolean> | boolean;
+    readonly estimateSize?: Signal<number | ((index: number) => number)> | number | ((index: number) => number);
+    readonly getScrollElement?: () => Element | null;
+    readonly injector?: Injector;
+    readonly keys: Signal<readonly string[]>;
+    readonly onEndReached?: () => void;
+    readonly overscan?: Signal<number> | number;
+    readonly scrollMargin?: Signal<number> | number;
+}
 
 export { listFilterValues }
 
@@ -1099,6 +1145,8 @@ export { nextPinSide }
 export { offersAllMatching }
 
 export { PaginationInfo }
+
+export { PaginationMode }
 
 export { PaginationSlot }
 
@@ -1140,6 +1188,8 @@ export interface ResolvedRenderer<TContext> {
     readonly inputs: Record<string, unknown>;
     readonly template: TemplateRef<TContext> | null;
 }
+
+export { resolveVirtualRows }
 
 export { RowAction }
 
@@ -1188,6 +1238,8 @@ export interface RowSelectionOptions<TRow> {
     readonly rows: Signal<readonly TRow[]>;
     readonly selectedIds?: MaybeSignalOptional<readonly string[]>;
 }
+
+export { rowSourceIndex }
 
 export { runRowAction }
 
@@ -1269,6 +1321,22 @@ export interface TableUrlStateOptions {
     readonly urlSync?: boolean;
 }
 
+export { TableVirtualization }
+
+// @public
+export interface TableVirtualizationOptions<TRow> {
+    readonly enabled?: Signal<boolean> | boolean;
+    readonly estimateSize?: Signal<number | ((index: number) => number)> | number | ((index: number) => number);
+    readonly expandable?: Signal<boolean> | boolean;
+    readonly getScrollElement?: () => Element | null;
+    readonly injector?: Injector;
+    readonly onEndReached?: () => void;
+    readonly overscan?: Signal<number> | number;
+    readonly rowKey: (row: TRow) => string;
+    readonly rows: Signal<readonly TRow[]>;
+    readonly scrollMargin?: Signal<number> | number;
+}
+
 // @public
 export function textFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<TextFieldWidget>;
 
@@ -1284,6 +1352,18 @@ export { unpinAllColumns }
 export function urlAdapterFor(options: Pick<TableUrlStateOptions, "urlAdapter" | "urlSync">, injector: Injector): UrlStateAdapter;
 
 export { UrlStateAdapter }
+
+export { virtualColumnSpan }
+
+// @public
+export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;
+
+export { virtualizeIgnoredOnPage }
+
+// @public
+export type VirtualizeOptions = VirtualizeInput;
+
+export { VirtualTableRow }
 
 export { visibleRowActions }
 

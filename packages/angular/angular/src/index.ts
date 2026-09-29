@@ -127,19 +127,43 @@ export {
   type TableUrlStateOptions,
   urlAdapterFor,
 } from "./url";
+export {
+  injectKeyedVirtualization,
+  injectKeyedVirtualizer,
+  injectTableVirtualization,
+  injectTableVirtualizer,
+  type KeyedVirtualizationOptions,
+  type TableVirtualizationOptions,
+  virtualize,
+  type VirtualizeOptions,
+} from "./virtualize";
 export type {
   CellRange,
   Direction,
   ExtraFilters,
   GridCell,
+  KeyedVirtualization,
   PaginationInfo,
+  PaginationMode,
   PaginationSlot,
   SortDirection,
   TableLabels,
   TableQueryParams,
   TableSource,
+  TableVirtualization,
+  VirtualTableRow,
+} from "@adapttable/core";
+export {
+  devWarn,
+  resolveVirtualRows,
+  rowSourceIndex,
+  virtualColumnSpan,
 } from "@adapttable/core";
 export type {
   ChromeBodyRegion,
   HeaderSelectionState,
+} from "@adapttable/core/binding";
+export {
+  isBodyEligible,
+  virtualizeIgnoredOnPage,
 } from "@adapttable/core/binding";
