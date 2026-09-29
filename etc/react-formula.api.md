@@ -50,6 +50,7 @@ import { serializeFormulaColumns } from '@adapttable/core';
 import { SortableValue } from '@adapttable/core';
 import { toFormulaValue } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
+import { UseFormulaUrlStateResult } from '@adapttable/core/formula';
 
 export { BinaryOp }
 
@@ -163,11 +164,7 @@ export interface UseFormulaUrlStateOptions {
     urlSync?: boolean;
 }
 
-// @public
-export interface UseFormulaUrlStateResult {
-    formulas: readonly FormulaColumnSpec[];
-    onFormulasChange: (next: readonly FormulaColumnSpec[]) => void;
-}
+export { UseFormulaUrlStateResult }
 
 // (No @packageDocumentation comment for this package)
 

@@ -13,6 +13,7 @@ import { AgentProgress } from '@adapttable/core';
 import { ApprovalPresentation } from '@adapttable/core';
 import { BulkAction } from '@adapttable/core';
 import { ColumnMetadata } from '@adapttable/core';
+import { FeatureStateKey } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
 import { FilterTypeRegistry } from '@adapttable/core';
 import { GroupAggregateOverrides } from '@adapttable/core';
@@ -1477,6 +1478,9 @@ export function subjectFor(key: string, args: unknown, result: ExecuteResult, co
 
 // @public
 export function summaryOf(key: CapabilityKey): string;
+
+// @public
+export const TABLE_AGENT_STATE: FeatureStateKey<AgentSession>;
 
 // @public
 export function tableActionCapabilities<TRow>(declared: DeclaredTableActions<TRow> | undefined, source: TableActionSource<TRow>): AgentCapabilityDefinition[];

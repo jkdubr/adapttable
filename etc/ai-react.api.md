@@ -19,11 +19,11 @@ import { AssistantResumeHandle } from '@adapttable/ai';
 import { AssistantStatus } from '@adapttable/ai';
 import { AssistantSuggestion } from '@adapttable/ai';
 import { AssistantTransport } from '@adapttable/ai';
-import { FeatureStateKey } from '@adapttable/core/binding';
 import { SharedApproval } from '@adapttable/ai';
 import { SpeechClip } from '@adapttable/ai/voice';
 import { SpeechInputHandle } from '@adapttable/react/adapter';
 import { StaticTableFeature } from '@adapttable/react/adapter';
+import { TABLE_AGENT_STATE } from '@adapttable/ai';
 import { TableAgentBridge as TableAgentBridge_2 } from '@adapttable/ai';
 import { TableAgentColumnPatch } from '@adapttable/ai';
 import { TableAgentControllerOptions } from '@adapttable/ai';
@@ -47,8 +47,7 @@ export { AssistantSuggestion }
 
 export { SharedApproval }
 
-// @public
-export const TABLE_AGENT_STATE: FeatureStateKey<AgentSession>;
+export { TABLE_AGENT_STATE }
 
 // @public
 export function tableAgent(options: TableAgentOptions): StaticTableFeature;

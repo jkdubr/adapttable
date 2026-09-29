@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ChangedCellFlashState } from '@adapttable/core/binding';
 import { InsertPatch } from '@adapttable/core';
 import { isStreamLive } from '@adapttable/core';
 import { isStreamSettled } from '@adapttable/core';
@@ -15,22 +16,14 @@ import { RowPatch } from '@adapttable/core';
 import { RowPatchEvent } from '@adapttable/core';
 import { RowPatchStreamHandle } from '@adapttable/core';
 import { RowPatchStreamReconnect } from '@adapttable/core';
+import { RowPatchStreamState } from '@adapttable/core/binding';
 import { RowPatchStreamStatus } from '@adapttable/core';
 import { StreamSocket } from '@adapttable/core';
 import { StreamSocketEvent } from '@adapttable/core';
 import { UpdatePatch } from '@adapttable/core';
 import { UpsertPatch } from '@adapttable/core';
 
-// @public
-export interface ChangedCellFlashState {
-    clear: () => void;
-    flashProps: (rowId: string, columnKey: string) => {
-        "data-flash"?: "";
-    } | Record<string, never>;
-    isFlashing: (rowId: string, columnKey: string) => boolean;
-    isRowFlashing: (rowId: string) => boolean;
-    mark: (events: readonly RowPatchEvent<unknown>[]) => void;
-}
+export { ChangedCellFlashState }
 
 export { InsertPatch }
 
@@ -54,12 +47,7 @@ export { RowPatchStreamHandle }
 
 export { RowPatchStreamReconnect }
 
-// @public
-export interface RowPatchStreamState {
-    close: () => void;
-    error: Error | null;
-    status: RowPatchStreamStatus;
-}
+export { RowPatchStreamState }
 
 export { RowPatchStreamStatus }
 

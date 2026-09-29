@@ -242,6 +242,12 @@ export type SortableValue = string | number | boolean | null | undefined;
 // @public
 export function toFormulaValue(raw: unknown): FormulaValue;
 
+// @public
+export interface UseFormulaUrlStateResult {
+    formulas: readonly FormulaColumnSpec[];
+    onFormulasChange: (next: readonly FormulaColumnSpec[]) => void;
+}
+
 // (No @packageDocumentation comment for this package)
 
 ```
