@@ -309,6 +309,33 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(part("edit-cell-editor")).toBeNull();
   });
 
+  it("edits a field on a phone card and hands the host the parsed value", async () => {
+    const onCellEdit = vi.fn();
+    const { part, parts, settle, element } = await mountFeatures({
+      features: [editing(onCellEdit)],
+      forceMobile: true,
+    });
+    expect(parts("card").length).toBeGreaterThan(0);
+    expect(part("table")).toBeNull();
+    const activate = element.querySelector<HTMLElement>(
+      '[data-adapttable-part="card-value"] [data-adapttable-part="edit-cell-activate"]'
+    );
+    expect(activate).not.toBeNull();
+    activate!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    await settle();
+    const editor = part<HTMLInputElement>("edit-cell-editor");
+    expect(editor).not.toBeNull();
+    editor!.value = "Card edit";
+    editor!.dispatchEvent(new Event("input"));
+    editor!.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+    );
+    await settle();
+    expect(onCellEdit).toHaveBeenCalledOnce();
+    expect(onCellEdit.mock.calls[0]?.[1]).toBe("name");
+    expect(onCellEdit.mock.calls[0]?.[2]).toBe("Card edit");
+  });
+
   it("warns when virtualize is composed on a paged table", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     await mountFeatures({
