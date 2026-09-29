@@ -31,6 +31,12 @@ export type {
   RowAction,
   RowActionsLayout,
 } from "@adapttable/core";
+export type {
+  ExportCsvOptions,
+  TableDensity,
+  UrlStateAdapter,
+} from "@adapttable/core";
+export type { SavedView, SavedViewsControllerOptions } from "@adapttable/core";
 export {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
@@ -86,6 +92,12 @@ export type {
   BulkBarSlotProps,
   SelectionState,
 } from "@adapttable/core/binding";
+export type {
+  ExportHandlerState,
+  FullscreenState,
+  ToolbarExtrasSlotProps,
+} from "@adapttable/core/binding";
+export type { SavedViewsSlotProps } from "@adapttable/core/binding";
 export {
   COLUMN_MENU,
   columnMenuActions,
@@ -115,3 +127,10 @@ export {
   coreBulkActions,
   coreRowActions,
 } from "@adapttable/core/binding";
+export {
+  coreDensityChooser,
+  coreExportCsv,
+  coreFullscreen,
+  TOOLBAR_EXTRAS,
+} from "@adapttable/core/binding";
+export { coreSavedViews, SAVED_VIEWS } from "@adapttable/core/binding";

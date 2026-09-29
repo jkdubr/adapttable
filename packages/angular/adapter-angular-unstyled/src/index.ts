@@ -10,10 +10,14 @@ export { AdaptDataTable } from "./dataTable";
 export {
   bulkActions,
   columnMenu,
+  densityChooser,
+  exportCsv,
   filters,
+  fullscreen,
   headerFilters,
   rowActions,
   type RowActionsFeatureOptions,
+  savedViews,
 } from "./features";
 export { AdaptAutoFilterForm } from "./filterFields";
 export {
@@ -23,4 +27,10 @@ export {
   AdaptFiltersForm,
   AdaptHeaderFilterTrigger,
 } from "./filterOverlays";
+export { AdaptSavedViewsMenu } from "./savedViews";
 export type { FiltersMode } from "./tableFilters";
+export {
+  AdaptDensityButton,
+  AdaptExportButton,
+  AdaptFullscreenButton,
+} from "./toolbarExtras";

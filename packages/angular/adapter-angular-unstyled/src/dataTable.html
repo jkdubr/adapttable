@@ -1,5 +1,10 @@
 @if (view(); as v) {
-  <div #root data-adapttable-part="root" [attr.dir]="v.table.dir()">
+  <div
+    #root
+    data-adapttable-part="root"
+    [attr.dir]="v.table.dir()"
+    [attr.data-density]="v.density()"
+  >
     <div data-adapttable-part="toolbar">
       <div data-adapttable-part="search-field">
         <input
@@ -48,6 +53,13 @@
           }
         }
       }
+      @if (v.savedViews; as savedViews) {
+        <ng-container
+          [adaptSlot]="savedViewsSlot"
+          [adaptSlotProps]="savedViews()"
+          [adaptSlotTable]="v.table"
+        />
+      }
       @if (v.columnMenu && !v.table.isMobile()) {
         <ng-container
           [adaptSlot]="columnMenuSlot"
@@ -55,6 +67,11 @@
           [adaptSlotTable]="v.table"
         />
       }
+      <ng-container
+        [adaptSlot]="toolbarExtrasSlot"
+        [adaptSlotProps]="v.toolbarExtras()"
+        [adaptSlotTable]="v.table"
+      />
     </div>
 
     @if (v.filters; as f) {

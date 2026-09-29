@@ -26,6 +26,7 @@ import {
   type DataTable,
   defaultConfirm,
   type Direction,
+  type ExportCsvOptions,
   type ExtraFilters,
   featureOptionsOf,
   FILTER_DRAWER,
@@ -38,7 +39,10 @@ import {
   type FilterTypeSpec,
   type GridFocus,
   injectDataTable,
+  injectDensity,
+  injectExportCsv,
   injectFrontendData,
+  injectFullscreen,
   injectGridFocus,
   injectIsMobile,
   injectRowSelection,
@@ -46,9 +50,16 @@ import {
   rowActionsFor,
   type RowActionsLayout,
   type RowSelection,
+  SAVED_VIEWS,
+  type SavedViewsControllerOptions,
+  type SavedViewsSlotProps,
   type SelectionState,
+  type TableDensity,
   type TableLabels,
   type TableQueryParams,
+  TOOLBAR_EXTRAS,
+  type ToolbarExtrasSlotProps,
+  urlAdapterFor,
 } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -101,6 +112,13 @@ interface TableView<TRow> {
   readonly rowActionsLayout: RowActionsLayout | undefined;
   /** Asks before an action that declares a `confirm`. */
   readonly confirm: ConfirmHandler;
+  /** The row density the root states. */
+  readonly density: Signal<TableDensity>;
+  /** The toolbar extras' props: density, fullscreen and export. */
+  readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
+  /** The saved-views menu's props, when it is composed. */
+  readonly savedViews:
+    Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
 }
 
 /**
@@ -179,6 +197,8 @@ export class AdaptDataTable<TRow> implements OnInit {
   readonly closeHeaderFilterOnSelect = input(false);
   /** The host's own chips, shown after the table's filter chips. */
   readonly extraChips = input<readonly ActiveFilterChip[]>([]);
+  /** Row density while the URL says nothing. Read once. */
+  readonly density = input<TableDensity>();
   /**
    * Asks before an action that declares a `confirm`. Defaults to the
    * browser's `confirm`. Read once.
@@ -220,6 +240,10 @@ export class AdaptDataTable<TRow> implements OnInit {
     chips: ACTIVE_FILTER_CHIPS,
     header: FILTER_HEADER,
   };
+  /** The saved-views slot. @internal */
+  protected readonly savedViewsSlot = SAVED_VIEWS;
+  /** The toolbar extras' slot. @internal */
+  protected readonly toolbarExtrasSlot = TOOLBAR_EXTRAS;
   /** The selection bar's slot. @internal */
   protected readonly bulkBarSlot = BULK_BAR;
   /** The Filters button's glyph. @internal */
@@ -268,6 +292,9 @@ export class AdaptDataTable<TRow> implements OnInit {
         : undefined;
     // Filled once the table exists; the table reads the count lazily.
     const filtersRef: { current?: FiltersView } = {};
+    // One URL backend for the table, its density and its saved views — a
+    // private memory store when the table does not sync with the URL.
+    const urlAdapter = urlAdapterFor({ urlSync: this.urlSync() }, injector);
     const viewportMobile = injectIsMobile({ injector });
     const isMobile = computed(() => this.forceMobile() ?? viewportMobile());
     const source = injectFrontendData<TRow>({
@@ -275,7 +302,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       columns: this.columns,
       getRowId: (row) => this.rowKey()(row),
       forceMobile: isMobile,
-      urlSync: this.urlSync(),
+      urlAdapter,
       urlKey: this.urlKey(),
       defaults: this.defaults(),
       filterFn: runtime?.filterFn,
@@ -361,6 +388,63 @@ export class AdaptDataTable<TRow> implements OnInit {
       ? injectGridFocus({ table, enabled: true, injector })
       : undefined;
     const root = (): HTMLElement | null => this.root()?.nativeElement ?? null;
+    const densityState =
+      featureOptions.densityChooser === true
+        ? injectDensity({
+            urlAdapter,
+            urlKey: this.urlKey(),
+            defaultDensity: this.density(),
+            injector,
+          })
+        : undefined;
+    const fixedDensity = this.density() ?? "comfortable";
+    const density = densityState?.density ?? computed(() => fixedDensity);
+    const fullscreen =
+      featureOptions.fullscreen === true
+        ? injectFullscreen(
+            computed(() => this.root()?.nativeElement),
+            injector
+          )
+        : undefined;
+    const exportOption = featureOptions.exportCsv as
+      boolean | ExportCsvOptions<TRow> | undefined;
+    const exporter =
+      exportOption === undefined || exportOption === false
+        ? undefined
+        : injectExportCsv<TRow>({
+            exportCsv: exportOption,
+            source,
+            columns: table.columns,
+            labels: table.labels,
+            featureHost: table.featureHost,
+            injector,
+          });
+    const savedViewsOption = featureOptions.savedViews as
+      SavedViewsControllerOptions | undefined;
+    const savedViews = savedViewsOption
+      ? computed((): SavedViewsSlotProps<SavedViewsControllerOptions> => ({
+          // The views capture and apply through the table's own backend
+          // and namespace; the host's explicit values still win.
+          options: {
+            urlAdapter,
+            urlKey: this.urlKey(),
+            ...savedViewsOption,
+          },
+          labels: table.labels(),
+        }))
+      : undefined;
+    const toolbarExtras = computed((): ToolbarExtrasSlotProps => ({
+      density: density(),
+      onDensityChange: (next) => {
+        densityState?.setDensity(next);
+      },
+      onToggleFullscreen: fullscreen?.().supported
+        ? fullscreen().toggle
+        : undefined,
+      isFullscreen: fullscreen?.().active,
+      ...exporter?.(),
+      labels: table.labels(),
+    }));
     const columnMenuProps = computed((): ColumnMenuSlotProps<never> => ({
       allColumns: table.allColumns() as never,
       layout: table.layout(),
@@ -391,6 +475,9 @@ export class AdaptDataTable<TRow> implements OnInit {
       filters,
       bulkBar,
       rowActions: computed(() => rowActions().rowActions),
+      density,
+      toolbarExtras,
+      savedViews,
       rowActionsLayout: featureOptions.rowActionsLayout as
         RowActionsLayout | undefined,
       confirm,

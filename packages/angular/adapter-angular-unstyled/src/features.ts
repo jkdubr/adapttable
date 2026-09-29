@@ -11,9 +11,14 @@ import {
   COLUMN_MENU,
   coreBulkActions,
   coreColumnMenu,
+  coreDensityChooser,
+  coreExportCsv,
   coreFilters,
+  coreFullscreen,
   coreHeaderFilters,
   coreRowActions,
+  coreSavedViews,
+  type ExportCsvOptions,
   extendFeature,
   FILTER_DRAWER,
   FILTER_HEADER,
@@ -22,7 +27,10 @@ import {
   FILTERS_FORM,
   type RowAction,
   type RowActionsLayout,
+  SAVED_VIEWS,
+  type SavedViewsControllerOptions,
   slotRender,
+  TOOLBAR_EXTRAS,
 } from "@adapttable/angular";
 
 import { AdaptBulkBar } from "./actions";
@@ -34,6 +42,12 @@ import {
   AdaptFiltersForm,
   AdaptHeaderFilterTrigger,
 } from "./filterOverlays";
+import { AdaptSavedViewsMenu } from "./savedViews";
+import {
+  AdaptDensityButton,
+  AdaptExportButton,
+  AdaptFullscreenButton,
+} from "./toolbarExtras";
 
 /**
  * The Columns menu: show, hide, reorder, pin, rename and auto-size columns,
@@ -135,4 +149,70 @@ export function rowActions<TRow>(
       rowActionsLayout: options.layout,
     }),
   };
+}
+
+/**
+ * A toolbar button that switches between comfortable and compact rows. The
+ * choice is kept in the URL.
+ *
+ * @public
+ */
+export function densityChooser(): AdaptTableFeature {
+  return extendFeature(coreDensityChooser(), [
+    slotRender(TOOLBAR_EXTRAS, () => AdaptDensityButton, {
+      orderAs: "density-chooser",
+    }),
+  ]);
+}
+
+/**
+ * A toolbar button that takes the table fullscreen, where the browser
+ * allows it.
+ *
+ * @public
+ */
+export function fullscreen(): AdaptTableFeature {
+  return extendFeature(coreFullscreen(), [
+    slotRender(TOOLBAR_EXTRAS, () => AdaptFullscreenButton, {
+      orderAs: "fullscreen",
+    }),
+  ]);
+}
+
+/**
+ * CSV export of the current view, from a toolbar button.
+ *
+ * @param options - `true`, or the export's scope, columns, filename,
+ *   writer and hooks.
+ *
+ * @public
+ */
+export function exportCsv<TRow>(
+  options: boolean | ExportCsvOptions<TRow> = true
+): AdaptTableFeature {
+  return extendFeature(
+    coreExportCsv(options as Parameters<typeof coreExportCsv>[0]),
+    [
+      slotRender(TOOLBAR_EXTRAS, () => AdaptExportButton, {
+        orderAs: "export-csv",
+      }),
+    ]
+  );
+}
+
+/**
+ * Named snapshots of the table's view — search, sort, filters, paging and
+ * layout — from a toolbar menu.
+ *
+ * @param options - Where the views are kept: a storage key, and optionally
+ *   a storage or a server store. The table supplies its URL backend.
+ *
+ * @public
+ */
+export function savedViews(
+  options: SavedViewsControllerOptions
+): AdaptTableFeature {
+  return extendFeature(coreSavedViews(options), [
+    slotRender(SAVED_VIEWS, () => AdaptSavedViewsMenu),
+  ]);
 }

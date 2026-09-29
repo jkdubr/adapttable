@@ -78,6 +78,11 @@ export * from "./kitExports";
 export { AdaptLiveRegion } from "./liveRegion";
 export { injectIsMobile, type IsMobileOptions } from "./mobile";
 export {
+  injectSavedViews,
+  type SavedViewsOptions,
+  type SavedViewsState,
+} from "./savedViews";
+export {
   injectRowSelection,
   type RowSelection,
   type RowSelectionOptions,
@@ -96,10 +101,19 @@ export {
   type MaybeSignalOptional,
 } from "./store";
 export {
+  type DensityOptions,
+  type DensityState,
+  type ExportCsvHandlerOptions,
+  injectDensity,
+  injectExportCsv,
+  injectFullscreen,
+} from "./toolbar";
+export {
   ADAPTTABLE_URL_ADAPTER,
   injectTableUrlState,
   type TableUrlState,
   type TableUrlStateOptions,
+  urlAdapterFor,
 } from "./url";
 export type {
   CellRange,
