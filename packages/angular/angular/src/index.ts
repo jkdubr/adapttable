@@ -127,6 +127,14 @@ export {
   rowEditing,
 } from "./features/editing";
 export {
+  grouping,
+  type GroupingExtras,
+  type GroupingOptions,
+  type GroupSort,
+  injectGrouping,
+  type TableGrouping,
+} from "./features/grouping";
+export {
   groupingPanel,
   type GroupingPanelExtras,
 } from "./features/groupingPanel";
@@ -158,6 +166,11 @@ export {
   injectGridFocus,
 } from "./focus/gridFocus";
 export {
+  type GroupCollapseOptions,
+  type GroupCollapseState,
+  injectGroupCollapse,
+} from "./grouping/groupCollapse";
+export {
   AdaptGroupingPanelChrome,
   type AngularGroupingPanelAggregationItemProps,
   type AngularGroupingPanelSurfaceProps,
@@ -167,9 +180,22 @@ export {
   type GroupingPanelStateOptions,
   injectGroupingPanelState,
 } from "./grouping/groupingPanelState";
+export {
+  AdaptGroupMoreButtonChrome,
+  type GroupMoreButtonProps,
+  type GroupMoreButtonSlotProps,
+  type GroupMoreButtonSlots,
+} from "./grouping/groupMoreButton";
+export {
+  type GroupPagingOptions,
+  type GroupPagingState,
+  injectGroupPaging,
+} from "./grouping/groupPaging";
+export { AdaptGroupToggleSpacer } from "./grouping/groupToggleSpacer";
 export { injectIsMobile, type IsMobileOptions } from "./hooks/isMobile";
 export { AdaptIcon } from "./icon";
 export * from "./kitExports";
+export type { RuntimeGrouping } from "./layout/tableRuntime";
 export {
   type DensityOptions,
   type DensityState,

@@ -6,6 +6,7 @@
 import {
   createGroupingPanelController,
   declaredAggregates,
+  groupingPanelAggregations,
   parseGroupBy,
   type TableRuntime,
   type TableSource,
@@ -28,7 +29,7 @@ import type { ColumnDef } from "../columnDef";
 import type { DataTable } from "../dataTable";
 import type { AdaptTableFeature } from "../featureHost";
 import type { GroupingPanelExtras } from "../features/groupingPanel";
-import { tableRuntimeFor } from "../layout/tableRuntime";
+import { type RuntimeGrouping, tableRuntimeFor } from "../layout/tableRuntime";
 import { fromStore } from "../store";
 
 /**
@@ -52,6 +53,8 @@ export interface GroupingPanelStateOptions<TRow> {
   readonly source: Signal<TableSource<TRow>>;
   /** The composed features; the panel seeds from the one with id `grouping-panel`. */
   readonly features: readonly AdaptTableFeature[];
+  /** The grouped entries, when the table groups its rows. */
+  readonly grouping?: Signal<RuntimeGrouping<TRow> | undefined>;
   /** The injector to run effects in. */
   readonly injector?: Injector;
 }
@@ -88,7 +91,8 @@ export function injectGroupingPanelState<TRow>(
   const runtime = tableRuntimeFor(
     options.table,
     options.source,
-    options.features
+    options.features,
+    options.grouping
   );
   const extras = feature.extras ?? {};
   const controller = createGroupingPanelController({
@@ -158,8 +162,20 @@ export function injectGroupingPanelState<TRow>(
     if (!state) {
       throw new Error("grouping panel composed without interactions");
     }
+    const grouped = options.grouping;
     return {
-      state,
+      state:
+        grouped === undefined
+          ? state
+          : {
+              ...state,
+              aggregations: groupingPanelAggregations({
+                source: current,
+                columns: options.table.allColumns(),
+                declared,
+                entries: grouped()?.entries,
+              }),
+            },
       columns: options.table.allColumns(),
       labels: options.table.labels(),
       mobile: options.table.isMobile(),

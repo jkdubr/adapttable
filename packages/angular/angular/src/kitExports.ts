@@ -87,6 +87,14 @@ export {
   resolveRowEditTrigger,
   rowEditConflict,
 } from "@adapttable/core";
+export {
+  groupAggregateEntries,
+  groupedViewSource,
+  groupLeafCount,
+  groupRowLayout,
+  groupSelectionState,
+  windowGroupedEntries,
+} from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,
@@ -183,4 +191,23 @@ export {
   EDITABLE_CELL,
   type EditableCellSlotProps,
   ROW_EDIT_ACTIONS,
+} from "@adapttable/core/binding";
+export {
+  bodyWindowKind,
+  type ChromeBodySlot,
+  desktopBodySlots,
+  type DesktopRowWiringArgs,
+  EXTRA_ROW_PARTS,
+  GROUP_HEADER_CARD,
+  GROUP_HEADER_ROW,
+  type GroupedFlatEntry,
+  type GroupHeaderCardSlotProps,
+  type GroupHeaderRowSlotProps,
+  groupIndentStyle,
+  groupRowParts,
+  insertExtraRows,
+  insertExtrasBeforeRows,
+  isExtraEntry,
+  resolveBodyVirtualization,
+  resolveMobileLabel,
 } from "@adapttable/core/binding";

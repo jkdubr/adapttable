@@ -15,6 +15,10 @@ export { AdaptDesktopTable } from "./components/desktopTable";
 export { AdaptEditableCell } from "./components/editableCell";
 export { AdaptFilterDrawer, AdaptFiltersForm } from "./components/filterPanel";
 export { AdaptFilterPopover } from "./components/filterPopover";
+export {
+  AdaptGroupHeaderCard,
+  AdaptGroupHeaderRow,
+} from "./components/groupHeader";
 export { AdaptGroupingPanel } from "./components/groupingPanel";
 export { type MenuPopover, menuPopover } from "./components/menuPopover";
 export { AdaptMobileCards } from "./components/mobileCards";
@@ -31,6 +35,8 @@ export {
 } from "./components/toolbarExtras";
 export {
   AdaptDataTable,
+  type BodyRow,
+  type BodySlot,
   type RowActionsCell,
   type TableView,
 } from "./dataTable";

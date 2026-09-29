@@ -16,10 +16,12 @@ import {
   BATCH_EDIT_BAR,
   type BatchEditBarProps,
   type BatchEditHandler,
+  bodyWindowKind,
   BULK_BAR,
   type BulkAction,
   type BulkBarSlotProps,
   type CellEditHandler,
+  type ChromeBodySlot,
   chromeColumnPlan,
   COLUMN_MENU,
   type ColumnDef,
@@ -28,6 +30,8 @@ import {
   type ConfirmHandler,
   type DataTable,
   defaultConfirm,
+  desktopBodySlots,
+  type DesktopRowWiringArgs,
   devWarn,
   type Direction,
   type EditableCellEditing,
@@ -45,6 +49,10 @@ import {
   FILTERS_ICON,
   type FilterTypeSpec,
   type GridFocus,
+  type GroupedFlatEntry,
+  groupedViewSource,
+  type GroupHeaderCardSlotProps,
+  type GroupHeaderRowSlotProps,
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
   injectBatchEditing,
@@ -57,14 +65,18 @@ import {
   injectFrontendData,
   injectFullscreen,
   injectGridFocus,
+  injectGrouping,
   injectGroupingPanelState,
   injectIsMobile,
+  injectKeyedVirtualization,
   injectRowEditing,
   injectRowReorder,
   injectRowSelection,
   injectTableVirtualization,
-  isBodyEligible,
+  insertExtraRows,
+  insertExtrasBeforeRows,
   type PaginationMode,
+  resolveBodyVirtualization,
   resolveEditingArming,
   resolveRowEditTrigger,
   ROW_REORDER_ANNOUNCER,
@@ -82,6 +94,7 @@ import {
   type SavedViewsSlotProps,
   type SelectionState,
   type TableDensity,
+  type TableGrouping,
   type TableLabels,
   type TableQueryParams,
   type TableVirtualization,
@@ -90,6 +103,7 @@ import {
   urlAdapterFor,
   virtualColumnSpan,
   virtualizeIgnoredOnPage,
+  windowGroupedEntries,
 } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -218,6 +232,74 @@ export interface RowActionsCell<TRow> {
 }
 
 /**
+ * One data row the body draws: the row, its index in the page, and its id.
+ *
+ * @public
+ */
+export type BodyRow<TRow> = DesktopRowWiringArgs<TRow>;
+
+/**
+ * One slot of the body in reading order: a group header, footer or "show
+ * more" row, a data row, a host extra row, or a virtual spacer.
+ *
+ * @public
+ */
+export type BodySlot<TRow> = ChromeBodySlot<TRow, BodyRow<TRow>>;
+
+/**
+ * The group header slots' props — {@link GROUP_HEADER_ROW} on desktop and
+ * {@link GROUP_HEADER_CARD} on phones — keyed by entry key.
+ */
+function groupHeadersFor<TRow>(options: {
+  readonly table: DataTable<TRow>;
+  readonly grouping: Signal<TableGrouping<TRow> | undefined>;
+  readonly slots: Signal<readonly BodySlot<TRow>[]>;
+  readonly selection: RowSelection | undefined;
+  readonly leadingCells: Signal<number>;
+  readonly showActions: Signal<boolean>;
+}): Signal<{
+  readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
+  readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
+}> {
+  const { table } = options;
+  const getCellProps = (column: ColumnDef<TRow>) => table.cellAttrs(column);
+  return computed(() => {
+    const grouping = options.grouping();
+    const rows = new Map<string, GroupHeaderRowSlotProps<never>>();
+    const cards = new Map<string, GroupHeaderCardSlotProps<never>>();
+    if (!grouping) return { rows, cards };
+    const columns = table.columns();
+    const labels = table.labels();
+    const selection = options.selection?.state() ?? null;
+    const onToggleCollapse = (groupKey: string): void => {
+      grouping.collapsed.toggle(groupKey);
+    };
+    for (const slot of options.slots()) {
+      if (slot.kind !== "group") continue;
+      const shared = {
+        entry: slot.entry,
+        columns,
+        selection,
+        labels,
+        onToggleCollapse,
+        onShowMore: grouping.showMore,
+      };
+      rows.set(slot.key, {
+        ...shared,
+        leadingCells: options.leadingCells(),
+        showActions: options.showActions(),
+        getCellProps,
+      } as unknown as GroupHeaderRowSlotProps<never>);
+      cards.set(slot.key, {
+        ...shared,
+        compact: false,
+      } as unknown as GroupHeaderCardSlotProps<never>);
+    }
+    return { rows, cards };
+  });
+}
+
+/**
  * The {@link EDITABLE_CELL} props of every cell in the body window, keyed
  * `rowId:columnKey`. A computed map keeps each object the same between
  * change-detection passes, so a slot's props change only when editing,
@@ -226,7 +308,7 @@ export interface RowActionsCell<TRow> {
 function editableCellsFor<TRow>(options: {
   readonly table: DataTable<TRow>;
   readonly editing: Signal<EditableCellEditing<TRow>>;
-  readonly virtualization: Signal<TableVirtualization<TRow>>;
+  readonly rows: Signal<readonly BodyRow<TRow>[]>;
   readonly rowKey: Signal<(row: TRow) => string>;
 }): Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> {
   return computed(() => {
@@ -237,7 +319,7 @@ function editableCellsFor<TRow>(options: {
     const columns = table.columns();
     const rowKey = options.rowKey();
     const cells = new Map<string, EditableCellSlotProps<never>>();
-    for (const entry of options.virtualization().rows) {
+    for (const entry of options.rows()) {
       const rowId = rowKey(entry.row);
       for (const column of columns) {
         const props = {
@@ -271,7 +353,7 @@ function actionsCellsFor<TRow>(options: {
   readonly table: DataTable<TRow>;
   readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
   readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
-  readonly virtualization: Signal<TableVirtualization<TRow>>;
+  readonly rows: Signal<readonly BodyRow<TRow>[]>;
   readonly rowKey: Signal<(row: TRow) => string>;
 }): Signal<ReadonlyMap<string, RowActionsCell<TRow>>> {
   return computed(() => {
@@ -281,7 +363,7 @@ function actionsCellsFor<TRow>(options: {
     const labels = options.table.labels();
     const rowKey = options.rowKey();
     const cells = new Map<string, RowActionsCell<TRow>>();
-    for (const entry of options.virtualization().rows) {
+    for (const entry of options.rows()) {
       const rowId = rowKey(entry.row);
       const trigger = resolveRowEditTrigger(
         actions,
@@ -308,36 +390,53 @@ function actionsCellsFor<TRow>(options: {
 }
 
 /**
- * The body window for a composed {@link virtualize} feature, or every row
- * when the feature is absent.
+ * The window the body draws: the flat rows (or a keyed window's spacers)
+ * and, while grouping renders, the grouped entries in view.
  */
-function bodyVirtualizationFor<TRow>(options: {
+interface BodyWindow<TRow> {
+  /** The row window — every row when virtualization is off. */
+  readonly virtualization: TableVirtualization<TRow>;
+  /** The grouped entries in the window, while grouping renders. */
+  readonly groupingEntries: readonly GroupedFlatEntry<TRow>[] | undefined;
+}
+
+/**
+ * The body window for a composed {@link virtualize} feature, or every row
+ * and entry when the feature is absent. A grouped body windows over its
+ * entries — headers, footers and leaves — rather than over the rows.
+ */
+function bodyWindowFor<TRow>(options: {
   readonly table: DataTable<TRow>;
-  readonly source: Signal<ReturnType<DataTable<TRow>["source"]>>;
+  readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
   readonly featureOptions: Readonly<Record<string, unknown>>;
   readonly rowKey: (row: TRow) => string;
   readonly maxHeight: number | string | undefined;
   readonly scrollBox: () => HTMLElement | null;
   readonly injector: Injector;
-}): Signal<TableVirtualization<TRow>> {
+}): Signal<BodyWindow<TRow>> {
   const {
     table,
-    source,
+    grouping,
     featureOptions,
     rowKey,
     maxHeight,
     scrollBox,
     injector,
   } = options;
+  const source = table.source;
   const wantVirtualize = featureOptions.virtualize === true;
-  const bodyChrome = computed(() => ({
-    body: table.bodyRegion(),
-    isPaged: source().paginationMode === "paged",
-    source: source(),
-    grouping: undefined,
-    tree: undefined,
-    isMobile: table.isMobile(),
-  }));
+  const groupEntries = computed(() => grouping?.()?.entries);
+  const bodyChrome = computed(() => {
+    const entries = groupEntries();
+    return {
+      body: table.bodyRegion(),
+      isPaged: source().paginationMode === "paged",
+      source: source(),
+      grouping: entries === undefined ? undefined : { entries },
+      tree: undefined,
+      isMobile: table.isMobile(),
+    };
+  });
   if (wantVirtualize && virtualizeIgnoredOnPage(true, bodyChrome())) {
     devWarn(
       'virtualize only applies in infinite mode — this paged table renders unvirtualized. Pass paginationMode="infinite" to enable it, or group the rows: an expanded page is windowed.'
@@ -345,14 +444,17 @@ function bodyVirtualizationFor<TRow>(options: {
   }
   if (!wantVirtualize) {
     return computed(() => ({
-      enabled: false,
-      rows: source().rows.map((row, index) => ({
-        row,
-        index,
-        key: rowKey(row),
-      })),
-      paddingTop: 0,
-      paddingBottom: 0,
+      virtualization: {
+        enabled: false,
+        rows: source().rows.map((row, index) => ({
+          row,
+          index,
+          key: rowKey(row),
+        })),
+        paddingTop: 0,
+        paddingBottom: 0,
+      },
+      groupingEntries: groupEntries(),
     }));
   }
   const estimateRowSize =
@@ -363,28 +465,53 @@ function bodyVirtualizationFor<TRow>(options: {
     typeof featureOptions.estimateCardSize === "number"
       ? featureOptions.estimateCardSize
       : 140;
-  const virtualOverscan =
+  const estimateSize = computed(() =>
+    table.isMobile() ? estimateCardSize : estimateRowSize
+  );
+  const overscan =
     typeof featureOptions.virtualOverscan === "number"
       ? featureOptions.virtualOverscan
       : undefined;
-  const virtualScrollMargin =
+  const scrollMargin =
     typeof featureOptions.virtualScrollMargin === "number"
       ? featureOptions.virtualScrollMargin
       : undefined;
-  return injectTableVirtualization<TRow>({
+  const getScrollElement = maxHeight == null ? undefined : () => scrollBox();
+  const onEndReached = (): void => {
+    table.loadMore();
+  };
+  const kind = computed(() => bodyWindowKind(true, bodyChrome()));
+  const flat = injectTableVirtualization<TRow>({
     rows: computed(() => source().rows),
     rowKey,
-    enabled: computed(() => isBodyEligible(bodyChrome())),
-    estimateSize: computed(() =>
-      table.isMobile() ? estimateCardSize : estimateRowSize
-    ),
-    overscan: virtualOverscan,
-    scrollMargin: virtualScrollMargin,
-    getScrollElement: maxHeight != null ? () => scrollBox() : undefined,
-    onEndReached: () => {
-      table.loadMore();
-    },
+    enabled: computed(() => kind() === "flat"),
+    estimateSize,
+    overscan,
+    scrollMargin,
+    getScrollElement,
+    onEndReached,
     injector,
+  });
+  const keyed = injectKeyedVirtualization({
+    keys: computed(() => (groupEntries() ?? []).map((entry) => entry.key)),
+    enabled: computed(() => kind() === "grouped"),
+    estimateSize,
+    overscan,
+    scrollMargin,
+    getScrollElement,
+    onEndReached,
+    injector,
+  });
+  return computed(() => {
+    const entries = groupEntries();
+    const window = keyed();
+    return {
+      virtualization: resolveBodyVirtualization(window, flat()),
+      groupingEntries:
+        entries === undefined
+          ? undefined
+          : windowGroupedEntries(entries, window.indices),
+    };
   });
 }
 
@@ -443,8 +570,17 @@ export interface TableView<TRow> {
   readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
   /** The batch-edit bar's props, when batch editing is composed. */
   readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
+  /** The grouped model, while `grouping()` or `groupingPanel()` is composed. */
+  readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
   /** The body window — every row when virtualization is off. */
   readonly virtualization: Signal<TableVirtualization<TRow>>;
+  /** The body in reading order, from core's body layout. */
+  readonly body: Signal<readonly BodySlot<TRow>[]>;
+  /** The group header, footer and "show more" slots' props, by entry key. */
+  readonly groupHeaders: Signal<{
+    readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
+    readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
+  }>;
   /** Column span for spacer/detail cells. */
   readonly bodyColSpan: Signal<number>;
 }
@@ -674,8 +810,16 @@ export class AdaptDataTable<TRow> implements OnInit {
             labels,
           })
         : undefined;
+    // A grouped table renders the full filtered set as one page: a group
+    // spans pages. The model reads the source before it is widened.
+    const groupingRef = signal<
+      Signal<TableGrouping<TRow> | undefined> | undefined
+    >(undefined);
+    const viewSource = computed(() =>
+      groupingRef()?.() === undefined ? source() : groupedViewSource(source())
+    );
     const table = injectDataTable<TRow>({
-      source,
+      source: viewSource,
       columns: this.columns,
       rowKey: (row) => this.rowKey()(row),
       tableLabel: this.tableLabel,
@@ -814,16 +958,25 @@ export class AdaptDataTable<TRow> implements OnInit {
         : undefined,
       hasRowActions: rowActions().hasRowActions,
     }));
-    const groupingPanel = injectGroupingPanelState({
+    const grouping = injectGrouping<TRow>({
       table,
       source,
       features,
       injector,
     });
+    groupingRef.set(grouping);
+    const groupingPanel = injectGroupingPanelState({
+      table,
+      source: viewSource,
+      features,
+      grouping,
+      injector,
+    });
     const reorder = injectRowReorder({
       table,
-      source,
+      source: viewSource,
       features,
+      grouping,
       injector,
     });
     const editing = editingBundleFor<TRow>({
@@ -855,28 +1008,27 @@ export class AdaptDataTable<TRow> implements OnInit {
               labels: table.labels(),
             };
           });
-    const virtualization = bodyVirtualizationFor({
+    const bodyWindow = bodyWindowFor({
       table,
-      source,
+      grouping,
       featureOptions,
       rowKey: (row) => this.rowKey()(row),
       maxHeight: this.maxHeight(),
       scrollBox: () => this.desktopTable()?.scrollElement() ?? null,
       injector,
     });
+    const virtualization = computed(() => bodyWindow().virtualization);
     const rowKey = computed(() => this.rowKey());
     const rowActionList = computed(() => rowActions().rowActions);
-    const editableCells =
-      editing === undefined
-        ? undefined
-        : editableCellsFor({ table, editing, virtualization, rowKey });
-    const actionsCells = actionsCellsFor({
-      table,
-      editing,
-      rowActions: rowActionList,
-      virtualization,
-      rowKey,
-    });
+    const columnPlan = computed(() =>
+      chromeColumnPlan({
+        rowActionCount: rowActionList()?.length ?? 0,
+        rowEditing: editing?.().rowEditing !== undefined,
+        rowReorder: reorder !== undefined,
+        rowDetail: false,
+        selection: selection !== undefined,
+      })
+    );
     const bodyColSpan = computed(() =>
       virtualColumnSpan(
         table.columns().length,
@@ -886,6 +1038,51 @@ export class AdaptDataTable<TRow> implements OnInit {
         reorder !== undefined
       )
     );
+    const body = computed((): readonly BodySlot<TRow>[] => {
+      const window = bodyWindow();
+      const entries = window.groupingEntries;
+      return desktopBodySlots<TRow, BodyRow<TRow>>({
+        pinnedTopRows: [],
+        pinnedBottomRows: [],
+        pinnedSummaryTop: [],
+        pinnedSummaryBottom: [],
+        extraRows: undefined,
+        extraFill: () => undefined,
+        insertExtraRows,
+        insertExtrasBeforeRows,
+        paddingTop: window.virtualization.paddingTop,
+        paddingBottom: window.virtualization.paddingBottom,
+        grouping: entries === undefined ? undefined : { entries },
+        entries: window.virtualization.rows,
+        tree: undefined,
+        getRowId: rowKey(),
+        columnSpan: bodyColSpan(),
+        rows: table.source().rows,
+        wiring: (args) => args,
+      });
+    });
+    const bodyRows = computed(() =>
+      body().flatMap((slot) => (slot.kind === "row" ? [slot.wiring] : []))
+    );
+    const editableCells =
+      editing === undefined
+        ? undefined
+        : editableCellsFor({ table, editing, rows: bodyRows, rowKey });
+    const actionsCells = actionsCellsFor({
+      table,
+      editing,
+      rowActions: rowActionList,
+      rows: bodyRows,
+      rowKey,
+    });
+    const groupHeaders = groupHeadersFor({
+      table,
+      grouping: grouping ?? computed(() => undefined),
+      slots: body,
+      selection,
+      leadingCells: computed(() => columnPlan().leadingCells),
+      showActions,
+    });
     this.view.set({
       table,
       selection,
@@ -905,7 +1102,10 @@ export class AdaptDataTable<TRow> implements OnInit {
       showActions,
       actionsCells,
       batchBar,
+      grouping,
       virtualization,
+      body,
+      groupHeaders,
       bodyColSpan,
       rowActionsLayout: featureOptions.rowActionsLayout as
         RowActionsLayout | undefined,

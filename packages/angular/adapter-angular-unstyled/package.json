@@ -73,6 +73,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-fullscreen.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-fullscreen.mjs"
     },
+    "./grouping": {
+      "types": "./dist/types/adapttable-angular-unstyled-grouping.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-grouping.mjs"
+    },
     "./grouping-panel": {
       "types": "./dist/types/adapttable-angular-unstyled-grouping-panel.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-grouping-panel.mjs"

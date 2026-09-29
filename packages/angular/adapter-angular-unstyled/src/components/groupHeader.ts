@@ -1,0 +1,379 @@
+/**
+ * Native group header, footer and "show more" rows for the desktop table,
+ * and the same three as cards on phones — the kit fills for
+ * {@link GROUP_HEADER_ROW} and {@link GROUP_HEADER_CARD}.
+ */
+import {
+  AdaptAttrs,
+  AdaptGroupMoreButtonChrome,
+  AdaptGroupToggleSpacer,
+  AdaptIcon,
+  type ColumnDef,
+  groupAggregateEntries,
+  type GroupHeaderCardSlotProps,
+  type GroupHeaderRowSlotProps,
+  groupIndentStyle,
+  groupLeafCount,
+  type GroupMoreButtonSlotProps,
+  groupRowLayout,
+  groupRowParts,
+  groupSelectionState,
+  type IconDescriptor,
+  resolveMobileLabel,
+  type SelectionState,
+} from "@adapttable/angular";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from "@angular/core";
+
+/** Slot props for a desktop group row. */
+type RowProps = GroupHeaderRowSlotProps<
+  never,
+  SelectionState,
+  ColumnDef<never>
+>;
+
+/** Slot props for a phone group card. */
+type CardProps = GroupHeaderCardSlotProps<
+  never,
+  SelectionState,
+  ColumnDef<never>
+>;
+
+/** The entry either slot draws. */
+type Entry = RowProps["entry"];
+
+/** A chevron pointing into the row; the toggle turns it down when open. */
+const CHEVRON: IconDescriptor = {
+  viewBox: "0 0 24 24",
+  width: 14,
+  height: 14,
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  focusable: "false",
+  shapes: [{ tag: "path", d: "m9 6 6 6-6 6" }],
+};
+
+/** The "show more" button inside a more row or card. */
+@Component({
+  selector: "adapt-group-more",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    <button
+      type="button"
+      data-adapttable-part="group-more"
+      style="font: inherit; background: transparent; border: none; padding: 0; cursor: pointer; text-decoration: underline; color: inherit"
+      (click)="props().onClick()"
+    >
+      {{ props().label }}
+    </button>
+  `,
+})
+class AdaptGroupMore {
+  readonly props = input.required<GroupMoreButtonSlotProps>();
+}
+
+/** What both the row and the card derive from one entry. */
+class GroupEntryView {
+  constructor(
+    private readonly entry: () => Entry,
+    private readonly selection: () => SelectionState | null
+  ) {}
+
+  readonly parts = computed(() => groupRowParts(this.entry().kind));
+  /** Neither a footer nor a "show more" row has a toggle or a count. */
+  readonly plain = computed(() => this.entry().kind !== "group");
+  readonly expanded = computed(() => {
+    const entry = this.entry();
+    return entry.kind !== "group" || !entry.collapsed;
+  });
+  readonly collapsed = computed(() => {
+    const entry = this.entry();
+    return entry.kind === "group" && entry.collapsed ? "true" : null;
+  });
+  readonly group = computed(() => {
+    const entry = this.entry();
+    return entry.kind === "group" ? entry : undefined;
+  });
+  readonly footer = computed(() => {
+    const entry = this.entry();
+    return entry.kind === "groupFooter" ? entry : undefined;
+  });
+  readonly more = computed(() => {
+    const entry = this.entry();
+    return entry.kind === "groupMore" ? entry : undefined;
+  });
+  readonly selectState = computed(() => {
+    const group = this.group();
+    const selection = this.selection();
+    return group && selection
+      ? groupSelectionState(group.leafIds, selection.selectedIds)
+      : undefined;
+  });
+  readonly count = computed(() => {
+    const group = this.group();
+    return group ? groupLeafCount(group) : 0;
+  });
+  readonly aggregateCells = computed(() => {
+    const entry = this.entry();
+    return entry.kind === "groupMore" ? undefined : entry.aggregateCells;
+  });
+  readonly aggregateOps = computed(() => {
+    const entry = this.entry();
+    return entry.kind === "groupMore" ? undefined : entry.aggregateOps;
+  });
+}
+
+/**
+ * A group's header, footer or "show more" row in the desktop table. One
+ * cell per column from the first aggregate onward, so a subtotal sits under
+ * the column it totals.
+ *
+ * @public
+ */
+@Component({
+  selector: "tr[adaptGroupHeaderRow]",
+  imports: [
+    AdaptAttrs,
+    AdaptGroupMoreButtonChrome,
+    AdaptGroupToggleSpacer,
+    AdaptIcon,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    "[attr.data-adapttable-part]": "view.parts().row",
+    "[attr.data-collapsed]": "view.collapsed()",
+  },
+  template: `
+    @let p = props();
+    @let l = layout();
+    <td
+      [attr.colspan]="p.leadingCells + l.labelColumns.length"
+      [attr.data-adapttable-part]="view.parts().cell"
+      [style]="labelCellStyle()"
+    >
+      <span
+        style="display: inline-flex; align-items: center; gap: 8px; width: 100%"
+      >
+        @if (view.group(); as group) {
+          <button
+            type="button"
+            data-adapttable-part="group-toggle"
+            [attr.aria-expanded]="view.expanded()"
+            [attr.aria-label]="
+              view.expanded() ? p.labels.collapseGroup : p.labels.expandGroup
+            "
+            (click)="p.onToggleCollapse(group.key)"
+          >
+            <span
+              style="display: inline-flex; transition: transform 150ms ease"
+              [style.transform]="
+                view.expanded() ? 'rotate(90deg)' : 'rotate(0deg)'
+              "
+            >
+              <svg [adaptIcon]="chevron"></svg>
+            </span>
+          </button>
+          @if (p.selection; as selection) {
+            <input
+              type="checkbox"
+              data-adapttable-part="group-select"
+              [attr.aria-label]="p.labels.selectAll"
+              [checked]="view.selectState() === 'all'"
+              [indeterminate]="view.selectState() === 'some'"
+              (change)="selection.toggleGroupLeaves(group.leafIds)"
+            />
+          }
+        } @else {
+          <adapt-group-toggle-spacer />
+        }
+        <span [attr.data-adapttable-part]="view.parts().label">
+          @if (view.more(); as more) {
+            <adapt-group-more-button-chrome
+              [scope]="more.scope"
+              [remaining]="more.remaining"
+              [groupKey]="more.groupKey"
+              [labels]="p.labels"
+              [onShowMore]="p.onShowMore"
+              [slots]="moreSlots"
+            />
+          } @else if (view.footer(); as footer) {
+            {{ p.labels.groupTotal(footer.label) }}
+          } @else {
+            {{ view.group()?.label }}
+          }
+        </span>
+        @if (view.plain()) {
+          <adapt-group-toggle-spacer />
+        } @else {
+          <span data-adapttable-part="group-count" style="opacity: 0.65">{{
+            p.labels.groupCount(view.count())
+          }}</span>
+        }
+        @for (aggregate of l.labelAggregates; track aggregate.column.key) {
+          <span
+            data-adapttable-part="group-aggregate"
+            [attr.data-column]="aggregate.column.key"
+            style="margin-inline-start: auto"
+            >{{ aggregate.node }}</span
+          >
+        }
+      </span>
+    </td>
+    @for (cell of l.cells; track cell.column.key) {
+      <td
+        [adaptAttrs]="p.getCellProps(cell.column)"
+        [attr.data-adapttable-part]="
+          cell.node === undefined ? null : 'group-aggregate'
+        "
+        [attr.data-column]="cell.node === undefined ? null : cell.column.key"
+      >
+        {{ cell.node }}
+      </td>
+    }
+    @if (p.showActions) {
+      <td></td>
+    }
+  `,
+})
+export class AdaptGroupHeaderRow {
+  /** Slot props from the table's group-header-row fill. */
+  readonly props = input.required<RowProps>();
+
+  protected readonly chevron = CHEVRON;
+  protected readonly moreSlots = { Button: AdaptGroupMore };
+  protected readonly view = new GroupEntryView(
+    () => this.props().entry,
+    () => this.props().selection
+  );
+
+  protected readonly layout = computed(() =>
+    groupRowLayout<never, ColumnDef<never>>(
+      this.props().columns,
+      this.view.aggregateCells(),
+      this.view.aggregateOps()
+    )
+  );
+
+  protected readonly labelCellStyle = computed(() => ({
+    fontWeight: 600,
+    ...groupIndentStyle(this.props().entry.level),
+  }));
+}
+
+/**
+ * A group's header, footer or "show more" block in the phone card list. A
+ * card shows only the subtotals that exist, each captioned by its column.
+ *
+ * @public
+ */
+@Component({
+  selector: "adapt-group-header-card",
+  imports: [AdaptGroupMoreButtonChrome, AdaptIcon],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    @let p = props();
+    <div
+      [attr.data-adapttable-part]="view.parts().card"
+      [attr.data-collapsed]="view.collapsed()"
+      style="font-weight: 600"
+    >
+      <span style="display: inline-flex; align-items: center; gap: 8px">
+        @if (view.group(); as group) {
+          <button
+            type="button"
+            data-adapttable-part="group-toggle"
+            [attr.aria-expanded]="view.expanded()"
+            [attr.aria-label]="
+              view.expanded() ? p.labels.collapseGroup : p.labels.expandGroup
+            "
+            (click)="p.onToggleCollapse(group.key)"
+          >
+            <span
+              style="display: inline-flex; transition: transform 150ms ease"
+              [style.transform]="
+                view.expanded() ? 'rotate(90deg)' : 'rotate(0deg)'
+              "
+            >
+              <svg [adaptIcon]="chevron"></svg>
+            </span>
+          </button>
+          @if (p.selection; as selection) {
+            <input
+              type="checkbox"
+              data-adapttable-part="group-select"
+              [attr.aria-label]="p.labels.selectAll"
+              [checked]="view.selectState() === 'all'"
+              [indeterminate]="view.selectState() === 'some'"
+              (change)="selection.toggleGroupLeaves(group.leafIds)"
+            />
+          }
+        }
+        <span [attr.data-adapttable-part]="view.parts().label">
+          @if (view.more(); as more) {
+            <adapt-group-more-button-chrome
+              [scope]="more.scope"
+              [remaining]="more.remaining"
+              [groupKey]="more.groupKey"
+              [labels]="p.labels"
+              [onShowMore]="p.onShowMore"
+              [slots]="moreSlots"
+            />
+          } @else if (view.footer(); as footer) {
+            {{ p.labels.groupTotal(footer.label) }}
+          } @else {
+            {{ view.group()?.label }}
+          }
+        </span>
+        @if (!view.plain()) {
+          <span data-adapttable-part="group-count" style="opacity: 0.65">{{
+            p.labels.groupCount(view.count())
+          }}</span>
+        }
+      </span>
+      @for (aggregate of aggregates(); track aggregate.column.key) {
+        <span style="display: flex; gap: 8px; margin-top: 4px">
+          <span style="opacity: 0.65">{{ caption(aggregate.column) }}</span>
+          <span
+            data-adapttable-part="group-aggregate"
+            [attr.data-column]="aggregate.column.key"
+            style="margin-inline-start: auto"
+            >{{ aggregate.node }}</span
+          >
+        </span>
+      }
+    </div>
+  `,
+})
+export class AdaptGroupHeaderCard {
+  /** Slot props from the table's group-header-card fill. */
+  readonly props = input.required<CardProps>();
+
+  protected readonly chevron = CHEVRON;
+  protected readonly moreSlots = { Button: AdaptGroupMore };
+  protected readonly view = new GroupEntryView(
+    () => this.props().entry,
+    () => this.props().selection
+  );
+
+  protected readonly aggregates = computed(() =>
+    groupAggregateEntries<never, ColumnDef<never>>(
+      this.props().columns,
+      this.view.aggregateCells(),
+      this.view.aggregateOps()
+    )
+  );
+
+  /** A subtotal's caption: the column's mobile label. */
+  protected caption(column: ColumnDef<never>): string | undefined {
+    return resolveMobileLabel(column);
+  }
+}

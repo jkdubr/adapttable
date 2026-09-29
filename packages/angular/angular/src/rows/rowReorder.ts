@@ -25,7 +25,7 @@ import {
 import type { DataTable } from "../dataTable";
 import type { AdaptTableFeature } from "../featureHost";
 import type { RowReorderFeature } from "../features/rowReorder";
-import { tableRuntimeFor } from "../layout/tableRuntime";
+import { type RuntimeGrouping, tableRuntimeFor } from "../layout/tableRuntime";
 import { fromStore } from "../store";
 
 /**
@@ -51,6 +51,8 @@ export interface RowReorderStateOptions<TRow> {
   readonly source: Signal<TableSource<TRow>>;
   /** The composed features; the reorder seeds from the one with id `row-reorder`. */
   readonly features: readonly AdaptTableFeature[];
+  /** The grouped entries, when the table groups its rows. */
+  readonly grouping?: Signal<RuntimeGrouping<TRow> | undefined>;
   /** The injector to run effects in. */
   readonly injector?: Injector;
 }
@@ -114,7 +116,8 @@ export function injectRowReorder<TRow>(
   const runtime = tableRuntimeFor(
     options.table,
     options.source,
-    options.features
+    options.features,
+    options.grouping
   );
   const controllerOptions = () =>
     rowReorderRuntimeOptions(runtime, feature.onRowReorder, feature.options);

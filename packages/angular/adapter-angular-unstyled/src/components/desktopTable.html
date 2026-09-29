@@ -27,11 +27,7 @@
         @for (column of v.table.columns(); track column.key; let col = $index) {
           <th
             data-adapttable-part="header-cell"
-            [adaptAttrs]="
-              v.grid
-                ? v.grid.headerCellAttrs(column, col)
-                : v.table.headerCellAttrs(column)
-            "
+            [adaptAttrs]="headerCells().get(column.key)!"
           >
             @if (column.sortable) {
               <button
@@ -67,123 +63,130 @@
       </tr>
     </thead>
     <tbody data-adapttable-part="tbody">
-      @if (v.virtualization().paddingTop > 0) {
-        <tr aria-hidden="true" data-adapttable-part="virtual-pad-top">
-          <td
-            [attr.colspan]="v.bodyColSpan()"
-            [style.height.px]="v.virtualization().paddingTop"
-          ></td>
-        </tr>
-      }
-      @for (entry of v.virtualization().rows; track entry.key; let i = $index) {
-        <tr
-          [adaptAttrs]="
-            v.grid
-              ? v.grid.rowAttrs(entry.row, entry.index)
-              : v.table.rowAttrs(entry.row, entry.index)
-          "
-          [attr.data-dragging]="
-            v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
-              'data-dragging'
-            ] ?? null
-          "
-          [attr.data-drop]="
-            v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
-              'data-drop'
-            ] ?? null
-          "
-          (dragover)="
-            v
-              .reorder?.()
-              .dropProps(entry.index, entry.row, v.table.windowStart())
-              .onDragOver($event)
-          "
-          (drop)="
-            v
-              .reorder?.()
-              .dropProps(entry.index, entry.row, v.table.windowStart())
-              .onDrop($event)
-          "
-        >
-          @if (v.reorder; as reorder) {
-            <td data-adapttable-part="reorder-cell">
-              <ng-container
-                [adaptSlot]="reorderHandleSlot"
-                [adaptSlotProps]="
-                  reorderHandleProps(reorder(), entry.row, entry.index)
-                "
-                [adaptSlotTable]="v.table"
-              />
-            </td>
+      @for (slot of v.body(); track slot.key) {
+        @switch (slot.kind) {
+          @case ("virtualPad") {
+            <tr aria-hidden="true" data-adapttable-part="virtual-spacer">
+              <td
+                [attr.colspan]="slot.colSpan"
+                [style.height.px]="slot.height"
+                style="padding: 0"
+              ></td>
+            </tr>
           }
-          @if (v.selection; as selection) {
-            <td data-adapttable-part="selection-cell">
-              <input
-                data-adapttable-part="checkbox"
-                [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
-              />
-            </td>
+          @case ("group") {
+            <ng-container
+              [adaptSlot]="groupHeaderRowSlot"
+              [adaptSlotProps]="v.groupHeaders().rows.get(slot.key)!"
+              [adaptSlotTable]="v.table"
+            />
           }
-          @for (
-            column of v.table.columns();
-            track column.key;
-            let col = $index
-          ) {
-            <td
-              data-adapttable-part="cell"
+          @case ("row") {
+            @let entry = slot.wiring;
+            <tr
               [adaptAttrs]="
                 v.grid
-                  ? v.grid.cellAttrs(column, entry.index, col)
-                  : v.table.cellAttrs(column)
+                  ? v.grid.rowAttrs(entry.row, entry.index)
+                  : v.table.rowAttrs(entry.row, entry.index)
+              "
+              [attr.data-dragging]="
+                v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+                  'data-dragging'
+                ] ?? null
+              "
+              [attr.data-drop]="
+                v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+                  'data-drop'
+                ] ?? null
+              "
+              (dragover)="
+                v
+                  .reorder?.()
+                  .dropProps(entry.index, entry.row, v.table.windowStart())
+                  .onDragOver($event)
+              "
+              (drop)="
+                v
+                  .reorder?.()
+                  .dropProps(entry.index, entry.row, v.table.windowStart())
+                  .onDrop($event)
               "
             >
-              @if (v.editableCells; as editableCells) {
-                <ng-container
-                  [adaptSlot]="editableCellSlot"
-                  [adaptSlotProps]="
-                    editableCells().get(rowId(entry.row) + ':' + column.key)!
+              @if (v.reorder; as reorder) {
+                <td data-adapttable-part="reorder-cell">
+                  <ng-container
+                    [adaptSlot]="reorderHandleSlot"
+                    [adaptSlotProps]="
+                      reorderHandleProps(reorder(), entry.row, entry.index)
+                    "
+                    [adaptSlotTable]="v.table"
+                  />
+                </td>
+              }
+              @if (v.selection; as selection) {
+                <td data-adapttable-part="selection-cell">
+                  <input
+                    data-adapttable-part="checkbox"
+                    [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
+                  />
+                </td>
+              }
+              @for (
+                column of v.table.columns();
+                track column.key;
+                let col = $index
+              ) {
+                <td
+                  data-adapttable-part="cell"
+                  [adaptAttrs]="
+                    v.grid
+                      ? v.grid.cellAttrs(column, entry.index, col)
+                      : v.table.cellAttrs(column)
                   "
-                  [adaptSlotTable]="v.table"
-                />
-              } @else {
-                <span
-                  [adaptCell]="column"
-                  [adaptCellRow]="entry.row"
-                  [adaptCellIndex]="entry.index"
-                ></span>
+                >
+                  @if (v.editableCells; as editableCells) {
+                    <ng-container
+                      [adaptSlot]="editableCellSlot"
+                      [adaptSlotProps]="
+                        editableCells().get(
+                          rowId(entry.row) + ':' + column.key
+                        )!
+                      "
+                      [adaptSlotTable]="v.table"
+                    />
+                  } @else {
+                    <span
+                      [adaptCell]="column"
+                      [adaptCellRow]="entry.row"
+                      [adaptCellIndex]="entry.index"
+                    ></span>
+                  }
+                </td>
               }
-            </td>
+              @if (v.showActions()) {
+                <td data-adapttable-part="actions-cell">
+                  @let actionsCell = v.actionsCells().get(rowId(entry.row))!;
+                  @if (actionsCell.rowEdit; as rowEdit) {
+                    <ng-container
+                      [adaptSlot]="rowEditActionsSlot"
+                      [adaptSlotProps]="rowEdit"
+                      [adaptSlotTable]="v.table"
+                    />
+                  }
+                  @if (actionsCell.actions.length > 0) {
+                    <adapt-row-actions
+                      [row]="entry.row"
+                      [actions]="actionsCell.actions"
+                      [confirm]="v.confirm"
+                      [labels]="v.table.labels()"
+                      [layout]="v.rowActionsLayout"
+                    />
+                  }
+                </td>
+              }
+            </tr>
           }
-          @if (v.showActions()) {
-            <td data-adapttable-part="actions-cell">
-              @let actionsCell = v.actionsCells().get(rowId(entry.row))!;
-              @if (actionsCell.rowEdit; as rowEdit) {
-                <ng-container
-                  [adaptSlot]="rowEditActionsSlot"
-                  [adaptSlotProps]="rowEdit"
-                  [adaptSlotTable]="v.table"
-                />
-              }
-              @if (actionsCell.actions.length > 0) {
-                <adapt-row-actions
-                  [row]="entry.row"
-                  [actions]="actionsCell.actions"
-                  [confirm]="v.confirm"
-                  [labels]="v.table.labels()"
-                  [layout]="v.rowActionsLayout"
-                />
-              }
-            </td>
-          }
-        </tr>
-      }
-      @if (v.virtualization().paddingBottom > 0) {
-        <tr aria-hidden="true" data-adapttable-part="virtual-pad-bottom">
-          <td
-            [attr.colspan]="v.bodyColSpan()"
-            [style.height.px]="v.virtualization().paddingBottom"
-          ></td>
-        </tr>
+        }
       }
     </tbody>
   </table>

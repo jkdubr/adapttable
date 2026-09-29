@@ -30,7 +30,7 @@ import { densityChooser } from "@adapttable/angular-unstyled/density";
 import { exportCsv } from "@adapttable/angular-unstyled/export";
 import { filters } from "@adapttable/angular-unstyled/filters";
 import { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
-import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
+import { grouping } from "@adapttable/angular-unstyled/grouping";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
 import { savedViews } from "@adapttable/angular-unstyled/saved-views";
 
@@ -64,9 +64,7 @@ export function standardPreset<TRow>(
     exportCsv(),
     fullscreen(),
     headerFilters(),
-    ...(options.grouping === undefined
-      ? []
-      : [groupingPanel(options.grouping)]),
+    ...(options.grouping === undefined ? [] : [grouping(options.grouping)]),
     ...(options.bulkActions === undefined
       ? []
       : [bulkActions(options.bulkActions)]),

@@ -11,6 +11,7 @@ import { CellEditHandler } from '@adapttable/angular';
 import { CellNavigationOptions } from '@adapttable/angular';
 import { ExportCsvOptions } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
+import { GroupingExtras } from '@adapttable/angular';
 import { GroupingPanelExtras } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
@@ -46,6 +47,9 @@ export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeat
 
 // @public
 export function fullscreen(): AdaptTableFeature;
+
+// @public
+export function grouping<TRow = unknown>(groupBy: string | readonly string[], extras?: GroupingExtras<TRow>): AdaptTableFeature;
 
 // @public
 export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string[], extras?: GroupingPanelExtras<TRow>): AdaptTableFeature;

@@ -1,76 +1,92 @@
 @let v = view();
-<ul
-  data-adapttable-part="cards"
-  style="margin: 0; padding: 0"
-  [style.padding-top.px]="v.virtualization().paddingTop || null"
-  [style.padding-bottom.px]="v.virtualization().paddingBottom || null"
->
-  @for (entry of v.virtualization().rows; track entry.key; let i = $index) {
-    <li
-      style="display: block"
-      [adaptAttrs]="v.table.cardAttrs(entry.row, entry.index)"
-      [attr.data-index]="entry.index"
-    >
-      @if (v.selection; as selection) {
-        <input
-          data-adapttable-part="checkbox"
-          [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
-        />
+<ul data-adapttable-part="cards" style="margin: 0; padding: 0">
+  @for (slot of v.body(); track slot.key) {
+    @switch (slot.kind) {
+      @case ("virtualPad") {
+        <li
+          data-adapttable-part="virtual-spacer"
+          style="display: block"
+          [style.height.px]="slot.height"
+        ></li>
       }
-      @for (column of v.table.columns(); track column.key) {
-        <div data-adapttable-part="card-row">
-          <span data-adapttable-part="card-label">{{
-            column.mobileLabel ?? column.header
-          }}</span>
-          <span data-adapttable-part="card-value">
-            @if (v.editableCells; as editableCells) {
-              <ng-container
-                [adaptSlot]="editableCellSlot"
-                [adaptSlotProps]="
-                  editableCells().get(rowId(entry.row) + ':' + column.key)!
-                "
-                [adaptSlotTable]="v.table"
-              />
-            } @else {
-              <span
-                [adaptCell]="column"
-                [adaptCellRow]="entry.row"
-                [adaptCellIndex]="entry.index"
-              ></span>
-            }
-          </span>
-        </div>
+      @case ("group") {
+        <li style="display: block">
+          <ng-container
+            [adaptSlot]="groupHeaderCardSlot"
+            [adaptSlotProps]="v.groupHeaders().cards.get(slot.key)!"
+            [adaptSlotTable]="v.table"
+          />
+        </li>
       }
-      @if (v.reorder; as reorder) {
-        <ng-container
-          [adaptSlot]="reorderButtonsSlot"
-          [adaptSlotProps]="
-            reorderButtonsProps(reorder(), entry.row, entry.index)
-          "
-          [adaptSlotTable]="v.table"
-        />
-      }
-      @if (v.showActions()) {
-        <div data-adapttable-part="card-actions">
-          @let actionsCell = v.actionsCells().get(rowId(entry.row))!;
-          @if (actionsCell.rowEdit; as rowEdit) {
+      @case ("row") {
+        @let entry = slot.wiring;
+        <li
+          style="display: block"
+          [adaptAttrs]="v.table.cardAttrs(entry.row, entry.index)"
+          [attr.data-index]="entry.index"
+        >
+          @if (v.selection; as selection) {
+            <input
+              data-adapttable-part="checkbox"
+              [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
+            />
+          }
+          @for (column of v.table.columns(); track column.key) {
+            <div data-adapttable-part="card-row">
+              <span data-adapttable-part="card-label">{{
+                column.mobileLabel ?? column.header
+              }}</span>
+              <span data-adapttable-part="card-value">
+                @if (v.editableCells; as editableCells) {
+                  <ng-container
+                    [adaptSlot]="editableCellSlot"
+                    [adaptSlotProps]="
+                      editableCells().get(rowId(entry.row) + ':' + column.key)!
+                    "
+                    [adaptSlotTable]="v.table"
+                  />
+                } @else {
+                  <span
+                    [adaptCell]="column"
+                    [adaptCellRow]="entry.row"
+                    [adaptCellIndex]="entry.index"
+                  ></span>
+                }
+              </span>
+            </div>
+          }
+          @if (v.reorder; as reorder) {
             <ng-container
-              [adaptSlot]="rowEditActionsSlot"
-              [adaptSlotProps]="rowEdit"
+              [adaptSlot]="reorderButtonsSlot"
+              [adaptSlotProps]="
+                reorderButtonsProps(reorder(), entry.row, entry.index)
+              "
               [adaptSlotTable]="v.table"
             />
           }
-          @if (actionsCell.actions.length > 0) {
-            <adapt-row-actions
-              [row]="entry.row"
-              [actions]="actionsCell.actions"
-              [confirm]="v.confirm"
-              [labels]="v.table.labels()"
-              [layout]="v.rowActionsLayout"
-            />
+          @if (v.showActions()) {
+            <div data-adapttable-part="card-actions">
+              @let actionsCell = v.actionsCells().get(rowId(entry.row))!;
+              @if (actionsCell.rowEdit; as rowEdit) {
+                <ng-container
+                  [adaptSlot]="rowEditActionsSlot"
+                  [adaptSlotProps]="rowEdit"
+                  [adaptSlotTable]="v.table"
+                />
+              }
+              @if (actionsCell.actions.length > 0) {
+                <adapt-row-actions
+                  [row]="entry.row"
+                  [actions]="actionsCell.actions"
+                  [confirm]="v.confirm"
+                  [labels]="v.table.labels()"
+                  [layout]="v.rowActionsLayout"
+                />
+              }
+            </div>
           }
-        </div>
+        </li>
       }
-    </li>
+    }
   }
 </ul>

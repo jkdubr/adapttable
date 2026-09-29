@@ -3044,6 +3044,16 @@ controls: the host writes its own markup.
   reorder grip, mobile up/down pair and live region, with
   `RowReorderHandleSlots` / `RowReorderButtonsSlots`; kits fill
   `ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and `ROW_REORDER_ANNOUNCER`.
+  `grouping` (with `GroupingExtras`) groups rows under collapsible
+  headers; `injectGrouping` (`GroupingOptions`) is its live model, a
+  `TableGrouping` of headers, footers, "show more" rows and leaves with the
+  actions that change them, and a grouped table renders the full filtered set
+  as one page. `injectGroupCollapse` (`GroupCollapseOptions`) holds which
+  groups are closed, controlled or not, and `injectGroupPaging`
+  (`GroupPagingOptions`) how many more groups or rows are showing.
+  `AdaptGroupMoreButtonChrome` words the "show more" offer and
+  `AdaptGroupToggleSpacer` keeps a footer's indent where a toggle would be.
+  `RuntimeGrouping` is the grouped entries the runtime view reads.
   `groupingPanel` (with
   `GroupingPanelExtras`) is the feature that owns the group-by state;
   `injectGroupingPanelState` (`GroupingPanelStateOptions`) publishes the
@@ -3119,8 +3129,12 @@ set. Overlay helpers `menuPopover` / `MenuPopover`, `OVERLAY_Z` and
 picks the anchored popover or the drawer.
 Each feature draws the kit's own native controls. `AdaptGroupingPanel` draws
 the grouping strip with those same native controls. `paginationMode` and
-`maxHeight` arm infinite lists and a scroll-box window. `TableView` is what
-the table renders from once its inputs have arrived — among it each row's
+`maxHeight` arm infinite lists and a scroll-box window. `grouping`
+(`@adapttable/angular-unstyled/grouping`) draws group headers, footers and
+"show more" rows with `AdaptGroupHeaderRow` on desktop and
+`AdaptGroupHeaderCard` on phones. `TableView` is what
+the table renders from once its inputs have arrived — its body as `BodySlot`
+entries in reading order, each data row a `BodyRow` — among it each row's
 `RowActionsCell`, the row-edit controls and host actions its actions cell
 draws — and `FiltersView` is
 the filters on that view: the button, the open panel, and the form, overlay,

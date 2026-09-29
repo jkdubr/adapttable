@@ -365,7 +365,9 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(box?.style.overflow).toBe("auto");
     // jsdom has no measured viewport: the window is armed with a spacer
     // rather than mounted rows (same as the headless virtualize tests).
-    expect(part("virtual-pad-bottom")).not.toBeNull();
+    const spacer = part("virtual-spacer");
+    expect(spacer).not.toBeNull();
+    expect(spacer!.querySelector("td")!.style.height).toMatch(/^[1-9]\d*px$/);
     expect(parts("reorder-header")).toHaveLength(1);
   });
 

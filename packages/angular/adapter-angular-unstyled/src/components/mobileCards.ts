@@ -6,6 +6,7 @@ import {
   AdaptCell,
   AdaptSlot,
   EDITABLE_CELL,
+  GROUP_HEADER_CARD,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_BUTTONS,
   type RowReorderButtonsProps,
@@ -43,6 +44,8 @@ export class AdaptMobileCards<TRow> {
   protected readonly editableCellSlot = EDITABLE_CELL;
   /** The row-edit-actions slot. @internal */
   protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
+  /** The group header slot. @internal */
+  protected readonly groupHeaderCardSlot = GROUP_HEADER_CARD;
 
   private buttonsPropsCache = new Map<string, RowReorderButtonsProps<never>>();
   private buttonsPropsToken = "";

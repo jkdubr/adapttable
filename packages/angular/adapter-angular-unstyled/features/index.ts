@@ -13,6 +13,7 @@ export { editing, rowEditing } from "@adapttable/angular-unstyled/editing";
 export { exportCsv } from "@adapttable/angular-unstyled/export";
 export { filters } from "@adapttable/angular-unstyled/filters";
 export { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
+export { grouping } from "@adapttable/angular-unstyled/grouping";
 export { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
 export { headerFilters } from "@adapttable/angular-unstyled/header-filters";
 export {

@@ -16,6 +16,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { injectDataTable } from "../dataTable";
+import { grouping, injectGrouping } from "../features/grouping";
 import { groupingPanel } from "../features/groupingPanel";
 import { rowReorder } from "../features/rowReorder";
 import { injectGroupingPanelState } from "../grouping/groupingPanelState";
@@ -99,6 +100,52 @@ describe("tableRuntimeFor", () => {
       labels.moveRejectedSorted
     );
     expect(onRowReorder).not.toHaveBeenCalled();
+  });
+
+  it("reads the grouped leaves in render order while the table groups", async () => {
+    @Component({ template: "" })
+    class Host {
+      readonly data = signal(PEOPLE);
+      readonly features = [grouping("team")];
+      readonly source = injectFrontendData({
+        data: this.data,
+        columns: COLUMNS,
+      });
+      readonly table = injectDataTable({
+        source: this.source,
+        columns: COLUMNS,
+        rowKey: (row) => row.id,
+        features: this.features,
+      });
+      readonly grouping = injectGrouping({
+        table: this.table,
+        source: this.source,
+        features: this.features,
+      })!;
+      readonly runtime = tableRuntimeFor(
+        this.table,
+        this.source,
+        this.features,
+        this.grouping
+      );
+    }
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ADAPTTABLE_URL_ADAPTER, useValue: createMemoryAdapter() },
+      ],
+    });
+    const fixture = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+
+    const { runtime } = fixture.componentInstance;
+    expect(runtime.view()?.visibleRows?.map((row) => row.id)).toEqual([
+      "1",
+      "3",
+      "2",
+    ]);
+    expect(runtime.rowAt(1)?.name).toBe("Linus");
   });
 
   it("drops a URL-carried avg when the server only lists sum, and never offers avg", async () => {

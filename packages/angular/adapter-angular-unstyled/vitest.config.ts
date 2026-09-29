@@ -60,6 +60,7 @@ export default defineConfig({
         "export/**/*.ts",
         "filters/**/*.ts",
         "fullscreen/**/*.ts",
+        "grouping/**/*.ts",
         "grouping-panel/**/*.ts",
         "header-filters/**/*.ts",
         "row-actions/**/*.ts",

@@ -43,6 +43,15 @@ describe("AdaptAttrs", () => {
     expect(button.hasAttribute("title")).toBe(false);
   });
 
+  it("writes an enumerated boolean as true or false so the element can drag", async () => {
+    const { button, update } = await mount({ draggable: true });
+    expect(button.getAttribute("draggable")).toBe("true");
+    expect(button.draggable).toBe(true);
+    await update({ draggable: false });
+    expect(button.getAttribute("draggable")).toBe("false");
+    expect(button.draggable).toBe(false);
+  });
+
   it("removes attributes and styles that leave the record", async () => {
     const { button, update } = await mount({
       "aria-label": "Sort",

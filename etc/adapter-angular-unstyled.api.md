@@ -9,11 +9,13 @@ import { ActiveFilterChipsSlotProps } from '@adapttable/angular';
 import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { AfterViewInit } from '@angular/core';
+import { AggregateOperationId } from '@adapttable/core';
 import { BatchEditBarProps } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionRunnerState } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
 import { ChecklistSlots } from '@adapttable/angular';
+import { ChromeBodySlot } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
 import { ColumnDrag } from '@adapttable/angular';
 import { ColumnLayoutState } from '@adapttable/angular';
@@ -22,7 +24,9 @@ import { ColumnMenuSlotProps } from '@adapttable/angular';
 import { ColumnModel } from '@adapttable/core';
 import { ConfirmHandler } from '@adapttable/angular';
 import { DataTable } from '@adapttable/angular';
+import { DesktopRowWiringArgs } from '@adapttable/angular';
 import { Direction } from '@adapttable/angular';
+import { DisplayValue } from '@adapttable/core';
 import { EditableCellEditing } from '@adapttable/angular';
 import { EditableCellEditorCtrl } from '@adapttable/angular';
 import { EditableCellSlotProps } from '@adapttable/angular';
@@ -39,8 +43,15 @@ import { FiltersFormSlotProps } from '@adapttable/angular';
 import { FilterTreeSlots } from '@adapttable/angular';
 import { FilterTypeRegistry } from '@adapttable/angular';
 import { GridFocus } from '@adapttable/angular';
+import { GroupAggregateOps } from '@adapttable/core';
+import { GroupHeaderCardSlotProps } from '@adapttable/angular';
+import { GroupHeaderRowSlotProps } from '@adapttable/angular';
 import { GroupingPanelSlotProps } from '@adapttable/angular';
 import { GroupingPanelSlots } from '@adapttable/angular';
+import { GroupMoreButtonSlotProps } from '@adapttable/angular';
+import { GroupRowCell } from '@adapttable/core';
+import { GroupRowLayout } from '@adapttable/core';
+import { HeaderSelectionState } from '@adapttable/core';
 import * as i0 from '@angular/core';
 import { IconDescriptor } from '@adapttable/angular';
 import { Injector } from '@angular/core';
@@ -57,6 +68,7 @@ import { readMultiDraft } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
 import { RowEditActionsProps } from '@adapttable/angular';
+import { RowGroupRef } from '@adapttable/core';
 import { RowReorderButtonsProps } from '@adapttable/core/binding';
 import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/angular';
 import { RowReorderHandleProps } from '@adapttable/core/binding';
@@ -69,6 +81,7 @@ import { SavedViewsState } from '@adapttable/angular';
 import { SelectionState } from '@adapttable/angular';
 import { Signal } from '@angular/core';
 import { TableDensity } from '@adapttable/angular';
+import { TableGrouping } from '@adapttable/angular';
 import { TableLabels } from '@adapttable/angular';
 import { TableQueryParams } from '@adapttable/angular';
 import { TableSource } from '@adapttable/angular';
@@ -400,6 +413,8 @@ export class AdaptDesktopTable<TRow> {
     protected readonly filterSlots: {
         header: FeatureSlotKey<FilterHeaderControlProps<never>>;
     };
+    protected readonly groupHeaderRowSlot: FeatureSlotKey<GroupHeaderRowSlotProps<never, unknown, ColumnModel<never>>>;
+    protected readonly headerCells: Signal<Map<string, Readonly<Record<string, unknown>>>>;
     readonly maxHeight: InputSignal<string | number | undefined>;
     protected reorderHandleProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderHandleProps_2<never>;
     protected readonly reorderHandleSlot: FeatureSlotKey<RowReorderHandleProps<never, unknown>>;
@@ -556,6 +571,62 @@ export class AdaptFullscreenButton {
 }
 
 // @public
+export class AdaptGroupHeaderCard {
+    // (undocumented)
+    protected readonly aggregates: Signal<GroupRowCell<never, ColumnDef<never>>[]>;
+    protected caption(column: ColumnDef<never>): string | undefined;
+    // (undocumented)
+    protected readonly chevron: IconDescriptor;
+    // (undocumented)
+    protected readonly moreSlots: {
+        Button: typeof AdaptGroupMore;
+    };
+    readonly props: InputSignal<CardProps>;
+    // (undocumented)
+    protected readonly view: GroupEntryView;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupHeaderCard, never>;
+}
+
+// @public
+export class AdaptGroupHeaderRow {
+    // (undocumented)
+    protected readonly chevron: IconDescriptor;
+    // (undocumented)
+    protected readonly labelCellStyle: Signal<    {
+    paddingInlineStart?: string;
+    fontWeight: number;
+    }>;
+    // (undocumented)
+    protected readonly layout: Signal<GroupRowLayout<never, ColumnDef<never>>>;
+    // (undocumented)
+    protected readonly moreSlots: {
+        Button: typeof AdaptGroupMore;
+    };
+    readonly props: InputSignal<RowProps>;
+    // (undocumented)
+    protected readonly view: GroupEntryView;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupHeaderRow, never>;
+}
+
+// @public
 export class AdaptGroupingPanel<TRow> {
     readonly props: InputSignal<GroupingPanelSlotProps<ColumnDef<TRow>>>;
     // (undocumented)
@@ -575,6 +646,7 @@ export class AdaptGroupingPanel<TRow> {
 // @internal
 export class AdaptMobileCards<TRow> {
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
+    protected readonly groupHeaderCardSlot: FeatureSlotKey<GroupHeaderCardSlotProps<never, unknown, ColumnModel<never>>>;
     protected reorderButtonsProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderButtonsProps_2<never>;
     protected readonly reorderButtonsSlot: FeatureSlotKey<RowReorderButtonsProps<never, unknown>>;
     protected readonly rowEditActionsSlot: FeatureSlotKey<RowEditActionsProps<never>>;
@@ -649,6 +721,12 @@ export class AdaptSavedViewsMenu implements OnInit {
 }
 
 // @public
+export type BodyRow<TRow> = DesktopRowWiringArgs<TRow>;
+
+// @public
+export type BodySlot<TRow> = ChromeBodySlot<TRow, BodyRow<TRow>>;
+
+// @public
 export type FiltersMode = "popover" | "drawer";
 
 // @public
@@ -696,6 +774,7 @@ export interface RowActionsCell<TRow> {
 export interface TableView<TRow> {
     readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
     readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
+    readonly body: Signal<readonly BodySlot<TRow>[]>;
     readonly bodyColSpan: Signal<number>;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
     readonly columnMenu: boolean;
@@ -706,6 +785,11 @@ export interface TableView<TRow> {
     readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
     readonly filters: FiltersView | undefined;
     readonly grid: GridFocus<TRow> | undefined;
+    readonly groupHeaders: Signal<{
+        readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
+        readonly cards: ReadonlyMap<string, GroupHeaderCardSlotProps<never>>;
+    }>;
+    readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
     readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
     readonly reorder: Signal<RowReorderState<TRow>> | undefined;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;

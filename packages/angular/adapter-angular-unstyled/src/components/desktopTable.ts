@@ -6,8 +6,10 @@ import {
   AdaptCell,
   AdaptHeader,
   AdaptSlot,
+  type Attrs,
   EDITABLE_CELL,
   FILTER_HEADER,
+  GROUP_HEADER_ROW,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_HANDLE,
   type RowReorderHandleProps,
@@ -16,6 +18,7 @@ import {
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   type ElementRef,
   input,
   viewChild,
@@ -59,6 +62,8 @@ export class AdaptDesktopTable<TRow> {
   protected readonly editableCellSlot = EDITABLE_CELL;
   /** The row-edit-actions slot. @internal */
   protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
+  /** The group header slot. @internal */
+  protected readonly groupHeaderRowSlot = GROUP_HEADER_ROW;
 
   private handlePropsCache = new Map<string, RowReorderHandleProps<never>>();
   private handlePropsToken = "";
@@ -79,6 +84,30 @@ export class AdaptDesktopTable<TRow> {
   scrollElement(): HTMLElement | null {
     return this.scrollBox()?.nativeElement ?? null;
   }
+
+  /**
+   * Each header cell's attributes: the table's (or the grid's), plus the
+   * grouping panel's drag handle on a column the panel may group by.
+   *
+   * @internal
+   */
+  protected readonly headerCells = computed(() => {
+    const view = this.view();
+    const panel = view.groupingPanel?.().state;
+    const cells = new Map<string, Attrs>();
+    view.table.columns().forEach((column, index) => {
+      const base = view.grid
+        ? view.grid.headerCellAttrs(column, index)
+        : view.table.headerCellAttrs(column);
+      cells.set(
+        column.key,
+        panel === undefined || column.groupable === false
+          ? base
+          : { ...base, ...panel.headerDragProps(column.key) }
+      );
+    });
+    return cells;
+  });
 
   /**
    * A row's id, for `@for` to track rows by.

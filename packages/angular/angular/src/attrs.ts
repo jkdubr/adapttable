@@ -52,9 +52,18 @@ const ATTRIBUTE_NAMES: Readonly<Record<string, string>> = {
   tabIndex: "tabindex",
 };
 
+/**
+ * Enumerated attributes whose boolean is written as `"true"` / `"false"`:
+ * an empty `draggable` is not draggable.
+ */
+const ENUMERATED = new Set(["draggable", "spellcheck", "contenteditable"]);
+
 /** The attribute text for a value, or `null` to remove the attribute. */
 function attributeText(name: string, value: unknown): string | null {
   // ARIA states are tokens: `aria-selected="false"` says something.
+  if (typeof value === "boolean" && ENUMERATED.has(name)) {
+    return String(value);
+  }
   if (typeof value === "boolean" && !name.startsWith("aria-")) {
     return value ? "" : null;
   }
