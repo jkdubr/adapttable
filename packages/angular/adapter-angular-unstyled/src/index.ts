@@ -17,6 +17,7 @@ export {
   headerFilters,
   rowActions,
   type RowActionsFeatureOptions,
+  rowReorder,
   savedViews,
   virtualize,
 } from "./features";

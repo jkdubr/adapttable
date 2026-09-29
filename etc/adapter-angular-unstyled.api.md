@@ -37,6 +37,9 @@ import { OutputEmitterRef } from '@angular/core';
 import { PaginationMode } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
+import { RowReorderHandler } from '@adapttable/angular';
+import { RowReorderOptions } from '@adapttable/angular';
+import { RowReorderState } from '@adapttable/angular';
 import { RowSelection } from '@adapttable/angular';
 import { SavedViewsControllerOptions } from '@adapttable/angular';
 import { SavedViewsSlotProps } from '@adapttable/angular';
@@ -324,6 +327,9 @@ export interface RowActionsFeatureOptions<TRow> {
 }
 
 // @public
+export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;
+
+// @public
 export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeature;
 
 // @public
@@ -337,6 +343,7 @@ export interface TableView<TRow> {
     readonly filters: FiltersView | undefined;
     readonly grid: GridFocus<TRow> | undefined;
     readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
+    readonly reorder: Signal<RowReorderState<TRow>> | undefined;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
     readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;

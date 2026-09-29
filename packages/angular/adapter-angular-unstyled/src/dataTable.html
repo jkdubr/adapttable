@@ -203,6 +203,11 @@
                     />
                   </th>
                 }
+                @if (v.reorder) {
+                  <th data-adapttable-part="reorder-header" scope="col">
+                    <span class="visually-hidden">Reorder</span>
+                  </th>
+                }
                 @for (
                   column of v.table.columns();
                   track column.key;
@@ -269,6 +274,36 @@
                       ? v.grid.rowAttrs(entry.row, entry.index)
                       : v.table.rowAttrs(entry.row, entry.index)
                   "
+                  [attr.data-dragging]="
+                    v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+                      'data-dragging'
+                    ] ?? null
+                  "
+                  [attr.data-drop]="
+                    v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+                      'data-drop'
+                    ] ?? null
+                  "
+                  (dragover)="
+                    v.reorder
+                      ?.()
+                      .dropProps(
+                        entry.index,
+                        entry.row,
+                        v.table.windowStart()
+                      )
+                      .onDragOver($event)
+                  "
+                  (drop)="
+                    v.reorder
+                      ?.()
+                      .dropProps(
+                        entry.index,
+                        entry.row,
+                        v.table.windowStart()
+                      )
+                      .onDrop($event)
+                  "
                 >
                   @if (v.selection; as selection) {
                     <td data-adapttable-part="selection-cell">
@@ -278,6 +313,38 @@
                           selection.rowCheckboxAttrs(rowId(entry.row))
                         "
                       />
+                    </td>
+                  }
+                  @if (v.reorder; as reorder) {
+                    <td data-adapttable-part="reorder-cell">
+                      <button
+                        type="button"
+                        data-adapttable-part="reorder-handle"
+                        [attr.draggable]="true"
+                        [attr.aria-label]="'Reorder row'"
+                        (dragstart)="
+                          reorder()
+                            .dragProps(rowId(entry.row), entry.index)
+                            .onDragStart($event)
+                        "
+                        (dragend)="
+                          reorder()
+                            .dragProps(rowId(entry.row), entry.index)
+                            .onDragEnd()
+                        "
+                        (keydown)="
+                          reorder().handleKeyDown(
+                            $event,
+                            rowId(entry.row),
+                            entry.index,
+                            entry.row,
+                            v.table.windowStart(),
+                            v.table.source().total
+                          )
+                        "
+                      >
+                        ⋮⋮
+                      </button>
                     </td>
                   }
                   @for (

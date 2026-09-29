@@ -132,6 +132,9 @@ import { resolveDisabledReason } from '@adapttable/core';
 import { resolveVirtualRows } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
+import { RowReorderHandler } from '@adapttable/core';
+import { RowReorderOptions } from '@adapttable/core';
+import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
 import { rowSourceIndex } from '@adapttable/core';
 import { runRowAction } from '@adapttable/core';
 import { SAVED_VIEWS } from '@adapttable/core/binding';
@@ -1099,6 +1102,9 @@ export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
 };
 
 // @public
+export function injectRowReorder<TRow>(options: RowReorderStateOptions<TRow>): Signal<RowReorderState<TRow>> | undefined;
+
+// @public
 export function injectRowSelection<TRow>(options: RowSelectionOptions<TRow>): RowSelection;
 
 // @public
@@ -1217,6 +1223,24 @@ export interface RowActionsOptions<TRow> {
     readonly labels: Signal<Required<TableLabels>>;
     readonly onDeleteRow?: (row: TRow) => void;
     readonly onDuplicateRow?: (row: TRow) => void;
+}
+
+// @public
+export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;
+
+export { RowReorderHandler }
+
+export { RowReorderOptions }
+
+// @public
+export type RowReorderState<TRow> = RowReorderState_2<TRow, DragEvent, KeyboardEvent>;
+
+// @public
+export interface RowReorderStateOptions<TRow> {
+    readonly features: readonly AdaptTableFeature[];
+    readonly injector?: Injector;
+    readonly source: Signal<TableSource<TRow>>;
+    readonly table: DataTable<TRow>;
 }
 
 // @public

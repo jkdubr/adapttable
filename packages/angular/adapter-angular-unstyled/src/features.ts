@@ -32,6 +32,9 @@ import {
   type GroupingPanelExtras,
   type RowAction,
   type RowActionsLayout,
+  rowReorder as coreAngularRowReorder,
+  type RowReorderHandler,
+  type RowReorderOptions,
   SAVED_VIEWS,
   type SavedViewsControllerOptions,
   slotRender,
@@ -271,4 +274,20 @@ export function cellNavigation(
   options: CellNavigationOptions = {}
 ): AdaptTableFeature {
   return coreAngularCellNavigation(options);
+}
+
+/**
+ * Let rows be dragged, or moved with the keyboard, into a new order. The
+ * table never writes to the host's array — the handler applies the move.
+ *
+ * @param onRowReorder - Called with the from/to indexes and the moved row.
+ * @param options - Move policy and cross-boundary handlers.
+ *
+ * @public
+ */
+export function rowReorder<TRow>(
+  onRowReorder: RowReorderHandler<TRow>,
+  options?: RowReorderOptions<TRow>
+): AdaptTableFeature {
+  return coreAngularRowReorder(onRowReorder, options);
 }

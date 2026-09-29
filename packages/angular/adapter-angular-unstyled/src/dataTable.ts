@@ -49,6 +49,7 @@ import {
   injectGridFocus,
   injectGroupingPanelState,
   injectIsMobile,
+  injectRowReorder,
   injectRowSelection,
   injectTableVirtualization,
   isBodyEligible,
@@ -56,6 +57,7 @@ import {
   type RowAction,
   rowActionsFor,
   type RowActionsLayout,
+  type RowReorderState,
   type RowSelection,
   SAVED_VIEWS,
   type SavedViewsControllerOptions,
@@ -213,6 +215,8 @@ export interface TableView<TRow> {
   /** The grouping strip's props, when the panel feature is composed. */
   readonly groupingPanel:
     Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
+  /** Row reorder state, when the feature is composed. */
+  readonly reorder: Signal<RowReorderState<TRow>> | undefined;
   /** The body window — every row when virtualization is off. */
   readonly virtualization: Signal<TableVirtualization<TRow>>;
   /** Column span for spacer/detail cells. */
@@ -611,6 +615,12 @@ export class AdaptDataTable<TRow> implements OnInit {
       features,
       injector,
     });
+    const reorder = injectRowReorder({
+      table,
+      source,
+      features,
+      injector,
+    });
     const virtualization = bodyVirtualizationFor({
       table,
       source,
@@ -624,7 +634,9 @@ export class AdaptDataTable<TRow> implements OnInit {
       virtualColumnSpan(
         table.columns().length,
         selection !== undefined,
-        rowActions().hasRowActions
+        rowActions().hasRowActions,
+        false,
+        reorder !== undefined
       )
     );
     this.view.set({
@@ -640,6 +652,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       toolbarExtras,
       savedViews,
       groupingPanel,
+      reorder,
       virtualization,
       bodyColSpan,
       rowActionsLayout: featureOptions.rowActionsLayout as

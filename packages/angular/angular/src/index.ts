@@ -91,6 +91,12 @@ export * from "./kitExports";
 export { AdaptLiveRegion } from "./liveRegion";
 export { injectIsMobile, type IsMobileOptions } from "./mobile";
 export {
+  injectRowReorder,
+  rowReorder,
+  type RowReorderState,
+  type RowReorderStateOptions,
+} from "./rowReorder";
+export {
   injectSavedViews,
   type SavedViewsOptions,
   type SavedViewsState,
@@ -138,6 +144,7 @@ export {
   virtualize,
   type VirtualizeOptions,
 } from "./virtualize";
+export type { RowReorderHandler, RowReorderOptions } from "@adapttable/core";
 export type {
   CellRange,
   Direction,
