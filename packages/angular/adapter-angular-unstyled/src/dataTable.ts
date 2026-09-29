@@ -89,9 +89,9 @@ import {
 /**
  * What the table renders from once its inputs have arrived.
  *
- * @internal
+ * @public
  */
-interface TableView<TRow> {
+export interface TableView<TRow> {
   /** The headless table. */
   readonly table: DataTable<TRow>;
   /** Row selection, when the table is selectable. */

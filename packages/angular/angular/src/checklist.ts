@@ -22,7 +22,6 @@ import {
 } from "@adapttable/core";
 import type {
   ChecklistButtonProps,
-  ChecklistCheckboxProps,
   ChecklistSearchProps,
 } from "@adapttable/core/binding";
 import {
@@ -53,12 +52,6 @@ export interface ChecklistSlots {
   readonly Button: Type<unknown>;
   /** One value's checkbox. */
   readonly Checkbox: Type<unknown>;
-}
-
-/** One mounted value, ready to draw. */
-interface ChecklistRow {
-  readonly value: string;
-  readonly props: ChecklistCheckboxProps;
 }
 
 /**
@@ -220,19 +213,17 @@ export class AdaptChecklistChrome<TRow> {
       padBottom: window.padBottom,
       empty: visible.length === 0,
       noValues: labels.checklistNoValues,
-      rows: visible
-        .slice(window.start, window.end)
-        .map((item): ChecklistRow => ({
-          value: item.value,
-          props: {
-            label: item.label,
-            count: labels.groupCount(item.count),
-            checked: selected.includes(item.value),
-            onChange: (on) => {
-              actions.toggle(item.value, on);
-            },
+      rows: visible.slice(window.start, window.end).map((item) => ({
+        value: item.value,
+        props: {
+          label: item.label,
+          count: labels.groupCount(item.count),
+          checked: selected.includes(item.value),
+          onChange: (on: boolean) => {
+            actions.toggle(item.value, on);
           },
-        })),
+        },
+      })),
     };
   });
 

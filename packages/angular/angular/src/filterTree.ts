@@ -436,13 +436,12 @@ export class AdaptFilterTreeGroup {
 }
 
 /**
- * The nested AND/OR filter builder: the structure is here, every control is
- * the kit's. Renders nothing without definitions or a filter tree to write.
+ * The builder's view: what {@link AdaptFilterTreeChrome} draws.
  *
- * @public
+ * @internal
  */
 @Component({
-  selector: "adapt-filter-tree-chrome",
+  selector: "adapt-filter-tree-view",
   imports: [AdaptControl, AdaptFilterTreeGroup, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -474,7 +473,7 @@ export class AdaptFilterTreeGroup {
     }
   `,
 })
-export class AdaptFilterTreeChrome<TRow> {
+export class AdaptFilterTreeView<TRow> {
   /** The definitions the builder offers. */
   readonly defs = input.required<readonly FilterDef<TRow>[]>();
   /** Reads and writes the filter tree. */
@@ -541,4 +540,42 @@ export class AdaptFilterTreeChrome<TRow> {
       };
     }
   );
+}
+
+/**
+ * The nested AND/OR filter builder: the structure is here, every control is
+ * the kit's. Renders nothing without definitions or a filter tree to write.
+ *
+ * @public
+ */
+@Component({
+  selector: "adapt-filter-tree-chrome",
+  imports: [AdaptFilterTreeView],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    <adapt-filter-tree-view
+      [defs]="defs()"
+      [source]="source()"
+      [labels]="labels()"
+      [registry]="registry()"
+      [defaultExpanded]="defaultExpanded()"
+      [slots]="slots()"
+    />
+  `,
+})
+export class AdaptFilterTreeChrome<TRow> {
+  /** The definitions the builder offers. */
+  readonly defs = input.required<readonly FilterDef<TRow>[]>();
+  /** Reads and writes the filter tree. */
+  readonly source =
+    input.required<Pick<TableSource<TRow>, "filterTree" | "setFilterTree">>();
+  /** Label overrides. */
+  readonly labels = input<TableLabels>();
+  /** Custom filter types, beyond the built-ins. */
+  readonly registry = input<FilterTypeRegistry>(defaultFilterRegistry);
+  /** Open the Advanced section on first paint. */
+  readonly defaultExpanded = input(false);
+  /** The kit's controls. */
+  readonly slots = input.required<FilterTreeSlots>();
 }

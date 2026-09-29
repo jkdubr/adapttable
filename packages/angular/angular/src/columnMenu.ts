@@ -22,9 +22,6 @@ import {
 import type { Attrs } from "./attrs";
 import { fromStore } from "./store";
 
-/** Moves a column to a new index in the full order. */
-type MoveColumn = (key: string, toIndex: number) => void;
-
 /**
  * Drag-to-reorder for a column menu's rows.
  *
@@ -36,7 +33,11 @@ export interface ColumnDrag {
    * and it carries `data-dragging` while dragged and `data-drop="before"` or
    * `"after"` while a column hovers it.
    */
-  readonly rowAttrs: (key: string, index: number, move: MoveColumn) => Attrs;
+  readonly rowAttrs: (
+    key: string,
+    index: number,
+    move: (key: string, toIndex: number) => void
+  ) => Attrs;
   /**
    * The reorder grip's attributes: a focusable button that moves the column
    * with the arrow keys, following the writing direction.
@@ -44,7 +45,7 @@ export interface ColumnDrag {
   readonly gripAttrs: (
     key: string,
     index: number,
-    move: MoveColumn,
+    move: (key: string, toIndex: number) => void,
     label: string
   ) => Attrs;
 }
