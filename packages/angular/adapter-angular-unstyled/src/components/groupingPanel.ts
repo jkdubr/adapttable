@@ -141,10 +141,14 @@ class AdaptGroupingChip {
       (change)="p.onChange($any($event.target).value)"
     >
       @if (p["data-adapttable-part"] === "grouping-add") {
-        <option value="" disabled hidden>{{ p.label }}</option>
+        <option value="" disabled hidden [selected]="p.value === ''">
+          {{ p.label }}
+        </option>
       }
       @for (option of p.options; track option.value) {
-        <option [value]="option.value">{{ option.label }}</option>
+        <option [value]="option.value" [selected]="option.value === p.value">
+          {{ option.label }}
+        </option>
       }
     </select>
   `,
@@ -234,10 +238,13 @@ class AdaptGroupingAggregationRemove {
       [style.width]="width(p.label)"
       (change)="choose($any($event.target))"
     >
-      <option value="" disabled hidden>{{ p.label }}</option>
+      <option value="" disabled hidden [selected]="true">
+        {{ p.label }}
+      </option>
       @for (option of available(); track option.value) {
         <option
           [value]="option.value"
+          [selected]="false"
           data-adapttable-part="grouping-aggregation-option"
         >
           {{ option.label }}
