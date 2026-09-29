@@ -1,5 +1,23 @@
 # @adapttable/base-ui
 
+## 3.3.0
+
+### Minor Changes
+
+- 96e5cc0: A kit now talks only to its binding. `@adapttable/react/adapter` re-exports the core names the kits use (`defaultLabels`, `resolveLabels`, the filter registry helpers and 46 more), and `@adapttable/react/pivot` re-exports everything `@adapttable/core/pivot` exports, so no kit imports `@adapttable/core`. Each kit's `/pivot` entry forwards `@adapttable/react/pivot`, and so also offers `pivotTableModel` and `usePivotUrlState`. Nothing is removed or renamed, and bundle sizes are unchanged.
+  
+  Core's deprecated main-entry copies of the adapter helpers now name their replacement in `@adapttable/core/binding`.
+
+### Patch Changes
+
+- 4833c56: The grouping strip's styles are injected by the grouping panel instead of with every table, so a plain `DataTable` no longer carries rules for a feature it never renders. `styles.css` still holds the whole sheet for hosts that import it.
+- Updated dependencies [d6e065c]
+- Updated dependencies [643545d]
+- Updated dependencies [ed815b3]
+- Updated dependencies [96e5cc0]
+  - @adapttable/core@3.7.0
+  - @adapttable/react@1.4.0
+
 ## 3.2.7
 
 ### Patch Changes

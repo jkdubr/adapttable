@@ -1,5 +1,21 @@
 # @adapttable/ai
 
+## 0.5.0
+
+### Minor Changes
+
+- d6e065c: Core owns the rest of what a second binding would otherwise copy from React. `@adapttable/core/binding` gains the state shapes the binding hooks return (`SelectionState`, `GridFocusState`, `TreeExpansionState`, `RowPinningState`, the URL-state results, `UseTableDataResult` and others), the `DENSITY_STATE` and `ROW_REORDER` keys with their state types, and the column-default and same-rows helpers (`resolveColumnDefaults`, `resolveColumnHeaders`, `columnPathText`, `sameRows`). `@adapttable/core` gains the column menu's drag-and-drop rules and state (`createColumnDragController`, `startColumnDrag`, `acceptColumnDrag`, `dropColumn`, `columnReorderKeyDown`), and `@adapttable/core/formula` the formula URL-state result. `@adapttable/ai` owns `TABLE_AGENT_STATE`.
+  
+  `@adapttable/react`, `@adapttable/ai-react` and `@adapttable/angular` re-export or call these under their existing names; their public APIs and behaviour are unchanged.
+
+### Patch Changes
+
+- Updated dependencies [d6e065c]
+- Updated dependencies [643545d]
+- Updated dependencies [ed815b3]
+- Updated dependencies [96e5cc0]
+  - @adapttable/core@3.7.0
+
 ## 0.4.0
 
 ### Minor Changes

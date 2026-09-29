@@ -1,5 +1,45 @@
 # @adapttable/angular
 
+## 0.2.0
+
+### Minor Changes
+
+- 2472d0d: The Angular binding composes features with slots. An `AdaptTableFeature` can
+  now `apply` configuration and `renders` components into named slots, drawn by
+  `AdaptSlot`; `extendFeature` lets a kit add its own controls to a core
+  feature. New for kits and hosts:
+  
+  - column layout: `ColumnLayoutOptions` on `injectDataTable`, the table's
+    `layout` signal, `injectColumnDrag` and `injectColumnRenameEditor`;
+  - filters: `filterRuntimeFor`, `filterChipsFor`, `filterOptionsFor`, the
+    field widgets `textFilterFor`, `rangeFilterFor` and `booleanFilterFor`, and
+    the `AdaptFilterTreeChrome` and `AdaptChecklistChrome` structures that draw
+    a kit's own controls;
+  - actions: `injectBulkActionRunner` and `rowActionsFor`;
+  - toolbar: `injectDensity`, `injectFullscreen`, `injectExportCsv`,
+    `injectSavedViews` and `urlAdapterFor`;
+  - `AdaptControl` and `AdaptIcon` for drawing kit controls and core glyphs.
+- 986711c: The Angular binding gains what a full table needs beside its rows:
+  `injectRowSelection` (row selection with the checkbox attributes),
+  `injectGridFocus` (keyboard cell navigation over core's grid-focus
+  controller) and `AdaptLiveRegion` (a polite, visually hidden live region).
+  `injectDataTable` now takes a `selection` and reports the body region, the
+  empty-state variant, the pager's pages and page sizes, loading more rows of
+  an infinite list, the card attributes and the status sentence a sort or a page speaks; `AdaptAttrs` applies key,
+  focus and mouse handlers, the `checked` and `indeterminate` properties and
+  a `ref`.
+
+### Patch Changes
+
+- d6e065c: Core owns the rest of what a second binding would otherwise copy from React. `@adapttable/core/binding` gains the state shapes the binding hooks return (`SelectionState`, `GridFocusState`, `TreeExpansionState`, `RowPinningState`, the URL-state results, `UseTableDataResult` and others), the `DENSITY_STATE` and `ROW_REORDER` keys with their state types, and the column-default and same-rows helpers (`resolveColumnDefaults`, `resolveColumnHeaders`, `columnPathText`, `sameRows`). `@adapttable/core` gains the column menu's drag-and-drop rules and state (`createColumnDragController`, `startColumnDrag`, `acceptColumnDrag`, `dropColumn`, `columnReorderKeyDown`), and `@adapttable/core/formula` the formula URL-state result. `@adapttable/ai` owns `TABLE_AGENT_STATE`.
+  
+  `@adapttable/react`, `@adapttable/ai-react` and `@adapttable/angular` re-export or call these under their existing names; their public APIs and behaviour are unchanged.
+- Updated dependencies [d6e065c]
+- Updated dependencies [643545d]
+- Updated dependencies [ed815b3]
+- Updated dependencies [96e5cc0]
+  - @adapttable/core@3.7.0
+
 ## 0.1.0
 
 ### Minor Changes
