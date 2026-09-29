@@ -8,7 +8,8 @@ import {
 } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
-import { menuPopover, placeOverlayBelowTrigger } from "./overlay";
+import { menuPopover } from "./components/menuPopover";
+import { placeOverlayBelowTrigger } from "./components/overlayPlacement";
 
 function rect(left: number, right: number, bottom = 20): DOMRect {
   return { left, right, bottom, top: 0, width: right - left } as DOMRect;

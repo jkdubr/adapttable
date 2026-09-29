@@ -1,0 +1,94 @@
+/**
+ * Row count and the windowed pager.
+ */
+import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+
+import type { TableView } from "../dataTable";
+
+/**
+ * Prev/next pager with a rows-per-page select.
+ *
+ * @internal
+ */
+@Component({
+  selector: "adapt-pagination-footer",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    @let v = view();
+    <div data-adapttable-part="footer">
+      <label>
+        {{ v.table.labels().rowsPerPage }}
+        <select
+          data-adapttable-part="rows-per-page"
+          [attr.aria-label]="v.table.labels().rowsPerPage"
+          [value]="v.table.source().limit"
+          (change)="v.table.setLimit(+$any($event.target).value)"
+        >
+          @for (size of v.table.pageSizeOptions(); track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </label>
+      @if (v.table.source().total > 0) {
+        <span>{{
+          v.table.labels().showing({
+            from: v.table.pagination().fromIndex,
+            to: v.table.pagination().toIndex,
+            total: v.table.source().total,
+          })
+        }}</span>
+      }
+      <div data-adapttable-part="pager">
+        <span>{{
+          v.table.labels().pageOf({
+            page: v.table.pagination().safePage,
+            total: v.table.pagination().totalPages,
+          })
+        }}</span>
+        <button
+          type="button"
+          data-adapttable-part="page-prev"
+          [attr.aria-label]="v.table.labels().previousPage"
+          [disabled]="v.table.pagination().safePage <= 1"
+          (click)="v.table.setPage(v.table.pagination().safePage - 1)"
+        >
+          ‹
+        </button>
+        @for (slot of v.table.pagerSlots(); track slot.key) {
+          @if (slot.item === "ellipsis") {
+            <span data-adapttable-part="page-ellipsis" aria-hidden="true"
+              >…</span
+            >
+          } @else {
+            <button
+              type="button"
+              data-adapttable-part="page-number"
+              [attr.aria-current]="
+                slot.item === v.table.pagination().safePage ? 'page' : null
+              "
+              (click)="v.table.setPage(+slot.item)"
+            >
+              {{ slot.item }}
+            </button>
+          }
+        }
+        <button
+          type="button"
+          data-adapttable-part="page-next"
+          [attr.aria-label]="v.table.labels().nextPage"
+          [disabled]="
+            v.table.pagination().safePage >= v.table.pagination().totalPages
+          "
+          (click)="v.table.setPage(v.table.pagination().safePage + 1)"
+        >
+          ›
+        </button>
+      </div>
+    </div>
+  `,
+})
+export class AdaptPaginationFooter<TRow> {
+  /** What the table renders from. */
+  readonly view = input.required<TableView<TRow>>();
+}

@@ -1,0 +1,199 @@
+@let v = view();
+<div #scrollBox data-adapttable-part="scroll-box" [style]="scrollBoxStyle()">
+  <table
+    data-adapttable-part="table"
+    [adaptAttrs]="v.grid ? v.grid.tableAttrs() : v.table.tableAttrs()"
+  >
+    <thead data-adapttable-part="thead">
+      <tr
+        data-adapttable-part="header-row"
+        [adaptAttrs]="v.table.headerRowAttrs()"
+      >
+        @if (v.selection; as selection) {
+          <th data-adapttable-part="selection-header" scope="col">
+            <input
+              data-adapttable-part="checkbox"
+              [adaptAttrs]="selection.headerCheckboxAttrs()"
+            />
+          </th>
+        }
+        @if (v.reorder) {
+          <th data-adapttable-part="reorder-header" scope="col">
+            <span class="visually-hidden">Reorder</span>
+          </th>
+        }
+        @for (column of v.table.columns(); track column.key; let col = $index) {
+          <th
+            data-adapttable-part="header-cell"
+            [adaptAttrs]="
+              v.grid
+                ? v.grid.headerCellAttrs(column, col)
+                : v.table.headerCellAttrs(column)
+            "
+          >
+            @if (column.sortable) {
+              <button
+                data-adapttable-part="sort-button"
+                [adaptAttrs]="v.table.sortButtonAttrs(column)"
+              >
+                <span [adaptHeader]="column"></span>
+                @if (v.table.sortBy() === column.key) {
+                  <span aria-hidden="true">{{
+                    v.table.sortDir() === "desc" ? "▼" : "▲"
+                  }}</span>
+                }
+              </button>
+            } @else {
+              <span [adaptHeader]="column"></span>
+            }
+            @if (v.filters?.header) {
+              @if (v.filters?.headerProps()?.get(column.key); as hp) {
+                <ng-container
+                  [adaptSlot]="filterSlots.header"
+                  [adaptSlotProps]="hp"
+                  [adaptSlotTable]="v.table"
+                />
+              }
+            }
+          </th>
+        }
+        @if (v.rowActions()) {
+          <th data-adapttable-part="actions-header" scope="col">
+            {{ v.table.labels().actions }}
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody data-adapttable-part="tbody">
+      @if (v.virtualization().paddingTop > 0) {
+        <tr aria-hidden="true" data-adapttable-part="virtual-pad-top">
+          <td
+            [attr.colspan]="v.bodyColSpan()"
+            [style.height.px]="v.virtualization().paddingTop"
+          ></td>
+        </tr>
+      }
+      @for (entry of v.virtualization().rows; track entry.key; let i = $index) {
+        <tr
+          [adaptAttrs]="
+            v.grid
+              ? v.grid.rowAttrs(entry.row, entry.index)
+              : v.table.rowAttrs(entry.row, entry.index)
+          "
+          [attr.data-dragging]="
+            v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+              'data-dragging'
+            ] ?? null
+          "
+          [attr.data-drop]="
+            v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
+              'data-drop'
+            ] ?? null
+          "
+          (dragover)="
+            v
+              .reorder?.()
+              .dropProps(entry.index, entry.row, v.table.windowStart())
+              .onDragOver($event)
+          "
+          (drop)="
+            v
+              .reorder?.()
+              .dropProps(entry.index, entry.row, v.table.windowStart())
+              .onDrop($event)
+          "
+        >
+          @if (v.selection; as selection) {
+            <td data-adapttable-part="selection-cell">
+              <input
+                data-adapttable-part="checkbox"
+                [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
+              />
+            </td>
+          }
+          @if (v.reorder; as reorder) {
+            <td data-adapttable-part="reorder-cell">
+              <button
+                type="button"
+                data-adapttable-part="reorder-handle"
+                [attr.draggable]="true"
+                [attr.aria-label]="'Reorder row'"
+                (dragstart)="
+                  reorder()
+                    .dragProps(rowId(entry.row), entry.index)
+                    .onDragStart($event)
+                "
+                (dragend)="
+                  reorder().dragProps(rowId(entry.row), entry.index).onDragEnd()
+                "
+                (keydown)="
+                  reorder().handleKeyDown(
+                    $event,
+                    rowId(entry.row),
+                    entry.index,
+                    entry.row,
+                    v.table.windowStart(),
+                    v.table.source().total
+                  )
+                "
+              >
+                ⋮⋮
+              </button>
+            </td>
+          }
+          @for (
+            column of v.table.columns();
+            track column.key;
+            let col = $index
+          ) {
+            <td
+              data-adapttable-part="cell"
+              [adaptAttrs]="
+                v.grid
+                  ? v.grid.cellAttrs(column, entry.index, col)
+                  : v.table.cellAttrs(column)
+              "
+              (dblclick)="beginEdit(entry.row, column)"
+            >
+              @if (v.editing?.().isActive(rowId(entry.row), column.key)) {
+                <input
+                  data-adapttable-part="cell-editor"
+                  [value]="v.editing?.().draft"
+                  (input)="v.editing?.().setDraft($any($event.target).value)"
+                  (keydown.enter)="commitEdit()"
+                  (keydown.escape)="cancelEdit()"
+                  (blur)="commitEdit()"
+                />
+              } @else {
+                <span
+                  [adaptCell]="column"
+                  [adaptCellRow]="entry.row"
+                  [adaptCellIndex]="entry.index"
+                ></span>
+              }
+            </td>
+          }
+          @if (v.rowActions(); as actions) {
+            <td data-adapttable-part="actions-cell">
+              <adapt-row-actions
+                [row]="entry.row"
+                [actions]="actions"
+                [confirm]="v.confirm"
+                [labels]="v.table.labels()"
+                [layout]="v.rowActionsLayout"
+              />
+            </td>
+          }
+        </tr>
+      }
+      @if (v.virtualization().paddingBottom > 0) {
+        <tr aria-hidden="true" data-adapttable-part="virtual-pad-bottom">
+          <td
+            [attr.colspan]="v.bodyColSpan()"
+            [style.height.px]="v.virtualization().paddingBottom"
+          ></td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

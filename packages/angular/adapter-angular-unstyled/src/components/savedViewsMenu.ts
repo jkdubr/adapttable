@@ -22,7 +22,7 @@ import {
   viewChild,
 } from "@angular/core";
 
-import { MENU_PANEL_STYLE, menuPopover } from "./overlay";
+import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
 
 /**
  * The saved-views toolbar control.

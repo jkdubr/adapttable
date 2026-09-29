@@ -8,14 +8,11 @@ import {
   ACTIVE_FILTER_CHIPS,
   type ActiveFilterChip,
   AdaptAttrs,
-  AdaptCell,
   AdaptCellTemplate,
-  AdaptHeader,
   AdaptIcon,
   AdaptLiveRegion,
   AdaptSlot,
   type AdaptTableFeature,
-  beginCellEdit,
   BULK_BAR,
   type BulkAction,
   type BulkBarSlotProps,
@@ -58,8 +55,6 @@ import {
   injectTableVirtualization,
   isBodyEligible,
   type PaginationMode,
-  parseCellEditValue,
-  resolveCellEditor,
   type RowAction,
   rowActionsFor,
   type RowActionsLayout,
@@ -97,7 +92,9 @@ import {
   viewChild,
 } from "@angular/core";
 
-import { AdaptRowActions } from "./actions";
+import { AdaptDesktopTable } from "./components/desktopTable";
+import { AdaptMobileCards } from "./components/mobileCards";
+import { AdaptPaginationFooter } from "./components/paginationFooter";
 import {
   type FiltersMode,
   type FiltersView,
@@ -244,12 +241,12 @@ export interface TableView<TRow> {
   selector: "adapt-data-table",
   imports: [
     NgTemplateOutlet,
-    AdaptRowActions,
     AdaptAttrs,
-    AdaptCell,
-    AdaptHeader,
+    AdaptDesktopTable,
     AdaptIcon,
     AdaptLiveRegion,
+    AdaptMobileCards,
+    AdaptPaginationFooter,
     AdaptSlot,
   ],
   templateUrl: "./dataTable.html",
@@ -378,86 +375,17 @@ export class AdaptDataTable<TRow> implements OnInit {
   /** The Filters button's glyph. @internal */
   protected readonly filtersIcon = FILTERS_ICON;
   /**
-   * The scroll box that owns `maxHeight`, when virtualization tracks it.
+   * The desktop body, when rendered — owns the scroll box virtualization
+   * tracks.
    *
    * @internal
    */
-  protected readonly scrollBox =
-    viewChild<ElementRef<HTMLElement>>("scrollBox");
+  protected readonly desktopTable = viewChild(AdaptDesktopTable);
   private readonly filtersForm = viewChild<TemplateRef<unknown>>("filtersForm");
   private readonly filtersTrigger =
     viewChild<TemplateRef<unknown>>("filtersTrigger");
   private readonly injector = inject(Injector);
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
-
-  /**
-   * A row's id, for `@for` to track rows by. A track expression reads only
-   * the item and the component, not a template alias.
-   *
-   * @internal
-   */
-  protected rowId(row: TRow): string {
-    return this.rowKey()(row);
-  }
-
-  /**
-   * Style for the scroll box when `maxHeight` is set.
-   *
-   * @internal
-   */
-  protected scrollBoxStyle(): Record<string, string> | null {
-    const maxHeight = this.maxHeight();
-    if (maxHeight == null) return null;
-    return {
-      maxHeight:
-        typeof maxHeight === "number" ? `${String(maxHeight)}px` : maxHeight,
-      overflow: "auto",
-    };
-  }
-
-  /**
-   * Open the in-place editor for a cell when editing is composed.
-   *
-   * @internal
-   */
-  protected beginEdit(row: TRow, column: ColumnDef<TRow>): void {
-    const view = this.view();
-    if (!view?.editing || !view.onCellEdit) return;
-    beginCellEdit(view.editing(), row, column, (entry) => this.rowKey()(entry));
-  }
-
-  /**
-   * Commit the active draft through the host's write.
-   *
-   * @internal
-   */
-  protected commitEdit(): void {
-    const view = this.view();
-    if (!view?.editing || !view.onCellEdit) return;
-    const commit = view.editing().commit();
-    if (!commit) return;
-    const row = view.table
-      .rows()
-      .find((entry) => this.rowKey()(entry) === commit.rowId);
-    const column = view.table
-      .columns()
-      .find((entry) => entry.key === commit.columnKey);
-    if (!row || !column) return;
-    const editor = resolveCellEditor(column);
-    const value = editor
-      ? parseCellEditValue(editor, commit.draft)
-      : commit.draft;
-    void view.onCellEdit(row, commit.columnKey, value);
-  }
-
-  /**
-   * Abandon the active draft.
-   *
-   * @internal
-   */
-  protected cancelEdit(): void {
-    this.view()?.editing?.().cancel();
-  }
 
   /** Start the table from the inputs it reads once. */
   ngOnInit(): void {
@@ -686,7 +614,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       featureOptions,
       rowKey: (row) => this.rowKey()(row),
       maxHeight: this.maxHeight(),
-      scrollBox: () => this.scrollBox()?.nativeElement ?? null,
+      scrollBox: () => this.desktopTable()?.scrollElement() ?? null,
       injector,
     });
     const bodyColSpan = computed(() =>

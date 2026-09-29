@@ -49,22 +49,19 @@ import {
   type VirtualizeOptions,
 } from "@adapttable/angular";
 
-import { AdaptBulkBar } from "./actions";
-import { AdaptColumnMenu } from "./columnMenu";
-import {
-  AdaptFilterChips,
-  AdaptFilterDrawer,
-  AdaptFilterPopover,
-  AdaptFiltersForm,
-  AdaptHeaderFilterTrigger,
-} from "./filterOverlays";
-import { AdaptGroupingPanel } from "./groupingPanel";
-import { AdaptSavedViewsMenu } from "./savedViews";
+import { AdaptFilterChips } from "./components/activeFilterChips";
+import { AdaptBulkBar } from "./components/bulkActionBar";
+import { AdaptColumnMenu } from "./components/columnMenu";
+import { AdaptFilterDrawer, AdaptFiltersForm } from "./components/filterPanel";
+import { AdaptFilterPopover } from "./components/filterPopover";
+import { AdaptGroupingPanel } from "./components/groupingPanel";
+import { AdaptSavedViewsMenu } from "./components/savedViewsMenu";
 import {
   AdaptDensityButton,
   AdaptExportButton,
   AdaptFullscreenButton,
-} from "./toolbarExtras";
+} from "./components/toolbarExtras";
+import { AdaptHeaderFilterTrigger } from "./header-filters/headerFilterTrigger";
 
 /**
  * The Columns menu: show, hide, reorder, pin, rename and auto-size columns,

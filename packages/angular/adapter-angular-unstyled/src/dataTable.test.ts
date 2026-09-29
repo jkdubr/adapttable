@@ -262,6 +262,15 @@ afterEach(() => {
 });
 
 describe("unstyled Angular editing and virtualize", () => {
+  it("ignores a double-click when editing is not composed", async () => {
+    const { part, parts, settle } = await mountFeatures({ features: [] });
+    const cell = parts("cell")[0];
+    expect(cell).toBeTruthy();
+    cell?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    await settle();
+    expect(part("cell-editor")).toBeNull();
+  });
+
   it("opens, commits and cancels an in-place cell editor", async () => {
     const onCellEdit = vi.fn();
     const { part, parts, settle } = await mountFeatures({

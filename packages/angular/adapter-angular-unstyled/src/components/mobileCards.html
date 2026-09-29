@@ -1,0 +1,46 @@
+@let v = view();
+<ul
+  data-adapttable-part="cards"
+  style="margin: 0; padding: 0"
+  [style.padding-top.px]="v.virtualization().paddingTop || null"
+  [style.padding-bottom.px]="v.virtualization().paddingBottom || null"
+>
+  @for (entry of v.virtualization().rows; track entry.key; let i = $index) {
+    <li
+      style="display: block"
+      [adaptAttrs]="v.table.cardAttrs(entry.row, entry.index)"
+      [attr.data-index]="entry.index"
+    >
+      @if (v.selection; as selection) {
+        <input
+          data-adapttable-part="checkbox"
+          [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
+        />
+      }
+      @for (column of v.table.columns(); track column.key) {
+        <div data-adapttable-part="card-row">
+          <span data-adapttable-part="card-label">{{
+            column.mobileLabel ?? column.header
+          }}</span>
+          <span
+            data-adapttable-part="card-value"
+            [adaptCell]="column"
+            [adaptCellRow]="entry.row"
+            [adaptCellIndex]="entry.index"
+          ></span>
+        </div>
+      }
+      @if (v.rowActions(); as actions) {
+        <div data-adapttable-part="card-actions">
+          <adapt-row-actions
+            [row]="entry.row"
+            [actions]="actions"
+            [confirm]="v.confirm"
+            [labels]="v.table.labels()"
+            [layout]="v.rowActionsLayout"
+          />
+        </div>
+      }
+    </li>
+  }
+</ul>

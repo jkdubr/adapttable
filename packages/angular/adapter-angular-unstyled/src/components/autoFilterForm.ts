@@ -40,7 +40,7 @@ import {
   signal,
 } from "@angular/core";
 
-import { CHECKLIST_SLOTS } from "./filterControls";
+import { CHECKLIST_SLOTS } from "./checklistFilter";
 
 /** A field's column stack: the caption is a flex item, so `gap` applies. */
 const FIELD_STACK =
