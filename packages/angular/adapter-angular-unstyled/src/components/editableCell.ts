@@ -20,6 +20,7 @@ import {
   multiDraftFromSelect,
   readMultiDraft,
   resolveEditableCellDisplay,
+  stopCellEditKeyboard,
   stopEditKeys,
 } from "@adapttable/angular";
 import {
@@ -180,6 +181,9 @@ class AdaptNativeCellEditor implements AfterViewInit {
 
   protected onKeyDown(event: KeyboardEvent): void {
     this.props().onEditorKeyDown(event);
+    // Stop at the editor so composed cellNavigation does not steal arrow
+    // keys from the caret (core's stopCellEditKeyboard).
+    stopCellEditKeyboard(event);
     stopEditKeys(event);
   }
 }

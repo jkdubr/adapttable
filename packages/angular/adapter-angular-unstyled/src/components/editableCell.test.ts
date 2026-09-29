@@ -155,7 +155,9 @@ describe("AdaptEditableCell", () => {
       bubbles: true,
       cancelable: true,
     });
+    const stopped = vi.spyOn(arrow, "stopPropagation");
     input.dispatchEvent(arrow);
+    expect(stopped).toHaveBeenCalled();
     expect(document.activeElement).toBe(input);
     expect(onCellEdit).not.toHaveBeenCalled();
   });
