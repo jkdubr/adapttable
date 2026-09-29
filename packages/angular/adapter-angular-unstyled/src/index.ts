@@ -6,6 +6,7 @@
  */
 export { AdaptDataTable, type TableView } from "./dataTable";
 export {
+  batchEditing,
   bulkActions,
   cellNavigation,
   columnMenu,
@@ -18,6 +19,7 @@ export {
   headerFilters,
   rowActions,
   type RowActionsFeatureOptions,
+  rowEditing,
   rowReorder,
   savedViews,
   virtualize,

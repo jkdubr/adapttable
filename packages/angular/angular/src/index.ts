@@ -45,10 +45,18 @@ export {
   injectDataTable,
 } from "./dataTable";
 export {
+  type BatchEditHandler,
+  batchEditing,
+  type BatchEditingInjectOptions,
   type CellEditHandler,
   type CellEditingOptions,
   editing,
+  injectBatchEditing,
   injectCellEditing,
+  injectRowEditing,
+  type RowEditHandler,
+  rowEditing,
+  type RowEditingInjectOptions,
 } from "./editing";
 export {
   ADAPTTABLE_FEATURES,
@@ -150,7 +158,12 @@ export {
   virtualize,
   type VirtualizeOptions,
 } from "./virtualize";
-export type { CellEditingState } from "@adapttable/core";
+export type {
+  BatchEditingState,
+  BatchRowEdit,
+  CellEditingState,
+  RowEditingState,
+} from "@adapttable/core";
 export type { RowReorderHandler, RowReorderOptions } from "@adapttable/core";
 export type {
   CellRange,

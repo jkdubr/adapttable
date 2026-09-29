@@ -8,6 +8,7 @@ import { ActiveFilterChip } from '@adapttable/angular';
 import { ActiveFilterChipsSlotProps } from '@adapttable/angular';
 import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptTableFeature } from '@adapttable/angular';
+import { BatchEditHandler } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
 import { CellEditHandler } from '@adapttable/angular';
@@ -39,6 +40,7 @@ import { OutputEmitterRef } from '@angular/core';
 import { PaginationMode } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
+import { RowEditHandler } from '@adapttable/angular';
 import { RowReorderHandler } from '@adapttable/angular';
 import { RowReorderOptions } from '@adapttable/angular';
 import { RowReorderState } from '@adapttable/angular';
@@ -279,6 +281,9 @@ export class AdaptGroupingPanel<TRow> {
 }
 
 // @public
+export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+
+// @public
 export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature;
 
 // @public
@@ -336,6 +341,9 @@ export interface RowActionsFeatureOptions<TRow> {
     readonly onDeleteRow?: (row: TRow) => void;
     readonly onDuplicateRow?: (row: TRow) => void;
 }
+
+// @public
+export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
 
 // @public
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;

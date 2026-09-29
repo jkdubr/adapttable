@@ -6,10 +6,12 @@
 import {
   ACTIVE_FILTER_CHIPS,
   type AdaptTableFeature,
+  type BatchEditHandler,
+  batchEditing as coreAngularBatchEditing,
   BULK_BAR,
   type BulkAction,
-  cellNavigation as coreAngularCellNavigation,
   type CellEditHandler,
+  cellNavigation as coreAngularCellNavigation,
   type CellNavigationOptions,
   COLUMN_MENU,
   coreBulkActions,
@@ -34,6 +36,8 @@ import {
   type GroupingPanelExtras,
   type RowAction,
   type RowActionsLayout,
+  type RowEditHandler,
+  rowEditing as coreAngularRowEditing,
   rowReorder as coreAngularRowReorder,
   type RowReorderHandler,
   type RowReorderOptions,
@@ -308,4 +312,34 @@ export function editing<TRow>(
   extras: Record<string, unknown> = {}
 ): AdaptTableFeature {
   return coreAngularEditing(onCellEdit, extras);
+}
+
+/**
+ * Edit a whole row at once. The host receives one patch of parsed values.
+ *
+ * @param onRowEdit - Called with the row and its changed fields.
+ * @param extras - Optional lifecycle observers merged into the patch.
+ *
+ * @public
+ */
+export function rowEditing<TRow>(
+  onRowEdit: RowEditHandler<TRow>,
+  extras: Record<string, unknown> = {}
+): AdaptTableFeature {
+  return coreAngularRowEditing(onRowEdit, extras);
+}
+
+/**
+ * Collect edits and save them in one batch.
+ *
+ * @param onBatchEdit - Called with every pending row at once.
+ * @param extras - Optional lifecycle observers merged into the patch.
+ *
+ * @public
+ */
+export function batchEditing<TRow>(
+  onBatchEdit: BatchEditHandler<TRow>,
+  extras: Record<string, unknown> = {}
+): AdaptTableFeature {
+  return coreAngularBatchEditing(onBatchEdit, extras);
 }

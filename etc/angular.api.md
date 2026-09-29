@@ -8,6 +8,8 @@ import { ACTIONS_COLUMN_KEY } from '@adapttable/core';
 import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
 import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
+import { BatchEditingState } from '@adapttable/core';
+import { BatchRowEdit } from '@adapttable/core';
 import { beginCellEdit } from '@adapttable/core';
 import { bindHeaderFilterDismiss } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
@@ -50,6 +52,7 @@ import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
 import { devWarn } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { EditableColumnLike } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
 import { ExportCsvOptions } from '@adapttable/core';
@@ -58,6 +61,7 @@ import { ExtraFilters } from '@adapttable/core';
 import { eyeIcon } from '@adapttable/core/binding';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
+import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
@@ -139,6 +143,7 @@ import { resolveDisabledReason } from '@adapttable/core';
 import { resolveVirtualRows } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
+import { RowEditingState } from '@adapttable/core';
 import { RowReorderHandler } from '@adapttable/core';
 import { RowReorderOptions } from '@adapttable/core';
 import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
@@ -576,6 +581,28 @@ export type AngularGroupingPanelSurfaceProps = GroupingPanelSurfaceProps<Templat
 
 // @public
 export type Attrs = Readonly<Record<string, unknown>>;
+
+// @public
+export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => void | Promise<void>;
+
+// @public
+export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+
+// @public
+export interface BatchEditingInjectOptions<TRow> {
+    readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
+    readonly enabled?: MaybeSignal<boolean>;
+    readonly featureHost?: FeatureHostState_2;
+    readonly injector?: Injector;
+    readonly onBatchEdit?: BatchEditHandler<TRow>;
+    readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditStart?: EditEventHandler<TRow>;
+}
+
+export { BatchEditingState }
+
+export { BatchRowEdit }
 
 export { beginCellEdit }
 
@@ -1084,6 +1111,9 @@ export { hideAllColumns }
 export { IconDescriptor }
 
 // @public
+export function injectBatchEditing<TRow>(options: BatchEditingInjectOptions<TRow>): Signal<BatchEditingState<TRow>>;
+
+// @public
 export function injectBulkActionRunner(options: BulkActionRunnerOptions): BulkActionRunnerState;
 
 // @public
@@ -1127,6 +1157,9 @@ export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
     readonly virtualization: Signal<KeyedVirtualization>;
     readonly scrollToIndex: (index: number) => void;
 };
+
+// @public
+export function injectRowEditing<TRow>(options: RowEditingInjectOptions<TRow>): Signal<RowEditingState<TRow>>;
 
 // @public
 export function injectRowReorder<TRow>(options: RowReorderStateOptions<TRow>): Signal<RowReorderState<TRow>> | undefined;
@@ -1259,6 +1292,26 @@ export interface RowActionsOptions<TRow> {
     readonly onDeleteRow?: (row: TRow) => void;
     readonly onDuplicateRow?: (row: TRow) => void;
 }
+
+// @public
+export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => void | Promise<void>;
+
+// @public
+export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+
+// @public
+export interface RowEditingInjectOptions<TRow> {
+    readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
+    readonly enabled?: MaybeSignal<boolean>;
+    readonly featureHost?: FeatureHostState_2;
+    readonly injector?: Injector;
+    readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditStart?: EditEventHandler<TRow>;
+    readonly onRowEdit?: RowEditHandler<TRow>;
+}
+
+export { RowEditingState }
 
 // @public
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;
