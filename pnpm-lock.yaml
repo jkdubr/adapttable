@@ -17,6 +17,8 @@ overrides:
   '@adapttable/unstyled': workspace:*
   '@adapttable/ai': workspace:*
   '@adapttable/ai-react': workspace:*
+  '@adapttable/angular': workspace:*
+  '@adapttable/angular-unstyled': workspace:*
   eslint-plugin-sonarjs>minimatch: ^10.2.3
   undici: ^7.29.0
   fast-uri: ^3.1.8
@@ -367,7 +369,7 @@ importers:
   packages/angular/adapter-angular-unstyled:
     dependencies:
       '@adapttable/angular':
-        specifier: 0.2.0
+        specifier: workspace:*
         version: link:../angular
       tslib:
         specifier: ^2.8.1
@@ -378,10 +380,10 @@ importers:
         version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.0))
+        version: 2.7.5(@angular/build@22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(yaml@2.9.0))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(d16d3e3c2453e7d779e042335991c126)
+        version: 2.7.5(eb7160fdcfceb6ccb72e5e64a36cf5ed)
       '@angular/build':
         specifier: ^22.2.0
         version: 22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0)
@@ -430,10 +432,10 @@ importers:
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(yaml@2.9.0))
+        version: 2.7.5(@angular/build@22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.0))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(eb7160fdcfceb6ccb72e5e64a36cf5ed)
+        version: 2.7.5(d16d3e3c2453e7d779e042335991c126)
       '@angular/build':
         specifier: ^22.2.0
         version: 22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0)
