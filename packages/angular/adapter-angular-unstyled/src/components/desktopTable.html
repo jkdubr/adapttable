@@ -49,7 +49,7 @@
               <span [adaptHeader]="column"></span>
             }
             @if (v.filters?.header) {
-              @if (v.filters?.headerProps()?.get(column.key); as hp) {
+              @if (v.filters.headerProps().get(column.key); as hp) {
                 <ng-container
                   [adaptSlot]="filterSlots.header"
                   [adaptSlotProps]="hp"

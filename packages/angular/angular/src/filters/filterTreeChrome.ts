@@ -24,7 +24,6 @@ import type {
   FilterTreeInputProps,
   FilterTreeSelectProps,
 } from "@adapttable/core/binding";
-import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -442,7 +441,7 @@ export class AdaptFilterTreeGroup {
  */
 @Component({
   selector: "adapt-filter-tree-view",
-  imports: [AdaptControl, AdaptFilterTreeGroup, NgTemplateOutlet],
+  imports: [AdaptControl, AdaptFilterTreeGroup],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-template #content>
