@@ -24,7 +24,11 @@ import { computed, type Signal, signal, type TemplateRef } from "@angular/core";
 /** Where the Filters button's panel opens. */
 export type FiltersMode = "popover" | "drawer";
 
-/** Everything the template draws for filters. */
+/**
+ * Everything the template draws for filters.
+ *
+ * @public
+ */
 export interface FiltersView {
   /** Whether the Filters button and its overlay show. */
   readonly button: boolean;

@@ -3062,7 +3062,8 @@ shares. Its `features` input composes `columnMenu`, `filters`,
 `densityChooser`, `fullscreen`, `exportCsv` and `savedViews`; `filtersMode`
 (`FiltersMode`) picks the anchored popover or the drawer. Each feature draws
 the kit's own native controls. `TableView` is what the table renders from
-once its inputs have arrived.
+once its inputs have arrived, and `FiltersView` is the filters on that view:
+the button, the open panel, and the form, overlay, chips and header funnels.
 
 ## Other packages
 

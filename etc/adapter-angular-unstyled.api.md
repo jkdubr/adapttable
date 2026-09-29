@@ -243,6 +243,21 @@ export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeat
 export type FiltersMode = "popover" | "drawer";
 
 // @public
+export interface FiltersView {
+    readonly button: boolean;
+    readonly chips: Signal<ActiveFilterChipsSlotProps>;
+    readonly click: () => void;
+    readonly count: Signal<number>;
+    readonly form: Signal<FiltersFormSlotProps<never>>;
+    readonly header: boolean;
+    readonly headerProps: Signal<ReadonlyMap<string, FilterHeaderControlProps<never>>>;
+    readonly mode: FiltersMode;
+    readonly open: Signal<boolean>;
+    readonly overlay: Signal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
+    readonly pointerDown: () => void;
+}
+
+// @public
 export function fullscreen(): AdaptTableFeature;
 
 // @public

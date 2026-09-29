@@ -17,4 +17,4 @@ export {
   type RowActionsFeatureOptions,
   savedViews,
 } from "./features";
-export type { FiltersMode } from "./tableFilters";
+export type { FiltersMode, FiltersView } from "./tableFilters";
