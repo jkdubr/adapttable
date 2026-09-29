@@ -1,0 +1,252 @@
+@if (view(); as v) {
+  <div data-adapttable-part="root" [attr.dir]="v.table.dir()">
+    <div data-adapttable-part="toolbar">
+      <div data-adapttable-part="search-field">
+        <input
+          data-adapttable-part="search"
+          [adaptAttrs]="v.table.searchInputAttrs()"
+        />
+      </div>
+    </div>
+
+    @switch (v.table.bodyRegion()) {
+      @case ("skeleton") {
+        <div
+          data-adapttable-part="loading"
+          role="status"
+          [attr.aria-label]="v.table.labels().loading"
+        ></div>
+      }
+      @case ("empty") {
+        <output data-adapttable-part="empty">
+          {{
+            noResults() ? v.table.labels().noResults : v.table.labels().noData
+          }}
+          @if (noResults()) {
+            <button
+              type="button"
+              data-adapttable-part="empty-clear"
+              (click)="v.table.clearFilters()"
+            >
+              {{ v.table.labels().clearAll }}
+            </button>
+          }
+        </output>
+      }
+      @case ("mobile") {
+        <ul data-adapttable-part="cards" style="margin: 0; padding: 0">
+          @for (row of v.table.rows(); track rowId(row); let i = $index) {
+            <li style="display: block" [adaptAttrs]="v.table.cardAttrs(row, i)">
+              @if (v.selection; as selection) {
+                <input
+                  data-adapttable-part="checkbox"
+                  [adaptAttrs]="selection.rowCheckboxAttrs(rowId(row))"
+                />
+              }
+              @for (column of v.table.columns(); track column.key) {
+                <div data-adapttable-part="card-row">
+                  <span data-adapttable-part="card-label">{{
+                    column.mobileLabel ?? column.header
+                  }}</span>
+                  <span
+                    data-adapttable-part="card-value"
+                    [adaptCell]="column"
+                    [adaptCellRow]="row"
+                    [adaptCellIndex]="i"
+                  ></span>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+      @case ("desktop") {
+        <div data-adapttable-part="scroll-box">
+          <table
+            data-adapttable-part="table"
+            [adaptAttrs]="v.grid ? v.grid.tableAttrs() : v.table.tableAttrs()"
+          >
+            <thead data-adapttable-part="thead">
+              <tr
+                data-adapttable-part="header-row"
+                [adaptAttrs]="v.table.headerRowAttrs()"
+              >
+                @if (v.selection; as selection) {
+                  <th data-adapttable-part="selection-header" scope="col">
+                    <input
+                      data-adapttable-part="checkbox"
+                      [adaptAttrs]="selection.headerCheckboxAttrs()"
+                    />
+                  </th>
+                }
+                @for (
+                  column of v.table.columns();
+                  track column.key;
+                  let col = $index
+                ) {
+                  <th
+                    data-adapttable-part="header-cell"
+                    [adaptAttrs]="
+                      v.grid
+                        ? v.grid.headerCellAttrs(column, col)
+                        : v.table.headerCellAttrs(column)
+                    "
+                  >
+                    @if (column.sortable) {
+                      <button
+                        data-adapttable-part="sort-button"
+                        [adaptAttrs]="v.table.sortButtonAttrs(column)"
+                      >
+                        <span [adaptHeader]="column"></span>
+                        @if (v.table.sortBy() === column.key) {
+                          <span aria-hidden="true">{{
+                            v.table.sortDir() === "desc" ? "▼" : "▲"
+                          }}</span>
+                        }
+                      </button>
+                    } @else {
+                      <span [adaptHeader]="column"></span>
+                    }
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody data-adapttable-part="tbody">
+              @for (row of v.table.rows(); track rowId(row); let i = $index) {
+                <tr
+                  [adaptAttrs]="
+                    v.grid ? v.grid.rowAttrs(row, i) : v.table.rowAttrs(row, i)
+                  "
+                >
+                  @if (v.selection; as selection) {
+                    <td data-adapttable-part="selection-cell">
+                      <input
+                        data-adapttable-part="checkbox"
+                        [adaptAttrs]="selection.rowCheckboxAttrs(rowId(row))"
+                      />
+                    </td>
+                  }
+                  @for (
+                    column of v.table.columns();
+                    track column.key;
+                    let col = $index
+                  ) {
+                    <td
+                      data-adapttable-part="cell"
+                      [adaptAttrs]="
+                        v.grid
+                          ? v.grid.cellAttrs(column, i, col)
+                          : v.table.cellAttrs(column)
+                      "
+                      [adaptCell]="column"
+                      [adaptCellRow]="row"
+                      [adaptCellIndex]="i"
+                    ></td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    @if (v.table.canLoadMore()) {
+      <div
+        data-adapttable-part="load-more"
+        [adaptAttrs]="v.table.loadMoreAttrs()"
+      >
+        <button
+          data-adapttable-part="load-more-button"
+          [adaptAttrs]="v.table.loadMoreButtonAttrs()"
+        >
+          {{ v.table.labels().loadMore }}
+        </button>
+      </div>
+    }
+
+    @if (v.table.showFooter()) {
+      <div data-adapttable-part="footer">
+        <label>
+          {{ v.table.labels().rowsPerPage }}
+          <select
+            data-adapttable-part="rows-per-page"
+            [attr.aria-label]="v.table.labels().rowsPerPage"
+            [value]="v.table.source().limit"
+            (change)="v.table.setLimit(+$any($event.target).value)"
+          >
+            @for (size of v.table.pageSizeOptions(); track size) {
+              <option [value]="size">{{ size }}</option>
+            }
+          </select>
+        </label>
+        @if (v.table.source().total > 0) {
+          <span>{{
+            v.table.labels().showing({
+              from: v.table.pagination().fromIndex,
+              to: v.table.pagination().toIndex,
+              total: v.table.source().total,
+            })
+          }}</span>
+        }
+        <div data-adapttable-part="pager">
+          <span>{{
+            v.table.labels().pageOf({
+              page: v.table.pagination().safePage,
+              total: v.table.pagination().totalPages,
+            })
+          }}</span>
+          <button
+            type="button"
+            data-adapttable-part="page-prev"
+            [attr.aria-label]="v.table.labels().previousPage"
+            [disabled]="v.table.pagination().safePage <= 1"
+            (click)="v.table.setPage(v.table.pagination().safePage - 1)"
+          >
+            ‹
+          </button>
+          @for (slot of v.table.pagerSlots(); track slot.key) {
+            @if (slot.item === "ellipsis") {
+              <span data-adapttable-part="page-ellipsis" aria-hidden="true"
+                >…</span
+              >
+            } @else {
+              <button
+                type="button"
+                data-adapttable-part="page-number"
+                [attr.aria-current]="
+                  slot.item === v.table.pagination().safePage ? 'page' : null
+                "
+                (click)="v.table.setPage(+slot.item)"
+              >
+                {{ slot.item }}
+              </button>
+            }
+          }
+          <button
+            type="button"
+            data-adapttable-part="page-next"
+            [attr.aria-label]="v.table.labels().nextPage"
+            [disabled]="
+              v.table.pagination().safePage >= v.table.pagination().totalPages
+            "
+            (click)="v.table.setPage(v.table.pagination().safePage + 1)"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+    }
+
+    <div
+      [adaptLiveRegion]="v.table.statusAnnouncement()"
+      part="table-status-announcer"
+    ></div>
+    @if (v.grid; as grid) {
+      <output
+        [adaptLiveRegion]="grid.announcement()"
+        part="grid-announcer"
+      ></output>
+    }
+  </div>
+}

@@ -4,5 +4,13 @@
   "trailingComma": "es5",
   "printWidth": 80,
   "tabWidth": 2,
-  "arrowParens": "always"
+  "arrowParens": "always",
+  "overrides": [
+    {
+      "files": "packages/angular/**/*.html",
+      "options": {
+        "parser": "angular"
+      }
+    }
+  ]
 }
