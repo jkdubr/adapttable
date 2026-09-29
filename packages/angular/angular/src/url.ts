@@ -108,15 +108,7 @@ export function injectTableUrlState(
 ): TableUrlState {
   if (!options.injector) assertInInjectionContext(injectTableUrlState);
   const injector = options.injector ?? inject(Injector);
-  const provided =
-    options.urlAdapter ??
-    injector.get(ADAPTTABLE_URL_ADAPTER, null, { optional: true }) ??
-    undefined;
-  const adapter = resolveUrlAdapter(
-    provided,
-    options.urlSync ?? true,
-    createMemoryAdapter()
-  );
+  const adapter = urlAdapterFor(options, injector);
   const store = createTableViewStore(
     { adapter, urlKey: options.urlKey },
     {
@@ -145,4 +137,30 @@ export function injectTableUrlState(
     clearExtras: store.clearExtras,
     clearAll: store.clearAll,
   };
+}
+
+/**
+ * The URL backend a table's state goes through: its own adapter, else the
+ * injector's, else the History API — or a private memory store when the
+ * table does not sync with the URL.
+ *
+ * @param options - The table's URL options.
+ * @param injector - Where {@link ADAPTTABLE_URL_ADAPTER} is looked up.
+ * @returns The adapter.
+ *
+ * @public
+ */
+export function urlAdapterFor(
+  options: Pick<TableUrlStateOptions, "urlAdapter" | "urlSync">,
+  injector: Injector
+): UrlStateAdapter {
+  const provided =
+    options.urlAdapter ??
+    injector.get(ADAPTTABLE_URL_ADAPTER, null, { optional: true }) ??
+    undefined;
+  return resolveUrlAdapter(
+    provided,
+    options.urlSync ?? true,
+    createMemoryAdapter()
+  );
 }

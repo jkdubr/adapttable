@@ -39,8 +39,9 @@ overrides:
   # CRLF injection, cache-control disclosure, cookie injection, response
   # desync, private-cache crash
   undici: "^7.29.0"
-  # host confusion via backslash authority introducer
-  fast-uri: "^3.1.5"
+  # host confusion via backslash authority introducer, and via an unclosed
+  # bracket in the authority
+  fast-uri: "^3.1.8"
   # sourceMappingURL path traversal → arbitrary .map disclosure
   postcss: "^8.5.23"
   # removeScripts plugin left executable scripts intact

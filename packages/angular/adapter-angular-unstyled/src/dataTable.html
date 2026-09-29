@@ -1,5 +1,10 @@
 @if (view(); as v) {
-  <div data-adapttable-part="root" [attr.dir]="v.table.dir()">
+  <div
+    #root
+    data-adapttable-part="root"
+    [attr.dir]="v.table.dir()"
+    [attr.data-density]="v.density()"
+  >
     <div data-adapttable-part="toolbar">
       <div data-adapttable-part="search-field">
         <input
@@ -7,7 +12,90 @@
           [adaptAttrs]="v.table.searchInputAttrs()"
         />
       </div>
+      @if (v.filters; as f) {
+        <ng-template #filtersTrigger>
+          <button
+            type="button"
+            data-adapttable-part="filters-button"
+            style="flex-shrink: 0; white-space: nowrap"
+            [attr.aria-expanded]="f.mode === 'popover' ? f.open() : null"
+            [attr.data-active]="f.open() ? '' : null"
+            (pointerdown)="f.pointerDown()"
+            (click)="f.click()"
+          >
+            <span
+              data-adapttable-part="filters-icon"
+              style="display: inline-flex"
+              ><svg [adaptIcon]="filtersIcon"></svg
+            ></span>
+            {{ v.table.labels().filters }}
+            @if (f.count() > 0) {
+              <span data-adapttable-part="filters-count">{{ f.count() }}</span>
+            }
+          </button>
+        </ng-template>
+        <ng-template #filtersForm>
+          <ng-container
+            [adaptSlot]="filterSlots.form"
+            [adaptSlotProps]="f.form()"
+            [adaptSlotTable]="v.table"
+          />
+        </ng-template>
+        @if (f.button) {
+          @if (f.mode === "popover") {
+            <ng-container
+              [adaptSlot]="filterSlots.popover"
+              [adaptSlotProps]="f.overlay()"
+              [adaptSlotTable]="v.table"
+            />
+          } @else {
+            <ng-container [ngTemplateOutlet]="filtersTrigger" />
+          }
+        }
+      }
+      @if (v.savedViews; as savedViews) {
+        <ng-container
+          [adaptSlot]="savedViewsSlot"
+          [adaptSlotProps]="savedViews()"
+          [adaptSlotTable]="v.table"
+        />
+      }
+      @if (v.columnMenu && !v.table.isMobile()) {
+        <ng-container
+          [adaptSlot]="columnMenuSlot"
+          [adaptSlotProps]="v.columnMenuProps()"
+          [adaptSlotTable]="v.table"
+        />
+      }
+      <ng-container
+        [adaptSlot]="toolbarExtrasSlot"
+        [adaptSlotProps]="v.toolbarExtras()"
+        [adaptSlotTable]="v.table"
+      />
     </div>
+
+    @if (v.filters; as f) {
+      @if (f.button && f.mode === "drawer") {
+        <ng-container
+          [adaptSlot]="filterSlots.drawer"
+          [adaptSlotProps]="f.overlay()"
+          [adaptSlotTable]="v.table"
+        />
+      }
+      <ng-container
+        [adaptSlot]="filterSlots.chips"
+        [adaptSlotProps]="f.chips()"
+        [adaptSlotTable]="v.table"
+      />
+    }
+
+    @if (v.bulkBar; as bulkBar) {
+      <ng-container
+        [adaptSlot]="bulkBarSlot"
+        [adaptSlotProps]="bulkBar()"
+        [adaptSlotTable]="v.table"
+      />
+    }
 
     @switch (v.table.bodyRegion()) {
       @case ("skeleton") {
@@ -54,6 +142,17 @@
                     [adaptCellRow]="row"
                     [adaptCellIndex]="i"
                   ></span>
+                </div>
+              }
+              @if (v.rowActions(); as actions) {
+                <div data-adapttable-part="card-actions">
+                  <adapt-row-actions
+                    [row]="row"
+                    [actions]="actions"
+                    [confirm]="v.confirm"
+                    [labels]="v.table.labels()"
+                    [layout]="v.rowActionsLayout"
+                  />
                 </div>
               }
             </li>
@@ -107,6 +206,20 @@
                     } @else {
                       <span [adaptHeader]="column"></span>
                     }
+                    @if (v.filters?.header) {
+                      @if (v.filters?.headerProps()?.get(column.key); as hp) {
+                        <ng-container
+                          [adaptSlot]="filterSlots.header"
+                          [adaptSlotProps]="hp"
+                          [adaptSlotTable]="v.table"
+                        />
+                      }
+                    }
+                  </th>
+                }
+                @if (v.rowActions()) {
+                  <th data-adapttable-part="actions-header" scope="col">
+                    {{ v.table.labels().actions }}
                   </th>
                 }
               </tr>
@@ -142,6 +255,17 @@
                       [adaptCellRow]="row"
                       [adaptCellIndex]="i"
                     ></td>
+                  }
+                  @if (v.rowActions(); as actions) {
+                    <td data-adapttable-part="actions-cell">
+                      <adapt-row-actions
+                        [row]="row"
+                        [actions]="actions"
+                        [confirm]="v.confirm"
+                        [labels]="v.table.labels()"
+                        [layout]="v.rowActionsLayout"
+                      />
+                    </td>
                   }
                 </tr>
               }

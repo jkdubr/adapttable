@@ -3012,8 +3012,41 @@ controls: the host writes its own markup.
   `AdaptAttrs` applies an `Attrs` record to an element.
 - `provideAdaptTableFeatures(...features)` composes features through
   dependency injection into the `ADAPTTABLE_FEATURES` multi-provider; an
-  `AdaptTableFeature` is anything with a `setup` that registers against the
-  table.
+  `AdaptTableFeature` has any of `apply` (configuration it merges into the
+  table), `setup` (registrations against the live table) and `renders` (the
+  slots it fills, each drawn by a `SlotComponent`). `extendFeature` adds
+  renders to a core feature, which is how a kit puts its own controls in;
+  `featureOptionsOf` is the merged configuration of a feature list.
+- Slots: `AdaptSlot` draws what the table's features put in one named slot,
+  handing each component the slot's props; `SlotFills` is the table's map of
+  fills, `SlotTable` what a slot component can ask of its table, and
+  `ADAPTTABLE_SLOT_TABLE` the token that provides it. `AdaptControl` draws one
+  kit control inside a Chrome, and `AdaptIcon` draws a core glyph as SVG.
+- Column layout: `DataTableOptions` takes `ColumnLayoutOptions` (controlled
+  or default layout, the change callback and the rename handler), and the
+  table's `layout` is a `ColumnLayout` signal — hidden, order, pins, widths
+  and names with their setters. `injectColumnDrag` returns a `ColumnDrag`
+  (row and grip attributes that reorder a Columns menu by drag or keyboard),
+  and `injectColumnRenameEditor` the inline column-name editor.
+- Filters: `filterRuntimeFor` (`FilterRuntimeOptions`) derives a
+  `TableFilters` runtime from the definitions — the predicates and the URL
+  keys; `filterChipsFor` the active chips and their count;
+  `filterOptionsFor` a definition's choices as a `FilterOptionsState`; and
+  `textFilterFor`, `rangeFilterFor` and `booleanFilterFor` the per-field
+  widgets a kit's form draws. `AdaptFilterTreeChrome` (with
+  `AngularFilterTreeDisclosureProps`) and `AdaptChecklistChrome` are the
+  nested AND/OR builder and the checklist filter, structure only; the kit
+  hands its controls in `slots`.
+- Actions: `injectBulkActionRunner` runs bulk actions and returns a
+  `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
+  actions column's list, with Duplicate and Delete appended for the host's
+  handlers.
+- Toolbar: `injectDensity` (`DensityOptions`, returning `DensityState`) is
+  row density kept in the URL, `injectFullscreen` the fullscreen toggle,
+  `injectExportCsv` (`ExportCsvHandlerOptions`) the Export button's state,
+  and `injectSavedViews` (`SavedViewsOptions`, returning `SavedViewsState`)
+  the saved views over the table's URL. `urlAdapterFor` resolves the one URL
+  adapter a table and its features share.
 - `fromStore(store, options)` turns any core store, an `ExternalStore`, into a
   read-only signal that ends with its injector (`FromStoreOptions`).
   `MaybeSignal` and `MaybeSignalOptional` are the option types that take a
@@ -3024,7 +3057,13 @@ unpublished while it reaches parity with the React kits. `AdaptDataTable`
 (`<adapt-data-table>`) takes the rows, columns and row key as inputs and
 renders search, sorting, paging, the phone card layout, row selection and
 keyboard cell navigation with the `data-adapttable-part` names every kit
-shares.
+shares. Its `features` input composes `columnMenu`, `filters`,
+`headerFilters`, `bulkActions`, `rowActions` (`RowActionsFeatureOptions`),
+`densityChooser`, `fullscreen`, `exportCsv` and `savedViews`; `filtersMode`
+(`FiltersMode`) picks the anchored popover or the drawer. Each feature draws
+the kit's own native controls. `TableView` is what the table renders from
+once its inputs have arrived, and `FiltersView` is the filters on that view:
+the button, the open panel, and the form, overlay, chips and header funnels.
 
 ## Other packages
 

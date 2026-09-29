@@ -5,9 +5,15 @@
 import {
   createFeatureHost,
   disposeFeatureHost,
+  type FeatureApplyInput,
   type FeatureHostState,
+  type FeaturePatch,
+  type FeatureRender,
   type FeatureSetup,
+  mergeFeaturePatches,
   type SidePanelEntry,
+  type SlotFill,
+  slotFillsOf,
 } from "@adapttable/core/binding";
 import {
   DestroyRef,
@@ -15,15 +21,94 @@ import {
   InjectionToken,
   type Injector,
   makeEnvironmentProviders,
+  type Type,
 } from "@angular/core";
 
 /**
- * A feature a table composes: anything with a `setup` that registers filter
- * types, editors, aggregators, writers, commands or menu entries.
+ * What a slot draws in Angular: a standalone component that takes the slot's
+ * props through one `props` input.
  *
  * @public
  */
-export type AdaptTableFeature = FeatureSetup<unknown, SidePanelEntry>;
+export type SlotComponent = Type<unknown>;
+
+/**
+ * A feature a table composes. Any of three parts, all optional:
+ *
+ * - `apply` merges the feature's configuration into the table's — what turns
+ *   the column menu or the density chooser on;
+ * - `setup` registers filter types, editors, aggregators, writers, commands
+ *   or menu entries against the live table;
+ * - `renders` names the slots the feature draws into and the component that
+ *   draws each one, which is how a kit puts its own controls in the table.
+ *
+ * @public
+ */
+export interface AdaptTableFeature extends FeatureSetup<
+  unknown,
+  SidePanelEntry
+> {
+  /** Stable id: `"column-menu"`, `"density-chooser"`, a plugin's name. */
+  readonly id?: string;
+  /** Merge this feature's configuration into the table. Later features win. */
+  apply?(input: FeatureApplyInput<never>): FeaturePatch<unknown>;
+  /** The slots this feature draws into, and what draws each one. */
+  readonly renders?: readonly FeatureRender<never, SlotComponent>[];
+}
+
+/**
+ * A feature with more slots filled: the base's own renders, then these. A
+ * kit extends a core feature with its components this way.
+ *
+ * @param base - The feature to extend.
+ * @param renders - The slots to add, from `slotRender`.
+ * @returns The extended feature.
+ *
+ * @public
+ */
+export function extendFeature(
+  base: AdaptTableFeature,
+  renders: readonly FeatureRender<never, SlotComponent>[]
+): AdaptTableFeature {
+  return { ...base, renders: [...(base.renders ?? []), ...renders] };
+}
+
+/** A feature's id, or its place in the list when it has none. */
+function withIds(
+  features: readonly AdaptTableFeature[]
+): (AdaptTableFeature & { readonly id: string })[] {
+  return features.map((feature, index) => ({
+    ...feature,
+    id: feature.id ?? `feature-${String(index)}`,
+  }));
+}
+
+/**
+ * The configuration every feature's `apply` merges, in order — what a kit
+ * reads before its table exists, such as the filter definitions its data
+ * tier needs.
+ *
+ * @param features - The composed features.
+ * @returns The merged configuration.
+ *
+ * @public
+ */
+export function featureOptionsOf(
+  features: readonly AdaptTableFeature[]
+): Readonly<Record<string, unknown>> {
+  return mergeFeaturePatches(withIds(features));
+}
+
+/**
+ * Which components draw each slot, ordered by feature id.
+ *
+ * @internal
+ */
+export function featureSlotFillsOf(
+  features: readonly AdaptTableFeature[]
+): ReadonlyMap<string, readonly SlotFill<SlotComponent>[]> {
+  return slotFillsOf(withIds(features));
+}
 
 /**
  * The features every table in this injector composes. Multi-provided: each

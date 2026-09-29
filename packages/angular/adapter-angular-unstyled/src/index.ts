@@ -4,4 +4,17 @@
  *
  * @packageDocumentation
  */
-export { AdaptDataTable } from "./dataTable";
+export { AdaptDataTable, type TableView } from "./dataTable";
+export {
+  bulkActions,
+  columnMenu,
+  densityChooser,
+  exportCsv,
+  filters,
+  fullscreen,
+  headerFilters,
+  rowActions,
+  type RowActionsFeatureOptions,
+  savedViews,
+} from "./features";
+export type { FiltersMode, FiltersView } from "./tableFilters";

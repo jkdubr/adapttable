@@ -4,46 +4,97 @@
 
 ```ts
 
+import { ActiveFilterChip } from '@adapttable/angular';
+import { ActiveFilterChipsSlotProps } from '@adapttable/angular';
 import { AdaptCellTemplate } from '@adapttable/angular';
+import { AdaptTableFeature } from '@adapttable/angular';
+import { BulkAction } from '@adapttable/angular';
+import { BulkBarSlotProps } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
+import { ColumnLayoutState } from '@adapttable/angular';
+import { ColumnMenuSlotProps } from '@adapttable/angular';
+import { ConfirmHandler } from '@adapttable/angular';
 import { DataTable } from '@adapttable/angular';
 import { Direction } from '@adapttable/angular';
+import { ExportCsvOptions } from '@adapttable/angular';
 import { ExtraFilters } from '@adapttable/angular';
+import { FeatureSlotKey } from '@adapttable/angular';
+import { FilterDef } from '@adapttable/angular';
+import { FilterHeaderControlProps } from '@adapttable/angular';
+import { FilterOverlaySlotProps } from '@adapttable/angular';
+import { FiltersFormSlotProps } from '@adapttable/angular';
 import { GridFocus } from '@adapttable/angular';
 import * as i0 from '@angular/core';
+import { IconDescriptor } from '@adapttable/angular';
 import { InputSignal } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
+import { RowAction } from '@adapttable/angular';
+import { RowActionsLayout } from '@adapttable/angular';
 import { RowSelection } from '@adapttable/angular';
+import { SavedViewsControllerOptions } from '@adapttable/angular';
+import { SavedViewsSlotProps } from '@adapttable/angular';
+import { SelectionState } from '@adapttable/angular';
 import { Signal } from '@angular/core';
+import { TableDensity } from '@adapttable/angular';
 import { TableLabels } from '@adapttable/angular';
 import { TableQueryParams } from '@adapttable/angular';
+import { TemplateRef } from '@angular/core';
+import { ToolbarExtrasSlotProps } from '@adapttable/angular';
 import { WritableSignal } from '@angular/core';
 
 // @public
 export class AdaptDataTable<TRow> implements OnInit {
+    // @internal
+    protected readonly bulkBarSlot: FeatureSlotKey<BulkBarSlotProps<unknown>>;
     readonly cellNavigation: InputSignal<boolean>;
     // @internal
     protected readonly cellTemplates: Signal<readonly AdaptCellTemplate[]>;
+    readonly closeHeaderFilterOnSelect: InputSignal<boolean>;
+    readonly columnLayout: InputSignal<ColumnLayoutState | undefined>;
+    readonly columnLayoutChange: OutputEmitterRef<ColumnLayoutState>;
+    // @internal
+    protected readonly columnMenuSlot: FeatureSlotKey<ColumnMenuSlotProps<never>>;
     readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
+    readonly confirm: InputSignal<ConfirmHandler | undefined>;
     readonly data: InputSignal<readonly TRow[]>;
+    readonly defaultColumnLayout: InputSignal<Partial<ColumnLayoutState> | undefined>;
     readonly defaults: InputSignal<(Partial<TableQueryParams> & {
     extra?: ExtraFilters;
     }) | undefined>;
+    readonly density: InputSignal<TableDensity | undefined>;
     readonly dir: InputSignal<Direction>;
+    readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
+    readonly features: InputSignal<readonly AdaptTableFeature[]>;
+    // @internal
+    protected readonly filtersIcon: IconDescriptor;
+    // @internal
+    protected readonly filterSlots: {
+        form: FeatureSlotKey<FiltersFormSlotProps<never>>;
+        popover: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
+        drawer: FeatureSlotKey<FilterOverlaySlotProps<unknown>>;
+        chips: FeatureSlotKey<ActiveFilterChipsSlotProps>;
+        header: FeatureSlotKey<FilterHeaderControlProps<never>>;
+    };
+    readonly filtersMode: InputSignal<FiltersMode>;
     readonly forceMobile: InputSignal<boolean | undefined>;
     readonly labels: InputSignal<TableLabels | undefined>;
     ngOnInit(): void;
     // @internal
     protected readonly noResults: Signal<boolean>;
+    readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
     // @internal
     protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
+    // @internal
+    protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
     readonly searchPlaceholder: InputSignal<string | undefined>;
     readonly selectable: InputSignal<boolean>;
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
     readonly selectionChange: OutputEmitterRef<string[]>;
     readonly tableLabel: InputSignal<string | undefined>;
+    // @internal
+    protected readonly toolbarExtrasSlot: FeatureSlotKey<ToolbarExtrasSlotProps>;
     readonly urlKey: InputSignal<string | undefined>;
     readonly urlSync: InputSignal<boolean>;
     // @internal
@@ -120,18 +171,127 @@ export class AdaptDataTable<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
+        "features": {
+            "alias": "features";
+            "required": false;
+            "isSignal": true;
+        };
+        "columnLayout": {
+            "alias": "columnLayout";
+            "required": false;
+            "isSignal": true;
+        };
+        "defaultColumnLayout": {
+            "alias": "defaultColumnLayout";
+            "required": false;
+            "isSignal": true;
+        };
+        "onColumnRename": {
+            "alias": "onColumnRename";
+            "required": false;
+            "isSignal": true;
+        };
+        "filtersMode": {
+            "alias": "filtersMode";
+            "required": false;
+            "isSignal": true;
+        };
+        "closeHeaderFilterOnSelect": {
+            "alias": "closeHeaderFilterOnSelect";
+            "required": false;
+            "isSignal": true;
+        };
+        "extraChips": {
+            "alias": "extraChips";
+            "required": false;
+            "isSignal": true;
+        };
+        "density": {
+            "alias": "density";
+            "required": false;
+            "isSignal": true;
+        };
+        "confirm": {
+            "alias": "confirm";
+            "required": false;
+            "isSignal": true;
+        };
     }, {
         "selectionChange": "selectionChange";
+        "columnLayoutChange": "columnLayoutChange";
     }, ["cellTemplates"], never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDataTable<any>, never>;
 }
 
-// @internal
+// @public
+export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature;
+
+// @public
+export function columnMenu(): AdaptTableFeature;
+
+// @public
+export function densityChooser(): AdaptTableFeature;
+
+// @public
+export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): AdaptTableFeature;
+
+// @public
+export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
+
+// @public
+export type FiltersMode = "popover" | "drawer";
+
+// @public
+export interface FiltersView {
+    readonly button: boolean;
+    readonly chips: Signal<ActiveFilterChipsSlotProps>;
+    readonly click: () => void;
+    readonly count: Signal<number>;
+    readonly form: Signal<FiltersFormSlotProps<never>>;
+    readonly header: boolean;
+    readonly headerProps: Signal<ReadonlyMap<string, FilterHeaderControlProps<never>>>;
+    readonly mode: FiltersMode;
+    readonly open: Signal<boolean>;
+    readonly overlay: Signal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
+    readonly pointerDown: () => void;
+}
+
+// @public
+export function fullscreen(): AdaptTableFeature;
+
+// @public
+export function headerFilters(): AdaptTableFeature;
+
+// @public
+export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], options?: RowActionsFeatureOptions<TRow>): AdaptTableFeature;
+
+// @public
+export interface RowActionsFeatureOptions<TRow> {
+    readonly confirmDeleteRow?: boolean;
+    readonly layout?: RowActionsLayout;
+    readonly onDeleteRow?: (row: TRow) => void;
+    readonly onDuplicateRow?: (row: TRow) => void;
+}
+
+// @public
+export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeature;
+
+// @public
 export interface TableView<TRow> {
+    readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
+    readonly columnMenu: boolean;
+    readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
+    readonly confirm: ConfirmHandler;
+    readonly density: Signal<TableDensity>;
+    readonly filters: FiltersView | undefined;
     readonly grid: GridFocus<TRow> | undefined;
+    readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
+    readonly rowActionsLayout: RowActionsLayout | undefined;
+    readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
     readonly selection: RowSelection | undefined;
     readonly table: DataTable<TRow>;
+    readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
 }
 
 // (No @packageDocumentation comment for this package)

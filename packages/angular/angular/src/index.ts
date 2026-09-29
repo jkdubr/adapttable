@@ -7,6 +7,13 @@
  *
  * @packageDocumentation
  */
+export {
+  type BulkActionRunnerOptions,
+  type BulkActionRunnerState,
+  injectBulkActionRunner,
+  rowActionsFor,
+  type RowActionsOptions,
+} from "./actions";
 export { AdaptAttrs, type Attrs } from "./attrs";
 export {
   AdaptCell,
@@ -14,6 +21,7 @@ export {
   AdaptHeader,
   type ResolvedRenderer,
 } from "./cell";
+export { AdaptChecklistChrome, type ChecklistSlots } from "./checklist";
 export {
   type CellContext,
   type ColumnDef,
@@ -21,6 +29,15 @@ export {
   type Renderer,
   resolveColumns,
 } from "./columnDef";
+export { type ColumnLayout, type ColumnLayoutOptions } from "./columnLayout";
+export {
+  type ColumnDrag,
+  type ColumnRenameEditorOptions,
+  type ColumnRenameEditorState,
+  injectColumnDrag,
+  injectColumnRenameEditor,
+} from "./columnMenu";
+export { AdaptControl } from "./control";
 export {
   type DataTable,
   type DataTableOptions,
@@ -29,21 +46,53 @@ export {
 export {
   ADAPTTABLE_FEATURES,
   type AdaptTableFeature,
+  extendFeature,
+  featureOptionsOf,
   provideAdaptTableFeatures,
+  type SlotComponent,
 } from "./features";
+export {
+  booleanFilterFor,
+  filterChipsFor,
+  filterOptionsFor,
+  type FilterOptionsState,
+  filterRuntimeFor,
+  type FilterRuntimeOptions,
+  rangeFilterFor,
+  type TableFilters,
+  textFilterFor,
+} from "./filters";
+export {
+  AdaptFilterTreeChrome,
+  type AngularFilterTreeDisclosureProps,
+  type FilterTreeSlots,
+} from "./filterTree";
 export { type FrontendDataOptions, injectFrontendData } from "./frontendData";
 export {
   type GridFocus,
   type GridFocusOptions,
   injectGridFocus,
 } from "./gridFocus";
+export { AdaptIcon } from "./icon";
+export * from "./kitExports";
 export { AdaptLiveRegion } from "./liveRegion";
 export { injectIsMobile, type IsMobileOptions } from "./mobile";
+export {
+  injectSavedViews,
+  type SavedViewsOptions,
+  type SavedViewsState,
+} from "./savedViews";
 export {
   injectRowSelection,
   type RowSelection,
   type RowSelectionOptions,
 } from "./selection";
+export {
+  AdaptSlot,
+  ADAPTTABLE_SLOT_TABLE,
+  type SlotFills,
+  type SlotTable,
+} from "./slots";
 export {
   type ExternalStore,
   fromStore,
@@ -52,10 +101,19 @@ export {
   type MaybeSignalOptional,
 } from "./store";
 export {
+  type DensityOptions,
+  type DensityState,
+  type ExportCsvHandlerOptions,
+  injectDensity,
+  injectExportCsv,
+  injectFullscreen,
+} from "./toolbar";
+export {
   ADAPTTABLE_URL_ADAPTER,
   injectTableUrlState,
   type TableUrlState,
   type TableUrlStateOptions,
+  urlAdapterFor,
 } from "./url";
 export type {
   CellRange,
