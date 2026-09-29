@@ -955,7 +955,6 @@ export type {
   ChecklistWindowState,
 } from "./filters/filtersBindingState";
 export type { GridFocusState } from "./focus/focusBindingState";
-export type { UseFormulaUrlStateResult } from "./formula/formulaBindingState";
 export type {
   GroupCollapseState,
   GroupPagingState,
@@ -994,3 +993,16 @@ export type {
   UseSavedViewsResult,
   UseTableUrlStateResult,
 } from "./url/urlBindingState";
+// Types the shared state shapes above hand back.
+export type { ChecklistWindow } from "./filters/checklistModel";
+export type { HighlightedCell } from "./rows/highlightStore";
+export type { RowPatchEvent } from "./rows/patch";
+export type {
+  RowDropPosition,
+  RowMoveMenuModel,
+  RowMoveRequest,
+  RowMoveTarget,
+  RowTreeParentRef,
+} from "./rows/rowMove";
+export type { RowPatchStreamStatus } from "./stream/status";
+export type { TableDensity } from "./url/viewStateSlices";

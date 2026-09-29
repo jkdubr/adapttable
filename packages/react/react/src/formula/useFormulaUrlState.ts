@@ -10,11 +10,11 @@
  * evaluation happens later, in the engine, on purpose.
  */
 import { type FormulaColumnSpec, formulaSlice } from "@adapttable/core";
-import type { UseFormulaUrlStateResult } from "@adapttable/core/binding";
+import type { UseFormulaUrlStateResult } from "@adapttable/core/formula";
 
 import type { UrlStateAdapter } from "../url/adapter";
 import { useUrlSlice } from "../url/useUrlSlice";
-export type { UseFormulaUrlStateResult } from "@adapttable/core/binding";
+export type { UseFormulaUrlStateResult } from "@adapttable/core/formula";
 
 export type { UrlStateAdapter };
 
