@@ -13,10 +13,14 @@ import {
   AdaptLiveRegion,
   AdaptSlot,
   type AdaptTableFeature,
+  BATCH_EDIT_BAR,
+  type BatchEditBarProps,
+  type BatchEditHandler,
   BULK_BAR,
   type BulkAction,
   type BulkBarSlotProps,
   type CellEditHandler,
+  chromeColumnPlan,
   COLUMN_MENU,
   type ColumnDef,
   type ColumnLayoutState,
@@ -27,6 +31,7 @@ import {
   devWarn,
   type Direction,
   type EditableCellEditing,
+  type EditableCellSlotProps,
   type EditEventHandler,
   type ExportCsvOptions,
   type ExtraFilters,
@@ -42,6 +47,7 @@ import {
   type GridFocus,
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
+  injectBatchEditing,
   injectCellEditing,
   injectCellSaveState,
   injectDataTable,
@@ -53,15 +59,22 @@ import {
   injectGridFocus,
   injectGroupingPanelState,
   injectIsMobile,
+  injectRowEditing,
   injectRowReorder,
   injectRowSelection,
   injectTableVirtualization,
   isBodyEligible,
   type PaginationMode,
+  resolveEditingArming,
+  resolveRowEditTrigger,
   ROW_REORDER_ANNOUNCER,
   type RowAction,
   rowActionsFor,
   type RowActionsLayout,
+  type RowEditActionsProps,
+  rowEditConflict,
+  type RowEditHandler,
+  type RowEditIcons,
   type RowReorderState,
   type RowSelection,
   SAVED_VIEWS,
@@ -106,15 +119,23 @@ import {
 } from "./tableFilters";
 
 /**
- * The editing bundle for a composed {@link editing} feature, or absent.
+ * The editing bundle for composed editing features, or absent.
  */
 function editingBundleFor<TRow>(options: {
   readonly featureOptions: Readonly<Record<string, unknown>>;
+  readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+  readonly featureHost: DataTable<TRow>["featureHost"];
+  readonly labels: DataTable<TRow>["labels"];
   readonly injector: Injector;
 }): Signal<EditableCellEditing<TRow>> | undefined {
+  const armed = resolveEditingArming(options.featureOptions);
+  if (!armed.any) return undefined;
   const onCellEdit = options.featureOptions.onCellEdit as
     CellEditHandler<TRow> | undefined;
-  if (!onCellEdit) return undefined;
+  const onRowEdit = options.featureOptions.onRowEdit as
+    RowEditHandler<TRow> | undefined;
+  const onBatchEdit = options.featureOptions.onBatchEdit as
+    BatchEditHandler<TRow> | undefined;
   const onEditStart = options.featureOptions.onEditStart as
     EditEventHandler<TRow> | undefined;
   const onEditCancel = options.featureOptions.onEditCancel as
@@ -131,17 +152,159 @@ function editingBundleFor<TRow>(options: {
     injector: options.injector,
   });
   const saving = injectCellSaveState<TRow>({ injector: options.injector });
-  return computed((): EditableCellEditing<TRow> => ({
-    onCellEdit,
-    state: cellState(),
-    validation: validation(),
-    saving: saving(),
-    lifecycle: {
-      onEditStart,
-      onEditCancel,
-      onEditCommit,
-    },
-  }));
+  const rowEditIcons = options.featureOptions.rowEditIcons as
+    RowEditIcons | undefined;
+  const lifecycle = {
+    onEditStart,
+    onEditCancel,
+    onEditCommit,
+  };
+  const rowEditing = armed.row
+    ? injectRowEditing<TRow>({
+        enabled: true,
+        columns: options.columns,
+        onRowEdit,
+        onEditStart,
+        onEditCancel,
+        onEditCommit,
+        featureHost: options.featureHost,
+        injector: options.injector,
+      })
+    : undefined;
+  const batch = armed.batch
+    ? injectBatchEditing<TRow>({
+        enabled: true,
+        columns: options.columns,
+        onBatchEdit,
+        onEditStart,
+        onEditCancel,
+        onEditCommit,
+        featureHost: options.featureHost,
+        injector: options.injector,
+      })
+    : undefined;
+  return computed((): EditableCellEditing<TRow> => {
+    const labels = options.labels();
+    return {
+      onCellEdit,
+      state: cellState(),
+      validation: validation(),
+      saving: saving(),
+      rowEditing: rowEditing?.(),
+      rowEditIcons,
+      batch: batch?.(),
+      lifecycle,
+      conflictLabels: {
+        message: labels.editConflict,
+        keepMine: labels.keepMine,
+        takeTheirs: labels.takeTheirs,
+        theirsValue: labels.theirsValue,
+      },
+      featureHost: options.featureHost,
+    };
+  });
+}
+
+/**
+ * One row's actions cell: row editing's controls and the host's actions.
+ *
+ * @public
+ */
+export interface RowActionsCell<TRow> {
+  /** The row-edit controls' props, when row editing is composed. */
+  readonly rowEdit: RowEditActionsProps<never> | undefined;
+  /** The host's actions, less any whose trigger row editing now owns. */
+  readonly actions: readonly RowAction<TRow>[];
+}
+
+/**
+ * The {@link EDITABLE_CELL} props of every cell in the body window, keyed
+ * `rowId:columnKey`. A computed map keeps each object the same between
+ * change-detection passes, so a slot's props change only when editing,
+ * the rows or the columns do.
+ */
+function editableCellsFor<TRow>(options: {
+  readonly table: DataTable<TRow>;
+  readonly editing: Signal<EditableCellEditing<TRow>>;
+  readonly virtualization: Signal<TableVirtualization<TRow>>;
+  readonly rowKey: Signal<(row: TRow) => string>;
+}): Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> {
+  return computed(() => {
+    const { table } = options;
+    const editing = options.editing();
+    const labels = table.labels();
+    const rows = table.rows();
+    const columns = table.columns();
+    const rowKey = options.rowKey();
+    const cells = new Map<string, EditableCellSlotProps<never>>();
+    for (const entry of options.virtualization().rows) {
+      const rowId = rowKey(entry.row);
+      for (const column of columns) {
+        const props = {
+          editing,
+          row: entry.row,
+          column,
+          rowId,
+          rowIndex: entry.index,
+          rows,
+          columns,
+          rowKey,
+          editLabel: labels.editCell,
+          undoLabel: labels.undoEdit,
+        };
+        cells.set(
+          `${rowId}:${column.key}`,
+          props as unknown as EditableCellSlotProps<never>
+        );
+      }
+    }
+    return cells;
+  });
+}
+
+/**
+ * Every window row's actions cell, keyed by row id: the row-edit controls
+ * and the host's actions, with a host action that opens the row taking the
+ * begin control's place.
+ */
+function actionsCellsFor<TRow>(options: {
+  readonly table: DataTable<TRow>;
+  readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
+  readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
+  readonly virtualization: Signal<TableVirtualization<TRow>>;
+  readonly rowKey: Signal<(row: TRow) => string>;
+}): Signal<ReadonlyMap<string, RowActionsCell<TRow>>> {
+  return computed(() => {
+    const editing = options.editing?.();
+    const rowEditing = editing?.rowEditing;
+    const actions = options.rowActions();
+    const labels = options.table.labels();
+    const rowKey = options.rowKey();
+    const cells = new Map<string, RowActionsCell<TRow>>();
+    for (const entry of options.virtualization().rows) {
+      const rowId = rowKey(entry.row);
+      const trigger = resolveRowEditTrigger(
+        actions,
+        rowEditing,
+        entry.row,
+        rowId
+      );
+      const rowEdit: RowEditActionsProps<TRow> | undefined = rowEditing && {
+        rowEditing,
+        row: entry.row,
+        rowId,
+        showBegin: trigger.showBegin,
+        icons: editing.rowEditIcons,
+        conflict: rowEditConflict(editing, rowId),
+        labels,
+      };
+      cells.set(rowId, {
+        rowEdit: rowEdit as unknown as RowEditActionsProps<never> | undefined,
+        actions: trigger.actions,
+      });
+    }
+    return cells;
+  });
 }
 
 /**
@@ -264,10 +427,22 @@ export interface TableView<TRow> {
   /** Row reorder state, when the feature is composed. */
   readonly reorder: Signal<RowReorderState<TRow>> | undefined;
   /**
-   * Cell editing bundle, when `editing()` is composed — state, channel,
+   * Cell editing bundle, when an editing feature is composed — state, channel,
    * validation, save tracking and lifecycle observers for the gate.
    */
   readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
+  /** Each window cell's editable-cell props, when editing is composed. */
+  readonly editableCells:
+    Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
+  /**
+   * Whether the actions column is drawn — row actions, or row editing's
+   * begin/save/cancel controls.
+   */
+  readonly showActions: Signal<boolean>;
+  /** Each window row's actions cell, keyed by row id. */
+  readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
+  /** The batch-edit bar's props, when batch editing is composed. */
+  readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
   /** The body window — every row when virtualization is off. */
   readonly virtualization: Signal<TableVirtualization<TRow>>;
   /** Column span for spacer/detail cells. */
@@ -414,6 +589,8 @@ export class AdaptDataTable<TRow> implements OnInit {
   protected readonly toolbarExtrasSlot = TOOLBAR_EXTRAS;
   /** The selection bar's slot. @internal */
   protected readonly bulkBarSlot = BULK_BAR;
+  /** The batch-edit bar's slot. @internal */
+  protected readonly batchEditBarSlot = BATCH_EDIT_BAR;
   /** The grouping strip's slot. @internal */
   protected readonly groupingPanelSlot = GROUPING_PANEL;
   /** The row-reorder announcer slot. @internal */
@@ -649,7 +826,35 @@ export class AdaptDataTable<TRow> implements OnInit {
       features,
       injector,
     });
-    const editing = editingBundleFor<TRow>({ featureOptions, injector });
+    const editing = editingBundleFor<TRow>({
+      featureOptions,
+      columns: computed(() => table.allColumns()),
+      featureHost: table.featureHost,
+      labels: table.labels,
+      injector,
+    });
+    const showActions = computed(
+      () =>
+        chromeColumnPlan({
+          rowActionCount: rowActions().rowActions?.length ?? 0,
+          rowEditing: editing?.().rowEditing !== undefined,
+          rowReorder: reorder !== undefined,
+          rowDetail: false,
+          selection: selection !== undefined,
+        }).showActions
+    );
+    const batchBar =
+      editing === undefined
+        ? undefined
+        : computed((): BatchEditBarProps<TRow> | undefined => {
+            const current = editing();
+            if (current.batch === undefined) return undefined;
+            return {
+              batch: current.batch,
+              contested: current.conflict?.anyContested,
+              labels: table.labels(),
+            };
+          });
     const virtualization = bodyVirtualizationFor({
       table,
       source,
@@ -659,11 +864,24 @@ export class AdaptDataTable<TRow> implements OnInit {
       scrollBox: () => this.desktopTable()?.scrollElement() ?? null,
       injector,
     });
+    const rowKey = computed(() => this.rowKey());
+    const rowActionList = computed(() => rowActions().rowActions);
+    const editableCells =
+      editing === undefined
+        ? undefined
+        : editableCellsFor({ table, editing, virtualization, rowKey });
+    const actionsCells = actionsCellsFor({
+      table,
+      editing,
+      rowActions: rowActionList,
+      virtualization,
+      rowKey,
+    });
     const bodyColSpan = computed(() =>
       virtualColumnSpan(
         table.columns().length,
         selection !== undefined,
-        rowActions().hasRowActions,
+        showActions(),
         false,
         reorder !== undefined
       )
@@ -676,13 +894,17 @@ export class AdaptDataTable<TRow> implements OnInit {
       columnMenuProps,
       filters,
       bulkBar,
-      rowActions: computed(() => rowActions().rowActions),
+      rowActions: rowActionList,
       density,
       toolbarExtras,
       savedViews,
       groupingPanel,
       reorder,
       editing,
+      editableCells,
+      showActions,
+      actionsCells,
+      batchBar,
       virtualization,
       bodyColSpan,
       rowActionsLayout: featureOptions.rowActionsLayout as

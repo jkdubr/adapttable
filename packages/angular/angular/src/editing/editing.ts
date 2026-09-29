@@ -28,6 +28,13 @@ import {
 
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
 
+export type {
+  BatchEditingState,
+  BatchRowEdit,
+  CellEditingState,
+  RowEditingState,
+};
+
 /**
  * A cell-edit write the host applies.
  *

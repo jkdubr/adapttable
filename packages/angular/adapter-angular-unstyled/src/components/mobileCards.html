@@ -23,16 +23,11 @@
             column.mobileLabel ?? column.header
           }}</span>
           <span data-adapttable-part="card-value">
-            @if (v.editing; as editing) {
+            @if (v.editableCells; as editableCells) {
               <ng-container
                 [adaptSlot]="editableCellSlot"
                 [adaptSlotProps]="
-                  editableCellProps(
-                    editing(),
-                    entry.row,
-                    column,
-                    entry.index
-                  )
+                  editableCells().get(rowId(entry.row) + ':' + column.key)!
                 "
                 [adaptSlotTable]="v.table"
               />
@@ -55,15 +50,25 @@
           [adaptSlotTable]="v.table"
         />
       }
-      @if (v.rowActions(); as actions) {
+      @if (v.showActions()) {
         <div data-adapttable-part="card-actions">
-          <adapt-row-actions
-            [row]="entry.row"
-            [actions]="actions"
-            [confirm]="v.confirm"
-            [labels]="v.table.labels()"
-            [layout]="v.rowActionsLayout"
-          />
+          @let actionsCell = v.actionsCells().get(rowId(entry.row))!;
+          @if (actionsCell.rowEdit; as rowEdit) {
+            <ng-container
+              [adaptSlot]="rowEditActionsSlot"
+              [adaptSlotProps]="rowEdit"
+              [adaptSlotTable]="v.table"
+            />
+          }
+          @if (actionsCell.actions.length > 0) {
+            <adapt-row-actions
+              [row]="entry.row"
+              [actions]="actionsCell.actions"
+              [confirm]="v.confirm"
+              [labels]="v.table.labels()"
+              [layout]="v.rowActionsLayout"
+            />
+          }
         </div>
       }
     </li>

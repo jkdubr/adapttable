@@ -8,6 +8,10 @@ import { ACTIONS_COLUMN_KEY } from '@adapttable/core';
 import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
 import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
+import { BATCH_EDIT_BAR } from '@adapttable/core/binding';
+import { BatchEditBarModel } from '@adapttable/core';
+import { BatchEditBarProps } from '@adapttable/core/binding';
+import { BatchEditButtonProps } from '@adapttable/core/binding';
 import { BatchEditingState } from '@adapttable/core';
 import { BatchRowEdit } from '@adapttable/core';
 import { beginCellEdit } from '@adapttable/core';
@@ -20,7 +24,9 @@ import { bulkActionErrorMessage } from '@adapttable/core';
 import { BulkActionOutcome } from '@adapttable/core';
 import { BulkBarSlotProps } from '@adapttable/core/binding';
 import { CellConflictAsk } from '@adapttable/core';
+import { cellConflictAsk } from '@adapttable/core';
 import { CellEditingState } from '@adapttable/core';
+import { CellEditor } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSaveState } from '@adapttable/core';
 import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
@@ -28,6 +34,7 @@ import { ChecklistButtonProps } from '@adapttable/core/binding';
 import { ChecklistCheckboxProps } from '@adapttable/core/binding';
 import { ChecklistSearchProps } from '@adapttable/core/binding';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
+import { chromeColumnPlan } from '@adapttable/core/binding';
 import { COLUMN_MENU } from '@adapttable/core/binding';
 import { ColumnLayoutState } from '@adapttable/core';
 import { columnMenuActions } from '@adapttable/core/binding';
@@ -138,6 +145,7 @@ import { isBodyEligible } from '@adapttable/core/binding';
 import { isBooleanEditor } from '@adapttable/core';
 import { isCellEditable } from '@adapttable/core';
 import { isDraftChecked } from '@adapttable/core';
+import { isFirstEditableColumn } from '@adapttable/core';
 import { isMultiSelectEditor } from '@adapttable/core';
 import { isSelectEditor } from '@adapttable/core';
 import { joinRelativeToken } from '@adapttable/core';
@@ -165,13 +173,25 @@ import { REORDER_COLUMN_KEY } from '@adapttable/core';
 import { resolveCellEditor } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
 import { resolveEditableCellDisplay } from '@adapttable/core';
+import { resolveEditingArming } from '@adapttable/core';
+import { resolveRowEditTrigger } from '@adapttable/core';
 import { resolveVirtualRows } from '@adapttable/core';
 import { restoreFocusSoon } from '@adapttable/core';
+import { ROW_EDIT_ACTIONS } from '@adapttable/core/binding';
 import { ROW_REORDER_ANNOUNCER } from '@adapttable/core/binding';
 import { ROW_REORDER_BUTTONS } from '@adapttable/core/binding';
 import { ROW_REORDER_HANDLE } from '@adapttable/core/binding';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
+import { RowEditActionsLayout } from '@adapttable/core';
+import { RowEditActionsProps } from '@adapttable/core/binding';
+import { RowEditButtonProps } from '@adapttable/core/binding';
+import { RowEditConflict } from '@adapttable/core';
+import { rowEditConflict } from '@adapttable/core';
+import { RowEditControls } from '@adapttable/core';
+import { rowEditControls } from '@adapttable/core';
+import { RowEditControlsOptions } from '@adapttable/core';
+import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
 import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/core/binding';
@@ -248,6 +268,142 @@ export class AdaptAttrs {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAttrs, never>;
+}
+
+// @public
+export class AdaptBatchEditBarChrome<TRow> {
+    readonly batch: InputSignal<BatchEditingState<TRow>>;
+    readonly buttonClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly cancelProps: Signal<BatchEditButtonProps>;
+    readonly className: InputSignal<string | undefined>;
+    readonly contested: InputSignal<boolean>;
+    readonly labels: InputSignal<Partial<TableLabels> | undefined>;
+    // (undocumented)
+    protected readonly model: Signal<BatchEditBarModel | null>;
+    // (undocumented)
+    protected readonly saveProps: Signal<BatchEditButtonProps>;
+    readonly slots: InputSignal<BatchEditBarSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptBatchEditBarChrome<any>, "adapt-batch-edit-bar-chrome", never, {
+        "batch": {
+            "alias": "batch";
+            "required": true;
+            "isSignal": true;
+        };
+        "contested": {
+            "alias": "contested";
+            "required": false;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "buttonClassName": {
+            "alias": "buttonClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptBatchEditBarChrome<any>, never>;
+}
+
+// @public
+export class AdaptBatchEditCell<TRow> {
+    readonly ask: InputSignal<CellConflictAsk | undefined>;
+    readonly batch: InputSignal<BatchEditingState<TRow>>;
+    // (undocumented)
+    protected readonly changed: Signal<boolean>;
+    readonly column: InputSignal<ColumnDef<TRow>>;
+    readonly conflictLabels: InputSignal<EditConflictLabels | undefined>;
+    readonly display: InputSignal<unknown>;
+    readonly editLabel: InputSignal<string>;
+    readonly editor: InputSignal<Type<unknown>>;
+    // (undocumented)
+    protected readonly editorCtrl: Signal<EditableCellEditorCtrl>;
+    readonly errorClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly errorId: Signal<string>;
+    // (undocumented)
+    protected readonly hasEditor: Signal<boolean>;
+    // (undocumented)
+    protected readonly resolved: Signal<CellEditor | null>;
+    readonly row: InputSignal<TRow>;
+    readonly rowId: InputSignal<string>;
+    readonly slots: InputSignal<EditableCellSlots | undefined>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptBatchEditCell<any>, "adapt-batch-edit-cell", never, {
+        "batch": {
+            "alias": "batch";
+            "required": true;
+            "isSignal": true;
+        };
+        "row": {
+            "alias": "row";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowId": {
+            "alias": "rowId";
+            "required": true;
+            "isSignal": true;
+        };
+        "column": {
+            "alias": "column";
+            "required": true;
+            "isSignal": true;
+        };
+        "display": {
+            "alias": "display";
+            "required": true;
+            "isSignal": true;
+        };
+        "editLabel": {
+            "alias": "editLabel";
+            "required": true;
+            "isSignal": true;
+        };
+        "editor": {
+            "alias": "editor";
+            "required": true;
+            "isSignal": true;
+        };
+        "ask": {
+            "alias": "ask";
+            "required": false;
+            "isSignal": true;
+        };
+        "conflictLabels": {
+            "alias": "conflictLabels";
+            "required": false;
+            "isSignal": true;
+        };
+        "errorClassName": {
+            "alias": "errorClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptBatchEditCell<any>, never>;
 }
 
 // @public
@@ -459,6 +615,8 @@ export class AdaptEditableCellGate<TRow> {
     readonly activateClassName: InputSignal<string | undefined>;
     // (undocumented)
     protected readonly activateProps: Signal<EditableCellActivateProps>;
+    // (undocumented)
+    protected readonly bundleConflictAsk: Signal<CellConflictAsk | undefined>;
     readonly column: InputSignal<ColumnDef<TRow>>;
     readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
     // (undocumented)
@@ -481,11 +639,15 @@ export class AdaptEditableCellGate<TRow> {
     // (undocumented)
     protected readonly rollbackProps: Signal<EditableCellButtonProps>;
     readonly row: InputSignal<TRow>;
+    // (undocumented)
+    protected readonly rowAsking: Signal<boolean>;
     readonly rowId: InputSignal<string>;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     readonly rows: InputSignal<readonly TRow[]>;
     readonly saveErrorClassName: InputSignal<string | undefined>;
     readonly slots: InputSignal<EditableCellSlots>;
+    // (undocumented)
+    protected readonly takesRowFocus: Signal<boolean>;
     readonly undoLabel: InputSignal<string | undefined>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptEditableCellGate<any>, "adapt-editable-cell-gate", never, {
@@ -723,6 +885,168 @@ export class AdaptLiveRegion {
 }
 
 // @public
+export class AdaptRowEditActionsChrome<TRow> {
+    // (undocumented)
+    protected readonly actionsLayout: Signal<RowEditActionsLayout>;
+    // (undocumented)
+    protected readonly beginProps: Signal<RowEditButtonProps>;
+    readonly buttonClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly cancelProps: Signal<RowEditButtonProps>;
+    readonly className: InputSignal<string | undefined>;
+    readonly conflict: InputSignal<    {
+    asking: boolean;
+    } | undefined>;
+    readonly icons: InputSignal<RowEditIcons | undefined>;
+    readonly labels: InputSignal<Partial<TableLabels> | undefined>;
+    readonly row: InputSignal<TRow>;
+    readonly rowEditing: InputSignal<RowEditingState<TRow>>;
+    readonly rowId: InputSignal<string>;
+    // (undocumented)
+    protected readonly saveProps: Signal<RowEditButtonProps>;
+    readonly showBegin: InputSignal<boolean>;
+    readonly slots: InputSignal<RowEditActionsSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptRowEditActionsChrome<any>, "adapt-row-edit-actions-chrome", never, {
+        "rowEditing": {
+            "alias": "rowEditing";
+            "required": true;
+            "isSignal": true;
+        };
+        "row": {
+            "alias": "row";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowId": {
+            "alias": "rowId";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "buttonClassName": {
+            "alias": "buttonClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "icons": {
+            "alias": "icons";
+            "required": false;
+            "isSignal": true;
+        };
+        "conflict": {
+            "alias": "conflict";
+            "required": false;
+            "isSignal": true;
+        };
+        "showBegin": {
+            "alias": "showBegin";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowEditActionsChrome<any>, never>;
+}
+
+// @public
+export class AdaptRowEditCell<TRow> {
+    readonly ask: InputSignal<CellConflictAsk | undefined>;
+    readonly column: InputSignal<ColumnDef<TRow>>;
+    readonly conflictLabels: InputSignal<EditConflictLabels | undefined>;
+    readonly display: InputSignal<unknown>;
+    readonly editLabel: InputSignal<string>;
+    readonly editor: InputSignal<Type<unknown>>;
+    // (undocumented)
+    protected readonly editorCtrl: Signal<EditableCellEditorCtrl>;
+    readonly errorClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly errorId: Signal<string>;
+    // (undocumented)
+    protected readonly hasEditor: Signal<boolean>;
+    // (undocumented)
+    protected readonly resolved: Signal<CellEditor | null>;
+    readonly rowAsking: InputSignal<boolean | undefined>;
+    readonly rowEditing: InputSignal<RowEditingState<TRow>>;
+    readonly slots: InputSignal<EditableCellSlots | undefined>;
+    readonly takesFocus: InputSignal<boolean>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptRowEditCell<any>, "adapt-row-edit-cell", never, {
+        "rowEditing": {
+            "alias": "rowEditing";
+            "required": true;
+            "isSignal": true;
+        };
+        "column": {
+            "alias": "column";
+            "required": true;
+            "isSignal": true;
+        };
+        "display": {
+            "alias": "display";
+            "required": true;
+            "isSignal": true;
+        };
+        "editLabel": {
+            "alias": "editLabel";
+            "required": true;
+            "isSignal": true;
+        };
+        "takesFocus": {
+            "alias": "takesFocus";
+            "required": true;
+            "isSignal": true;
+        };
+        "editor": {
+            "alias": "editor";
+            "required": true;
+            "isSignal": true;
+        };
+        "ask": {
+            "alias": "ask";
+            "required": false;
+            "isSignal": true;
+        };
+        "rowAsking": {
+            "alias": "rowAsking";
+            "required": false;
+            "isSignal": true;
+        };
+        "conflictLabels": {
+            "alias": "conflictLabels";
+            "required": false;
+            "isSignal": true;
+        };
+        "errorClassName": {
+            "alias": "errorClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowEditCell<any>, never>;
+}
+
+// @public
 export class AdaptRowReorderAnnouncer {
     readonly props: InputSignal<    {
     readonly announcement: string;
@@ -952,6 +1276,17 @@ export type AngularGroupingPanelSurfaceProps = GroupingPanelSurfaceProps<Templat
 // @public
 export type Attrs = Readonly<Record<string, unknown>>;
 
+export { BATCH_EDIT_BAR }
+
+export { BatchEditBarProps }
+
+// @public
+export interface BatchEditBarSlots {
+    readonly Button: Type<unknown>;
+}
+
+export { BatchEditButtonProps }
+
 // @public
 export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => void | Promise<void>;
 
@@ -1003,6 +1338,10 @@ export interface BulkActionRunnerState {
 }
 
 export { BulkBarSlotProps }
+
+export { CellConflictAsk }
+
+export { cellConflictAsk }
 
 // @public
 export interface CellConflictNoticeProps {
@@ -1069,6 +1408,8 @@ export interface ChecklistSlots {
 }
 
 export { ChromeBodyRegion }
+
+export { chromeColumnPlan }
 
 export { COLUMN_MENU }
 
@@ -1285,7 +1626,9 @@ export function editableCellController<TRow>(options: {
 }): EditableCellController;
 
 // @public
-export type EditableCellEditing<TRow> = EditingBundle<TRow>;
+export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
+    rowEditIcons?: RowEditIcons;
+}
 
 // @public
 export interface EditableCellEditorCtrl {
@@ -1676,6 +2019,8 @@ export { isCellEditable }
 
 export { isDraftChecked }
 
+export { isFirstEditableColumn }
+
 // @public
 export interface IsMobileOptions {
     readonly breakpoint?: number;
@@ -1772,9 +2117,15 @@ export interface ResolvedRenderer<TContext> {
 
 export { resolveEditableCellDisplay }
 
+export { resolveEditingArming }
+
+export { resolveRowEditTrigger }
+
 export { resolveVirtualRows }
 
 export { restoreFocusSoon }
+
+export { ROW_EDIT_ACTIONS }
 
 export { ROW_REORDER_ANNOUNCER }
 
@@ -1802,8 +2153,29 @@ export interface RowActionsOptions<TRow> {
     readonly onDuplicateRow?: (row: TRow) => void;
 }
 
+export { RowEditActionsProps }
+
+// @public
+export interface RowEditActionsSlots {
+    readonly Button: Type<unknown>;
+}
+
+export { RowEditButtonProps }
+
+export { RowEditConflict }
+
+export { rowEditConflict }
+
+export { RowEditControls }
+
+export { rowEditControls }
+
+export { RowEditControlsOptions }
+
 // @public
 export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => void | Promise<void>;
+
+export { RowEditIcons }
 
 // @public
 export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;

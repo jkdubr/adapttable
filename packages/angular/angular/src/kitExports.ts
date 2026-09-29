@@ -80,6 +80,13 @@ export {
   readMultiDraft,
   resolveEditableCellDisplay,
 } from "@adapttable/core";
+export {
+  cellConflictAsk,
+  isFirstEditableColumn,
+  resolveEditingArming,
+  resolveRowEditTrigger,
+  rowEditConflict,
+} from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,
@@ -171,6 +178,9 @@ export {
   ROW_REORDER_HANDLE,
 } from "@adapttable/core/binding";
 export {
+  BATCH_EDIT_BAR,
+  chromeColumnPlan,
   EDITABLE_CELL,
   type EditableCellSlotProps,
+  ROW_EDIT_ACTIONS,
 } from "@adapttable/core/binding";

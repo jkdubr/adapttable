@@ -9,6 +9,7 @@ import {
   rowEditingSignature as coreRowEditingSignature,
   rowIsDirty as coreRowIsDirty,
 } from "@adapttable/core";
+import type { RowEditIcons } from "@adapttable/core/binding";
 
 import type { ColumnDef } from "../columnDef";
 
@@ -24,7 +25,10 @@ export { focusEditorOnMount, stopCellEditKeyboard } from "@adapttable/core";
  *
  * @public
  */
-export type EditableCellEditing<TRow> = EditingBundle<TRow>;
+export interface EditableCellEditing<TRow> extends EditingBundle<TRow> {
+  /** Glyph overrides for the row-mode controls, when the host set any. */
+  rowEditIcons?: RowEditIcons;
+}
 
 /**
  * Whether a row holds any dirty cell mark.

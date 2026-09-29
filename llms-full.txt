@@ -19809,7 +19809,12 @@ controls: the host writes its own markup.
   hands its controls in `slots`. `AdaptGroupingPanelChrome` is the grouping
   strip — chips, insertion carets, aggregations and the ungroup target —
   with `GroupingPanelSlots`, `AngularGroupingPanelSurfaceProps` and
-  `AngularGroupingPanelAggregationItemProps`. `groupingPanel` (with
+  `AngularGroupingPanelAggregationItemProps`. `AdaptRowReorderHandleChrome`,
+  `AdaptRowReorderButtonsChrome` and `AdaptRowReorderAnnouncer` are the
+  reorder grip, mobile up/down pair and live region, with
+  `RowReorderHandleSlots` / `RowReorderButtonsSlots`; kits fill
+  `ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and `ROW_REORDER_ANNOUNCER`.
+  `groupingPanel` (with
   `GroupingPanelExtras`) is the feature that owns the group-by state;
   `injectGroupingPanelState` (`GroupingPanelStateOptions`) publishes the
   strip's props for the `GROUPING_PANEL` slot. `virtualize`
@@ -19821,9 +19826,24 @@ controls: the host writes its own markup.
   on the keyboard grid; `injectGridFocus` is the underlying hook.
   `rowReorder` / `injectRowReorder` (`RowReorderStateOptions`) publish the
   drag and keyboard grab model. `editing` / `injectCellEditing`
-  (`CellEditHandler`, `CellEditingOptions`) arm in-place cell edits;
-  `rowEditing` / `injectRowEditing` and `batchEditing` / `injectBatchEditing`
-  arm whole-row and batch commits.
+  (`CellEditHandler`, `CellEditingOptions`, `EditingLifecycleExtras`) arm
+  in-place cell edits; `injectEditValidation` (`EditValidationInjectOptions`)
+  and `injectCellSaveState` (`CellSaveStateInjectOptions`) track validators
+  and rejected saves. `AdaptEditableCellGate` draws the activate control and
+  editor slot (`EDITABLE_CELL`, `EditableCellSlotProps`,
+  `EditableCellSlots`, `EditableCellEditorCtrl`, `EditableCellActivateProps`,
+  `EditableCellButtonProps`); `AdaptCellConflictNotice`
+  (`CellConflictNoticeProps`) is the keep/take question when a live row moves
+  under the editor. `rowEditing` / `injectRowEditing` (`RowEditHandler`,
+  `RowEditingInjectOptions`) and `batchEditing` / `injectBatchEditing`
+  (`BatchEditHandler`, `BatchEditingInjectOptions`) arm whole-row and
+  batch commits. `AdaptRowEditCell` binds a row's fields to its draft (Enter
+  saves the row, Escape cancels it, the first field takes focus) and
+  `AdaptRowEditActionsChrome` draws its edit, save and cancel controls for
+  the `ROW_EDIT_ACTIONS` slot; `AdaptBatchEditCell` turns every editable cell
+  into a field marked `data-changed` once edited, and
+  `AdaptBatchEditBarChrome` fills `BATCH_EDIT_BAR` with the unsaved-row
+  count, Save all and Cancel all.
 - Actions: `injectBulkActionRunner` runs bulk actions and returns a
   `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
   actions column's list, with Duplicate and Delete appended for the host's
@@ -19837,24 +19857,44 @@ controls: the host writes its own markup.
 - `fromStore(store, options)` turns any core store, an `ExternalStore`, into a
   read-only signal that ends with its injector (`FromStoreOptions`).
   `MaybeSignal` and `MaybeSignalOptional` are the option types that take a
-  value or a signal of one.
+  value or a signal of one. Secondary entries `./formula`, `./pivot`,
+  `./sparkline` and `./stream` currently export only the reserved markers
+  `__angularFormulaReserved`, `__angularPivotReserved`,
+  `__angularSparklineReserved` and `__angularStreamReserved` until those
+  surfaces land.
 
 `@adapttable/angular-unstyled` is the Angular table drawn with native HTML,
 unpublished while it reaches parity with the React kits. `AdaptDataTable`
 (`<adapt-data-table>`) takes the rows, columns and row key as inputs and
 renders search, sorting, paging, the phone card layout, row selection and
 keyboard cell navigation with the `data-adapttable-part` names every kit
-shares. Its `features` input composes `columnMenu`, `filters`,
-`headerFilters`, `bulkActions`, `rowActions` (`RowActionsFeatureOptions`),
-`densityChooser`, `fullscreen`, `exportCsv`, `savedViews`,
-`groupingPanel`, `virtualize`, `cellNavigation`, `rowReorder`, `editing`,
-`rowEditing` and `batchEditing`; `filtersMode`
-(`FiltersMode`) picks the anchored popover or the drawer. Each feature draws
-the kit's own native controls. `AdaptGroupingPanel` draws the grouping
-strip with those same native controls. `paginationMode` and `maxHeight` arm
-infinite lists and a scroll-box window. `TableView` is what the table renders from
-once its inputs have arrived, and `FiltersView` is the filters on that view:
-the button, the open panel, and the form, overlay, chips and header funnels.
+shares. `AdaptDesktopTable` and `AdaptMobileCards` are the desktop body and
+phone card list; `AdaptPaginationFooter` is the pager. Its `features` input
+composes factories from secondary entries —
+`columnMenu` (`AdaptColumnMenu`), `filters` (`AdaptFiltersForm`,
+`AdaptFilterDrawer`, `AdaptFilterPopover`, `AdaptFilterChips`,
+`AdaptAutoFilterForm`), `headerFilters`, `bulkActions` (`AdaptBulkBar`),
+`rowActions` (`RowActionsFeatureOptions`), `densityChooser`
+(`AdaptDensityButton`), `fullscreen` (`AdaptFullscreenButton`), `exportCsv`
+(`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`), `groupingPanel`
+(`AdaptGroupingPanel`), `virtualize`, `cellNavigation`, `rowReorder`,
+`editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL`,
+`AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`
+(`AdaptBatchEditBar` fills `BATCH_EDIT_BAR`) — each importable from its own
+subpath (or from `@adapttable/angular-unstyled/features`); `standardPreset`
+(`@adapttable/angular-unstyled/preset`, `StandardPresetOptions`) assembles
+the zero-configuration
+set. Overlay helpers `menuPopover` / `MenuPopover`, `OVERLAY_Z` and
+`placeOverlayBelowTrigger` position kit menus. `filtersMode` (`FiltersMode`)
+picks the anchored popover or the drawer.
+Each feature draws the kit's own native controls. `AdaptGroupingPanel` draws
+the grouping strip with those same native controls. `paginationMode` and
+`maxHeight` arm infinite lists and a scroll-box window. `TableView` is what
+the table renders from once its inputs have arrived — among it each row's
+`RowActionsCell`, the row-edit controls and host actions its actions cell
+draws — and `FiltersView` is
+the filters on that view: the button, the open panel, and the form, overlay,
+chips and header funnels.
 
 ## Other packages
 

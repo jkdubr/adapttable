@@ -5,7 +5,46 @@
 ```ts
 
 import { AdaptTableFeature } from '@adapttable/angular';
+import { BatchEditBarProps } from '@adapttable/angular';
+import { BatchEditButtonProps } from '@adapttable/angular';
 import { BatchEditHandler } from '@adapttable/angular';
+import * as i0 from '@angular/core';
+import { InputSignal } from '@angular/core';
+
+// @public
+export class AdaptBatchEditBar<TRow> {
+    readonly props: InputSignal<BatchEditBarProps<TRow>>;
+    // (undocumented)
+    protected readonly slots: {
+        Button: typeof AdaptBatchEditButton;
+    };
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptBatchEditBar<any>, "adapt-batch-edit-bar", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptBatchEditBar<any>, never>;
+}
+
+// @public (undocumented)
+export class AdaptBatchEditButton {
+    // (undocumented)
+    readonly props: InputSignal<BatchEditButtonProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptBatchEditButton, "adapt-batch-edit-button", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptBatchEditButton, never>;
+}
 
 // @public
 export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;

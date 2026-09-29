@@ -29,5 +29,9 @@ export {
   AdaptExportButton,
   AdaptFullscreenButton,
 } from "./components/toolbarExtras";
-export { AdaptDataTable, type TableView } from "./dataTable";
+export {
+  AdaptDataTable,
+  type RowActionsCell,
+  type TableView,
+} from "./dataTable";
 export type { FiltersMode, FiltersView } from "./tableFilters";

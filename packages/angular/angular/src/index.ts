@@ -60,6 +60,7 @@ export {
 export {
   AdaptCellConflictNotice,
   AdaptEditableCellGate,
+  type CellConflictAsk,
   type CellConflictNoticeProps,
   commitBooleanDraft,
   type EditableCellActivateProps,
@@ -82,6 +83,23 @@ export {
   type RowEditHandler,
   type RowEditingInjectOptions,
 } from "./editing/editing";
+export {
+  AdaptBatchEditBarChrome,
+  AdaptBatchEditCell,
+  AdaptRowEditActionsChrome,
+  AdaptRowEditCell,
+  type BatchEditBarProps,
+  type BatchEditBarSlots,
+  type BatchEditButtonProps,
+  type RowEditActionsProps,
+  type RowEditActionsSlots,
+  type RowEditButtonProps,
+  type RowEditConflict,
+  type RowEditControls,
+  rowEditControls,
+  type RowEditControlsOptions,
+  type RowEditIcons,
+} from "./editing/rowEditGate";
 export {
   type CellSaveStateInjectOptions,
   injectCellSaveState,

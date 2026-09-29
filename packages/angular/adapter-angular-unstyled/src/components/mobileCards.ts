@@ -5,10 +5,8 @@ import {
   AdaptAttrs,
   AdaptCell,
   AdaptSlot,
-  type ColumnDef,
   EDITABLE_CELL,
-  type EditableCellEditing,
-  type EditableCellSlotProps,
+  ROW_EDIT_ACTIONS,
   ROW_REORDER_BUTTONS,
   type RowReorderButtonsProps,
   type RowReorderState,
@@ -43,11 +41,11 @@ export class AdaptMobileCards<TRow> {
   protected readonly reorderButtonsSlot = ROW_REORDER_BUTTONS;
   /** The editable-cell slot. @internal */
   protected readonly editableCellSlot = EDITABLE_CELL;
+  /** The row-edit-actions slot. @internal */
+  protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
 
   private buttonsPropsCache = new Map<string, RowReorderButtonsProps<never>>();
   private buttonsPropsToken = "";
-  private editablePropsCache = new Map<string, EditableCellSlotProps<never>>();
-  private editablePropsToken = "";
 
   /**
    * A row's id, for `@for` to track rows by.
@@ -98,51 +96,6 @@ export class AdaptMobileCards<TRow> {
       rowCount,
     } as unknown as RowReorderButtonsProps<never>;
     this.buttonsPropsCache.set(key, props);
-    return props;
-  }
-
-  /**
-   * Props for the editable-cell slot on one card field. Cached so AdaptSlot
-   * does not see a new object every tick.
-   *
-   * @internal
-   */
-  protected editableCellProps(
-    editing: EditableCellEditing<TRow>,
-    row: TRow,
-    column: ColumnDef<TRow>,
-    rowIndex: number
-  ): EditableCellSlotProps<never> {
-    const view = this.view();
-    const labels = view.table.labels();
-    const active = editing.state.active;
-    const token = [
-      active ? `${active.rowId}:${active.columnKey}` : "",
-      editing.state.draft,
-      String(view.table.rows().length),
-      String(view.table.columns().length),
-    ].join("|");
-    if (token !== this.editablePropsToken) {
-      this.editablePropsCache = new Map();
-      this.editablePropsToken = token;
-    }
-    const rowId = this.rowId(row);
-    const key = `${rowId}:${column.key}`;
-    const cached = this.editablePropsCache.get(key);
-    if (cached) return cached;
-    const props = {
-      editing,
-      row,
-      column,
-      rowId,
-      rowIndex,
-      rows: view.table.rows(),
-      columns: view.table.columns(),
-      rowKey: (entry: TRow) => this.rowKey()(entry),
-      editLabel: labels.editCell,
-      undoLabel: labels.undoEdit,
-    } as unknown as EditableCellSlotProps<never>;
-    this.editablePropsCache.set(key, props);
     return props;
   }
 }

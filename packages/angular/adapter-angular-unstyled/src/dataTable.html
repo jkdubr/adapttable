@@ -97,6 +97,16 @@
       />
     }
 
+    @if (v.batchBar; as batchBar) {
+      @if (batchBar(); as batchProps) {
+        <ng-container
+          [adaptSlot]="batchEditBarSlot"
+          [adaptSlotProps]="batchProps"
+          [adaptSlotTable]="v.table"
+        />
+      }
+    }
+
     @if (v.groupingPanel; as groupingPanel) {
       <ng-container
         [adaptSlot]="groupingPanelSlot"

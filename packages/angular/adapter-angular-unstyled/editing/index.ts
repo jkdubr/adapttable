@@ -9,11 +9,19 @@ import {
   EDITABLE_CELL,
   editing as coreAngularEditing,
   extendFeature,
+  ROW_EDIT_ACTIONS,
   type RowEditHandler,
   rowEditing as coreAngularRowEditing,
   slotRender,
 } from "@adapttable/angular";
 import { AdaptEditableCell } from "@adapttable/angular-unstyled";
+
+import { AdaptRowEditActions } from "./rowEditActions";
+
+const cellChrome = [
+  slotRender(EDITABLE_CELL, () => AdaptEditableCell),
+  slotRender(ROW_EDIT_ACTIONS, () => AdaptRowEditActions),
+];
 
 /**
  * Edit a single cell in place. The host's write receives the row, column
@@ -29,9 +37,7 @@ export function editing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
   extras: Record<string, unknown> = {}
 ): AdaptTableFeature {
-  return extendFeature(coreAngularEditing(onCellEdit, extras), [
-    slotRender(EDITABLE_CELL, () => AdaptEditableCell),
-  ]);
+  return extendFeature(coreAngularEditing(onCellEdit, extras), cellChrome);
 }
 
 /**
@@ -46,7 +52,7 @@ export function rowEditing<TRow>(
   onRowEdit: RowEditHandler<TRow>,
   extras: Record<string, unknown> = {}
 ): AdaptTableFeature {
-  return extendFeature(coreAngularRowEditing(onRowEdit, extras), [
-    slotRender(EDITABLE_CELL, () => AdaptEditableCell),
-  ]);
+  return extendFeature(coreAngularRowEditing(onRowEdit, extras), cellChrome);
 }
+
+export { AdaptRowEditActions } from "./rowEditActions";

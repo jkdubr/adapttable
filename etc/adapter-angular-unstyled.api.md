@@ -9,6 +9,7 @@ import { ActiveFilterChipsSlotProps } from '@adapttable/angular';
 import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { AfterViewInit } from '@angular/core';
+import { BatchEditBarProps } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionRunnerState } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
@@ -55,6 +56,7 @@ import { PaginationMode } from '@adapttable/angular';
 import { readMultiDraft } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
+import { RowEditActionsProps } from '@adapttable/angular';
 import { RowReorderButtonsProps } from '@adapttable/core/binding';
 import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/angular';
 import { RowReorderHandleProps } from '@adapttable/core/binding';
@@ -178,6 +180,8 @@ export class AdaptColumnMenu {
 
 // @public
 export class AdaptDataTable<TRow> implements OnInit {
+    // @internal
+    protected readonly batchEditBarSlot: FeatureSlotKey<BatchEditBarProps<never>>;
     // @internal
     protected readonly bulkBarSlot: FeatureSlotKey<BulkBarSlotProps<unknown>>;
     readonly cellNavigation: InputSignal<boolean>;
@@ -392,7 +396,6 @@ export class AdaptDensityButton {
 
 // @internal
 export class AdaptDesktopTable<TRow> {
-    protected editableCellProps(editing: EditableCellEditing<TRow>, row: TRow, column: ColumnDef<TRow>, rowIndex: number): EditableCellSlotProps<never>;
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
     protected readonly filterSlots: {
         header: FeatureSlotKey<FilterHeaderControlProps<never>>;
@@ -400,6 +403,7 @@ export class AdaptDesktopTable<TRow> {
     readonly maxHeight: InputSignal<string | number | undefined>;
     protected reorderHandleProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderHandleProps_2<never>;
     protected readonly reorderHandleSlot: FeatureSlotKey<RowReorderHandleProps<never, unknown>>;
+    protected readonly rowEditActionsSlot: FeatureSlotKey<RowEditActionsProps<never>>;
     protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
@@ -570,8 +574,10 @@ export class AdaptGroupingPanel<TRow> {
 
 // @internal
 export class AdaptMobileCards<TRow> {
+    protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
     protected reorderButtonsProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderButtonsProps_2<never>;
     protected readonly reorderButtonsSlot: FeatureSlotKey<RowReorderButtonsProps<never, unknown>>;
+    protected readonly rowEditActionsSlot: FeatureSlotKey<RowEditActionsProps<never>>;
     protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     readonly view: InputSignal<TableView<TRow>>;
@@ -681,13 +687,22 @@ export const OVERLAY_Z = 10050;
 export function placeOverlayBelowTrigger(overlay: HTMLElement, trigger: HTMLElement, dir: "ltr" | "rtl"): void;
 
 // @public
+export interface RowActionsCell<TRow> {
+    readonly actions: readonly RowAction<TRow>[];
+    readonly rowEdit: RowEditActionsProps<never> | undefined;
+}
+
+// @public
 export interface TableView<TRow> {
+    readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
+    readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
     readonly bodyColSpan: Signal<number>;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
     readonly columnMenu: boolean;
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
     readonly confirm: ConfirmHandler;
     readonly density: Signal<TableDensity>;
+    readonly editableCells: Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
     readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
     readonly filters: FiltersView | undefined;
     readonly grid: GridFocus<TRow> | undefined;
@@ -697,6 +712,7 @@ export interface TableView<TRow> {
     readonly rowActionsLayout: RowActionsLayout | undefined;
     readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
     readonly selection: RowSelection | undefined;
+    readonly showActions: Signal<boolean>;
     readonly table: DataTable<TRow>;
     readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
     readonly virtualization: Signal<TableVirtualization<TRow>>;

@@ -3067,7 +3067,13 @@ controls: the host writes its own markup.
   under the editor. `rowEditing` / `injectRowEditing` (`RowEditHandler`,
   `RowEditingInjectOptions`) and `batchEditing` / `injectBatchEditing`
   (`BatchEditHandler`, `BatchEditingInjectOptions`) arm whole-row and
-  batch commits.
+  batch commits. `AdaptRowEditCell` binds a row's fields to its draft (Enter
+  saves the row, Escape cancels it, the first field takes focus) and
+  `AdaptRowEditActionsChrome` draws its edit, save and cancel controls for
+  the `ROW_EDIT_ACTIONS` slot; `AdaptBatchEditCell` turns every editable cell
+  into a field marked `data-changed` once edited, and
+  `AdaptBatchEditBarChrome` fills `BATCH_EDIT_BAR` with the unsaved-row
+  count, Save all and Cancel all.
 - Actions: `injectBulkActionRunner` runs bulk actions and returns a
   `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
   actions column's list, with Duplicate and Delete appended for the host's
@@ -3102,8 +3108,9 @@ composes factories from secondary entries —
 (`AdaptDensityButton`), `fullscreen` (`AdaptFullscreenButton`), `exportCsv`
 (`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`), `groupingPanel`
 (`AdaptGroupingPanel`), `virtualize`, `cellNavigation`, `rowReorder`,
-`editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL`) and
-`batchEditing` — each importable from its own
+`editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL`,
+`AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`
+(`AdaptBatchEditBar` fills `BATCH_EDIT_BAR`) — each importable from its own
 subpath (or from `@adapttable/angular-unstyled/features`); `standardPreset`
 (`@adapttable/angular-unstyled/preset`, `StandardPresetOptions`) assembles
 the zero-configuration
@@ -3113,7 +3120,9 @@ picks the anchored popover or the drawer.
 Each feature draws the kit's own native controls. `AdaptGroupingPanel` draws
 the grouping strip with those same native controls. `paginationMode` and
 `maxHeight` arm infinite lists and a scroll-box window. `TableView` is what
-the table renders from once its inputs have arrived, and `FiltersView` is
+the table renders from once its inputs have arrived — among it each row's
+`RowActionsCell`, the row-edit controls and host actions its actions cell
+draws — and `FiltersView` is
 the filters on that view: the button, the open panel, and the form, overlay,
 chips and header funnels.
 
