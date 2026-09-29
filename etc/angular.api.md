@@ -2028,6 +2028,7 @@ export interface GridFocusOptions<TRow> {
     readonly enabled: MaybeSignal<boolean>;
     readonly injector?: Injector;
     readonly onActivate?: (cell: GridCell) => void;
+    readonly onRangeChange?: (range: CellRange | null) => void;
     readonly table: DataTable<TRow>;
 }
 

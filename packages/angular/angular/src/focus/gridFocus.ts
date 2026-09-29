@@ -10,6 +10,7 @@
  */
 import {
   type CellRange,
+  cellRangeKey,
   createGridFocusController,
   type GridCell,
   gridCellAttributes,
@@ -17,6 +18,7 @@ import {
   gridContainerAttributes,
   type GridFocusControllerOptions,
   gridRowAttributes,
+  reportedCellRange,
 } from "@adapttable/core";
 import {
   afterRenderEffect,
@@ -46,6 +48,12 @@ export interface GridFocusOptions<TRow> {
   readonly enabled: MaybeSignal<boolean>;
   /** Enter or F2 on a cell. */
   readonly onActivate?: (cell: GridCell) => void;
+  /**
+   * Told the selected rectangle whenever it changes — `null` while only a
+   * cell is focused. Defaults to the `onRangeChange` a composed
+   * `cellNavigation()` carries.
+   */
+  readonly onRangeChange?: (range: CellRange | null) => void;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }
@@ -130,6 +138,27 @@ export function injectGridFocus<TRow>(
     },
     { injector }
   );
+
+  // A lone focused cell is not a selection, so it reports `null`, and the
+  // host hears only when the reported rectangle changes.
+  const onRangeChange =
+    options.onRangeChange ??
+    (table.featureOptions.onCellRangeChange as
+      ((range: CellRange | null) => void) | undefined);
+  if (onRangeChange) {
+    const reported = computed(() => reportedCellRange(snapshot().range), {
+      equal: (left, right) => cellRangeKey(left) === cellRangeKey(right),
+    });
+    effect(
+      () => {
+        const range = reported();
+        untracked(() => {
+          onRangeChange(range);
+        });
+      },
+      { injector }
+    );
+  }
 
   // A pointer released outside the table would leave a drag armed.
   effect(
