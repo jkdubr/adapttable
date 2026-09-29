@@ -14,6 +14,7 @@ export {
   AdaptHeader,
   type ResolvedRenderer,
 } from "./cell";
+export { AdaptChecklistChrome, type ChecklistSlots } from "./checklist";
 export {
   type CellContext,
   type ColumnDef,
@@ -29,6 +30,7 @@ export {
   injectColumnDrag,
   injectColumnRenameEditor,
 } from "./columnMenu";
+export { AdaptControl } from "./control";
 export {
   type DataTable,
   type DataTableOptions,
@@ -38,9 +40,26 @@ export {
   ADAPTTABLE_FEATURES,
   type AdaptTableFeature,
   extendFeature,
+  featureOptionsOf,
   provideAdaptTableFeatures,
   type SlotComponent,
 } from "./features";
+export {
+  booleanFilterFor,
+  filterChipsFor,
+  filterOptionsFor,
+  type FilterOptionsState,
+  filterRuntimeFor,
+  type FilterRuntimeOptions,
+  rangeFilterFor,
+  type TableFilters,
+  textFilterFor,
+} from "./filters";
+export {
+  AdaptFilterTreeChrome,
+  type AngularFilterTreeDisclosureProps,
+  type FilterTreeSlots,
+} from "./filterTree";
 export { type FrontendDataOptions, injectFrontendData } from "./frontendData";
 export {
   type GridFocus,

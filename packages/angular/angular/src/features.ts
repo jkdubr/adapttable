@@ -84,9 +84,14 @@ function withIds(
 }
 
 /**
- * The configuration every feature's `apply` merges, in order.
+ * The configuration every feature's `apply` merges, in order — what a kit
+ * reads before its table exists, such as the filter definitions its data
+ * tier needs.
  *
- * @internal
+ * @param features - The composed features.
+ * @returns The merged configuration.
+ *
+ * @public
  */
 export function featureOptionsOf(
   features: readonly AdaptTableFeature[]

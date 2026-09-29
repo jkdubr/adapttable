@@ -6,4 +6,13 @@
  */
 export { AdaptColumnMenu } from "./columnMenu";
 export { AdaptDataTable } from "./dataTable";
-export { columnMenu } from "./features";
+export { columnMenu, filters, headerFilters } from "./features";
+export { AdaptAutoFilterForm } from "./filterFields";
+export {
+  AdaptFilterChips,
+  AdaptFilterDrawer,
+  AdaptFilterPopover,
+  AdaptFiltersForm,
+  AdaptHeaderFilterTrigger,
+} from "./filterOverlays";
+export type { FiltersMode } from "./tableFilters";

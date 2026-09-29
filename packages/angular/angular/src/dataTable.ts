@@ -126,6 +126,11 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
   readonly selection?: RowSelection;
   /** Called after the table clears its filters from the empty state. */
   readonly onClearFilters?: () => void;
+  /**
+   * How many filters are set, from `filterChipsFor`. An empty table under an
+   * active filter says nothing matched rather than that nothing exists.
+   */
+  readonly activeFilterCount?: Signal<number>;
   /** Features this table composes, beside the provided ones. */
   readonly features?: readonly AdaptTableFeature[];
   /** The injector to run in. Omit to use the current injection context. */
@@ -437,7 +442,7 @@ export function injectDataTable<TRow>(
     ),
     emptyVariant: computed(() =>
       chromeEmptyVariant({
-        activeFilterCount: 0,
+        activeFilterCount: options.activeFilterCount?.() ?? 0,
         extra: source().extra,
         search: source().search,
       })
