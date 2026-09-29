@@ -1,5 +1,40 @@
 # @adapttable/react
 
+## 1.4.0
+
+### Minor Changes
+
+- 96e5cc0: A kit now talks only to its binding. `@adapttable/react/adapter` re-exports the core names the kits use (`defaultLabels`, `resolveLabels`, the filter registry helpers and 46 more), and `@adapttable/react/pivot` re-exports everything `@adapttable/core/pivot` exports, so no kit imports `@adapttable/core`. Each kit's `/pivot` entry forwards `@adapttable/react/pivot`, and so also offers `pivotTableModel` and `usePivotUrlState`. Nothing is removed or renamed, and bundle sizes are unchanged.
+  
+  Core's deprecated main-entry copies of the adapter helpers now name their replacement in `@adapttable/core/binding`.
+
+### Patch Changes
+
+- d6e065c: Core owns the rest of what a second binding would otherwise copy from React. `@adapttable/core/binding` gains the state shapes the binding hooks return (`SelectionState`, `GridFocusState`, `TreeExpansionState`, `RowPinningState`, the URL-state results, `UseTableDataResult` and others), the `DENSITY_STATE` and `ROW_REORDER` keys with their state types, and the column-default and same-rows helpers (`resolveColumnDefaults`, `resolveColumnHeaders`, `columnPathText`, `sameRows`). `@adapttable/core` gains the column menu's drag-and-drop rules and state (`createColumnDragController`, `startColumnDrag`, `acceptColumnDrag`, `dropColumn`, `columnReorderKeyDown`), and `@adapttable/core/formula` the formula URL-state result. `@adapttable/ai` owns `TABLE_AGENT_STATE`.
+  
+  `@adapttable/react`, `@adapttable/ai-react` and `@adapttable/angular` re-export or call these under their existing names; their public APIs and behaviour are unchanged.
+- 643545d: The table's feature controllers are framework-neutral. `@adapttable/core` now holds the logic the React binding used to own, so a second binding can drive the same behavior:
+  
+  - Columns: the column layout controller (`createColumnLayoutController`, with the rename baselines a reset restores), the layout storage write policy (`writeStoredColumnLayout`), the column reorder model and the inline rename editor.
+  - Filters: the operator-first range, text and boolean fields, the AND/OR filter-tree builder, the active-filter chips, the checklist filter and its window, and the per-column header filter cells.
+  - Rows and grouping: the grouping panel and its runtime, group paging and collapse, lazy tree children, row actions and row reorder runtimes, cell navigation and context-menu copy.
+  - Panels and bars: the find bar, shortcuts, the bulk action runner, the saved views panel, export progress, the status bar, the side panel, sticky toolbar and density, Escape-to-close and focus restore, row highlights and changed-cell flash, the all-matching selection scope, the pivot layout and panel, sparkline geometry and nested table defaults.
+  
+  The React hooks and Chrome run on them with their public API unchanged; names React exported before are now re-exported from core. Filter-tree chips now label a custom filter type's operators through its registry widget, the same words the builder shows, instead of the raw operator strings.
+- ed815b3: `@adapttable/core/binding` now owns the whole slot contract, so a binding other than React can fill every position a kit fills today:
+  
+  - Every slot key the React binding declared (the status bar, find bar, batch-edit bar, command palette, context menu, side panel, bulk bar, filters form, editable cell, fill handle, toolbar extras, tree, row editing, row reorder, group headers, column select and every `*_LIVE` key), with the same ids and `single` flags.
+  - The props every kit control receives, from the checklist, filter tree, header filters, grouping and pivot panels, saved views, side panel, command palette, context menu, row and batch editing, editable cell, row reorder, tree toggle, column select, fill handle, multi-select editor, find bar, status bar, export progress, agent approval and table assistant. Rendered content is a `TNode` type parameter and key, drag and style types are parameters too.
+  - The agent feature-state keys (`AGENT_APPROVAL_STATE` and its relatives), `FILTER_ENGINE`, `GROUPING_PANEL_STATE`, `TableAssistantView`, `assistantIsBusy` and `assistantIsUsable`.
+  - The table's glyphs as path data (`FILTERS_ICON`, `SEARCH_ICON`, `expandChevronIcon`, `GRIP_ICON`, `eyeIcon`, `PIN_ICON` and the assistant's avatars and glyphs), `OVERLAY_MOTION`, `MOUNT_STAGGER`, `FORCED_COLORS_CSS` with `ensureForcedColorsStyles`, and the display helpers (`groupRowParts`, `mergedCellStyle`, `cellHighlightKind`, `cellHighlightStyle`, `groupIndentStyle`, `pinnedEdgeCellStyle`, `logicalAlign`, `sortArrow`, `resolveMobileLabel` and the rest).
+  
+  `@adapttable/react` imports all of these from core and re-exports each under its current name and entry point; its API and rendering are unchanged.
+- Updated dependencies [d6e065c]
+- Updated dependencies [643545d]
+- Updated dependencies [ed815b3]
+- Updated dependencies [96e5cc0]
+  - @adapttable/core@3.7.0
+
 ## 1.3.6
 
 ### Patch Changes

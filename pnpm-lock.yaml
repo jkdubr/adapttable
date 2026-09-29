@@ -367,7 +367,7 @@ importers:
   packages/angular/adapter-angular-unstyled:
     dependencies:
       '@adapttable/angular':
-        specifier: 0.1.0
+        specifier: 0.2.0
         version: link:../angular
       tslib:
         specifier: ^2.8.1
