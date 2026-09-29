@@ -21,7 +21,6 @@ import { AdaptAutoFilterForm } from "./autoFilterForm";
 import { TREE_SLOTS } from "./filterTreeBuilder";
 
 /** An overlay's props in Angular: its content is a template. */
-type OverlayProps = FilterOverlaySlotProps<TemplateRef<unknown>>;
 
 /**
  * The filters form both overlays hold: the nested AND/OR builder, then the
@@ -143,7 +142,8 @@ const FOCUSABLE =
 })
 export class AdaptFilterDrawer {
   /** The slot's props. */
-  readonly props = input.required<OverlayProps>();
+  readonly props =
+    input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>("panel");
 

@@ -19,7 +19,6 @@ import {
 import { OVERLAY_Z, placeOverlayBelowTrigger } from "./overlayPlacement";
 
 /** An overlay's props in Angular: its content is a template. */
-type OverlayProps = FilterOverlaySlotProps<TemplateRef<unknown>>;
 
 /**
  * The anchored filter card: opens under the Filters button with no
@@ -80,7 +79,8 @@ type OverlayProps = FilterOverlaySlotProps<TemplateRef<unknown>>;
 })
 export class AdaptFilterPopover {
   /** The slot's props. */
-  readonly props = input.required<OverlayProps>();
+  readonly props =
+    input.required<FilterOverlaySlotProps<TemplateRef<unknown>>>();
 
   protected readonly zIndex = OVERLAY_Z;
   private readonly anchor =

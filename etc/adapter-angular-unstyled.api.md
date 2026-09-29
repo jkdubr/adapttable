@@ -8,64 +8,162 @@ import { ActiveFilterChip } from '@adapttable/angular';
 import { ActiveFilterChipsSlotProps } from '@adapttable/angular';
 import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptTableFeature } from '@adapttable/angular';
-import { BatchEditHandler } from '@adapttable/angular';
-import { BulkAction } from '@adapttable/angular';
+import { BulkAction } from '@adapttable/core';
+import { BulkActionRunnerState } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
 import { CellEditHandler } from '@adapttable/angular';
 import { CellEditingState } from '@adapttable/angular';
-import { CellNavigationOptions } from '@adapttable/angular';
+import { ChecklistSlots } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
+import { ColumnDrag } from '@adapttable/angular';
 import { ColumnLayoutState } from '@adapttable/angular';
+import { ColumnMenuRow } from '@adapttable/angular';
 import { ColumnMenuSlotProps } from '@adapttable/angular';
 import { ConfirmHandler } from '@adapttable/angular';
 import { DataTable } from '@adapttable/angular';
 import { Direction } from '@adapttable/angular';
 import { ElementRef } from '@angular/core';
-import { ExportCsvOptions } from '@adapttable/angular';
 import { ExtraFilters } from '@adapttable/angular';
 import { FeatureSlotKey } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
 import { FilterHeaderControlProps } from '@adapttable/angular';
 import { FilterOverlaySlotProps } from '@adapttable/angular';
 import { FiltersFormSlotProps } from '@adapttable/angular';
+import { FilterTreeSlots } from '@adapttable/angular';
+import { FilterTypeRegistry } from '@adapttable/angular';
 import { GridFocus } from '@adapttable/angular';
-import { GroupingPanelExtras } from '@adapttable/angular';
 import { GroupingPanelSlotProps } from '@adapttable/angular';
 import { GroupingPanelSlots } from '@adapttable/angular';
 import * as i0 from '@angular/core';
 import { IconDescriptor } from '@adapttable/angular';
+import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
 import { PaginationMode } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
-import { RowEditHandler } from '@adapttable/angular';
-import { RowReorderHandler } from '@adapttable/angular';
-import { RowReorderOptions } from '@adapttable/angular';
 import { RowReorderState } from '@adapttable/angular';
 import { RowSelection } from '@adapttable/angular';
 import { SavedViewsControllerOptions } from '@adapttable/angular';
 import { SavedViewsSlotProps } from '@adapttable/angular';
+import { SavedViewsState } from '@adapttable/angular';
 import { SelectionState } from '@adapttable/angular';
 import { Signal } from '@angular/core';
 import { TableDensity } from '@adapttable/angular';
 import { TableLabels } from '@adapttable/angular';
 import { TableQueryParams } from '@adapttable/angular';
+import { TableSource } from '@adapttable/angular';
 import { TableVirtualization } from '@adapttable/angular';
 import { TemplateRef } from '@angular/core';
 import { ToolbarExtrasSlotProps } from '@adapttable/angular';
-import { VirtualizeOptions } from '@adapttable/angular';
 import { WritableSignal } from '@angular/core';
+
+// @public
+export class AdaptAutoFilterForm<TRow> {
+    // (undocumented)
+    protected readonly checklistSlots: ChecklistSlots;
+    readonly defs: InputSignal<readonly FilterDef<TRow>[]>;
+    protected kindOf(def: FilterDef<TRow>): string;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    readonly registry: InputSignal<FilterTypeRegistry>;
+    readonly source: InputSignal<TableSource<TRow>>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptAutoFilterForm<any>, "adapt-auto-filter-form", never, {
+        "defs": {
+            "alias": "defs";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "registry": {
+            "alias": "registry";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptAutoFilterForm<any>, never>;
+}
+
+// @internal
+export class AdaptBulkBar {
+    // (undocumented)
+    protected readonly actions: Signal<    {
+    action: BulkAction;
+    reason: string | undefined;
+    }[]>;
+    // (undocumented)
+    protected readonly banner: Signal<boolean>;
+    // (undocumented)
+    protected readonly errorMessage: Signal<string | null>;
+    // (undocumented)
+    protected readonly ids: Signal<string[]>;
+    readonly props: InputSignal<BulkBarSlotProps<SelectionState>>;
+    // (undocumented)
+    protected run(action: BulkBarSlotProps<SelectionState>["bulkActions"][number]): void;
+    // (undocumented)
+    protected readonly runner: BulkActionRunnerState;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptBulkBar, "adapt-bulk-bar", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptBulkBar, never>;
+}
+
+// @public
+export class AdaptColumnMenu {
+    // (undocumented)
+    protected readonly actionsKey = "actions";
+    // (undocumented)
+    protected readonly drag: ColumnDrag;
+    // (undocumented)
+    protected hideAll(): void;
+    // (undocumented)
+    protected readonly panelStyle: Readonly<Record<string, string>>;
+    // (undocumented)
+    protected readonly popover: MenuPopover;
+    readonly props: InputSignal<ColumnMenuSlotProps<never>>;
+    // (undocumented)
+    protected readonly query: WritableSignal<string>;
+    // (undocumented)
+    protected readonly reorderKey = "reorder";
+    // (undocumented)
+    protected readonly rows: Signal<ColumnMenuRow<never>[]>;
+    // (undocumented)
+    protected showAll(): void;
+    // (undocumented)
+    protected unpinAll(): void;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnMenu, "adapt-column-menu", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnMenu, never>;
+}
 
 // @public
 export class AdaptDataTable<TRow> implements OnInit {
     // @internal
-    protected beginEdit(row: TRow, column: ColumnDef<TRow>): void;
-    // @internal
     protected readonly bulkBarSlot: FeatureSlotKey<BulkBarSlotProps<unknown>>;
-    // @internal
-    protected cancelEdit(): void;
     readonly cellNavigation: InputSignal<boolean>;
     // @internal
     protected readonly cellTemplates: Signal<readonly AdaptCellTemplate[]>;
@@ -75,8 +173,6 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly columnMenuSlot: FeatureSlotKey<ColumnMenuSlotProps<never>>;
     readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
-    // @internal
-    protected commitEdit(): void;
     readonly confirm: InputSignal<ConfirmHandler | undefined>;
     readonly data: InputSignal<readonly TRow[]>;
     readonly defaultColumnLayout: InputSignal<Partial<ColumnLayoutState> | undefined>;
@@ -84,6 +180,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     extra?: ExtraFilters;
     }) | undefined>;
     readonly density: InputSignal<TableDensity | undefined>;
+    // @internal
+    protected readonly desktopTable: Signal<AdaptDesktopTable<any> | undefined>;
     readonly dir: InputSignal<Direction>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
     readonly features: InputSignal<readonly AdaptTableFeature[]>;
@@ -108,15 +206,9 @@ export class AdaptDataTable<TRow> implements OnInit {
     protected readonly noResults: Signal<boolean>;
     readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
     readonly paginationMode: InputSignal<PaginationMode | undefined>;
-    // @internal
-    protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
-    // @internal
-    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
-    // @internal
-    protected scrollBoxStyle(): Record<string, string> | null;
     readonly searchPlaceholder: InputSignal<string | undefined>;
     readonly selectable: InputSignal<boolean>;
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
@@ -263,6 +355,154 @@ export class AdaptDataTable<TRow> implements OnInit {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDataTable<any>, never>;
 }
 
+// @internal
+export class AdaptDensityButton {
+    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDensityButton, "adapt-density-button", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDensityButton, never>;
+}
+
+// @internal
+export class AdaptDesktopTable<TRow> {
+    protected beginEdit(row: TRow, column: ColumnDef<TRow>): void;
+    protected cancelEdit(): void;
+    protected commitEdit(): void;
+    protected readonly filterSlots: {
+        header: FeatureSlotKey<FilterHeaderControlProps<never>>;
+    };
+    readonly maxHeight: InputSignal<string | number | undefined>;
+    protected rowId(row: TRow): string;
+    readonly rowKey: InputSignal<(row: TRow) => string>;
+    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
+    protected scrollBoxStyle(): Record<string, string> | null;
+    scrollElement(): HTMLElement | null;
+    readonly view: InputSignal<TableView<TRow>>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDesktopTable<any>, "adapt-desktop-table", never, {
+        "view": {
+            "alias": "view";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowKey": {
+            "alias": "rowKey";
+            "required": true;
+            "isSignal": true;
+        };
+        "maxHeight": {
+            "alias": "maxHeight";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDesktopTable<any>, never>;
+}
+
+// @internal
+export class AdaptExportButton {
+    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptExportButton, "adapt-export-button", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptExportButton, never>;
+}
+
+// @internal
+export class AdaptFilterChips {
+    readonly props: InputSignal<ActiveFilterChipsSlotProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterChips, "adapt-filter-chips", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterChips, never>;
+}
+
+// @internal
+export class AdaptFilterDrawer {
+    constructor();
+    readonly props: InputSignal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterDrawer, "adapt-filter-drawer", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterDrawer, never>;
+}
+
+// @internal
+export class AdaptFilterPopover {
+    constructor();
+    readonly props: InputSignal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
+    // (undocumented)
+    protected readonly zIndex = 10050;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterPopover, "adapt-filter-popover", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterPopover, never>;
+}
+
+// @internal
+export class AdaptFiltersForm {
+    readonly props: InputSignal<FiltersFormSlotProps<never>>;
+    // (undocumented)
+    protected readonly treeSlots: FilterTreeSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFiltersForm, "adapt-filters-form", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFiltersForm, never>;
+}
+
+// @internal
+export class AdaptFullscreenButton {
+    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFullscreenButton, "adapt-fullscreen-button", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFullscreenButton, never>;
+}
+
 // @public
 export class AdaptGroupingPanel<TRow> {
     readonly props: InputSignal<GroupingPanelSlotProps<ColumnDef<TRow>>>;
@@ -280,29 +520,77 @@ export class AdaptGroupingPanel<TRow> {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupingPanel<any>, never>;
 }
 
-// @public
-export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+// @internal
+export class AdaptMobileCards<TRow> {
+    protected rowId(row: TRow): string;
+    readonly rowKey: InputSignal<(row: TRow) => string>;
+    readonly view: InputSignal<TableView<TRow>>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMobileCards<any>, "adapt-mobile-cards", never, {
+        "view": {
+            "alias": "view";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowKey": {
+            "alias": "rowKey";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMobileCards<any>, never>;
+}
 
-// @public
-export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature;
+// @internal
+export class AdaptPaginationFooter<TRow> {
+    readonly view: InputSignal<TableView<TRow>>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPaginationFooter<any>, "adapt-pagination-footer", never, {
+        "view": {
+            "alias": "view";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPaginationFooter<any>, never>;
+}
 
-// @public
-export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
-
-// @public
-export function columnMenu(): AdaptTableFeature;
-
-// @public
-export function densityChooser(): AdaptTableFeature;
-
-// @public
-export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
-
-// @public
-export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): AdaptTableFeature;
-
-// @public
-export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
+// @internal
+export class AdaptSavedViewsMenu implements OnInit {
+    // (undocumented)
+    protected apply(name: string): void;
+    // (undocumented)
+    protected readonly name: WritableSignal<string>;
+    ngOnInit(): void;
+    // (undocumented)
+    protected readonly panelStyle: Readonly<Record<string, string>>;
+    // (undocumented)
+    protected readonly popover: MenuPopover;
+    readonly props: InputSignal<SavedViewsSlotProps<SavedViewsControllerOptions>>;
+    // (undocumented)
+    protected readonly rowStyle: {
+        display: string;
+        "align-items": string;
+        gap: string;
+    };
+    // (undocumented)
+    protected save(): void;
+    // (undocumented)
+    protected readonly trimmed: Signal<string>;
+    protected readonly views: WritableSignal<SavedViewsState | undefined>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSavedViewsMenu, "adapt-saved-views-menu", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSavedViewsMenu, never>;
+}
 
 // @public
 export type FiltersMode = "popover" | "drawer";
@@ -323,33 +611,24 @@ export interface FiltersView {
 }
 
 // @public
-export function fullscreen(): AdaptTableFeature;
-
-// @public
-export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string[], extras?: GroupingPanelExtras<TRow>): AdaptTableFeature;
-
-// @public
-export function headerFilters(): AdaptTableFeature;
-
-// @public
-export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], options?: RowActionsFeatureOptions<TRow>): AdaptTableFeature;
-
-// @public
-export interface RowActionsFeatureOptions<TRow> {
-    readonly confirmDeleteRow?: boolean;
-    readonly layout?: RowActionsLayout;
-    readonly onDeleteRow?: (row: TRow) => void;
-    readonly onDuplicateRow?: (row: TRow) => void;
+export interface MenuPopover {
+    readonly close: () => void;
+    readonly open: Signal<boolean>;
+    readonly toggle: () => void;
 }
 
 // @public
-export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+export function menuPopover(elements: {
+    readonly root: () => HTMLElement | undefined;
+    readonly trigger: () => HTMLElement | undefined;
+    readonly panel: () => HTMLElement | undefined;
+}, injector: Injector): MenuPopover;
 
 // @public
-export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;
+export const OVERLAY_Z = 10050;
 
 // @public
-export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeature;
+export function placeOverlayBelowTrigger(overlay: HTMLElement, trigger: HTMLElement, dir: "ltr" | "rtl"): void;
 
 // @public
 export interface TableView<TRow> {
@@ -373,9 +652,6 @@ export interface TableView<TRow> {
     readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
     readonly virtualization: Signal<TableVirtualization<TRow>>;
 }
-
-// @public
-export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

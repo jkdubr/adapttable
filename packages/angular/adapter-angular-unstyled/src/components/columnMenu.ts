@@ -45,7 +45,6 @@ import {
 import { MENU_PANEL_STYLE, menuPopover } from "./menuPopover";
 
 /** The menu's props, with the row type erased as every slot erases it. */
-type MenuProps = ColumnMenuSlotProps<never>;
 
 const NOOP_RENAME = (): void => undefined;
 
@@ -211,7 +210,7 @@ export class AdaptColumnMenuRow {
   /** The row. */
   readonly row = input.required<ColumnMenuRow<never>>();
   /** The menu's props. */
-  readonly props = input.required<MenuProps>();
+  readonly props = input.required<ColumnMenuSlotProps<never>>();
   /** The menu's drag state. */
   readonly drag = input.required<ColumnDrag>();
 
@@ -248,7 +247,10 @@ export class AdaptColumnMenuRow {
     });
   });
 
-  protected pinLabel(row: ColumnMenuRow<never>, props: MenuProps): string {
+  protected pinLabel(
+    row: ColumnMenuRow<never>,
+    props: ColumnMenuSlotProps<never>
+  ): string {
     return pinActionLabel(row.pinned, props.labels);
   }
 
@@ -462,7 +464,7 @@ export class AdaptColumnMenuEdgeRow {
 })
 export class AdaptColumnMenu {
   /** The slot's props. */
-  readonly props = input.required<MenuProps>();
+  readonly props = input.required<ColumnMenuSlotProps<never>>();
 
   protected readonly query = signal("");
   protected readonly panelStyle = MENU_PANEL_STYLE;

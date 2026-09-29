@@ -11,9 +11,17 @@ export { AdaptFilterChips } from "./components/activeFilterChips";
 export { AdaptAutoFilterForm } from "./components/autoFilterForm";
 export { AdaptBulkBar } from "./components/bulkActionBar";
 export { AdaptColumnMenu } from "./components/columnMenu";
+export { AdaptDesktopTable } from "./components/desktopTable";
 export { AdaptFilterDrawer, AdaptFiltersForm } from "./components/filterPanel";
 export { AdaptFilterPopover } from "./components/filterPopover";
 export { AdaptGroupingPanel } from "./components/groupingPanel";
+export { type MenuPopover, menuPopover } from "./components/menuPopover";
+export { AdaptMobileCards } from "./components/mobileCards";
+export {
+  OVERLAY_Z,
+  placeOverlayBelowTrigger,
+} from "./components/overlayPlacement";
+export { AdaptPaginationFooter } from "./components/paginationFooter";
 export { AdaptSavedViewsMenu } from "./components/savedViewsMenu";
 export {
   AdaptDensityButton,

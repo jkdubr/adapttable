@@ -12,6 +12,14 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true
   },
-  "include": ["src", "vitest.config.ts", "vitest.setup.ts"],
+  "include": [
+    "src",
+    "formula",
+    "pivot",
+    "sparkline",
+    "stream",
+    "vitest.config.ts",
+    "vitest.setup.ts"
+  ],
   "exclude": ["node_modules", "dist", "coverage"]
 }
