@@ -2,6 +2,7 @@
  * Editing feature factories for Angular: cell, row and batch editing over
  * core's binding factories.
  */
+import type { EditEventHandler } from "@adapttable/core";
 import {
   coreBatchEditing,
   coreEditing,
@@ -16,6 +17,22 @@ import type {
 import type { AdaptTableFeature } from "../featureHost";
 
 /**
+ * Lifecycle observers a host may pass to {@link editing}.
+ *
+ * @public
+ */
+export interface EditingLifecycleExtras<TRow = unknown> {
+  /** An editor opened. */
+  readonly onEditStart?: EditEventHandler<TRow>;
+  /** A commit reached the host. */
+  readonly onEditCommit?: EditEventHandler<TRow>;
+  /** The reader threw the draft away. */
+  readonly onEditCancel?: EditEventHandler<TRow>;
+  /** Extra patch fields merged into the feature. */
+  readonly [key: string]: unknown;
+}
+
+/**
  * A cell-editing feature that also carries the host's write.
  */
 interface EditingFeature<TRow> extends AdaptTableFeature {
@@ -26,14 +43,16 @@ interface EditingFeature<TRow> extends AdaptTableFeature {
  * Edit a single cell in place.
  *
  * @param onCellEdit - The host's write for a committed edit.
- * @param extras - Optional lifecycle observers merged into the feature patch.
+ * @param extras - Optional lifecycle observers merged into the feature patch;
+ *   {@link injectCellEditing} reads `onEditStart` / `onEditCancel`, and the
+ *   editing bundle's lifecycle carries `onEditCommit`.
  * @returns The feature.
  *
  * @public
  */
 export function editing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
-  extras: Record<string, unknown> = {}
+  extras: EditingLifecycleExtras<TRow> = {}
 ): AdaptTableFeature {
   return {
     ...coreEditing(onCellEdit, extras),

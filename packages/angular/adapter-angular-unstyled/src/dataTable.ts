@@ -17,7 +17,6 @@ import {
   type BulkAction,
   type BulkBarSlotProps,
   type CellEditHandler,
-  type CellEditingState,
   COLUMN_MENU,
   type ColumnDef,
   type ColumnLayoutState,
@@ -27,6 +26,8 @@ import {
   defaultConfirm,
   devWarn,
   type Direction,
+  type EditableCellEditing,
+  type EditEventHandler,
   type ExportCsvOptions,
   type ExtraFilters,
   featureOptionsOf,
@@ -42,8 +43,10 @@ import {
   GROUPING_PANEL,
   type GroupingPanelSlotProps,
   injectCellEditing,
+  injectCellSaveState,
   injectDataTable,
   injectDensity,
+  injectEditValidation,
   injectExportCsv,
   injectFrontendData,
   injectFullscreen,
@@ -101,6 +104,45 @@ import {
   type FiltersView,
   filtersViewFor,
 } from "./tableFilters";
+
+/**
+ * The editing bundle for a composed {@link editing} feature, or absent.
+ */
+function editingBundleFor<TRow>(options: {
+  readonly featureOptions: Readonly<Record<string, unknown>>;
+  readonly injector: Injector;
+}): Signal<EditableCellEditing<TRow>> | undefined {
+  const onCellEdit = options.featureOptions.onCellEdit as
+    CellEditHandler<TRow> | undefined;
+  if (!onCellEdit) return undefined;
+  const onEditStart = options.featureOptions.onEditStart as
+    EditEventHandler<TRow> | undefined;
+  const onEditCancel = options.featureOptions.onEditCancel as
+    EditEventHandler<TRow> | undefined;
+  const onEditCommit = options.featureOptions.onEditCommit as
+    EditEventHandler<TRow> | undefined;
+  const cellState = injectCellEditing<TRow>({
+    onEditStart,
+    onEditCancel,
+    onEditCommit,
+    injector: options.injector,
+  });
+  const validation = injectEditValidation<TRow>({
+    injector: options.injector,
+  });
+  const saving = injectCellSaveState<TRow>({ injector: options.injector });
+  return computed((): EditableCellEditing<TRow> => ({
+    onCellEdit,
+    state: cellState(),
+    validation: validation(),
+    saving: saving(),
+    lifecycle: {
+      onEditStart,
+      onEditCancel,
+      onEditCommit,
+    },
+  }));
+}
 
 /**
  * The body window for a composed {@link virtualize} feature, or every row
@@ -221,10 +263,11 @@ export interface TableView<TRow> {
     Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
   /** Row reorder state, when the feature is composed. */
   readonly reorder: Signal<RowReorderState<TRow>> | undefined;
-  /** Cell editing state, when `editing()` is composed. */
-  readonly editing: Signal<CellEditingState> | undefined;
-  /** The host's cell-edit write, when editing is composed. */
-  readonly onCellEdit: CellEditHandler<TRow> | undefined;
+  /**
+   * Cell editing bundle, when `editing()` is composed — state, channel,
+   * validation, save tracking and lifecycle observers for the gate.
+   */
+  readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
   /** The body window — every row when virtualization is off. */
   readonly virtualization: Signal<TableVirtualization<TRow>>;
   /** Column span for spacer/detail cells. */
@@ -606,11 +649,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       features,
       injector,
     });
-    const onCellEdit = featureOptions.onCellEdit as
-      CellEditHandler<TRow> | undefined;
-    const editing = onCellEdit
-      ? injectCellEditing<TRow>({ injector })
-      : undefined;
+    const editing = editingBundleFor<TRow>({ featureOptions, injector });
     const virtualization = bodyVirtualizationFor({
       table,
       source,
@@ -644,7 +683,6 @@ export class AdaptDataTable<TRow> implements OnInit {
       groupingPanel,
       reorder,
       editing,
-      onCellEdit,
       virtualization,
       bodyColSpan,
       rowActionsLayout: featureOptions.rowActionsLayout as

@@ -8,9 +8,8 @@ import {
   AdaptSlot,
   beginCellEdit,
   type ColumnDef,
+  editableCellController,
   FILTER_HEADER,
-  parseCellEditValue,
-  resolveCellEditor,
   ROW_REORDER_HANDLE,
   type RowReorderHandleProps,
   type RowReorderState,
@@ -29,6 +28,10 @@ import { AdaptRowActions } from "./rowActionButtons";
 /**
  * The desktop table drawn with native elements: sticky header, body rows,
  * selection, reorder and in-place cell editors.
+ *
+ * Cell commits go through core's {@link editableCellController} (same path
+ * as {@link AdaptEditableCellGate}); the inline text editor is replaced by
+ * the gate Chrome in a later part.
  *
  * @internal
  */
@@ -150,33 +153,30 @@ export class AdaptDesktopTable<TRow> {
    * @internal
    */
   protected beginEdit(row: TRow, column: ColumnDef<TRow>): void {
-    const view = this.view();
-    if (!view.editing || !view.onCellEdit) return;
-    beginCellEdit(view.editing(), row, column, (entry) => this.rowKey()(entry));
+    const editing = this.view().editing?.();
+    if (!editing) return;
+    beginCellEdit(editing.state, row, column, (entry) => this.rowKey()(entry));
   }
 
   /**
-   * Commit the active draft through the host's write.
+   * Commit the active draft through core's editableCellController (parseValue,
+   * validators, async save tracking and lifecycle).
    *
    * @internal
    */
-  protected commitEdit(): void {
+  protected finishCellEdit(row: TRow, column: ColumnDef<TRow>): void {
     const view = this.view();
-    if (!view.editing || !view.onCellEdit) return;
-    const commit = view.editing().commit();
-    if (!commit) return;
-    const row = view.table
-      .rows()
-      .find((entry) => this.rowKey()(entry) === commit.rowId);
-    const column = view.table
-      .columns()
-      .find((entry) => entry.key === commit.columnKey);
-    if (!row || !column) return;
-    const editor = resolveCellEditor(column);
-    const value = editor
-      ? parseCellEditValue(editor, commit.draft)
-      : commit.draft;
-    void view.onCellEdit(row, commit.columnKey, value);
+    const editing = view.editing?.();
+    if (!editing) return;
+    editableCellController({
+      editing,
+      row,
+      column,
+      rowId: this.rowKey()(row),
+      rows: view.table.rows(),
+      columns: view.table.columns(),
+      rowKey: (entry) => this.rowKey()(entry),
+    }).commit();
   }
 
   /**
@@ -185,6 +185,6 @@ export class AdaptDesktopTable<TRow> {
    * @internal
    */
   protected cancelEdit(): void {
-    this.view().editing?.().cancel();
+    this.view().editing?.().state.cancel();
   }
 }

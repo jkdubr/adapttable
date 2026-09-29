@@ -47,6 +47,31 @@ export {
   injectDataTable,
 } from "./dataTable";
 export {
+  type EditableCellController,
+  editableCellController,
+  type EditableCellEditing,
+  type EditableCellMode,
+  type EditingBundle,
+  focusEditorOnMount,
+  rowEditingSignature,
+  rowIsDirty,
+  stopCellEditKeyboard,
+} from "./editing/editableCellController";
+export {
+  AdaptCellConflictNotice,
+  AdaptEditableCellGate,
+  type CellConflictNoticeProps,
+  commitBooleanDraft,
+  type EditableCellActivateProps,
+  type EditableCellButtonProps,
+  type EditableCellEditorCtrl,
+  type EditableCellSlots,
+  editorBusyProps,
+  editorValidationProps,
+  multiDraftFromSelect,
+  stopEditKeys,
+} from "./editing/editableCellGate";
+export {
   type BatchEditHandler,
   type BatchEditingInjectOptions,
   type CellEditHandler,
@@ -57,6 +82,14 @@ export {
   type RowEditHandler,
   type RowEditingInjectOptions,
 } from "./editing/editing";
+export {
+  type CellSaveStateInjectOptions,
+  injectCellSaveState,
+} from "./editing/saveState";
+export {
+  type EditValidationInjectOptions,
+  injectEditValidation,
+} from "./editing/validation";
 export {
   ADAPTTABLE_FEATURES,
   type AdaptTableFeature,
@@ -69,7 +102,12 @@ export {
   cellNavigation,
   type CellNavigationOptions,
 } from "./features/cellNavigation";
-export { batchEditing, editing, rowEditing } from "./features/editing";
+export {
+  batchEditing,
+  editing,
+  type EditingLifecycleExtras,
+  rowEditing,
+} from "./features/editing";
 export {
   groupingPanel,
   type GroupingPanelExtras,
@@ -179,6 +217,12 @@ export {
   type KeyedVirtualizationOptions,
   type TableVirtualizationOptions,
 } from "./virtual/tableVirtualization";
+export type {
+  EditEvent,
+  EditEventHandler,
+  EditLifecycle,
+  EditUnit,
+} from "@adapttable/core";
 export type {
   BatchEditingState,
   BatchRowEdit,

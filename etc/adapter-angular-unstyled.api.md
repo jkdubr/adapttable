@@ -43,6 +43,8 @@ import { OutputEmitterRef } from '@angular/core';
 import { PaginationMode } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
+import { RowReorderHandleProps } from '@adapttable/core/binding';
+import { RowReorderHandleProps as RowReorderHandleProps_2 } from '@adapttable/angular';
 import { RowReorderState } from '@adapttable/angular';
 import { RowSelection } from '@adapttable/angular';
 import { SavedViewsControllerOptions } from '@adapttable/angular';
@@ -206,6 +208,10 @@ export class AdaptDataTable<TRow> implements OnInit {
     protected readonly noResults: Signal<boolean>;
     readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
     readonly paginationMode: InputSignal<PaginationMode | undefined>;
+    // @internal
+    protected readonly reorderAnnouncerSlot: FeatureSlotKey<    {
+    announcement: string;
+    }>;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
@@ -379,6 +385,8 @@ export class AdaptDesktopTable<TRow> {
         header: FeatureSlotKey<FilterHeaderControlProps<never>>;
     };
     readonly maxHeight: InputSignal<string | number | undefined>;
+    protected reorderHandleProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderHandleProps_2<never>;
+    protected readonly reorderHandleSlot: FeatureSlotKey<RowReorderHandleProps<never, unknown>>;
     protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;

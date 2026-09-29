@@ -19,8 +19,10 @@ import { BulkActionContext } from '@adapttable/core';
 import { bulkActionErrorMessage } from '@adapttable/core';
 import { BulkActionOutcome } from '@adapttable/core';
 import { BulkBarSlotProps } from '@adapttable/core/binding';
+import { CellConflictAsk } from '@adapttable/core';
 import { CellEditingState } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
+import { CellSaveState } from '@adapttable/core';
 import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
 import { ChecklistButtonProps } from '@adapttable/core/binding';
 import { ChecklistCheckboxProps } from '@adapttable/core/binding';
@@ -52,8 +54,21 @@ import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
 import { devWarn } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { EditableCellActivateProps as EditableCellActivateProps_2 } from '@adapttable/core/binding';
+import { EditableCellButtonProps } from '@adapttable/core/binding';
+import { EditableCellController } from '@adapttable/core';
+import { EditableCellMode } from '@adapttable/core';
+import { EditableCellPresentation } from '@adapttable/core';
 import { EditableColumnLike } from '@adapttable/core';
+import { EditConflictLabels } from '@adapttable/core';
+import { EditEvent } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
+import { EditingBundle } from '@adapttable/core';
+import { EditLifecycle } from '@adapttable/core';
+import { editorBusyProps } from '@adapttable/core';
+import { editorValidationProps } from '@adapttable/core';
+import { EditUnit } from '@adapttable/core';
+import { EditValidationState } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
@@ -91,6 +106,7 @@ import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { filterWidgetKind } from '@adapttable/core';
+import { focusEditorOnMount } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GridCell } from '@adapttable/core';
 import { GRIP_ICON } from '@adapttable/core/binding';
@@ -158,6 +174,7 @@ import { RowReorderMoveButtonProps } from '@adapttable/core/binding';
 import { RowReorderOptions } from '@adapttable/core';
 import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
 import { rowSourceIndex } from '@adapttable/core';
+import { RowValidator } from '@adapttable/core';
 import { runRowAction } from '@adapttable/core';
 import { SAVED_VIEWS } from '@adapttable/core/binding';
 import { SavedView } from '@adapttable/core';
@@ -174,6 +191,8 @@ import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { splitRelativeToken } from '@adapttable/core';
+import { stopCellEditKeyboard } from '@adapttable/core';
+import { stopEditKeys } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
@@ -250,6 +269,49 @@ export class AdaptCell<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptCell<any>, never>;
+}
+
+// @public
+export class AdaptCellConflictNotice {
+    readonly ask: InputSignal<CellConflictAsk>;
+    readonly errorClassName: InputSignal<string | undefined>;
+    readonly errorId: InputSignal<string>;
+    // (undocumented)
+    protected readonly keepProps: Signal<EditableCellButtonProps>;
+    readonly labels: InputSignal<EditConflictLabels>;
+    readonly slots: InputSignal<EditableCellSlots>;
+    // (undocumented)
+    protected readonly takeProps: Signal<EditableCellButtonProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptCellConflictNotice, "adapt-cell-conflict-notice", never, {
+        "ask": {
+            "alias": "ask";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "errorId": {
+            "alias": "errorId";
+            "required": true;
+            "isSignal": true;
+        };
+        "errorClassName": {
+            "alias": "errorClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptCellConflictNotice, never>;
 }
 
 // @public
@@ -380,6 +442,132 @@ export class AdaptControl<TProps> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptControl<any>, never>;
+}
+
+// @public
+export class AdaptEditableCellGate<TRow> {
+    constructor();
+    readonly activateClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly activateProps: Signal<EditableCellActivateProps>;
+    readonly column: InputSignal<ColumnDef<TRow>>;
+    readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
+    // (undocumented)
+    protected readonly conflictAsk: Signal<CellConflictAsk | undefined>;
+    // (undocumented)
+    protected readonly ctrl: Signal<EditableCellController<unknown>>;
+    readonly display: InputSignal<unknown>;
+    readonly editing: InputSignal<EditableCellEditing<TRow> | undefined>;
+    readonly editLabel: InputSignal<string>;
+    readonly editor: InputSignal<Type<unknown>>;
+    // (undocumented)
+    protected readonly editorCtrl: Signal<EditableCellEditorCtrl>;
+    readonly errorClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly errorId: Signal<string>;
+    readonly kitRendersError: InputSignal<boolean | undefined>;
+    // (undocumented)
+    protected readonly presentation: Signal<EditableCellPresentation>;
+    readonly rollbackClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    protected readonly rollbackProps: Signal<EditableCellButtonProps>;
+    readonly row: InputSignal<TRow>;
+    readonly rowId: InputSignal<string>;
+    readonly rowKey: InputSignal<(row: TRow) => string>;
+    readonly rows: InputSignal<readonly TRow[]>;
+    readonly saveErrorClassName: InputSignal<string | undefined>;
+    readonly slots: InputSignal<EditableCellSlots>;
+    readonly undoLabel: InputSignal<string | undefined>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptEditableCellGate<any>, "adapt-editable-cell-gate", never, {
+        "editing": {
+            "alias": "editing";
+            "required": false;
+            "isSignal": true;
+        };
+        "row": {
+            "alias": "row";
+            "required": true;
+            "isSignal": true;
+        };
+        "column": {
+            "alias": "column";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowId": {
+            "alias": "rowId";
+            "required": true;
+            "isSignal": true;
+        };
+        "rows": {
+            "alias": "rows";
+            "required": true;
+            "isSignal": true;
+        };
+        "columns": {
+            "alias": "columns";
+            "required": true;
+            "isSignal": true;
+        };
+        "rowKey": {
+            "alias": "rowKey";
+            "required": true;
+            "isSignal": true;
+        };
+        "editLabel": {
+            "alias": "editLabel";
+            "required": true;
+            "isSignal": true;
+        };
+        "activateClassName": {
+            "alias": "activateClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "errorClassName": {
+            "alias": "errorClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "saveErrorClassName": {
+            "alias": "saveErrorClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "rollbackClassName": {
+            "alias": "rollbackClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "undoLabel": {
+            "alias": "undoLabel";
+            "required": false;
+            "isSignal": true;
+        };
+        "kitRendersError": {
+            "alias": "kitRendersError";
+            "required": false;
+            "isSignal": true;
+        };
+        "display": {
+            "alias": "display";
+            "required": true;
+            "isSignal": true;
+        };
+        "editor": {
+            "alias": "editor";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptEditableCellGate<any>, never>;
 }
 
 // @public
@@ -808,6 +996,15 @@ export interface BulkActionRunnerState {
 export { BulkBarSlotProps }
 
 // @public
+export interface CellConflictNoticeProps {
+    readonly ask?: CellConflictAsk;
+    readonly errorClassName?: string;
+    readonly errorId: string;
+    readonly labels?: NonNullable<EditableCellEditing<never>["conflictLabels"]>;
+    readonly slots: EditableCellSlots;
+}
+
+// @public
 export interface CellContext<TRow> {
     readonly $implicit: TRow;
     readonly column: ColumnDef<TRow>;
@@ -823,6 +1020,7 @@ export type CellEditHandler<TRow> = (row: TRow, columnKey: string, value: unknow
 export interface CellEditingOptions<TRow = unknown> {
     readonly injector?: Injector;
     readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditCommit?: EditEventHandler<TRow>;
     readonly onEditStart?: EditEventHandler<TRow>;
 }
 
@@ -837,6 +1035,14 @@ export interface CellNavigationOptions {
 }
 
 export { CellRange }
+
+// @public
+export interface CellSaveStateInjectOptions<TRow> {
+    readonly formatError?: (error: unknown) => string;
+    readonly injector?: Injector;
+    readonly onEditError?: EditEventHandler<TRow>;
+    readonly onRollback?: (previous: TRow, columnKey: string) => void;
+}
 
 export { CHECKLIST_LIST_HEIGHT }
 
@@ -925,6 +1131,9 @@ export interface ColumnRenameEditorState {
     readonly inputId: string;
     readonly submit: () => boolean;
 }
+
+// @public
+export function commitBooleanDraft(ctrl: EditableCellEditorCtrl, checked: boolean): void;
 
 export { ConfirmHandler }
 
@@ -1047,7 +1256,87 @@ export { devWarn }
 export { Direction }
 
 // @public
-export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+export type EditableCellActivateProps = EditableCellActivateProps_2<unknown>;
+
+export { EditableCellButtonProps }
+
+export { EditableCellController }
+
+// @public
+export function editableCellController<TRow>(options: {
+    editing: EditableCellEditing<TRow> | undefined;
+    row: TRow;
+    column: ColumnDef<TRow>;
+    rowId: string;
+    rows: readonly TRow[];
+    columns: readonly ColumnDef<TRow>[];
+    rowKey: (row: TRow) => string;
+}): EditableCellController;
+
+// @public
+export type EditableCellEditing<TRow> = EditingBundle<TRow>;
+
+// @public
+export interface EditableCellEditorCtrl {
+    commitOnBlur: () => void;
+    conflict?: boolean;
+    draft: string;
+    editor: NonNullable<ReturnType<typeof editableCellController>["editor"]>;
+    error?: string;
+    errorId: string;
+    focusRef: (node: {
+        focus: () => void;
+    } | null) => void;
+    onEditorKeyDown: (event: {
+        key: string;
+        preventDefault: () => void;
+        shiftKey?: boolean;
+    }) => void;
+    selectOptions: ReturnType<typeof editableCellController>["selectOptions"];
+    setDraft: (value: string) => void;
+    validating: boolean;
+}
+
+export { EditableCellMode }
+
+// @public
+export interface EditableCellSlots {
+    readonly Activate: Type<unknown>;
+    readonly Button: Type<unknown>;
+}
+
+export { EditEvent }
+
+export { EditEventHandler }
+
+// @public
+export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
+
+export { EditingBundle }
+
+// @public
+export interface EditingLifecycleExtras<TRow = unknown> {
+    readonly [key: string]: unknown;
+    readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditStart?: EditEventHandler<TRow>;
+}
+
+export { EditLifecycle }
+
+export { editorBusyProps }
+
+export { editorValidationProps }
+
+export { EditUnit }
+
+// @public
+export interface EditValidationInjectOptions<TRow> {
+    readonly applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
+    readonly enabled?: MaybeSignal<boolean>;
+    readonly injector?: Injector;
+    readonly validateRow?: RowValidator<TRow>;
+}
 
 // @public
 export interface ExportCsvHandlerOptions<TRow> {
@@ -1166,6 +1455,8 @@ export { FilterTypeSpec }
 export { FilterValue }
 
 export { filterWidgetKind }
+
+export { focusEditorOnMount }
 
 // @public
 export function fromStore<T>(store: ExternalStore<T>, options?: FromStoreOptions): Signal<T>;
@@ -1293,6 +1584,9 @@ export function injectBulkActionRunner(options: BulkActionRunnerOptions): BulkAc
 export function injectCellEditing<TRow = unknown>(options?: CellEditingOptions<TRow>): Signal<CellEditingState>;
 
 // @public
+export function injectCellSaveState<TRow>(options?: CellSaveStateInjectOptions<TRow>): Signal<CellSaveState<TRow>>;
+
+// @public
 export function injectColumnDrag(injector?: Injector): ColumnDrag;
 
 // @public
@@ -1303,6 +1597,9 @@ export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTabl
 
 // @public
 export function injectDensity(options?: DensityOptions): DensityState;
+
+// @public
+export function injectEditValidation<TRow>(options?: EditValidationInjectOptions<TRow>): Signal<EditValidationState<TRow>>;
 
 // @public
 export function injectExportCsv<TRow>(options: ExportCsvHandlerOptions<TRow>): Signal<ExportHandlerState>;
@@ -1388,6 +1685,9 @@ export type MaybeSignal<T> = T | Signal<T>;
 
 // @public
 export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
+
+// @public
+export function multiDraftFromSelect(select: HTMLSelectElement): string;
 
 export { nextPinSide }
 
@@ -1492,7 +1792,13 @@ export interface RowEditingInjectOptions<TRow> {
     readonly onRowEdit?: RowEditHandler<TRow>;
 }
 
+// @public
+export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
+
 export { RowEditingState }
+
+// @public
+export function rowIsDirty<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): boolean;
 
 export { RowMoveMenuSlotProps }
 
@@ -1613,6 +1919,10 @@ export interface SlotTable {
 export { SortDirection }
 
 export { splitRelativeToken }
+
+export { stopCellEditKeyboard }
+
+export { stopEditKeys }
 
 export { TableDensity }
 

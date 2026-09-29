@@ -138,14 +138,18 @@
               "
               (dblclick)="beginEdit(entry.row, column)"
             >
-              @if (v.editing?.().isActive(rowId(entry.row), column.key)) {
+              @if (
+                v.editing?.().state.isActive(rowId(entry.row), column.key)
+              ) {
                 <input
                   data-adapttable-part="cell-editor"
-                  [value]="v.editing?.().draft"
-                  (input)="v.editing?.().setDraft($any($event.target).value)"
-                  (keydown.enter)="commitEdit()"
+                  [value]="v.editing?.().state.draft"
+                  (input)="
+                    v.editing?.().state.setDraft($any($event.target).value)
+                  "
+                  (keydown.enter)="finishCellEdit(entry.row, column)"
                   (keydown.escape)="cancelEdit()"
-                  (blur)="commitEdit()"
+                  (blur)="finishCellEdit(entry.row, column)"
                 />
               } @else {
                 <span

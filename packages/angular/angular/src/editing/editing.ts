@@ -68,6 +68,12 @@ export interface CellEditingOptions<TRow = unknown> {
   readonly onEditStart?: EditEventHandler<TRow>;
   /** The reader threw the draft away (Escape, or switching cells). */
   readonly onEditCancel?: EditEventHandler<TRow>;
+  /**
+   * A commit reached the host. Carried for {@link editing} extras parity;
+   * the session itself does not fire it — {@link editableCellController} does
+   * through the editing bundle's lifecycle.
+   */
+  readonly onEditCommit?: EditEventHandler<TRow>;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }
