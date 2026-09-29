@@ -1,9 +1,10 @@
 import type { ColumnDef, FilterDef } from "@adapttable/angular";
+import { filters } from "@adapttable/angular-unstyled/filters";
+import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptDataTable } from "./dataTable";
-import { filters, headerFilters } from "./features";
 import type { FiltersMode } from "./tableFilters";
 
 interface Person {

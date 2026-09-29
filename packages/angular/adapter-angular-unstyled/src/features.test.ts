@@ -1,14 +1,10 @@
 import { featureOptionsOf } from "@adapttable/angular";
+import { batchEditing } from "@adapttable/angular-unstyled/batch-editing";
+import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
+import { editing, rowEditing } from "@adapttable/angular-unstyled/editing";
+import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
+import { virtualize } from "@adapttable/angular-unstyled/virtualize";
 import { describe, expect, it, vi } from "vitest";
-
-import {
-  batchEditing,
-  cellNavigation,
-  editing,
-  rowEditing,
-  rowReorder,
-  virtualize,
-} from "./features";
 
 describe("unstyled Angular feature wrappers", () => {
   it("arms virtualize with the windowing knobs", () => {

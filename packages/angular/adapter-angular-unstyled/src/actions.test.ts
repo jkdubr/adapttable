@@ -5,11 +5,13 @@ import type {
   ConfirmHandler,
   RowAction,
 } from "@adapttable/angular";
+import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
+import { columnMenu } from "@adapttable/angular-unstyled/column-menu";
+import { rowActions } from "@adapttable/angular-unstyled/row-actions";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptDataTable } from "./dataTable";
-import { bulkActions, columnMenu, rowActions } from "./features";
 
 interface Person {
   id: string;

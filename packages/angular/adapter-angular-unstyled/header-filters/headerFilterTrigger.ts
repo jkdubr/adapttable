@@ -13,6 +13,7 @@ import {
   type TableSource,
   watchOverlayDismiss,
 } from "@adapttable/angular";
+import { AdaptAutoFilterForm } from "@adapttable/angular-unstyled";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -23,8 +24,6 @@ import {
   input,
   signal,
 } from "@angular/core";
-
-import { AdaptAutoFilterForm } from "../components/autoFilterForm";
 
 let nextSession = 0;
 

@@ -2,6 +2,7 @@ import {
   type ColumnDef,
   type GroupingPanelSlotProps,
 } from "@adapttable/angular";
+import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
 import { type GroupingPanelState, resolveLabels } from "@adapttable/core";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -9,7 +10,6 @@ import { describe, expect, it } from "vitest";
 
 import { AdaptGroupingPanel } from "./components/groupingPanel";
 import { AdaptDataTable } from "./dataTable";
-import { groupingPanel } from "./features";
 
 interface Row {
   id: string;

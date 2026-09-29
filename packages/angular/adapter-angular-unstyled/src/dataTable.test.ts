@@ -4,12 +4,14 @@ import {
   type ColumnDef,
   type PaginationMode,
 } from "@adapttable/angular";
+import { editing } from "@adapttable/angular-unstyled/editing";
+import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
+import { virtualize } from "@adapttable/angular-unstyled/virtualize";
 import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
-import { editing, rowReorder, virtualize } from "./features";
 
 interface City {
   id: string;

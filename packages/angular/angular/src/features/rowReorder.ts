@@ -17,7 +17,7 @@ interface RowReorderFeature<TRow> extends AdaptTableFeature {
  * Let rows be dragged, or moved with the keyboard, into a new order.
  *
  * ```ts
- * import { rowReorder } from "@adapttable/angular-unstyled";
+ * import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
  *
  * features: [rowReorder((from, to) => reorder(from, to))]
  * ```

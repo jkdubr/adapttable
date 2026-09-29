@@ -33,6 +33,74 @@
       "types": "./dist/types/adapttable-angular-unstyled.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled.mjs"
     },
+    "./batch-editing": {
+      "types": "./dist/types/adapttable-angular-unstyled-batch-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-batch-editing.mjs"
+    },
+    "./bulk-actions": {
+      "types": "./dist/types/adapttable-angular-unstyled-bulk-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-bulk-actions.mjs"
+    },
+    "./cell-navigation": {
+      "types": "./dist/types/adapttable-angular-unstyled-cell-navigation.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-cell-navigation.mjs"
+    },
+    "./column-menu": {
+      "types": "./dist/types/adapttable-angular-unstyled-column-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-column-menu.mjs"
+    },
+    "./density": {
+      "types": "./dist/types/adapttable-angular-unstyled-density.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-density.mjs"
+    },
+    "./editing": {
+      "types": "./dist/types/adapttable-angular-unstyled-editing.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-editing.mjs"
+    },
+    "./export": {
+      "types": "./dist/types/adapttable-angular-unstyled-export.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-export.mjs"
+    },
+    "./features": {
+      "types": "./dist/types/adapttable-angular-unstyled-features.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-features.mjs"
+    },
+    "./filters": {
+      "types": "./dist/types/adapttable-angular-unstyled-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-filters.mjs"
+    },
+    "./fullscreen": {
+      "types": "./dist/types/adapttable-angular-unstyled-fullscreen.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-fullscreen.mjs"
+    },
+    "./grouping-panel": {
+      "types": "./dist/types/adapttable-angular-unstyled-grouping-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-grouping-panel.mjs"
+    },
+    "./header-filters": {
+      "types": "./dist/types/adapttable-angular-unstyled-header-filters.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-header-filters.mjs"
+    },
+    "./preset": {
+      "types": "./dist/types/adapttable-angular-unstyled-preset.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-preset.mjs"
+    },
+    "./row-actions": {
+      "types": "./dist/types/adapttable-angular-unstyled-row-actions.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-row-actions.mjs"
+    },
+    "./row-reorder": {
+      "types": "./dist/types/adapttable-angular-unstyled-row-reorder.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-row-reorder.mjs"
+    },
+    "./saved-views": {
+      "types": "./dist/types/adapttable-angular-unstyled-saved-views.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-saved-views.mjs"
+    },
+    "./virtualize": {
+      "types": "./dist/types/adapttable-angular-unstyled-virtualize.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-virtualize.mjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

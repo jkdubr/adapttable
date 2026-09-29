@@ -16,7 +16,7 @@ export type VirtualizeOptions = VirtualizeInput;
  * Render only the rows in view.
  *
  * ```ts
- * import { virtualize } from "@adapttable/angular-unstyled";
+ * import { virtualize } from "@adapttable/angular-unstyled/virtualize";
  *
  * features: [virtualize(), virtualize({ estimateRowSize: 56 })]
  * ```

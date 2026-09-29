@@ -27,7 +27,7 @@ export interface CellNavigationOptions {
  * A keyboard grid with a focused cell.
  *
  * ```ts
- * import { cellNavigation } from "@adapttable/angular-unstyled";
+ * import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
  *
  * features: [cellNavigation()]
  * ```

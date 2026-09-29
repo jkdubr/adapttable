@@ -2,27 +2,23 @@
  * `@adapttable/angular-unstyled` — the Angular table drawn with native HTML
  * and no styles of its own, over `@adapttable/angular`.
  *
+ * Feature factories live on secondary entries (`bulk-actions`, `filters`,
+ * …); import them from those paths or from `@adapttable/angular-unstyled/features`.
+ *
  * @packageDocumentation
  */
+export { AdaptFilterChips } from "./components/activeFilterChips";
+export { AdaptAutoFilterForm } from "./components/autoFilterForm";
+export { AdaptBulkBar } from "./components/bulkActionBar";
+export { AdaptColumnMenu } from "./components/columnMenu";
+export { AdaptFilterDrawer, AdaptFiltersForm } from "./components/filterPanel";
+export { AdaptFilterPopover } from "./components/filterPopover";
 export { AdaptGroupingPanel } from "./components/groupingPanel";
-export { AdaptDataTable, type TableView } from "./dataTable";
+export { AdaptSavedViewsMenu } from "./components/savedViewsMenu";
 export {
-  batchEditing,
-  bulkActions,
-  cellNavigation,
-  columnMenu,
-  densityChooser,
-  editing,
-  exportCsv,
-  filters,
-  fullscreen,
-  groupingPanel,
-  headerFilters,
-  rowActions,
-  type RowActionsFeatureOptions,
-  rowEditing,
-  rowReorder,
-  savedViews,
-  virtualize,
-} from "./features";
+  AdaptDensityButton,
+  AdaptExportButton,
+  AdaptFullscreenButton,
+} from "./components/toolbarExtras";
+export { AdaptDataTable, type TableView } from "./dataTable";
 export type { FiltersMode, FiltersView } from "./tableFilters";

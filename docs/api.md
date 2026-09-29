@@ -3076,17 +3076,20 @@ unpublished while it reaches parity with the React kits. `AdaptDataTable`
 (`<adapt-data-table>`) takes the rows, columns and row key as inputs and
 renders search, sorting, paging, the phone card layout, row selection and
 keyboard cell navigation with the `data-adapttable-part` names every kit
-shares. Its `features` input composes `columnMenu`, `filters`,
-`headerFilters`, `bulkActions`, `rowActions` (`RowActionsFeatureOptions`),
-`densityChooser`, `fullscreen`, `exportCsv`, `savedViews`,
-`groupingPanel`, `virtualize`, `cellNavigation`, `rowReorder`, `editing`,
-`rowEditing` and `batchEditing`; `filtersMode`
-(`FiltersMode`) picks the anchored popover or the drawer. Each feature draws
-the kit's own native controls. `AdaptGroupingPanel` draws the grouping
-strip with those same native controls. `paginationMode` and `maxHeight` arm
-infinite lists and a scroll-box window. `TableView` is what the table renders from
-once its inputs have arrived, and `FiltersView` is the filters on that view:
-the button, the open panel, and the form, overlay, chips and header funnels.
+shares. Its `features` input composes factories from secondary entries —
+`columnMenu`, `filters`, `headerFilters`, `bulkActions`, `rowActions`
+(`RowActionsFeatureOptions`), `densityChooser`, `fullscreen`, `exportCsv`,
+`savedViews`, `groupingPanel`, `virtualize`, `cellNavigation`, `rowReorder`,
+`editing`, `rowEditing` and `batchEditing` — each importable from its own
+subpath (or from `@adapttable/angular-unstyled/features`); `standardPreset`
+(`@adapttable/angular-unstyled/preset`) assembles the zero-configuration
+set. `filtersMode` (`FiltersMode`) picks the anchored popover or the drawer.
+Each feature draws the kit's own native controls. `AdaptGroupingPanel` draws
+the grouping strip with those same native controls. `paginationMode` and
+`maxHeight` arm infinite lists and a scroll-box window. `TableView` is what
+the table renders from once its inputs have arrived, and `FiltersView` is
+the filters on that view: the button, the open panel, and the form, overlay,
+chips and header funnels.
 
 ## Other packages
 

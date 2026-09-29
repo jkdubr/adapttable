@@ -1,9 +1,9 @@
 import type { ColumnDef, ColumnLayoutState } from "@adapttable/angular";
+import { columnMenu } from "@adapttable/angular-unstyled/column-menu";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptDataTable } from "./dataTable";
-import { columnMenu } from "./features";
 
 interface City {
   id: string;

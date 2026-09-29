@@ -6,5 +6,24 @@
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "batch-editing",
+    "bulk-actions",
+    "cell-navigation",
+    "column-menu",
+    "density",
+    "editing",
+    "export",
+    "features",
+    "filters",
+    "fullscreen",
+    "grouping-panel",
+    "header-filters",
+    "preset",
+    "row-actions",
+    "row-reorder",
+    "saved-views",
+    "virtualize"
+  ]
 }

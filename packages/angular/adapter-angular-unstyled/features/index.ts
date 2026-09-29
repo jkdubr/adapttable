@@ -1,0 +1,24 @@
+/**
+ * `@adapttable/angular-unstyled/features` — every feature factory this kit
+ * publishes, forwarded from its own secondary entries.
+ *
+ * @packageDocumentation
+ */
+export { batchEditing } from "@adapttable/angular-unstyled/batch-editing";
+export { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
+export { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
+export { columnMenu } from "@adapttable/angular-unstyled/column-menu";
+export { densityChooser } from "@adapttable/angular-unstyled/density";
+export { editing, rowEditing } from "@adapttable/angular-unstyled/editing";
+export { exportCsv } from "@adapttable/angular-unstyled/export";
+export { filters } from "@adapttable/angular-unstyled/filters";
+export { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
+export { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
+export { headerFilters } from "@adapttable/angular-unstyled/header-filters";
+export {
+  rowActions,
+  type RowActionsFeatureOptions,
+} from "@adapttable/angular-unstyled/row-actions";
+export { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
+export { savedViews } from "@adapttable/angular-unstyled/saved-views";
+export { virtualize } from "@adapttable/angular-unstyled/virtualize";

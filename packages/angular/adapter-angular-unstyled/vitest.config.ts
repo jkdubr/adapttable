@@ -19,6 +19,14 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: /^@adapttable\/angular-unstyled$/,
+        replacement: path.resolve(packageDir, "src/index.ts"),
+      },
+      {
+        find: /^@adapttable\/angular-unstyled\/(.+)$/,
+        replacement: path.resolve(packageDir, "$1/index.ts"),
+      },
+      {
         find: /^@adapttable\/core$/,
         replacement: path.resolve(packageDir, "../../shared/core/src/index.ts"),
       },
@@ -41,7 +49,24 @@ export default defineConfig({
     coverage: {
       provider: "istanbul",
       reporter: ["text", "lcov", "html"],
-      include: ["src/**/*.ts"],
+      include: [
+        "src/**/*.ts",
+        "batch-editing/**/*.ts",
+        "bulk-actions/**/*.ts",
+        "cell-navigation/**/*.ts",
+        "column-menu/**/*.ts",
+        "density/**/*.ts",
+        "editing/**/*.ts",
+        "export/**/*.ts",
+        "filters/**/*.ts",
+        "fullscreen/**/*.ts",
+        "grouping-panel/**/*.ts",
+        "header-filters/**/*.ts",
+        "row-actions/**/*.ts",
+        "row-reorder/**/*.ts",
+        "saved-views/**/*.ts",
+        "virtualize/**/*.ts",
+      ],
       exclude: ["src/**/*.test.ts", "src/**/index.ts"],
       thresholds: {
         statements: 95,

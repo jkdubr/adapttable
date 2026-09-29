@@ -1,15 +1,13 @@
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
+import { densityChooser } from "@adapttable/angular-unstyled/density";
+import { exportCsv } from "@adapttable/angular-unstyled/export";
+import { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
+import { rowActions } from "@adapttable/angular-unstyled/row-actions";
+import { savedViews } from "@adapttable/angular-unstyled/saved-views";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptDataTable } from "./dataTable";
-import {
-  densityChooser,
-  exportCsv,
-  fullscreen,
-  rowActions,
-  savedViews,
-} from "./features";
 
 interface City {
   id: string;
