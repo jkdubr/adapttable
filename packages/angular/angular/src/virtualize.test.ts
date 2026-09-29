@@ -229,7 +229,7 @@ describe("injectTableVirtualization", () => {
     const injector = TestBed.inject(Injector);
     const state = injectTableVirtualization({
       rows: signal(rows),
-      rowKey: (row) => row.id,
+      rowKey: (row: Row) => row.id,
       enabled: false,
       estimateSize: 32,
       injector,

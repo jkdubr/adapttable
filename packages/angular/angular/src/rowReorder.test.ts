@@ -55,7 +55,7 @@ class ReorderHost {
 describe("rowReorder feature", () => {
   it("registers under the row-reorder id with the host handler", () => {
     const onRowReorder = vi.fn();
-    const feature = rowReorder(onRowReorder, { allowCrossPage: true });
+    const feature = rowReorder(onRowReorder);
     expect(feature.id).toBe("row-reorder");
     expect(featureOptionsOf([feature])).toEqual({});
   });
@@ -71,12 +71,11 @@ describe("injectRowReorder", () => {
     const fixture = TestBed.createComponent(ReorderHost);
     fixture.autoDetectChanges();
     await fixture.whenStable();
-    const reorder = fixture.componentInstance.reorder;
-    expect(reorder).toBeDefined();
-    const state = reorder!();
+    const live = fixture.componentInstance.reorder!;
+    const state = live();
     expect(state.lifted).toBeNull();
     expect(state.isLifted("1")).toBe(false);
-    expect(state.isMovePending(PEOPLE[0]!)).toBe(false);
+    expect(state.isMovePending?.(PEOPLE[0]!)).toBe(false);
     expect(state.dragProps("1", 0).draggable).toBe(true);
 
     const drag = Object.assign(new Event("dragstart"), {
@@ -84,8 +83,8 @@ describe("injectRowReorder", () => {
     }) as unknown as DragEvent;
     state.dragProps("1", 0).onDragStart(drag);
     fixture.detectChanges();
-    expect(reorder!().isLifted("1")).toBe(true);
-    expect(reorder!().lifted?.rowId).toBe("1");
+    expect(live().isLifted("1")).toBe(true);
+    expect(live().lifted?.rowId).toBe("1");
 
     const over = Object.assign(new Event("dragover"), {
       dataTransfer: { dropEffect: "move" },
@@ -113,14 +112,13 @@ describe("injectRowReorder", () => {
     );
     fixture.detectChanges();
 
-    reorder!().moveBy(1);
-    reorder!().moveMenu();
-    reorder!().selectMoveTarget(0);
-    reorder!().cancelMove();
-    reorder!().confirmMove();
+    live().moveBy(0, 1, PEOPLE[0]!, 0, 3);
+    live().moveMenu(PEOPLE[0]!);
+    live().cancelMove();
+    live().confirmMove();
     fixture.detectChanges();
 
-    expect(reorder!().rowAttrs("1", 0)).toEqual({
+    expect(live().rowAttrs("1", 0)).toEqual({
       "data-dragging": undefined,
       "data-drop": undefined,
     });
