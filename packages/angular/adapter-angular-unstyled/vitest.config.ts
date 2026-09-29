@@ -40,7 +40,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "row-reorder/**/*.test.ts"],
     clearMocks: true,
     restoreMocks: true,
     pool: "threads",
@@ -67,7 +67,11 @@ export default defineConfig({
         "saved-views/**/*.ts",
         "virtualize/**/*.ts",
       ],
-      exclude: ["src/**/*.test.ts", "src/**/index.ts"],
+      exclude: [
+        "src/**/*.test.ts",
+        "src/**/index.ts",
+        "row-reorder/**/*.test.ts",
+      ],
       thresholds: {
         statements: 95,
         branches: 90,
