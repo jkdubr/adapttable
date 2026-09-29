@@ -2,4 +2,4 @@
 "@adapttable/angular": minor
 ---
 
-Add Angular row virtualization on `@tanstack/angular-virtual`, mount the grouping panel, and ship the grouping-panel Chrome: `virtualize()` windows the body; the panel owns group-by state with native unstyled controls.
+Add Angular row virtualization, cell-navigation as a feature, and the grouping-panel Chrome/mount: `virtualize()` windows the body; `cellNavigation()` arms the keyboard grid; the panel owns group-by state with native unstyled controls.

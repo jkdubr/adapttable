@@ -10,6 +10,7 @@ import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
+import { CellNavigationOptions } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
 import { ColumnLayoutState } from '@adapttable/angular';
 import { ColumnMenuSlotProps } from '@adapttable/angular';
@@ -268,6 +269,9 @@ export class AdaptGroupingPanel<TRow> {
 
 // @public
 export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature;
+
+// @public
+export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
 
 // @public
 export function columnMenu(): AdaptTableFeature;

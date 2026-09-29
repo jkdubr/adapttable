@@ -21,6 +21,7 @@ export {
   AdaptHeader,
   type ResolvedRenderer,
 } from "./cell";
+export { cellNavigation, type CellNavigationOptions } from "./cellNavigation";
 export { AdaptChecklistChrome, type ChecklistSlots } from "./checklist";
 export {
   type CellContext,

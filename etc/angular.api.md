@@ -604,6 +604,14 @@ export interface CellContext<TRow> {
     readonly value: unknown;
 }
 
+// @public
+export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
+
+// @public
+export interface CellNavigationOptions {
+    readonly onRangeChange?: (range: CellRange | null) => void;
+}
+
 export { CellRange }
 
 export { CHECKLIST_LIST_HEIGHT }

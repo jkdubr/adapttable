@@ -281,7 +281,11 @@ export class AdaptDataTable<TRow> implements OnInit {
   readonly selectable = input(false);
   /** The selected row ids, to control the selection. */
   readonly selectedIds = input<readonly string[]>();
-  /** Arrow keys move between cells. Read once. */
+  /**
+   * Arrow keys move between cells. Read once. Prefer composing
+   * `cellNavigation()` when listing features; this input still toggles the
+   * grid alone.
+   */
   readonly cellNavigation = input(false);
   /**
    * The features this table composes, such as `columnMenu()`. Read once,
@@ -518,9 +522,10 @@ export class AdaptDataTable<TRow> implements OnInit {
             labels: table.labels(),
           }))
         : undefined;
-    const grid = this.cellNavigation()
-      ? injectGridFocus({ table, enabled: true, injector })
-      : undefined;
+    const grid =
+      this.cellNavigation() || featureOptions.cellNavigation === true
+        ? injectGridFocus({ table, enabled: true, injector })
+        : undefined;
     const root = (): HTMLElement | null => this.root()?.nativeElement ?? null;
     const densityState =
       featureOptions.densityChooser === true

@@ -5882,6 +5882,8 @@
       "BulkActionRunnerOptions",
       "BulkActionRunnerState",
       "CellContext",
+      "cellNavigation",
+      "CellNavigationOptions",
       "ChecklistSlots",
       "ColumnDef",
       "ColumnDrag",

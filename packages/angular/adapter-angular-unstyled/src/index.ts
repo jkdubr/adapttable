@@ -7,6 +7,7 @@
 export { AdaptDataTable, type TableView } from "./dataTable";
 export {
   bulkActions,
+  cellNavigation,
   columnMenu,
   densityChooser,
   exportCsv,
