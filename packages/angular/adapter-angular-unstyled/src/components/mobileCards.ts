@@ -5,8 +5,10 @@ import {
   AdaptAttrs,
   AdaptCell,
   AdaptSlot,
+  type ColumnDef,
   EDITABLE_CELL,
   GROUP_HEADER_CARD,
+  resolveMobileLabel,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_BUTTONS,
   type RowReorderButtonsProps,
@@ -49,6 +51,16 @@ export class AdaptMobileCards<TRow> {
 
   private buttonsPropsCache = new Map<string, RowReorderButtonsProps<never>>();
   private buttonsPropsToken = "";
+
+  /**
+   * A field's caption: its `mobileLabel`, else a string header, else its
+   * key; an empty `mobileLabel` shows none.
+   *
+   * @internal
+   */
+  protected caption(column: ColumnDef<TRow>): string | undefined {
+    return resolveMobileLabel(column);
+  }
 
   /**
    * A row's id, for `@for` to track rows by.

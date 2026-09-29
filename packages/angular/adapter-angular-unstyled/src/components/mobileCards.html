@@ -33,9 +33,9 @@
           }
           @for (column of v.table.columns(); track column.key) {
             <div data-adapttable-part="card-row">
-              <span data-adapttable-part="card-label">{{
-                column.mobileLabel ?? column.header
-              }}</span>
+              @if (caption(column); as label) {
+                <span data-adapttable-part="card-label">{{ label }}</span>
+              }
               <span data-adapttable-part="card-value">
                 @if (v.editableCells; as editableCells) {
                   <ng-container

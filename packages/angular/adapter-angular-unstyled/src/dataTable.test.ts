@@ -390,3 +390,47 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(part("cards")).not.toBeNull();
   });
 });
+
+describe("unstyled Angular phone card captions", () => {
+  @Component({
+    imports: [AdaptDataTable],
+    template: `
+      <adapt-data-table
+        [data]="rows"
+        [columns]="columns"
+        [rowKey]="rowKey"
+        [urlSync]="false"
+        [forceMobile]="true"
+      />
+    `,
+  })
+  class CaptionHost {
+    readonly rows: City[] = CITIES.slice(0, 1);
+    readonly rowKey = (row: City) => row.id;
+    readonly columns: ColumnDef<City>[] = [
+      {
+        key: "name",
+        header: "City",
+        mobileLabel: "",
+        accessor: (row) => row.name,
+      },
+      { key: "country", header: "Country", accessor: (row) => row.country },
+    ];
+  }
+
+  it("captions a field by its header and drops the caption an empty mobileLabel asks to", async () => {
+    const fixture = TestBed.createComponent(CaptionHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const { parts } = queryParts(fixture.nativeElement as HTMLElement);
+    const rows = parts("card-row");
+    expect(rows).toHaveLength(2);
+    expect(
+      rows[0]!.querySelector('[data-adapttable-part="card-label"]')
+    ).toBeNull();
+    expect(rows[0]!.textContent.trim()).toBe("City 01");
+    expect(
+      parts("card-label").map((label) => label.textContent.trim())
+    ).toEqual(["Country"]);
+  });
+});

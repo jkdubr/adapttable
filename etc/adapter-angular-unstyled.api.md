@@ -645,6 +645,7 @@ export class AdaptGroupingPanel<TRow> {
 
 // @internal
 export class AdaptMobileCards<TRow> {
+    protected caption(column: ColumnDef<TRow>): string | undefined;
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
     protected readonly groupHeaderCardSlot: FeatureSlotKey<GroupHeaderCardSlotProps<never, unknown, ColumnModel<never>>>;
     protected reorderButtonsProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderButtonsProps_2<never>;
