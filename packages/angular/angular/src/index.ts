@@ -32,7 +32,18 @@ export {
   provideAdaptTableFeatures,
 } from "./features";
 export { type FrontendDataOptions, injectFrontendData } from "./frontendData";
+export {
+  type GridFocus,
+  type GridFocusOptions,
+  injectGridFocus,
+} from "./gridFocus";
+export { AdaptLiveRegion } from "./liveRegion";
 export { injectIsMobile, type IsMobileOptions } from "./mobile";
+export {
+  injectRowSelection,
+  type RowSelection,
+  type RowSelectionOptions,
+} from "./selection";
 export {
   type ExternalStore,
   fromStore,
@@ -46,3 +57,19 @@ export {
   type TableUrlState,
   type TableUrlStateOptions,
 } from "./url";
+export type {
+  CellRange,
+  Direction,
+  ExtraFilters,
+  GridCell,
+  PaginationInfo,
+  PaginationSlot,
+  SortDirection,
+  TableLabels,
+  TableQueryParams,
+  TableSource,
+} from "@adapttable/core";
+export type {
+  ChromeBodyRegion,
+  HeaderSelectionState,
+} from "@adapttable/core/binding";

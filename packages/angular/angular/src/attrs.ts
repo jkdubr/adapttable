@@ -4,6 +4,7 @@
  * instead of binding each attribute by hand.
  */
 import {
+  DestroyRef,
   Directive,
   effect,
   ElementRef,
@@ -15,8 +16,9 @@ import {
 import { primitiveText } from "./columnDef";
 
 /**
- * An attribute record: attribute values, an optional `style` object, and
- * `onClick` / `onChange` handlers.
+ * An attribute record: attribute values, an optional `style` object, event
+ * handlers (`onClick`, `onChange`, `onKeyDown`, `onFocus` and the mouse
+ * presses) and an optional `ref` that receives the element.
  *
  * @public
  */
@@ -27,6 +29,22 @@ const EVENTS: Readonly<Record<string, string>> = {
   onClick: "click",
   // A prop getter's `onChange` follows every keystroke.
   onChange: "input",
+  onKeyDown: "keydown",
+  onFocus: "focus",
+  onMouseDown: "mousedown",
+  onMouseEnter: "mouseenter",
+  onMouseUp: "mouseup",
+};
+
+/**
+ * Boolean keys set as DOM properties rather than attributes, so a checkbox
+ * follows the record after the user has clicked it.
+ */
+const PROPERTIES = new Set(["checked", "indeterminate"]);
+
+/** Record keys spelled the React way, and the attribute each one names. */
+const ATTRIBUTE_NAMES: Readonly<Record<string, string>> = {
+  tabIndex: "tabindex",
 };
 
 /** The attribute text for a value, or `null` to remove the attribute. */
@@ -58,10 +76,14 @@ export class AdaptAttrs {
   private styles = new Set<string>();
   private readonly handlers = new Map<string, (event: Event) => void>();
   private readonly listening = new Map<string, () => void>();
+  private ref: ((element: HTMLElement | null) => void) | undefined;
 
   constructor() {
     effect(() => {
       this.apply(this.adaptAttrs());
+    });
+    inject(DestroyRef).onDestroy(() => {
+      this.ref?.(null);
     });
   }
 
@@ -72,10 +94,28 @@ export class AdaptAttrs {
       const event = EVENTS[name];
       if (event) this.handle(name, event, value);
       else if (name === "style") styles = this.applyStyle(value);
-      else if (name === "value") this.setProperty("value", value ?? "");
-      else if (this.applyAttribute(name, value)) attributes.add(name);
+      else if (name === "ref") this.attachRef(value);
+      else if (name === "value") this.setProperty(name, value ?? "");
+      else if (PROPERTIES.has(name)) this.setProperty(name, value === true);
+      else {
+        const attribute = ATTRIBUTE_NAMES[name] ?? name;
+        if (this.applyAttribute(attribute, value)) attributes.add(attribute);
+      }
     }
+    if (!("ref" in attrs)) this.attachRef(undefined);
     this.prune(attrs, attributes, styles);
+  }
+
+  /** Hand the element to a record's `ref`, and release the one it replaced. */
+  private attachRef(value: unknown): void {
+    const ref =
+      typeof value === "function"
+        ? (value as (element: HTMLElement | null) => void)
+        : undefined;
+    if (ref === this.ref) return;
+    this.ref?.(null);
+    this.ref = ref;
+    ref?.(this.element.nativeElement);
   }
 
   private setProperty(name: string, value: unknown): void {

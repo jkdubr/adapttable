@@ -4,18 +4,23 @@
 
 ```ts
 
+import { CellRange } from '@adapttable/core';
+import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ColumnMetadata } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
 import { ExtraFilters } from '@adapttable/core';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
+import { GridCell } from '@adapttable/core';
+import { HeaderSelectionState } from '@adapttable/core/binding';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
+import { PaginationSlot } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { SidePanelEntry } from '@adapttable/core/binding';
 import { Signal } from '@angular/core';
@@ -112,6 +117,27 @@ export class AdaptHeader<TRow> {
 }
 
 // @public
+export class AdaptLiveRegion {
+    readonly adaptLiveRegion: InputSignal<string>;
+    readonly part: InputSignal<string>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<AdaptLiveRegion, "[adaptLiveRegion]", never, {
+        "adaptLiveRegion": {
+            "alias": "adaptLiveRegion";
+            "required": true;
+            "isSignal": true;
+        };
+        "part": {
+            "alias": "part";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptLiveRegion, never>;
+}
+
+// @public
 export const ADAPTTABLE_FEATURES: InjectionToken<readonly AdaptTableFeature[]>;
 
 // @public
@@ -132,6 +158,10 @@ export interface CellContext<TRow> {
     readonly value: unknown;
 }
 
+export { CellRange }
+
+export { ChromeBodyRegion }
+
 // @public
 export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
     cell?: Renderer<CellContext<TRow>>;
@@ -142,16 +172,26 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
 
 // @public
 export interface DataTable<TRow> {
+    readonly bodyRegion: Signal<ChromeBodyRegion>;
+    readonly canLoadMore: Signal<boolean>;
+    readonly cardAttrs: (row: TRow, index: number) => Attrs;
     readonly cellAttrs: (column: ColumnDef<TRow>) => Attrs;
     readonly cellValue: (column: ColumnDef<TRow>, row: TRow) => unknown;
+    readonly clearFilters: () => void;
     readonly columns: Signal<readonly ColumnDef<TRow>[]>;
     readonly dir: Signal<Direction>;
+    readonly emptyVariant: Signal<"noData" | "noResults">;
     readonly featureHost: FeatureHostState;
     readonly headerCellAttrs: (column: ColumnDef<TRow>) => Attrs;
     readonly headerRowAttrs: () => Attrs;
     readonly isEmpty: Signal<boolean>;
     readonly isMobile: Signal<boolean>;
     readonly labels: Signal<Required<TableLabels>>;
+    readonly loadMore: () => void;
+    readonly loadMoreAttrs: () => Attrs;
+    readonly loadMoreButtonAttrs: () => Attrs;
+    readonly pagerSlots: Signal<PaginationSlot[]>;
+    readonly pageSizeOptions: Signal<readonly number[]>;
     readonly pagination: Signal<PaginationInfo>;
     readonly rowAttrs: (row: TRow, index: number) => Attrs;
     readonly rowKey: (row: TRow) => string;
@@ -163,13 +203,16 @@ export interface DataTable<TRow> {
     readonly setPage: (page: number) => void;
     readonly setSearch: (term: string) => void;
     readonly setSearchValue: (text: string) => void;
+    readonly showFooter: Signal<boolean>;
     readonly sortButtonAttrs: (column: ColumnDef<TRow>) => Attrs;
     readonly sortBy: Signal<string | undefined>;
     readonly sortByOptions: Signal<SortByOption[]>;
     readonly sortDir: Signal<SortDirection | undefined>;
     readonly source: Signal<TableSource<TRow>>;
+    readonly statusAnnouncement: Signal<string>;
     readonly tableAttrs: () => Attrs;
     readonly toggleSort: (key: string) => void;
+    readonly windowStart: Signal<number>;
 }
 
 // @public
@@ -185,17 +228,23 @@ export interface DataTableOptions<TRow> {
     readonly labels?: MaybeSignalOptional<TableLabels>;
     readonly locale?: MaybeSignalOptional<string>;
     readonly multiSort?: boolean;
+    readonly onClearFilters?: () => void;
     readonly rowKey: (row: TRow) => string;
     readonly searchDebounceMs?: number;
+    readonly selection?: RowSelection;
     readonly source: Signal<TableSource<TRow>>;
     readonly tableLabel?: MaybeSignalOptional<string>;
 }
+
+export { Direction }
 
 // @public
 export interface ExternalStore<T> {
     readonly getSnapshot: () => T;
     readonly subscribe: (listener: () => void) => () => void;
 }
+
+export { ExtraFilters }
 
 // @public
 export function fromStore<T>(store: ExternalStore<T>, options?: FromStoreOptions): Signal<T>;
@@ -221,11 +270,36 @@ export interface FrontendDataOptions<TRow> extends Omit<TableUrlStateOptions, "i
     readonly paginationMode?: MaybeSignal<PaginationMode>;
 }
 
+export { GridCell }
+
+// @public
+export interface GridFocus<TRow> {
+    readonly active: Signal<GridCell | null>;
+    readonly announcement: Signal<string>;
+    readonly cellAttrs: (column: ColumnDef<TRow>, index: number, col: number) => Attrs;
+    readonly enabled: Signal<boolean>;
+    readonly focusCell: (cell: GridCell) => void;
+    readonly headerCellAttrs: (column: ColumnDef<TRow>, col: number) => Attrs;
+    readonly range: Signal<CellRange | null>;
+    readonly rowAttrs: (row: TRow, index: number) => Attrs;
+    readonly tableAttrs: () => Attrs;
+}
+
+// @public
+export interface GridFocusOptions<TRow> {
+    readonly enabled: MaybeSignal<boolean>;
+    readonly injector?: Injector;
+    readonly onActivate?: (cell: GridCell) => void;
+    readonly table: DataTable<TRow>;
+}
+
 // @public
 export interface HeaderContext<TRow> {
     readonly $implicit: ColumnDef<TRow>;
     readonly column: ColumnDef<TRow>;
 }
+
+export { HeaderSelectionState }
 
 // @public
 export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTable<TRow>;
@@ -234,7 +308,13 @@ export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTabl
 export function injectFrontendData<TRow>(options: FrontendDataOptions<TRow>): Signal<TableSource<TRow>>;
 
 // @public
+export function injectGridFocus<TRow>(options: GridFocusOptions<TRow>): GridFocus<TRow>;
+
+// @public
 export function injectIsMobile(options?: IsMobileOptions): Signal<boolean>;
+
+// @public
+export function injectRowSelection<TRow>(options: RowSelectionOptions<TRow>): RowSelection;
 
 // @public
 export function injectTableUrlState(options?: TableUrlStateOptions): TableUrlState;
@@ -251,6 +331,10 @@ export type MaybeSignal<T> = T | Signal<T>;
 // @public
 export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
 
+export { PaginationInfo }
+
+export { PaginationSlot }
+
 // @public
 export function provideAdaptTableFeatures(...features: readonly AdaptTableFeature[]): EnvironmentProviders;
 
@@ -266,6 +350,37 @@ export interface ResolvedRenderer<TContext> {
     readonly inputs: Record<string, unknown>;
     readonly template: TemplateRef<TContext> | null;
 }
+
+// @public
+export interface RowSelection {
+    readonly clear: () => void;
+    readonly headerCheckboxAttrs: () => Attrs;
+    readonly headerState: Signal<HeaderSelectionState>;
+    readonly isSelected: (id: string) => boolean;
+    readonly replace: (ids: readonly string[]) => void;
+    readonly rowCheckboxAttrs: (id: string) => Attrs;
+    readonly selectedCount: Signal<number>;
+    readonly selectedIds: Signal<ReadonlySet<string>>;
+    readonly toggle: (id: string) => void;
+    readonly toggleAll: () => void;
+}
+
+// @public
+export interface RowSelectionOptions<TRow> {
+    readonly labels?: MaybeSignalOptional<TableLabels>;
+    readonly onSelectionChange?: (ids: string[]) => void;
+    readonly rowKey: (row: TRow) => string;
+    readonly rows: Signal<readonly TRow[]>;
+    readonly selectedIds?: MaybeSignalOptional<readonly string[]>;
+}
+
+export { SortDirection }
+
+export { TableLabels }
+
+export { TableQueryParams }
+
+export { TableSource }
 
 // @public
 export interface TableUrlState extends Pick<TableViewStore, "setPage" | "setLimit" | "setSort" | "setGroupBy" | "initializeGroupBy" | "setGroupAggregateOverrides" | "toggleSortLevel" | "setSearch" | "setExtra" | "setExtras" | "setFilterTree" | "clearExtras" | "clearAll"> {

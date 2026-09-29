@@ -98,6 +98,10 @@ export const KITS = Object.freeze([
     base: "adapter-unstyled",
   },
   { name: "adapter-bootstrap", framework: "react", role: "private" },
+  // The Angular unstyled kit is private while it reaches parity with the
+  // React kits; it passes the conformance suite from its first release. The
+  // pull request that brings it to parity publishes it as `native`.
+  { name: "adapter-angular-unstyled", framework: "angular", role: "private" },
   // The Angular kits are private placeholders until each is built: Angular
   // Material (#467), PrimeNG (#468) and NG-ZORRO (#471). The pull request that
   // builds one publishes its package and gives it the `shell` role here.

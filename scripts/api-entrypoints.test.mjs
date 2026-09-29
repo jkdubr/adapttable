@@ -74,11 +74,14 @@ describe("entrypoints", () => {
     assert.ok(!ENTRIES.some((e) => e.report === "cli-cli.api.md"));
   });
 
-  it("marks the workspace-private adapter as unpublished and the rest as published", () => {
+  it("marks the workspace-private adapters as unpublished and the rest as published", () => {
     const unpublished = [
       ...new Set(ENTRIES.filter((e) => !e.published).map((e) => e.dir)),
     ];
-    assert.deepEqual(unpublished, ["adapter-bootstrap"]);
+    assert.deepEqual(unpublished, [
+      "adapter-angular-unstyled",
+      "adapter-bootstrap",
+    ]);
   });
 
   it("names a committed report for every entry point", () => {
