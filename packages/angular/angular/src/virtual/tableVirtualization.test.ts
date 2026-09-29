@@ -1,10 +1,15 @@
-import { Component, Injector, signal } from "@angular/core";
+/**
+ * Row and keyed windows over the real TanStack virtualizer. jsdom lays
+ * nothing out, so each test gives the scroll box, the window and the rows
+ * the sizes a browser would.
+ */
+import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AdaptAttrs } from "../attrs";
 import { featureOptionsOf } from "../featureHost";
 import { virtualize } from "../features/virtualize";
-import { ADAPTTABLE_URL_ADAPTER } from "../url/tableUrlState";
 import {
   injectKeyedVirtualization,
   injectKeyedVirtualizer,
@@ -12,138 +17,195 @@ import {
   injectTableVirtualizer,
 } from "./tableVirtualization";
 
-const items = signal<
-  {
-    index: number;
-    start: number;
-    end: number;
-    size: number;
-    key: string | number;
-    lane: number;
-  }[]
->([]);
-const total = signal(0);
-
-vi.mock("@tanstack/angular-virtual", () => {
-  const make = (opts?: { getItemKey?: (index: number) => string }) => {
-    // Exercise the adapter's key extractor for in-range and missing rows.
-    opts?.getItemKey?.(0);
-    opts?.getItemKey?.(999);
-    return {
-      getVirtualItems: () => items(),
-      getTotalSize: () => total(),
-      measureElement: vi.fn(),
-      scrollToIndex: vi.fn(),
-      options: signal({ scrollMargin: 0 }),
-    };
-  };
-  return {
-    injectWindowVirtualizer: vi.fn(
-      (factory: () => { getItemKey?: (index: number) => string }) =>
-        make(typeof factory === "function" ? factory() : factory)
-    ),
-    injectVirtualizer: vi.fn(
-      (factory: () => { getItemKey?: (index: number) => string }) =>
-        make(typeof factory === "function" ? factory() : factory)
-    ),
-  };
-});
-
 interface Row {
   id: string;
 }
 
-const rows: Row[] = Array.from({ length: 5 }, (_, i) => ({
-  id: String(i),
+const ROWS: Row[] = Array.from({ length: 60 }, (_, index) => ({
+  id: String(index),
 }));
 
-@Component({
-  template: `
-    <output class="count">{{ window().rows.length }}</output>
-    <output class="enabled">{{ window().enabled }}</output>
-  `,
-})
-class Host {
-  private readonly rows = signal(rows);
-  readonly window = injectTableVirtualization({
-    rows: this.rows,
-    rowKey: (row) => row.id,
-    enabled: true,
-    estimateSize: 40,
+/** Heights by element: the scroll box, and a row by its `data-index`. */
+const layout = {
+  box: 200,
+  row: (index: number): number => (index === 0 ? 100 : 40),
+  scrollTop: 0,
+  scrollY: 0,
+};
+
+const restore: (() => void)[] = [];
+
+function stub<T extends object>(
+  target: T,
+  name: PropertyKey,
+  descriptor: PropertyDescriptor
+): void {
+  const previous = Object.getOwnPropertyDescriptor(target, name);
+  Object.defineProperty(target, name, { configurable: true, ...descriptor });
+  restore.push(() => {
+    if (previous) Object.defineProperty(target, name, previous);
+    else Reflect.deleteProperty(target, name);
   });
 }
 
+function isBox(element: Element): boolean {
+  return element.classList.contains("box");
+}
+
+/** The box's height, a row's by its `data-index`, and nothing else's. */
+function heightOf(element: Element): number {
+  if (isBox(element)) return layout.box;
+  const index = element.getAttribute("data-index");
+  return index === null ? 0 : layout.row(Number(index));
+}
+
+beforeEach(() => {
+  layout.scrollTop = 0;
+  layout.scrollY = 0;
+  stub(HTMLElement.prototype, "offsetHeight", {
+    get(this: HTMLElement) {
+      return heightOf(this);
+    },
+  });
+  stub(Element.prototype, "clientHeight", {
+    get(this: Element) {
+      return isBox(this) ? layout.box : 0;
+    },
+  });
+  stub(Element.prototype, "scrollHeight", {
+    get(this: Element) {
+      return isBox(this) ? 100_000 : 0;
+    },
+  });
+  stub(Element.prototype, "scrollTo", {
+    value(this: Element, options: { top?: number }) {
+      if (isBox(this) && options.top !== undefined) {
+        layout.scrollTop = options.top;
+      }
+    },
+  });
+  stub(Element.prototype, "scrollTop", {
+    get(this: Element) {
+      return isBox(this) ? layout.scrollTop : 0;
+    },
+    set(this: Element, value: number) {
+      if (isBox(this)) layout.scrollTop = value;
+    },
+  });
+  stub(Element.prototype, "getBoundingClientRect", {
+    value(this: Element) {
+      const height = heightOf(this);
+      return { top: 0, left: 0, width: 0, height, bottom: height, right: 0 };
+    },
+  });
+  stub(globalThis, "scrollY", {
+    get: () => layout.scrollY,
+  });
+});
+
+afterEach(() => {
+  while (restore.length > 0) restore.pop()!();
+  document.body.replaceChildren();
+});
+
 @Component({
+  imports: [AdaptAttrs],
   template: `
-    <output class="count">{{ vz.virtualization().rows.length }}</output>
-    <output class="pad">{{ vz.virtualization().paddingBottom }}</output>
+    <div class="box" #box>
+      @for (entry of vz.virtualization().rows; track entry.key) {
+        <div
+          class="row"
+          [attr.data-index]="entry.index"
+          [adaptAttrs]="{ ref: vz.virtualization().measureElement }"
+        >
+          {{ entry.row.id }}
+        </div>
+      }
+    </div>
   `,
 })
-class FullHost {
-  private readonly rows = signal(rows);
-  readonly onEndReached = vi.fn();
-  readonly scrollEl = document.createElement("div");
-  readonly estimate = signal(48);
-  readonly overscan = signal(2);
-  readonly margin = signal(8);
+class BoxHost {
   readonly enabled = signal(true);
-  readonly expandable = signal(false);
+  readonly estimate = signal(40);
+  readonly onEndReached = vi.fn();
   readonly vz = injectTableVirtualizer({
-    rows: this.rows,
-    rowKey: (row) => row.id,
+    rows: signal(ROWS.slice(0, 20)),
+    rowKey: (row: Row) => row.id,
     enabled: this.enabled,
     estimateSize: this.estimate,
-    overscan: this.overscan,
-    scrollMargin: this.margin,
-    expandable: this.expandable,
-    getScrollElement: () => this.scrollEl,
-    onEndReached: () => this.onEndReached(),
+    overscan: 0,
+    getScrollElement: () => document.querySelector(".box"),
+    onEndReached: () => {
+      this.onEndReached();
+    },
   });
 }
 
-@Component({
-  template: `<output class="page">{{ vz.virtualization().enabled }}</output>`,
-})
+@Component({ template: "" })
 class PageHost {
-  readonly onEndReached = vi.fn();
-  readonly vz = injectTableVirtualizer({
-    rows: signal(rows),
+  readonly margin = input(0);
+  readonly window = injectTableVirtualization({
+    rows: signal(ROWS),
     rowKey: (row: Row) => row.id,
     enabled: true,
-    onEndReached: () => this.onEndReached(),
+    estimateSize: 40,
+    overscan: 0,
+    scrollMargin: this.margin,
   });
 }
 
-@Component({
-  template: `<output class="indices">{{ window().indices.join(",") }}</output>`,
-})
-class KeyedHost {
-  private readonly keys = signal(["a", "b", "c"]);
-  readonly window = injectKeyedVirtualization({
-    keys: this.keys,
-    enabled: false,
-    estimateSize: 48,
-  });
-}
-
-@Component({
-  template: `
-    <output class="count">{{ vz.virtualization().indices.length }}</output>
-  `,
-})
-class KeyedFullHost {
-  private readonly keys = signal(["a", "b", "c", "d"]);
-  readonly onEndReached = vi.fn();
-  readonly scrollEl = document.createElement("div");
-  readonly vz = injectKeyedVirtualizer({
-    keys: this.keys,
+@Component({ template: "" })
+class PairHost {
+  readonly vz = injectTableVirtualizer({
+    rows: signal(ROWS.slice(0, 20)),
+    rowKey: (row: Row) => row.id,
     enabled: true,
-    estimateSize: (index) => 20 + index,
-    overscan: 1,
-    scrollMargin: 4,
-    getScrollElement: () => this.scrollEl,
-    onEndReached: () => this.onEndReached(),
+    estimateSize: 40,
+    overscan: 0,
+    expandable: true,
+    getScrollElement: () => document.querySelector(".box"),
   });
+}
+
+@Component({ template: `<div class="box"></div>` })
+class KeyedHost {
+  readonly enabled = signal(true);
+  readonly onEndReached = vi.fn();
+  readonly vz = injectKeyedVirtualizer({
+    keys: signal(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]),
+    enabled: this.enabled,
+    estimateSize: 50,
+    overscan: 0,
+    getScrollElement: () => document.querySelector(".box"),
+    onEndReached: () => {
+      this.onEndReached();
+    },
+  });
+}
+
+async function mount<T>(
+  host: new () => T,
+  inputs: Record<string, unknown> = {}
+) {
+  const fixture = TestBed.createComponent(host);
+  for (const [name, value] of Object.entries(inputs)) {
+    fixture.componentRef.setInput(name, value);
+  }
+  document.body.append(fixture.nativeElement as HTMLElement);
+  fixture.autoDetectChanges();
+  await fixture.whenStable();
+  return { fixture, host: fixture.componentInstance };
+}
+
+function scrollBox(top: number): void {
+  layout.scrollTop = top;
+  document.querySelector(".box")!.dispatchEvent(new Event("scroll"));
+}
+
+function rendered(): string[] {
+  return [...document.querySelectorAll(".row")].map((row) =>
+    row.textContent.trim()
+  );
 }
 
 describe("virtualize feature", () => {
@@ -166,131 +228,159 @@ describe("virtualize feature", () => {
   });
 });
 
-describe("injectTableVirtualization", () => {
-  beforeEach(() => {
-    items.set([]);
-    total.set(0);
-    TestBed.configureTestingModule({
-      providers: [
-        {
-          provide: ADAPTTABLE_URL_ADAPTER,
-          useValue: {
-            get: () => ({}),
-            set: () => undefined,
-            subscribe: () => () => undefined,
-          },
-        },
-      ],
-    });
+describe("injectTableVirtualizer in a scroll box", () => {
+  it("renders the rows in view and spaces the rest", async () => {
+    layout.row = () => 40;
+    const { host } = await mount(BoxHost);
+    expect(rendered()).toEqual(["0", "1", "2", "3", "4"]);
+    const window = host.vz.virtualization();
+    expect(window.enabled).toBe(true);
+    expect(window.paddingTop).toBe(0);
+    expect(window.paddingBottom).toBe(15 * 40);
   });
 
-  it("feeds the window virtualizer and materializes every row when the slice is empty", () => {
-    const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector(".enabled")?.textContent).toBe(
-      "true"
+  it("moves the window as the box scrolls, and says once when the end is in view", async () => {
+    layout.row = () => 40;
+    const { fixture, host } = await mount(BoxHost);
+    scrollBox(400);
+    await fixture.whenStable();
+    expect(rendered()).toEqual(["10", "11", "12", "13", "14"]);
+    expect(host.vz.virtualization().paddingTop).toBe(400);
+    expect(host.onEndReached).not.toHaveBeenCalled();
+
+    scrollBox(600);
+    await fixture.whenStable();
+    expect(rendered()).toEqual(["15", "16", "17", "18", "19"]);
+    expect(host.onEndReached).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the true total when rows measure taller than the estimate", async () => {
+    layout.row = (index) => (index === 0 ? 100 : 40);
+    const { fixture, host } = await mount(BoxHost);
+    await fixture.whenStable();
+    expect(rendered()).toEqual(["0", "1", "2", "3"]);
+    const window = host.vz.virtualization();
+    // 100 for the first row, 40 for each of the other nineteen.
+    expect(window.paddingTop + 100 + 3 * 40 + window.paddingBottom).toBe(
+      100 + 19 * 40
     );
-    // Armed but no measured slice yet → pending spacer, no mounted rows
-    // once items land; with an empty slice and a measured total of 0 the
-    // pending height is estimate × count.
-    expect(
-      Number(fixture.nativeElement.querySelector(".count")?.textContent)
-    ).toBe(0);
   });
 
-  it("materializes the measured slice and scrolls by index", () => {
-    const fixture = TestBed.createComponent(FullHost);
-    fixture.detectChanges();
-    items.set([
-      { index: 0, start: 0, end: 40, size: 40, key: "0", lane: 0 },
-      { index: 1, start: 40, end: 80, size: 40, key: "1", lane: 0 },
-    ]);
-    total.set(200);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.vz.virtualization().rows).toHaveLength(2);
-    expect(fixture.componentInstance.vz.virtualization().enabled).toBe(true);
-    fixture.componentInstance.vz.scrollToIndex(3);
-    fixture.componentInstance.vz
-      .virtualization()
-      .measureElement?.(document.createElement("tr"));
+  it("renders every row with no spacers while windowing is off", async () => {
+    layout.row = () => 40;
+    const { fixture, host } = await mount(BoxHost);
+    host.enabled.set(false);
+    await fixture.whenStable();
+    expect(rendered()).toHaveLength(20);
+    expect(host.vz.virtualization().paddingBottom).toBe(0);
+    expect(host.vz.virtualization().measureElement).toBeUndefined();
 
-    items.set([
-      { index: 4, start: 160, end: 200, size: 40, key: "4", lane: 0 },
-    ]);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.onEndReached).toHaveBeenCalled();
-
-    fixture.componentInstance.enabled.set(false);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.vz.virtualization().rows).toHaveLength(5);
+    host.enabled.set(true);
+    await fixture.whenStable();
+    expect(rendered()).toHaveLength(5);
   });
 
-  it("accepts an injector and number estimate without signals", () => {
-    const injector = TestBed.inject(Injector);
-    const state = injectTableVirtualization({
-      rows: signal(rows),
-      rowKey: (row: Row) => row.id,
-      enabled: false,
-      estimateSize: 32,
-      injector,
-    });
-    expect(state().enabled).toBe(false);
-    expect(state().rows).toHaveLength(5);
-  });
-
-  it("windows against the page when no scroll element is given", () => {
-    const fixture = TestBed.createComponent(PageHost);
-    fixture.detectChanges();
-    items.set([
-      { index: 4, start: 160, end: 200, size: 40, key: "4", lane: 0 },
-    ]);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.onEndReached).toHaveBeenCalled();
-    expect(fixture.componentInstance.vz.virtualization().enabled).toBe(true);
+  it("scrolls the box to bring a row into view", async () => {
+    layout.row = () => 40;
+    const { host } = await mount(BoxHost);
+    host.vz.scrollToIndex(12);
+    // Centred: row 12 starts at 480; half the 200px box above it.
+    expect(layout.scrollTop).toBe(480 - 100 + 20);
   });
 });
 
-describe("injectKeyedVirtualization", () => {
-  beforeEach(() => {
-    items.set([]);
-    total.set(0);
-    TestBed.configureTestingModule({
-      providers: [
-        {
-          provide: ADAPTTABLE_URL_ADAPTER,
-          useValue: {
-            get: () => ({}),
-            set: () => undefined,
-            subscribe: () => () => undefined,
-          },
-        },
-      ],
-    });
-  });
-
-  it("returns every index when windowing is off", () => {
-    const fixture = TestBed.createComponent(KeyedHost);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector(".indices")?.textContent).toBe(
-      "0,1,2"
+describe("injectTableVirtualization against the page", () => {
+  it("windows the rows below a table that starts down the page", async () => {
+    const { fixture, host } = await mount(PageHost, { margin: 400 });
+    // jsdom's window is 768px tall; the list starts 400px down, so 368px of
+    // it shows — ten 40px rows.
+    const first = host.window();
+    expect(first.rows.map((entry) => entry.row.id)).toEqual(
+      Array.from({ length: 10 }, (_, index) => String(index))
     );
+
+    layout.scrollY = 800;
+    globalThis.dispatchEvent(new Event("scroll"));
+    await fixture.whenStable();
+    const scrolled = host.window().rows.map((entry) => Number(entry.row.id));
+    // 800px scrolled, less the 400px above the list: rows from index 10.
+    expect(scrolled[0]).toBe(10);
+    expect(scrolled.at(-1)).toBe(29);
   });
 
-  it("windows keyed entries inside a scroll element", () => {
-    const fixture = TestBed.createComponent(KeyedFullHost);
-    fixture.detectChanges();
-    items.set([
-      { index: 1, start: 20, end: 40, size: 20, key: "b", lane: 0 },
-      { index: 2, start: 40, end: 60, size: 20, key: "c", lane: 0 },
+  it("starts at the top of the list when it sits at the top of the page", async () => {
+    const { host } = await mount(PageHost, { margin: 0 });
+    expect(host.window().rows).toHaveLength(20);
+  });
+});
+
+describe("row-pair measurement", () => {
+  it("counts an open detail panel into its row's height", async () => {
+    const { fixture, host } = await mount(PairHost);
+    document.body.insertAdjacentHTML("beforeend", '<div class="box"></div>');
+    await fixture.whenStable();
+    const window = host.vz.virtualization();
+    expect(window.measureElement).toBeUndefined();
+    const pair = window.measureRowPair!;
+    const before = window.paddingTop + window.paddingBottom;
+
+    layout.row = (index) => (index === 0 ? 40 : 160);
+    const row = document.createElement("tr");
+    row.setAttribute("data-index", "0");
+    const detail = document.createElement("tr");
+    detail.setAttribute("data-index", "1");
+    pair.row(0)(row);
+    pair.detail(0)(detail);
+    await fixture.whenStable();
+
+    const after = host.vz.virtualization();
+    expect(after.paddingTop + after.paddingBottom - before).toBe(160);
+  });
+});
+
+describe("injectKeyedVirtualizer", () => {
+  it("windows keyed entries in a scroll box and every index while off", async () => {
+    layout.row = () => 50;
+    const { fixture, host } = await mount(KeyedHost);
+    expect(host.vz.virtualization().indices).toEqual([0, 1, 2, 3]);
+    expect(host.vz.virtualization().paddingBottom).toBe(6 * 50);
+
+    scrollBox(300);
+    await fixture.whenStable();
+    expect(host.vz.virtualization().indices).toEqual([6, 7, 8, 9]);
+    expect(host.onEndReached).toHaveBeenCalledOnce();
+
+    host.enabled.set(false);
+    await fixture.whenStable();
+    expect(host.vz.virtualization().indices).toEqual([
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
     ]);
-    total.set(80);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.vz.virtualization().indices).toEqual([
-      1, 2,
-    ]);
-    fixture.componentInstance.vz.scrollToIndex(0);
-    items.set([{ index: 3, start: 60, end: 80, size: 20, key: "d", lane: 0 }]);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.onEndReached).toHaveBeenCalled();
+  });
+  it("measures a taller entry and scrolls an entry into view", async () => {
+    layout.row = (index) => (index === 1 ? 150 : 50);
+    const { fixture, host } = await mount(KeyedHost);
+    const before = host.vz.virtualization();
+    expect(before.paddingBottom).toBe(6 * 50);
+    const entry = document.createElement("div");
+    entry.setAttribute("data-index", "1");
+    before.measureElement!(entry);
+    await fixture.whenStable();
+    // Entry 1 measures 150, so entries 0 and 1 fill the 200px box and the
+    // other eight wait below at their estimate.
+    const after = host.vz.virtualization();
+    expect(after.indices).toEqual([0, 1]);
+    expect(after.paddingBottom).toBe(8 * 50);
+
+    host.vz.scrollToIndex(8);
+    // Centred: entry 8 starts at 50 + 150 + 6 × 50 = 500.
+    expect(layout.scrollTop).toBe(500 - 100 + 25);
+  });
+
+  it("lists every entry from the window-only injector while off", () => {
+    const window = TestBed.runInInjectionContext(() =>
+      injectKeyedVirtualization({ keys: signal(["x", "y"]), enabled: false })
+    );
+    expect(window().enabled).toBe(false);
+    expect(window().indices).toEqual([0, 1]);
   });
 });

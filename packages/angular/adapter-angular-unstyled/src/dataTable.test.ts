@@ -391,7 +391,9 @@ describe("unstyled Angular editing and virtualize", () => {
     Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
       configurable: true,
       get(this: HTMLElement) {
-        return this.dataset.adapttablePart === "cards" ? 320 : 0;
+        const part = this.dataset.adapttablePart;
+        if (part === "cards") return 320;
+        return part === "card" ? 160 : 0;
       },
     });
     const top = Object.getOwnPropertyDescriptor(Element.prototype, "scrollTop");

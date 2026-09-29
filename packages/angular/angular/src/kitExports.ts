@@ -196,8 +196,10 @@ export {
 export {
   bodyWindowKind,
   type ChromeBodySlot,
+  chromeRenderModel,
   desktopBodySlots,
   type DesktopRowWiringArgs,
+  estimateBodyItemSize,
   EXTRA_ROW_PARTS,
   GROUP_HEADER_CARD,
   GROUP_HEADER_ROW,

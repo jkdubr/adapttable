@@ -3062,7 +3062,16 @@ controls: the host writes its own markup.
   `injectTableVirtualization` / `injectKeyedVirtualization` (with
   `TableVirtualizationOptions` / `KeyedVirtualizationOptions`) and the
   `injectTableVirtualizer` / `injectKeyedVirtualizer` scroll helpers are the
-  headless hooks kits call. `cellNavigation` (`CellNavigationOptions`) turns
+  headless hooks kits call. A virtualized row or card hands itself to the
+  window's `measureElement`, so rows taller than their estimate keep the true
+  scroll height; `injectRowPairMeasurer` (`RowPairMeasurerOptions`, with
+  `ResizableVirtualizer` and `RowPairMeasurer`) measures a row together with
+  its open detail panel. `injectMeasuredWindowScrollMargin`
+  (`MeasuredWindowScrollMarginOptions`) keeps a page-scrolled window's margin
+  equal to where the list starts, so a table down the page windows the rows in
+  view. `injectColumnWindow` (`ColumnWindowOptions`, returning `ColumnWindow`)
+  windows a wide table's columns — pinned ones always rendered — and
+  `AdaptColumnSpacer` holds the skipped width open on either side. `cellNavigation` (`CellNavigationOptions`) turns
   on the keyboard grid; `injectGridFocus` is the underlying hook.
   `rowReorder` / `injectRowReorder` (`RowReorderStateOptions`) publish the
   drag and keyboard grab model. `editing` / `injectCellEditing`

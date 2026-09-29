@@ -36,6 +36,8 @@ import {
   type VirtualItem,
 } from "@tanstack/angular-virtual";
 
+import { injectRowPairMeasurer } from "./measureRowPair";
+
 function asItemMeta(item: VirtualItem): VirtualItemMeta {
   return {
     index: item.index,
@@ -115,7 +117,11 @@ function readEstimate(
 /** The methods the window math and scroll helpers call on either virtualizer. */
 type ActiveVirtualizer = Pick<
   AngularVirtualizer<Element, Element>,
-  "getVirtualItems" | "getTotalSize" | "measureElement" | "scrollToIndex"
+  | "getVirtualItems"
+  | "getTotalSize"
+  | "measureElement"
+  | "resizeItem"
+  | "scrollToIndex"
 >;
 
 function pickVirtualizer(
@@ -208,6 +214,11 @@ export function injectTableVirtualizer<TRow>(
         options.onEndReached?.();
       }
     });
+    // A row with an open detail panel is two elements: measure them as a pair.
+    const measureRowPair = injectRowPairMeasurer({
+      virtualizer: activeVirtualizer,
+      enabled: computed(() => enabled() && expandable()),
+    });
 
     const virtualization = computed((): TableVirtualization<TRow> => {
       const on = enabled();
@@ -235,7 +246,7 @@ export function injectTableVirtualizer<TRow>(
         items: active ? items : [],
         estimateSize: estimateSize(),
         expandable: expandable(),
-        measureRowPair: undefined,
+        measureRowPair: expandable() ? measureRowPair : undefined,
       });
     });
 

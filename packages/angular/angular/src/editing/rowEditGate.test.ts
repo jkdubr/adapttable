@@ -69,6 +69,7 @@ class TestButton {
       [value]="props().draft"
       (input)="props().setDraft(field.value)"
       (keydown)="props().onEditorKeyDown($event)"
+      (blur)="props().commitOnBlur()"
     />
   `,
 })
@@ -139,6 +140,41 @@ class RowHost {
   readonly showBegin = signal(true);
   readonly conflict = signal<{ asking: boolean } | undefined>(undefined);
   readonly slots = SLOTS;
+  readonly editor = TestEditor;
+}
+
+const POINTS: ColumnDef<Task> = {
+  key: "points",
+  header: "Points",
+  accessor: (r) => r.title.length,
+  editable: true,
+};
+
+@Component({
+  imports: [AdaptRowEditCell],
+  template: `
+    @if (editing().isEditing("1")) {
+      @for (column of columns; track column.key; let first = $first) {
+        <adapt-row-edit-cell
+          [rowEditing]="editing()"
+          [column]="column"
+          [display]="''"
+          [editLabel]="'Edit ' + column.key"
+          [takesFocus]="first"
+          [editor]="editor"
+        />
+      }
+    }
+  `,
+})
+class TwoFieldHost {
+  readonly onRowEdit = vi.fn();
+  readonly columns = [COLUMN, POINTS];
+  readonly editing = injectRowEditing<Task>({
+    enabled: true,
+    columns: this.columns,
+    onRowEdit: this.onRowEdit,
+  });
   readonly editor = TestEditor;
 }
 
@@ -252,6 +288,30 @@ describe("AdaptRowEditActionsChrome", () => {
   });
 });
 
+describe("AdaptRowEditCell", () => {
+  it("hands focus to the first field of an opened row, not the last", async () => {
+    const { host, settle } = await mount(TwoFieldHost);
+    host.editing().begin(TASK, "1");
+    await settle();
+    const fields = document.querySelectorAll<HTMLInputElement>(
+      '[data-adapttable-part="edit-cell-editor"]'
+    );
+    expect(fields).toHaveLength(2);
+    expect(document.activeElement).toBe(fields[0]);
+  });
+
+  it("keeps the row open when a field loses focus", async () => {
+    const { host, settle } = await mount(TwoFieldHost);
+    host.editing().begin(TASK, "1");
+    await settle();
+    type("Ship it");
+    one("edit-cell-editor").dispatchEvent(new Event("blur"));
+    await settle();
+    expect(host.onRowEdit).not.toHaveBeenCalled();
+    expect(host.editing().isEditing("1")).toBe(true);
+  });
+});
+
 describe("AdaptBatchEditBarChrome", () => {
   it("appears with the pending count once a field changes", async () => {
     const { settle } = await mount(BatchHost);
@@ -276,6 +336,17 @@ describe("AdaptBatchEditBarChrome", () => {
     expect(part("batch-edit-bar")).toBeNull();
   });
 
+  it("ignores Enter in a batch field: nothing saves until Save all", async () => {
+    const { host, settle } = await mount(BatchHost);
+    type("Ship it");
+    one("edit-cell-editor").dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+    );
+    await settle();
+    expect(host.onBatchEdit).not.toHaveBeenCalled();
+    expect(one("batch-edit-count").textContent.trim()).toBe("1 waiting");
+  });
+
   it("discards the drafts on cancel", async () => {
     const { host, settle } = await mount(BatchHost);
     type("Ship it");
@@ -295,5 +366,22 @@ describe("AdaptBatchEditBarChrome", () => {
     expect(one("batch-edit-conflict").textContent.trim()).toBe(
       "Changed underneath"
     );
+  });
+});
+
+describe("row and batch editing state", () => {
+  it("stays off unless enabled", () => {
+    const onRowEdit = vi.fn();
+    const onBatchEdit = vi.fn();
+    const rows = TestBed.runInInjectionContext(() =>
+      injectRowEditing<Task>({ columns: COLUMNS, onRowEdit })
+    );
+    const batch = TestBed.runInInjectionContext(() =>
+      injectBatchEditing<Task>({ columns: COLUMNS, onBatchEdit })
+    );
+    rows().begin(TASK, "1");
+    expect(rows().isEditing("1")).toBe(false);
+    batch().setDraft(TASK, "1", "title", "Ship it");
+    expect(batch().pending).toBe(false);
   });
 });

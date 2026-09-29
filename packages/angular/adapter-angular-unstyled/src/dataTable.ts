@@ -13,6 +13,7 @@ import {
   AdaptLiveRegion,
   AdaptSlot,
   type AdaptTableFeature,
+  type Attrs,
   BATCH_EDIT_BAR,
   type BatchEditBarProps,
   type BatchEditHandler,
@@ -22,7 +23,7 @@ import {
   type BulkBarSlotProps,
   type CellEditHandler,
   type ChromeBodySlot,
-  chromeColumnPlan,
+  chromeRenderModel,
   COLUMN_MENU,
   type ColumnDef,
   type ColumnLayoutState,
@@ -37,6 +38,7 @@ import {
   type EditableCellEditing,
   type EditableCellSlotProps,
   type EditEventHandler,
+  estimateBodyItemSize,
   type ExportCsvOptions,
   type ExtraFilters,
   featureOptionsOf,
@@ -58,6 +60,7 @@ import {
   injectBatchEditing,
   injectCellEditing,
   injectCellSaveState,
+  injectColumnWindow,
   injectDataTable,
   injectDensity,
   injectEditValidation,
@@ -69,6 +72,7 @@ import {
   injectGroupingPanelState,
   injectIsMobile,
   injectKeyedVirtualization,
+  injectMeasuredWindowScrollMargin,
   injectRowEditing,
   injectRowReorder,
   injectRowSelection,
@@ -101,7 +105,6 @@ import {
   TOOLBAR_EXTRAS,
   type ToolbarExtrasSlotProps,
   urlAdapterFor,
-  virtualColumnSpan,
   virtualizeIgnoredOnPage,
   windowGroupedEntries,
 } from "@adapttable/angular";
@@ -232,11 +235,20 @@ export interface RowActionsCell<TRow> {
 }
 
 /**
- * One data row the body draws: the row, its index in the page, and its id.
+ * One data row the body draws: the row, its index in the page, its id, and
+ * the attributes its row or card carries.
  *
  * @public
  */
-export type BodyRow<TRow> = DesktopRowWiringArgs<TRow>;
+export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
+  /**
+   * The row's attributes — the grid's or the table's, plus the window's
+   * measure ref while virtualized.
+   */
+  readonly rowAttrs: Attrs;
+  /** The same row as a phone card: its attributes, measured the same way. */
+  readonly cardAttrs: Attrs;
+}
 
 /**
  * One slot of the body in reading order: a group header, footer or "show
@@ -254,6 +266,7 @@ function groupHeadersFor<TRow>(options: {
   readonly table: DataTable<TRow>;
   readonly grouping: Signal<TableGrouping<TRow> | undefined>;
   readonly slots: Signal<readonly BodySlot<TRow>[]>;
+  readonly columns: Signal<readonly ColumnDef<TRow>[]>;
   readonly selection: RowSelection | undefined;
   readonly leadingCells: Signal<number>;
   readonly showActions: Signal<boolean>;
@@ -268,7 +281,7 @@ function groupHeadersFor<TRow>(options: {
     const rows = new Map<string, GroupHeaderRowSlotProps<never>>();
     const cards = new Map<string, GroupHeaderCardSlotProps<never>>();
     if (!grouping) return { rows, cards };
-    const columns = table.columns();
+    const columns = options.columns();
     const labels = table.labels();
     const selection = options.selection?.state() ?? null;
     const onToggleCollapse = (groupKey: string): void => {
@@ -389,6 +402,11 @@ function actionsCellsFor<TRow>(options: {
   });
 }
 
+/** A number feature option, or nothing when it is not a number. */
+function numberOption(value: unknown): number | undefined {
+  return typeof value === "number" ? value : undefined;
+}
+
 /**
  * The window the body draws: the flat rows (or a keyed window's spacers)
  * and, while grouping renders, the grouped entries in view.
@@ -412,6 +430,7 @@ function bodyWindowFor<TRow>(options: {
   readonly rowKey: (row: TRow) => string;
   readonly maxHeight: number | string | undefined;
   readonly scrollBox: () => HTMLElement | null;
+  readonly root: () => HTMLElement | null;
   readonly injector: Injector;
 }): Signal<BodyWindow<TRow>> {
   const {
@@ -421,6 +440,7 @@ function bodyWindowFor<TRow>(options: {
     rowKey,
     maxHeight,
     scrollBox,
+    root,
     injector,
   } = options;
   const source = table.source;
@@ -457,26 +477,25 @@ function bodyWindowFor<TRow>(options: {
       groupingEntries: groupEntries(),
     }));
   }
-  const estimateRowSize =
-    typeof featureOptions.estimateRowSize === "number"
-      ? featureOptions.estimateRowSize
-      : 56;
-  const estimateCardSize =
-    typeof featureOptions.estimateCardSize === "number"
-      ? featureOptions.estimateCardSize
-      : 140;
+  const sizes = {
+    estimateRowSize: numberOption(featureOptions.estimateRowSize),
+    estimateCardSize: numberOption(featureOptions.estimateCardSize),
+  };
   const estimateSize = computed(() =>
-    table.isMobile() ? estimateCardSize : estimateRowSize
+    estimateBodyItemSize(bodyChrome(), sizes, source().rows)
   );
-  const overscan =
-    typeof featureOptions.virtualOverscan === "number"
-      ? featureOptions.virtualOverscan
-      : undefined;
-  const scrollMargin =
-    typeof featureOptions.virtualScrollMargin === "number"
-      ? featureOptions.virtualScrollMargin
-      : undefined;
-  const getScrollElement = maxHeight == null ? undefined : () => scrollBox();
+  const overscan = numberOption(featureOptions.virtualOverscan);
+  const hostMargin = numberOption(featureOptions.virtualScrollMargin);
+  const inScrollBox = maxHeight != null;
+  // Scrolling the page, a list that starts down the page windows from where
+  // it starts; the host's margin wins when it gave one.
+  const measuredMargin = injectMeasuredWindowScrollMargin({
+    enabled: !inScrollBox && hostMargin === undefined,
+    element: root,
+    injector,
+  });
+  const scrollMargin = computed(() => hostMargin ?? measuredMargin());
+  const getScrollElement = inScrollBox ? () => scrollBox() : undefined;
   const onEndReached = (): void => {
     table.loadMore();
   };
@@ -583,6 +602,12 @@ export interface TableView<TRow> {
   }>;
   /** Column span for spacer/detail cells. */
   readonly bodyColSpan: Signal<number>;
+  /** The columns the desktop table draws — a window of them when wide. */
+  readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+  /** The spacer widths either side of a column window, when windowed. */
+  readonly columnSpacers: Signal<{ start: number; end: number } | undefined>;
+  /** Each column's position among all visible columns, by key. */
+  readonly columnIndex: Signal<ReadonlyMap<string, number>>;
 }
 
 /**
@@ -988,16 +1013,6 @@ export class AdaptDataTable<TRow> implements OnInit {
       labels: table.labels,
       injector,
     });
-    const showActions = computed(
-      () =>
-        chromeColumnPlan({
-          rowActionCount: rowActions().rowActions?.length ?? 0,
-          rowEditing: editing?.().rowEditing !== undefined,
-          rowReorder: reorder !== undefined,
-          rowDetail: false,
-          selection: selection !== undefined,
-        }).showActions
-    );
     const batchBar =
       editing === undefined
         ? undefined
@@ -1020,29 +1035,58 @@ export class AdaptDataTable<TRow> implements OnInit {
         (table.isMobile()
           ? this.mobileCards()?.scrollElement()
           : this.desktopTable()?.scrollElement()) ?? null,
+      root: () => this.root()?.nativeElement ?? null,
       injector,
     });
     const virtualization = computed(() => bodyWindow().virtualization);
     const rowKey = computed(() => this.rowKey());
     const rowActionList = computed(() => rowActions().rowActions);
-    const columnPlan = computed(() =>
-      chromeColumnPlan({
-        rowActionCount: rowActionList()?.length ?? 0,
-        rowEditing: editing?.().rowEditing !== undefined,
-        rowReorder: reorder !== undefined,
-        rowDetail: false,
-        selection: selection !== undefined,
-      })
+    const columnWindow = injectColumnWindow<TRow>({
+      columns: table.columns,
+      enabled: featureOptions.virtualizeColumns === true,
+      widths: computed(() => table.layout().state.widths),
+      pinnedKeys: computed(() => {
+        const { pinned } = table.layout().state;
+        return new Set(
+          Object.keys(pinned).filter((key) => pinned[key] !== undefined)
+        );
+      }),
+      getScrollElement: () => this.desktopTable()?.scrollElement() ?? null,
+      injector,
+    });
+    // Core's render model: the rendered (possibly windowed) columns, the
+    // spacer widths, the injected columns and the full-width span.
+    const renderModel = computed(() => {
+      const window = bodyWindow();
+      const entries = window.groupingEntries;
+      return chromeRenderModel({
+        table: {
+          columns: table.columns(),
+          selection: selection?.state() ?? null,
+          labels: table.labels(),
+        },
+        rows: table.source().rows,
+        rowActions: rowActionList(),
+        getRowId: rowKey(),
+        rowEntries: window.virtualization.rows,
+        columnWindow: columnWindow(),
+        editing: editing?.(),
+        rowReorder: reorder?.(),
+        grouping: entries === undefined ? undefined : { entries },
+      });
+    });
+    const showActions = computed(() => renderModel().showActions);
+    const bodyColSpan = computed(() => renderModel().columnSpan);
+    const renderedColumns = computed(() => renderModel().columns);
+    const columnSpacers = computed(() => renderModel().columnSpacers);
+    const columnIndex = computed(
+      () => new Map(table.columns().map((column, index) => [column.key, index]))
     );
-    const bodyColSpan = computed(() =>
-      virtualColumnSpan(
-        table.columns().length,
-        selection !== undefined,
-        showActions(),
-        false,
-        reorder !== undefined
-      )
-    );
+    // A virtualized row hands itself to the window, which measures it.
+    const measured = (attrs: Attrs): Attrs => {
+      const measure = virtualization().measureElement;
+      return measure === undefined ? attrs : { ...attrs, ref: measure };
+    };
     const body = computed((): readonly BodySlot<TRow>[] => {
       const window = bodyWindow();
       const entries = window.groupingEntries;
@@ -1063,7 +1107,15 @@ export class AdaptDataTable<TRow> implements OnInit {
         getRowId: rowKey(),
         columnSpan: bodyColSpan(),
         rows: table.source().rows,
-        wiring: (args) => args,
+        wiring: (args) => ({
+          ...args,
+          rowAttrs: measured(
+            grid
+              ? grid.rowAttrs(args.row, args.index)
+              : table.rowAttrs(args.row, args.index)
+          ),
+          cardAttrs: measured(table.cardAttrs(args.row, args.index)),
+        }),
       });
     });
     const bodyRows = computed(() =>
@@ -1084,8 +1136,9 @@ export class AdaptDataTable<TRow> implements OnInit {
       table,
       grouping: grouping ?? computed(() => undefined),
       slots: body,
+      columns: renderedColumns,
       selection,
-      leadingCells: computed(() => columnPlan().leadingCells),
+      leadingCells: computed(() => renderModel().leadingCells),
       showActions,
     });
     this.view.set({
@@ -1112,6 +1165,9 @@ export class AdaptDataTable<TRow> implements OnInit {
       body,
       groupHeaders,
       bodyColSpan,
+      columns: renderedColumns,
+      columnSpacers,
+      columnIndex,
       rowActionsLayout: featureOptions.rowActionsLayout as
         RowActionsLayout | undefined,
       confirm,

@@ -27,7 +27,7 @@
         @let entry = slot.wiring;
         <li
           style="display: block"
-          [adaptAttrs]="v.table.cardAttrs(entry.row, entry.index)"
+          [adaptAttrs]="entry.cardAttrs"
           [attr.data-index]="entry.index"
         >
           @if (v.selection; as selection) {

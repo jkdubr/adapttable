@@ -37,6 +37,7 @@ import { ChecklistSearchProps } from '@adapttable/core/binding';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { chromeColumnPlan } from '@adapttable/core/binding';
+import { chromeRenderModel } from '@adapttable/core/binding';
 import { COLUMN_MENU } from '@adapttable/core/binding';
 import { ColumnLayoutState } from '@adapttable/core';
 import { columnMenuActions } from '@adapttable/core/binding';
@@ -84,6 +85,7 @@ import { editorValidationProps } from '@adapttable/core';
 import { EditUnit } from '@adapttable/core';
 import { EditValidationState } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
+import { estimateBodyItemSize } from '@adapttable/core/binding';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
 import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
@@ -226,6 +228,7 @@ import { RowEditControlsOptions } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
+import { RowPairMeasurer } from '@adapttable/core/binding';
 import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/core/binding';
 import { RowReorderHandleProps as RowReorderHandleProps_2 } from '@adapttable/core/binding';
 import { RowReorderHandler } from '@adapttable/core';
@@ -618,6 +621,44 @@ export class AdaptChecklistChrome<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptChecklistChrome<any>, never>;
+}
+
+// @public
+export class AdaptColumnSpacer {
+    readonly as: InputSignal<"td" | "th">;
+    // (undocumented)
+    protected readonly cellStyle: Signal<    {
+    width: string;
+    minWidth: string;
+    padding: string;
+    border: string;
+    }>;
+    // (undocumented)
+    protected readonly header: Signal<boolean>;
+    // (undocumented)
+    protected readonly part: Signal<string>;
+    readonly side: InputSignal<"start" | "end">;
+    readonly width: InputSignal<number>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnSpacer, "adapt-column-spacer", never, {
+        "width": {
+            "alias": "width";
+            "required": true;
+            "isSignal": true;
+        };
+        "side": {
+            "alias": "side";
+            "required": true;
+            "isSignal": true;
+        };
+        "as": {
+            "alias": "as";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnSpacer, never>;
 }
 
 // @public
@@ -1506,6 +1547,8 @@ export { ChromeBodySlot }
 
 export { chromeColumnPlan }
 
+export { chromeRenderModel }
+
 export { COLUMN_MENU }
 
 // @public
@@ -1575,6 +1618,25 @@ export interface ColumnRenameEditorState {
     readonly inputAttrs: () => Attrs;
     readonly inputId: string;
     readonly submit: () => boolean;
+}
+
+// @public
+export interface ColumnWindow<TRow> {
+    readonly columns: readonly ColumnDef<TRow>[];
+    readonly enabled: boolean;
+    readonly paddingEnd: number;
+    readonly paddingStart: number;
+}
+
+// @public
+export interface ColumnWindowOptions<TRow> {
+    readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+    readonly enabled: MaybeSignal<boolean>;
+    readonly getScrollElement: () => HTMLElement | null;
+    readonly injector?: Injector;
+    readonly overscan?: number;
+    readonly pinnedKeys?: Signal<ReadonlySet<string> | undefined>;
+    readonly widths?: Signal<Readonly<Record<string, number>> | undefined>;
 }
 
 // @public
@@ -1795,6 +1857,8 @@ export interface EditValidationInjectOptions<TRow> {
     readonly injector?: Injector;
     readonly validateRow?: RowValidator<TRow>;
 }
+
+export { estimateBodyItemSize }
 
 // @public
 export interface ExportCsvHandlerOptions<TRow> {
@@ -2129,6 +2193,9 @@ export function injectColumnDrag(injector?: Injector): ColumnDrag;
 export function injectColumnRenameEditor(options: ColumnRenameEditorOptions): ColumnRenameEditorState;
 
 // @public
+export function injectColumnWindow<TRow>(options: ColumnWindowOptions<TRow>): Signal<ColumnWindow<TRow>>;
+
+// @public
 export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTable<TRow>;
 
 // @public
@@ -2174,7 +2241,13 @@ export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
 };
 
 // @public
+export function injectMeasuredWindowScrollMargin(options: MeasuredWindowScrollMarginOptions): Signal<number>;
+
+// @public
 export function injectRowEditing<TRow>(options: RowEditingInjectOptions<TRow>): Signal<RowEditingState<TRow>>;
+
+// @public
+export function injectRowPairMeasurer(options: RowPairMeasurerOptions): RowPairMeasurer;
 
 // @public
 export function injectRowReorder<TRow>(options: RowReorderStateOptions<TRow>): Signal<RowReorderState<TRow>> | undefined;
@@ -2247,6 +2320,13 @@ export type MaybeSignal<T> = T | Signal<T>;
 // @public
 export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
 
+// @public
+export interface MeasuredWindowScrollMarginOptions {
+    readonly element: () => Element | null;
+    readonly enabled: MaybeSignal<boolean>;
+    readonly injector?: Injector;
+}
+
 export { mobileCardListStyle }
 
 // @public
@@ -2294,6 +2374,11 @@ export { RelativePreset }
 export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
 
 export { REORDER_COLUMN_KEY }
+
+// @public
+export interface ResizableVirtualizer {
+    readonly resizeItem: (index: number, size: number) => void;
+}
 
 export { resolveBodyVirtualization }
 
@@ -2399,6 +2484,15 @@ export { RowEditingState }
 export function rowIsDirty<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): boolean;
 
 export { RowMoveMenuSlotProps }
+
+export { RowPairMeasurer }
+
+// @public
+export interface RowPairMeasurerOptions {
+    readonly enabled: MaybeSignal<boolean>;
+    readonly injector?: Injector;
+    readonly virtualizer: () => ResizableVirtualizer | undefined;
+}
 
 // @public
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;

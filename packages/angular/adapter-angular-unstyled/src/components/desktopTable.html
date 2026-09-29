@@ -24,7 +24,10 @@
             />
           </th>
         }
-        @for (column of v.table.columns(); track column.key; let col = $index) {
+        @if (v.columnSpacers(); as spacers) {
+          <adapt-column-spacer [width]="spacers.start" side="start" as="th" />
+        }
+        @for (column of v.columns(); track column.key) {
           <th
             data-adapttable-part="header-cell"
             [adaptAttrs]="headerCells().get(column.key)!"
@@ -55,6 +58,9 @@
             }
           </th>
         }
+        @if (v.columnSpacers(); as spacers) {
+          <adapt-column-spacer [width]="spacers.end" side="end" as="th" />
+        }
         @if (v.showActions()) {
           <th data-adapttable-part="actions-header" scope="col">
             {{ v.table.labels().actions }}
@@ -84,11 +90,7 @@
           @case ("row") {
             @let entry = slot.wiring;
             <tr
-              [adaptAttrs]="
-                v.grid
-                  ? v.grid.rowAttrs(entry.row, entry.index)
-                  : v.table.rowAttrs(entry.row, entry.index)
-              "
+              [adaptAttrs]="entry.rowAttrs"
               [attr.data-dragging]="
                 v.reorder?.().rowAttrs(rowId(entry.row), entry.index)[
                   'data-dragging'
@@ -131,16 +133,19 @@
                   />
                 </td>
               }
-              @for (
-                column of v.table.columns();
-                track column.key;
-                let col = $index
-              ) {
+              @if (v.columnSpacers(); as spacers) {
+                <adapt-column-spacer [width]="spacers.start" side="start" />
+              }
+              @for (column of v.columns(); track column.key) {
                 <td
                   data-adapttable-part="cell"
                   [adaptAttrs]="
                     v.grid
-                      ? v.grid.cellAttrs(column, entry.index, col)
+                      ? v.grid.cellAttrs(
+                          column,
+                          entry.index,
+                          v.columnIndex().get(column.key)!
+                        )
                       : v.table.cellAttrs(column)
                   "
                 >
@@ -162,6 +167,9 @@
                     ></span>
                   }
                 </td>
+              }
+              @if (v.columnSpacers(); as spacers) {
+                <adapt-column-spacer [width]="spacers.end" side="end" />
               }
               @if (v.showActions()) {
                 <td data-adapttable-part="actions-cell">

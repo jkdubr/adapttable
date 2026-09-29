@@ -253,6 +253,18 @@ export {
   type TableUrlStateOptions,
   urlAdapterFor,
 } from "./url/tableUrlState";
+export { AdaptColumnSpacer } from "./virtual/columnSpacer";
+export {
+  type ColumnWindow,
+  type ColumnWindowOptions,
+  injectColumnWindow,
+} from "./virtual/columnWindow";
+export {
+  injectRowPairMeasurer,
+  type ResizableVirtualizer,
+  type RowPairMeasurer,
+  type RowPairMeasurerOptions,
+} from "./virtual/measureRowPair";
 export {
   injectKeyedVirtualization,
   injectKeyedVirtualizer,
@@ -261,6 +273,10 @@ export {
   type KeyedVirtualizationOptions,
   type TableVirtualizationOptions,
 } from "./virtual/tableVirtualization";
+export {
+  injectMeasuredWindowScrollMargin,
+  type MeasuredWindowScrollMarginOptions,
+} from "./virtual/windowScrollMargin";
 export type {
   EditEvent,
   EditEventHandler,

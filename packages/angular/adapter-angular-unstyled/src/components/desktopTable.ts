@@ -4,6 +4,7 @@
 import {
   AdaptAttrs,
   AdaptCell,
+  AdaptColumnSpacer,
   AdaptHeader,
   AdaptSlot,
   type Attrs,
@@ -38,7 +39,14 @@ import { AdaptRowActions } from "./rowActionButtons";
  */
 @Component({
   selector: "adapt-desktop-table",
-  imports: [AdaptAttrs, AdaptCell, AdaptHeader, AdaptRowActions, AdaptSlot],
+  imports: [
+    AdaptAttrs,
+    AdaptCell,
+    AdaptColumnSpacer,
+    AdaptHeader,
+    AdaptRowActions,
+    AdaptSlot,
+  ],
   templateUrl: "./desktopTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },

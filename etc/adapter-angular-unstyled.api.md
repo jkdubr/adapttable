@@ -10,6 +10,7 @@ import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { AfterViewInit } from '@angular/core';
 import { AggregateOperationId } from '@adapttable/core';
+import { Attrs } from '@adapttable/angular';
 import { BatchEditBarProps } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionRunnerState } from '@adapttable/angular';
@@ -736,7 +737,10 @@ export class AdaptSavedViewsMenu implements OnInit {
 }
 
 // @public
-export type BodyRow<TRow> = DesktopRowWiringArgs<TRow>;
+export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
+    readonly cardAttrs: Attrs;
+    readonly rowAttrs: Attrs;
+}
 
 // @public
 export type BodySlot<TRow> = ChromeBodySlot<TRow, BodyRow<TRow>>;
@@ -792,8 +796,14 @@ export interface TableView<TRow> {
     readonly body: Signal<readonly BodySlot<TRow>[]>;
     readonly bodyColSpan: Signal<number>;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
+    readonly columnIndex: Signal<ReadonlyMap<string, number>>;
     readonly columnMenu: boolean;
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
+    readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+    readonly columnSpacers: Signal<{
+        start: number;
+        end: number;
+    } | undefined>;
     readonly confirm: ConfirmHandler;
     readonly density: Signal<TableDensity>;
     readonly editableCells: Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
