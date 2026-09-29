@@ -245,7 +245,15 @@ export class AdaptChecklistChrome<TRow> {
     padBottom: number;
     empty: boolean;
     noValues: string;
-    rows: ChecklistRow[];
+    rows: {
+    value: string;
+    props: {
+    label: string;
+    count: string;
+    checked: boolean;
+    onChange: (on: boolean) => void;
+    };
+    }[];
     } | undefined>;
     // (undocumented)
     protected readonly optionStyle: {
@@ -329,14 +337,10 @@ export class AdaptControl<TProps> {
 export class AdaptFilterTreeChrome<TRow> {
     readonly defaultExpanded: InputSignal<boolean>;
     readonly defs: InputSignal<readonly FilterDef<TRow>[]>;
-    // (undocumented)
-    protected readonly disclosure: Signal<AngularFilterTreeDisclosureProps | undefined>;
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly registry: InputSignal<FilterTypeRegistry>;
     readonly slots: InputSignal<FilterTreeSlots>;
     readonly source: InputSignal<Pick<TableSource<TRow>, "filterTree" | "setFilterTree">>;
-    // (undocumented)
-    protected readonly view: Signal<TreeView>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterTreeChrome<any>, "adapt-filter-tree-chrome", never, {
         "defs": {
@@ -545,8 +549,8 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
 
 // @public
 export interface ColumnDrag {
-    readonly gripAttrs: (key: string, index: number, move: MoveColumn, label: string) => Attrs;
-    readonly rowAttrs: (key: string, index: number, move: MoveColumn) => Attrs;
+    readonly gripAttrs: (key: string, index: number, move: (key: string, toIndex: number) => void, label: string) => Attrs;
+    readonly rowAttrs: (key: string, index: number, move: (key: string, toIndex: number) => void) => Attrs;
 }
 
 // @public
