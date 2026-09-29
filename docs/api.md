@@ -3036,7 +3036,10 @@ controls: the host writes its own markup.
   widgets a kit's form draws. `AdaptFilterTreeChrome` (with
   `AngularFilterTreeDisclosureProps`) and `AdaptChecklistChrome` are the
   nested AND/OR builder and the checklist filter, structure only; the kit
-  hands its controls in `slots`.
+  hands its controls in `slots`. `AdaptGroupingPanelChrome` is the grouping
+  strip — chips, insertion carets, aggregations and the ungroup target —
+  with `GroupingPanelSlots`, `AngularGroupingPanelSurfaceProps` and
+  `AngularGroupingPanelAggregationItemProps`.
 - Actions: `injectBulkActionRunner` runs bulk actions and returns a
   `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
   actions column's list, with Duplicate and Delete appended for the host's
@@ -3061,7 +3064,8 @@ shares. Its `features` input composes `columnMenu`, `filters`,
 `headerFilters`, `bulkActions`, `rowActions` (`RowActionsFeatureOptions`),
 `densityChooser`, `fullscreen`, `exportCsv` and `savedViews`; `filtersMode`
 (`FiltersMode`) picks the anchored popover or the drawer. Each feature draws
-the kit's own native controls. `TableView` is what the table renders from
+the kit's own native controls. `AdaptGroupingPanel` draws the grouping
+strip with those same native controls. `TableView` is what the table renders from
 once its inputs have arrived, and `FiltersView` is the filters on that view:
 the button, the open panel, and the form, overlay, chips and header funnels.
 

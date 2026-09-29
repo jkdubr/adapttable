@@ -73,6 +73,12 @@ export {
   type GridFocusOptions,
   injectGridFocus,
 } from "./gridFocus";
+export {
+  AdaptGroupingPanelChrome,
+  type AngularGroupingPanelAggregationItemProps,
+  type AngularGroupingPanelSurfaceProps,
+  type GroupingPanelSlots,
+} from "./groupingPanel";
 export { AdaptIcon } from "./icon";
 export * from "./kitExports";
 export { AdaptLiveRegion } from "./liveRegion";

@@ -17,4 +17,5 @@ export {
   type RowActionsFeatureOptions,
   savedViews,
 } from "./features";
+export { AdaptGroupingPanel } from "./groupingPanel";
 export type { FiltersMode, FiltersView } from "./tableFilters";

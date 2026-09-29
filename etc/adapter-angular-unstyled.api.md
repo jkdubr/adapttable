@@ -24,6 +24,8 @@ import { FilterHeaderControlProps } from '@adapttable/angular';
 import { FilterOverlaySlotProps } from '@adapttable/angular';
 import { FiltersFormSlotProps } from '@adapttable/angular';
 import { GridFocus } from '@adapttable/angular';
+import { GroupingPanelSlots } from '@adapttable/angular';
+import { GroupingPanelState } from '@adapttable/angular';
 import * as i0 from '@angular/core';
 import { IconDescriptor } from '@adapttable/angular';
 import { InputSignal } from '@angular/core';
@@ -222,6 +224,47 @@ export class AdaptDataTable<TRow> implements OnInit {
     }, ["cellTemplates"], never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDataTable<any>, never>;
+}
+
+// @public
+export class AdaptGroupingPanel<TRow> {
+    readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
+    readonly dir: InputSignal<Direction | undefined>;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    readonly mobile: InputSignal<boolean>;
+    // (undocumented)
+    protected readonly slots: GroupingPanelSlots;
+    readonly state: InputSignal<GroupingPanelState>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupingPanel<any>, "adapt-grouping-panel", never, {
+        "state": {
+            "alias": "state";
+            "required": true;
+            "isSignal": true;
+        };
+        "columns": {
+            "alias": "columns";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "mobile": {
+            "alias": "mobile";
+            "required": false;
+            "isSignal": true;
+        };
+        "dir": {
+            "alias": "dir";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupingPanel<any>, never>;
 }
 
 // @public

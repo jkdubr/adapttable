@@ -84,6 +84,16 @@ import { filterWidgetKind } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GridCell } from '@adapttable/core';
 import { GRIP_ICON } from '@adapttable/core/binding';
+import { GroupingPanelAggregationRemoveProps } from '@adapttable/core/binding';
+import { GroupingPanelChecklistProps } from '@adapttable/core/binding';
+import { GroupingPanelChipProps } from '@adapttable/core/binding';
+import { GroupingPanelDropZoneProps } from '@adapttable/core/binding';
+import { GroupingPanelRemoveZoneProps } from '@adapttable/core/binding';
+import { GroupingPanelRestoreProps } from '@adapttable/core/binding';
+import { GroupingPanelSelectProps } from '@adapttable/core/binding';
+import { GroupingPanelState } from '@adapttable/core/binding';
+import { GroupingPanelState as GroupingPanelState_2 } from '@adapttable/core';
+import { GroupingPanelSurfaceProps } from '@adapttable/core/binding';
 import { hasActiveHeaderFilter } from '@adapttable/core';
 import { headerFilterInsideSelector } from '@adapttable/core';
 import { HeaderSelectionState } from '@adapttable/core/binding';
@@ -379,6 +389,51 @@ export class AdaptFilterTreeChrome<TRow> {
 }
 
 // @public
+export class AdaptGroupingPanelChrome<TRow> {
+    readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
+    readonly dir: InputSignal<Direction | undefined>;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    readonly mobile: InputSignal<boolean>;
+    readonly slots: InputSignal<GroupingPanelSlots>;
+    readonly state: InputSignal<GroupingPanelState_2>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupingPanelChrome<any>, "adapt-grouping-panel-chrome", never, {
+        "state": {
+            "alias": "state";
+            "required": true;
+            "isSignal": true;
+        };
+        "columns": {
+            "alias": "columns";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "mobile": {
+            "alias": "mobile";
+            "required": false;
+            "isSignal": true;
+        };
+        "dir": {
+            "alias": "dir";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupingPanelChrome<any>, never>;
+}
+
+// @public
 export class AdaptHeader<TRow> {
     readonly column: InputSignal<ColumnDef<TRow>>;
     protected readonly context: Signal<HeaderContext<TRow>>;
@@ -477,6 +532,23 @@ export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry>
 
 // @public
 export type AngularFilterTreeDisclosureProps = FilterTreeDisclosureProps<TemplateRef<unknown>>;
+
+// @public
+export interface AngularGroupingPanelAggregationItemProps {
+    // (undocumented)
+    readonly "data-adapttable-part": "grouping-aggregation-item";
+    // (undocumented)
+    readonly children: TemplateRef<unknown>;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly readOnly: boolean;
+    // (undocumented)
+    readonly readOnlyLabel: string;
+}
+
+// @public
+export type AngularGroupingPanelSurfaceProps = GroupingPanelSurfaceProps<TemplateRef<unknown>, DragEvent>;
 
 // @public
 export type Attrs = Readonly<Record<string, unknown>>;
@@ -890,6 +962,35 @@ export interface GridFocusOptions<TRow> {
 }
 
 export { GRIP_ICON }
+
+export { GroupingPanelAggregationRemoveProps }
+
+export { GroupingPanelChecklistProps }
+
+export { GroupingPanelChipProps }
+
+export { GroupingPanelDropZoneProps }
+
+export { GroupingPanelRemoveZoneProps }
+
+export { GroupingPanelRestoreProps }
+
+export { GroupingPanelSelectProps }
+
+// @public
+export interface GroupingPanelSlots {
+    readonly AggregationItem: Type<unknown>;
+    readonly AggregationPicker: Type<unknown>;
+    readonly AggregationRemove: Type<unknown>;
+    readonly AggregationRestore: Type<unknown>;
+    readonly Chip: Type<unknown>;
+    readonly DropZone: Type<unknown>;
+    readonly RemoveZone: Type<unknown>;
+    readonly Select: Type<unknown>;
+    readonly Surface: Type<unknown>;
+}
+
+export { GroupingPanelState }
 
 export { hasActiveHeaderFilter }
 

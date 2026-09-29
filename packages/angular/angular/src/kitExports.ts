@@ -98,6 +98,16 @@ export type {
   ToolbarExtrasSlotProps,
 } from "@adapttable/core/binding";
 export type { SavedViewsSlotProps } from "@adapttable/core/binding";
+export type { GroupingPanelState } from "@adapttable/core/binding";
+export type {
+  GroupingPanelAggregationRemoveProps,
+  GroupingPanelChecklistProps,
+  GroupingPanelChipProps,
+  GroupingPanelDropZoneProps,
+  GroupingPanelRemoveZoneProps,
+  GroupingPanelRestoreProps,
+  GroupingPanelSelectProps,
+} from "@adapttable/core/binding";
 export {
   COLUMN_MENU,
   columnMenuActions,
