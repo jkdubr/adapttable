@@ -10,24 +10,41 @@ import {
   deriveSortByOptions,
   devWarn,
   type Direction,
+  gridContainerAttributes,
+  gridRowAttributes,
   nextSort,
+  pageSizeOptions,
   type PaginationInfo,
+  type PaginationSlot,
+  paginationSlots,
   resolveLabels,
+  resolveTableStatus,
   SEARCH_DEBOUNCE_MS,
   type SortByOption,
   type SortDirection,
   type TableLabels,
   type TableSource,
+  type TableStatusSignature,
   visibleColumns,
 } from "@adapttable/core";
 import {
+  bodyCanLoadMore,
+  cardSetSize,
   cellAttributes,
+  type ChromeBodyRegion,
+  chromeBodyRegion,
+  chromeEmptyVariant,
+  chromeShowFooter,
+  clearChromeFilters,
   type FeatureHostState,
+  fetchNextBodyPage,
   headerCellAttributes,
   headerRowAttributes,
   rowAttributes,
   searchInputAttributes,
   sortButtonAttributes,
+  sortedColumnName,
+  sourceWindowStart,
   tableAttributes,
 } from "@adapttable/core/binding";
 import {
@@ -37,7 +54,9 @@ import {
   inject,
   Injector,
   type Signal,
+  signal,
   type TemplateRef,
+  untracked,
 } from "@angular/core";
 
 import type { Attrs } from "./attrs";
@@ -45,6 +64,7 @@ import type { AdaptCellTemplate } from "./cell";
 import { type CellContext, type ColumnDef, resolveColumns } from "./columnDef";
 import { type AdaptTableFeature, featureHostFor } from "./features";
 import { createSearchInput } from "./searchInput";
+import type { RowSelection } from "./selection";
 import { type MaybeSignal, type MaybeSignalOptional, readMaybe } from "./store";
 
 /**
@@ -84,6 +104,13 @@ export interface DataTableOptions<TRow> {
    * its own `cell`.
    */
   readonly cellTemplates?: Signal<readonly AdaptCellTemplate[]>;
+  /**
+   * Row selection from `injectRowSelection`. With it, every row states
+   * whether it is selected.
+   */
+  readonly selection?: RowSelection;
+  /** Called after the table clears its filters from the empty state. */
+  readonly onClearFilters?: () => void;
   /** Features this table composes, beside the provided ones. */
   readonly features?: readonly AdaptTableFeature[];
   /** The injector to run in. Omit to use the current injection context. */
@@ -122,6 +149,35 @@ export interface DataTable<TRow> {
   readonly search: Signal<string>;
   /** What the search box shows: the term as typed, before it commits. */
   readonly searchValue: Signal<string>;
+  /**
+   * Which body renders: a skeleton on the first load, the empty state, the
+   * card list on a phone or the table on a desktop.
+   */
+  readonly bodyRegion: Signal<ChromeBodyRegion>;
+  /**
+   * Why the body is empty: `"noResults"` when a search or filter matched
+   * nothing, `"noData"` when there is nothing at all.
+   */
+  readonly emptyVariant: Signal<"noData" | "noResults">;
+  /** Whether the paged footer shows. */
+  readonly showFooter: Signal<boolean>;
+  /** The numbered pager's pages and gaps, keyed. */
+  readonly pagerSlots: Signal<PaginationSlot[]>;
+  /** The page sizes a rows-per-page control offers. */
+  readonly pageSizeOptions: Signal<readonly number[]>;
+  /**
+   * Whether an infinite list has more rows to load — what a phone shows in
+   * place of the pager.
+   */
+  readonly canLoadMore: Signal<boolean>;
+  /** Where the rendered rows start in the dataset. */
+  readonly windowStart: Signal<number>;
+  /**
+   * What the table says after a sort or a page: empty on the first settle,
+   * and whenever nothing a reader cares about moved. Render it in a live
+   * region that is present from the first paint.
+   */
+  readonly statusAnnouncement: Signal<string>;
   /** The features composed on this table. */
   readonly featureHost: FeatureHostState;
   /** Advance a column's sort: ascending, descending, then off. */
@@ -134,6 +190,10 @@ export interface DataTable<TRow> {
   readonly setPage: (page: number) => void;
   /** Change the page size. */
   readonly setLimit: (limit: number) => void;
+  /** Clear every filter, then call `onClearFilters`. */
+  readonly clearFilters: () => void;
+  /** Load the next rows of an infinite list, unless they are loading. */
+  readonly loadMore: () => void;
   /** A row's stable id. */
   readonly rowKey: (row: TRow) => string;
   /** A cell's accessor value. */
@@ -150,6 +210,16 @@ export interface DataTable<TRow> {
   readonly rowAttrs: (row: TRow, index: number) => Attrs;
   /** A body cell's attributes. */
   readonly cellAttrs: (column: ColumnDef<TRow>) => Attrs;
+  /** A phone card's attributes: its row identity and place in the list. */
+  readonly cardAttrs: (row: TRow, index: number) => Attrs;
+  /**
+   * The load-more area's attributes: once it scrolls near the viewport, the
+   * next rows load, and it keeps loading while the list is too short to push
+   * it away.
+   */
+  readonly loadMoreAttrs: () => Attrs;
+  /** The load-more button's attributes: its label, its state and its click. */
+  readonly loadMoreButtonAttrs: () => Attrs;
   /**
    * The search box's attributes: its text, and an input handler that commits
    * the term once typing pauses.
@@ -243,6 +313,39 @@ export function injectDataTable<TRow>(
     injector
   );
 
+  const windowStart = computed(() => sourceWindowStart(source()));
+  const isEmpty = computed(
+    () => source().rows.length === 0 && !source().isLoading
+  );
+  /**
+   * Whether the rendered rows are a slice of the dataset — a page, or a
+   * window. A reader counts the rows it can reach, so a slice states the
+   * real size.
+   */
+  const windowed = computed(() => source().total > source().rows.length);
+  const canLoadMore = computed(
+    () =>
+      bodyCanLoadMore({
+        isPaged: source().paginationMode === "paged",
+        source: source(),
+      }) && source().hasNextPage === true
+  );
+  const loadMore = (): void => {
+    fetchNextBodyPage(source());
+  };
+  const loadMoreSentinel = watchLoadMore(
+    canLoadMore,
+    computed(() => source().rows.length),
+    loadMore,
+    injector
+  );
+  const statusAnnouncement = trackTableStatus(
+    source,
+    labels,
+    allColumns,
+    injector
+  );
+
   const toggleSort = (key: string): void => {
     const current = source();
     const next = nextSort({ key: current.sortBy, dir: current.sortDir }, key);
@@ -252,7 +355,7 @@ export function injectDataTable<TRow>(
   return {
     source,
     rows: computed(() => source().rows),
-    isEmpty: computed(() => source().rows.length === 0 && !source().isLoading),
+    isEmpty,
     columns,
     isMobile,
     labels,
@@ -266,6 +369,32 @@ export function injectDataTable<TRow>(
     sortByOptions: computed(() => deriveSortByOptions(columns())),
     search,
     searchValue: searchInput.value,
+    bodyRegion: computed(() =>
+      chromeBodyRegion({
+        isLoading: source().isLoading,
+        rowCount: source().rows.length,
+        isEmpty: isEmpty(),
+        isMobile: isMobile(),
+      })
+    ),
+    emptyVariant: computed(() =>
+      chromeEmptyVariant({
+        activeFilterCount: 0,
+        extra: source().extra,
+        search: source().search,
+      })
+    ),
+    showFooter: computed(() => chromeShowFooter(source())),
+    pagerSlots: computed(() => {
+      const { safePage, totalPages } = computePagination(source());
+      return paginationSlots(safePage, totalPages);
+    }),
+    pageSizeOptions: computed(() =>
+      pageSizeOptions([source().limit, source().defaultLimit])
+    ),
+    canLoadMore,
+    windowStart,
+    statusAnnouncement,
     featureHost: featureHostFor(injector, options.features),
     toggleSort,
     setSearch: searchInput.commit,
@@ -276,13 +405,25 @@ export function injectDataTable<TRow>(
     setLimit: (limit) => {
       source().setLimit(limit);
     },
+    loadMore,
+    clearFilters: () => {
+      clearChromeFilters(source(), options.onClearFilters);
+    },
     rowKey,
     cellValue: (column, row) => column.accessor?.(row) ?? null,
-    tableAttrs: () =>
-      tableAttributes(
+    tableAttrs: () => ({
+      ...tableAttributes(
         dir(),
         (options.tableLabel && readMaybe(options.tableLabel)) ?? labels().table
       ),
+      ...gridContainerAttributes({
+        enabled: false,
+        windowed: windowed(),
+        columnsWindowed: false,
+        rowCount: source().total,
+        colCount: columns().length,
+      }),
+    }),
     headerRowAttrs: () => headerRowAttributes(),
     headerCellAttrs: (column) => {
       const { sortBy, sortDir, sortLevels } = source();
@@ -302,13 +443,143 @@ export function injectDataTable<TRow>(
           source().toggleSortLevel(key);
         },
       }),
-    rowAttrs: (row, index) => rowAttributes(rowKey(row), index, undefined),
+    rowAttrs: (row, index) => {
+      const id = rowKey(row);
+      return {
+        ...rowAttributes(id, index, options.selection?.isSelected(id)),
+        ...gridRowAttributes(
+          { enabled: false, windowed: windowed() },
+          windowStart() + index
+        ),
+      };
+    },
     cellAttrs: (column) => cellAttributes(column, sizing()),
+    loadMoreAttrs: () => ({ ref: loadMoreSentinel }),
+    loadMoreButtonAttrs: () => ({
+      type: "button",
+      disabled: source().isFetchingNextPage === true,
+      onClick: loadMore,
+    }),
+    cardAttrs: (row, index) => {
+      const id = rowKey(row);
+      const setSize = cardSetSize(source(), windowStart());
+      const partial = setSize > source().rows.length;
+      return {
+        "data-adapttable-part": "card",
+        "data-row-id": id,
+        "data-index": index,
+        "data-selected": options.selection?.isSelected(id) ? "" : undefined,
+        // A windowed list has only a slice of its items in the DOM, so each
+        // one states where it sits; a complete list is simply counted.
+        "aria-posinset": partial ? windowStart() + index + 1 : undefined,
+        "aria-setsize": partial ? setSize : undefined,
+      };
+    },
     searchInputAttrs: () =>
       searchInputAttributes(
         searchInput.value(),
         labels(),
         searchInput.setValue
       ),
+  };
+}
+
+/**
+ * What the table announces after its rows settle. Only a move in the sort,
+ * the count or the visible range can change the sentence, so a view-state
+ * change that moves none of them leaves the region alone.
+ */
+function trackTableStatus<TRow>(
+  source: Signal<TableSource<TRow>>,
+  labels: Signal<Required<TableLabels>>,
+  columns: Signal<readonly ColumnDef<TRow>[]>,
+  injector: Injector
+): Signal<string> {
+  const inputs = computed(
+    () => {
+      const current = source();
+      return {
+        total: current.total,
+        shown: current.rows.length,
+        page: current.page,
+        limit: current.limit,
+        paged: current.paginationMode === "paged",
+        sortBy: current.sortBy,
+        sortDir: current.sortDir,
+      };
+    },
+    {
+      equal: (a, b) =>
+        a.total === b.total &&
+        a.shown === b.shown &&
+        a.page === b.page &&
+        a.limit === b.limit &&
+        a.paged === b.paged &&
+        a.sortBy === b.sortBy &&
+        a.sortDir === b.sortDir,
+    }
+  );
+  const announcement = signal("");
+  let previous: TableStatusSignature | undefined;
+  effect(
+    () => {
+      const current = inputs();
+      untracked(() => {
+        const next = resolveTableStatus(
+          {
+            ...current,
+            labels: labels(),
+            sortColumnName: sortedColumnName(columns(), current.sortBy),
+          },
+          previous
+        );
+        previous = next.signature;
+        // Written every time, the empty result included: silence has to
+        // clear the region, or a message repeated after a quiet settle never
+        // changes the text and is never spoken.
+        announcement.set(next.announcement);
+      });
+    },
+    { injector }
+  );
+  return announcement.asReadonly();
+}
+
+/**
+ * Load the next rows once the load-more area comes within 200px of the
+ * viewport. The observer re-arms whenever the row count moves, so a page
+ * too short to push the area away keeps loading until it fills or the rows
+ * run out.
+ *
+ * @returns The `ref` that hands the area's element to the watcher.
+ */
+function watchLoadMore(
+  enabled: Signal<boolean>,
+  rowCount: Signal<number>,
+  loadMore: () => void,
+  injector: Injector
+): (element: HTMLElement | null) => void {
+  const element = signal<HTMLElement | null>(null);
+  effect(
+    (onCleanup) => {
+      const target = element();
+      rowCount();
+      if (!target || !enabled()) return;
+      if (typeof IntersectionObserver === "undefined") return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting) loadMore();
+        },
+        { rootMargin: "200px" }
+      );
+      observer.observe(target);
+      onCleanup(() => {
+        observer.disconnect();
+      });
+    },
+    { injector }
+  );
+  return (target) => {
+    element.set(target);
   };
 }
