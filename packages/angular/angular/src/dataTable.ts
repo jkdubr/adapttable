@@ -70,15 +70,15 @@ import {
   type ColumnLayout,
   columnLayoutFor,
   type ColumnLayoutOptions,
-} from "./columnLayout";
+} from "./columns/columnLayout";
 import {
   type AdaptTableFeature,
   featureHostFor,
   featureOptionsOf,
   featureSlotFillsOf,
-} from "./features";
+} from "./featureHost";
 import { createSearchInput } from "./searchInput";
-import type { RowSelection } from "./selection";
+import type { RowSelection } from "./selection/selection";
 import type { SlotFills } from "./slots";
 import { type MaybeSignal, type MaybeSignalOptional, readMaybe } from "./store";
 

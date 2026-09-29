@@ -8,7 +8,7 @@ import { Component, inject, input, signal, type Type } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { AdaptControl } from "./control";
-import { extendFeature, featureSlotFillsOf } from "./features";
+import { extendFeature, featureSlotFillsOf } from "./featureHost";
 import { AdaptIcon } from "./icon";
 import { AdaptSlot, ADAPTTABLE_SLOT_TABLE, type SlotTable } from "./slots";
 

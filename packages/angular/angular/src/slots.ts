@@ -24,7 +24,7 @@ import {
   ViewContainerRef,
 } from "@angular/core";
 
-import type { SlotComponent } from "./features";
+import type { SlotComponent } from "./featureHost";
 
 /**
  * Which components draw each slot — `DataTable.slotFills`.

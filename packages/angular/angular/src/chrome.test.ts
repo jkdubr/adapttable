@@ -2,15 +2,15 @@ import { createMemoryAdapter } from "@adapttable/core";
 import { Component, computed, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
+import { AdaptLiveRegion } from "./a11y/liveRegion";
 import { AdaptAttrs } from "./attrs";
 import { AdaptCell } from "./cell";
 import type { ColumnDef } from "./columnDef";
 import { injectDataTable } from "./dataTable";
-import { injectFrontendData } from "./frontendData";
-import { injectGridFocus } from "./gridFocus";
-import { AdaptLiveRegion } from "./liveRegion";
-import { injectRowSelection } from "./selection";
-import { ADAPTTABLE_URL_ADAPTER } from "./url";
+import { injectGridFocus } from "./focus/gridFocus";
+import { injectRowSelection } from "./selection/selection";
+import { injectFrontendData } from "./source/frontendData";
+import { ADAPTTABLE_URL_ADAPTER } from "./url/tableUrlState";
 
 interface Person {
   id: string;

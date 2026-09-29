@@ -9,11 +9,14 @@ import { TestBed } from "@angular/core/testing";
 import { AdaptCellTemplate } from "./cell";
 import { type ColumnDef, resolveColumns } from "./columnDef";
 import { injectDataTable } from "./dataTable";
-import { injectFrontendData } from "./frontendData";
-import { injectIsMobile } from "./mobile";
-import { injectRowSelection } from "./selection";
+import { injectIsMobile } from "./hooks/isMobile";
+import { injectRowSelection } from "./selection/selection";
+import { injectFrontendData } from "./source/frontendData";
 import { fromStore } from "./store";
-import { ADAPTTABLE_URL_ADAPTER, injectTableUrlState } from "./url";
+import {
+  ADAPTTABLE_URL_ADAPTER,
+  injectTableUrlState,
+} from "./url/tableUrlState";
 
 interface Row {
   id: string;

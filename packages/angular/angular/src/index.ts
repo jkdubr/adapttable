@@ -7,13 +7,14 @@
  *
  * @packageDocumentation
  */
+export { AdaptLiveRegion } from "./a11y/liveRegion";
 export {
   type BulkActionRunnerOptions,
   type BulkActionRunnerState,
   injectBulkActionRunner,
   rowActionsFor,
   type RowActionsOptions,
-} from "./actions";
+} from "./actions/bulkActionRunner";
 export { AdaptAttrs, type Attrs } from "./attrs";
 export {
   AdaptCell,
@@ -21,8 +22,6 @@ export {
   AdaptHeader,
   type ResolvedRenderer,
 } from "./cell";
-export { cellNavigation, type CellNavigationOptions } from "./cellNavigation";
-export { AdaptChecklistChrome, type ChecklistSlots } from "./checklist";
 export {
   type CellContext,
   type ColumnDef,
@@ -30,14 +29,17 @@ export {
   type Renderer,
   resolveColumns,
 } from "./columnDef";
-export { type ColumnLayout, type ColumnLayoutOptions } from "./columnLayout";
+export {
+  type ColumnLayout,
+  type ColumnLayoutOptions,
+} from "./columns/columnLayout";
 export {
   type ColumnDrag,
   type ColumnRenameEditorOptions,
   type ColumnRenameEditorState,
   injectColumnDrag,
   injectColumnRenameEditor,
-} from "./columnMenu";
+} from "./columns/columnMenu";
 export { AdaptControl } from "./control";
 export {
   type DataTable,
@@ -46,18 +48,15 @@ export {
 } from "./dataTable";
 export {
   type BatchEditHandler,
-  batchEditing,
   type BatchEditingInjectOptions,
   type CellEditHandler,
   type CellEditingOptions,
-  editing,
   injectBatchEditing,
   injectCellEditing,
   injectRowEditing,
   type RowEditHandler,
-  rowEditing,
   type RowEditingInjectOptions,
-} from "./editing";
+} from "./editing/editing";
 export {
   ADAPTTABLE_FEATURES,
   type AdaptTableFeature,
@@ -65,7 +64,22 @@ export {
   featureOptionsOf,
   provideAdaptTableFeatures,
   type SlotComponent,
-} from "./features";
+} from "./featureHost";
+export {
+  cellNavigation,
+  type CellNavigationOptions,
+} from "./features/cellNavigation";
+export { batchEditing, editing, rowEditing } from "./features/editing";
+export {
+  groupingPanel,
+  type GroupingPanelExtras,
+} from "./features/groupingPanel";
+export { rowReorder } from "./features/rowReorder";
+export { virtualize, type VirtualizeOptions } from "./features/virtualize";
+export {
+  AdaptChecklistChrome,
+  type ChecklistSlots,
+} from "./filters/checklistChrome";
 export {
   booleanFilterFor,
   filterChipsFor,
@@ -76,56 +90,58 @@ export {
   rangeFilterFor,
   type TableFilters,
   textFilterFor,
-} from "./filters";
+} from "./filters/filters";
 export {
   AdaptFilterTreeChrome,
   type AngularFilterTreeDisclosureProps,
   type FilterTreeSlots,
-} from "./filterTree";
-export { type FrontendDataOptions, injectFrontendData } from "./frontendData";
+} from "./filters/filterTreeChrome";
 export {
   type GridFocus,
   type GridFocusOptions,
   injectGridFocus,
-} from "./gridFocus";
-export {
-  groupingPanel,
-  type GroupingPanelExtras,
-  type GroupingPanelStateOptions,
-  injectGroupingPanelState,
-} from "./grouping";
+} from "./focus/gridFocus";
 export {
   AdaptGroupingPanelChrome,
   type AngularGroupingPanelAggregationItemProps,
   type AngularGroupingPanelSurfaceProps,
   type GroupingPanelSlots,
-} from "./groupingPanel";
+} from "./grouping/groupingPanelChrome";
+export {
+  type GroupingPanelStateOptions,
+  injectGroupingPanelState,
+} from "./grouping/groupingPanelState";
+export { injectIsMobile, type IsMobileOptions } from "./hooks/isMobile";
 export { AdaptIcon } from "./icon";
 export * from "./kitExports";
-export { AdaptLiveRegion } from "./liveRegion";
-export { injectIsMobile, type IsMobileOptions } from "./mobile";
+export {
+  type DensityOptions,
+  type DensityState,
+  type ExportCsvHandlerOptions,
+  injectDensity,
+  injectExportCsv,
+  injectFullscreen,
+} from "./layout/toolbar";
 export {
   injectRowReorder,
-  rowReorder,
   type RowReorderState,
   type RowReorderStateOptions,
-} from "./rowReorder";
-export {
-  injectSavedViews,
-  type SavedViewsOptions,
-  type SavedViewsState,
-} from "./savedViews";
+} from "./rows/rowReorder";
 export {
   injectRowSelection,
   type RowSelection,
   type RowSelectionOptions,
-} from "./selection";
+} from "./selection/selection";
 export {
   AdaptSlot,
   ADAPTTABLE_SLOT_TABLE,
   type SlotFills,
   type SlotTable,
 } from "./slots";
+export {
+  type FrontendDataOptions,
+  injectFrontendData,
+} from "./source/frontendData";
 export {
   type ExternalStore,
   fromStore,
@@ -134,20 +150,17 @@ export {
   type MaybeSignalOptional,
 } from "./store";
 export {
-  type DensityOptions,
-  type DensityState,
-  type ExportCsvHandlerOptions,
-  injectDensity,
-  injectExportCsv,
-  injectFullscreen,
-} from "./toolbar";
+  injectSavedViews,
+  type SavedViewsOptions,
+  type SavedViewsState,
+} from "./url/savedViews";
 export {
   ADAPTTABLE_URL_ADAPTER,
   injectTableUrlState,
   type TableUrlState,
   type TableUrlStateOptions,
   urlAdapterFor,
-} from "./url";
+} from "./url/tableUrlState";
 export {
   injectKeyedVirtualization,
   injectKeyedVirtualizer,
@@ -155,9 +168,7 @@ export {
   injectTableVirtualizer,
   type KeyedVirtualizationOptions,
   type TableVirtualizationOptions,
-  virtualize,
-  type VirtualizeOptions,
-} from "./virtualize";
+} from "./virtual/tableVirtualization";
 export type {
   BatchEditingState,
   BatchRowEdit,
