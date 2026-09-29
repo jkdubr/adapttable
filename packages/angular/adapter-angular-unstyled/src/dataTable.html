@@ -140,7 +140,11 @@
         </output>
       }
       @case ("mobile") {
-        <adapt-mobile-cards [view]="v" [rowKey]="rowKey()" />
+        <adapt-mobile-cards
+          [view]="v"
+          [rowKey]="rowKey()"
+          [maxHeight]="maxHeight()"
+        />
       }
       @case ("desktop") {
         <adapt-desktop-table

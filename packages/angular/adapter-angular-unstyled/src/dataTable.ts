@@ -740,6 +740,8 @@ export class AdaptDataTable<TRow> implements OnInit {
    * @internal
    */
   protected readonly desktopTable = viewChild(AdaptDesktopTable);
+  /** The phone card list, when rendered — the scroll box on phones. @internal */
+  protected readonly mobileCards = viewChild(AdaptMobileCards);
   private readonly filtersForm = viewChild<TemplateRef<unknown>>("filtersForm");
   private readonly filtersTrigger =
     viewChild<TemplateRef<unknown>>("filtersTrigger");
@@ -1014,7 +1016,10 @@ export class AdaptDataTable<TRow> implements OnInit {
       featureOptions,
       rowKey: (row) => this.rowKey()(row),
       maxHeight: this.maxHeight(),
-      scrollBox: () => this.desktopTable()?.scrollElement() ?? null,
+      scrollBox: () =>
+        (table.isMobile()
+          ? this.mobileCards()?.scrollElement()
+          : this.desktopTable()?.scrollElement()) ?? null,
       injector,
     });
     const virtualization = computed(() => bodyWindow().virtualization);

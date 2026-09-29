@@ -8,13 +8,21 @@ import {
   type ColumnDef,
   EDITABLE_CELL,
   GROUP_HEADER_CARD,
+  mobileCardListStyle,
   resolveMobileLabel,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_BUTTONS,
   type RowReorderButtonsProps,
   type RowReorderState,
 } from "@adapttable/angular";
-import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  type ElementRef,
+  input,
+  viewChild,
+} from "@angular/core";
 
 import type { TableView } from "../dataTable";
 import { AdaptRowActions } from "./rowActionButtons";
@@ -51,6 +59,45 @@ export class AdaptMobileCards<TRow> {
 
   private buttonsPropsCache = new Map<string, RowReorderButtonsProps<never>>();
   private buttonsPropsToken = "";
+
+  /**
+   * Cap the card list's height; the list scrolls inside the cap and a
+   * composed {@link virtualize} tracks the list instead of the page.
+   */
+  readonly maxHeight = input<number | string>();
+
+  /**
+   * The card list, which scrolls itself when its height is capped.
+   *
+   * @internal
+   */
+  protected readonly scrollBox =
+    viewChild<ElementRef<HTMLElement>>("scrollBox");
+
+  /**
+   * The scroll element virtualization tracks on phones, when present.
+   *
+   * @internal
+   */
+  scrollElement(): HTMLElement | null {
+    return this.scrollBox()?.nativeElement ?? null;
+  }
+
+  /**
+   * The list's cap, from core's card-list rule.
+   *
+   * @internal
+   */
+  protected readonly listStyle = computed(() => {
+    const maxHeight = this.maxHeight();
+    if (typeof maxHeight === "string") {
+      return { maxHeight, overflowY: "auto" };
+    }
+    const style = mobileCardListStyle(maxHeight);
+    return style
+      ? { maxHeight: `${String(style.maxHeight)}px`, overflowY: "auto" }
+      : null;
+  });
 
   /**
    * A field's caption: its `mobileLabel`, else a string header, else its

@@ -93,6 +93,7 @@ export {
   groupLeafCount,
   groupRowLayout,
   groupSelectionState,
+  mobileCardListStyle,
   windowGroupedEntries,
 } from "@adapttable/core";
 export type {

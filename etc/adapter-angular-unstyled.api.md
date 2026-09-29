@@ -234,6 +234,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     protected readonly groupingPanelSlot: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly maxHeight: InputSignal<string | number | undefined>;
+    // @internal
+    protected readonly mobileCards: Signal<AdaptMobileCards<any> | undefined>;
     ngOnInit(): void;
     // @internal
     protected readonly noResults: Signal<boolean>;
@@ -648,11 +650,18 @@ export class AdaptMobileCards<TRow> {
     protected caption(column: ColumnDef<TRow>): string | undefined;
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
     protected readonly groupHeaderCardSlot: FeatureSlotKey<GroupHeaderCardSlotProps<never, unknown, ColumnModel<never>>>;
+    protected readonly listStyle: Signal<    {
+    maxHeight: string;
+    overflowY: string;
+    } | null>;
+    readonly maxHeight: InputSignal<string | number | undefined>;
     protected reorderButtonsProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderButtonsProps_2<never>;
     protected readonly reorderButtonsSlot: FeatureSlotKey<RowReorderButtonsProps<never, unknown>>;
     protected readonly rowEditActionsSlot: FeatureSlotKey<RowEditActionsProps<never>>;
     protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
+    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
+    scrollElement(): HTMLElement | null;
     readonly view: InputSignal<TableView<TRow>>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMobileCards<any>, "adapt-mobile-cards", never, {
@@ -664,6 +673,11 @@ export class AdaptMobileCards<TRow> {
         "rowKey": {
             "alias": "rowKey";
             "required": true;
+            "isSignal": true;
+        };
+        "maxHeight": {
+            "alias": "maxHeight";
+            "required": false;
             "isSignal": true;
         };
     }, {}, never, never, true, never>;

@@ -180,6 +180,7 @@ import { isSelectEditor } from '@adapttable/core';
 import { joinRelativeToken } from '@adapttable/core';
 import { KeyedVirtualization } from '@adapttable/core';
 import { listFilterValues } from '@adapttable/core';
+import { mobileCardListStyle } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { offersAllMatching } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
@@ -2245,6 +2246,8 @@ export type MaybeSignal<T> = T | Signal<T>;
 
 // @public
 export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
+
+export { mobileCardListStyle }
 
 // @public
 export function multiDraftFromSelect(select: HTMLSelectElement): string;

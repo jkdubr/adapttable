@@ -1,5 +1,10 @@
 @let v = view();
-<ul data-adapttable-part="cards" style="margin: 0; padding: 0">
+<ul
+  #scrollBox
+  data-adapttable-part="cards"
+  style="margin: 0; padding: 0"
+  [style]="listStyle()"
+>
   @for (slot of v.body(); track slot.key) {
     @switch (slot.kind) {
       @case ("virtualPad") {

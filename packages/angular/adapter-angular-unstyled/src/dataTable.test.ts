@@ -380,14 +380,59 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(part("scroll-box")?.style.maxHeight).toBe("50vh");
   });
 
-  it("uses the card size estimate when virtualizing on a phone", async () => {
-    const { part } = await mountFeatures({
-      features: [virtualize({ estimateCardSize: 160 })],
-      paginationMode: "infinite",
-      maxHeight: 320,
-      forceMobile: true,
+  it("windows phone cards inside the capped card list, and scrolling moves the window", async () => {
+    // jsdom lays nothing out: give the card list the height its cap sets and
+    // a scroll position the test controls.
+    let scrollTop = 0;
+    const height = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "offsetHeight"
+    );
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+      configurable: true,
+      get(this: HTMLElement) {
+        return this.dataset.adapttablePart === "cards" ? 320 : 0;
+      },
     });
-    expect(part("cards")).not.toBeNull();
+    const top = Object.getOwnPropertyDescriptor(Element.prototype, "scrollTop");
+    Object.defineProperty(Element.prototype, "scrollTop", {
+      configurable: true,
+      get(this: Element) {
+        return this.getAttribute("data-adapttable-part") === "cards"
+          ? scrollTop
+          : 0;
+      },
+      set() {
+        // The virtualizer's own scrolls are not what this test moves.
+      },
+    });
+    try {
+      const { part, parts, settle } = await mountFeatures({
+        features: [virtualize({ estimateCardSize: 160, virtualOverscan: 0 })],
+        paginationMode: "infinite",
+        maxHeight: 320,
+        forceMobile: true,
+      });
+      const list = part("cards")!;
+      expect(list.style.maxHeight).toBe("320px");
+      expect(list.style.overflowY).toBe("auto");
+      const titles = () =>
+        parts("card").map((card) =>
+          card
+            .querySelector('[data-adapttable-part="card-value"]')!
+            .textContent.trim()
+        );
+      expect(titles()).toEqual(["City 01", "City 02"]);
+
+      scrollTop = 1600;
+      list.dispatchEvent(new Event("scroll"));
+      await settle();
+      expect(titles()).toEqual(["City 11", "City 12"]);
+    } finally {
+      if (height)
+        Object.defineProperty(HTMLElement.prototype, "offsetHeight", height);
+      if (top) Object.defineProperty(Element.prototype, "scrollTop", top);
+    }
   });
 });
 
