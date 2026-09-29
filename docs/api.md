@@ -3052,8 +3052,10 @@ controls: the host writes its own markup.
   `rowReorder` / `injectRowReorder` (`RowReorderStateOptions`) publish the
   drag and keyboard grab model. `editing` / `injectCellEditing`
   (`CellEditHandler`, `CellEditingOptions`) arm in-place cell edits;
-  `rowEditing` / `injectRowEditing` and `batchEditing` / `injectBatchEditing`
-  arm whole-row and batch commits.
+  `rowEditing` / `injectRowEditing` (`RowEditHandler`,
+  `RowEditingInjectOptions`) and `batchEditing` / `injectBatchEditing`
+  (`BatchEditHandler`, `BatchEditingInjectOptions`) arm whole-row and
+  batch commits.
 - Actions: `injectBulkActionRunner` runs bulk actions and returns a
   `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
   actions column's list, with Duplicate and Delete appended for the host's
