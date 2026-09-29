@@ -10,6 +10,7 @@ import type { RowPinState } from "../rows/rowPinModel";
 import type { QueryFilterGroup } from "../source/queryContract";
 import type { TableStateMutators } from "../tableStateMutators";
 import type { SavedView } from "./savedViewsController";
+import type { TableDensity } from "./viewStateSlices";
 
 /**
  * State + change handler returned by {@link useColumnLayoutUrlState}.
@@ -121,4 +122,16 @@ export interface UseTableUrlStateResult extends TableStateMutators {
   extra: ExtraFilters;
   /** Nested AND/OR filter tree, when one is in the URL. */
   filterTree: QueryFilterGroup | undefined;
+}
+
+/**
+ * The controlled pair to spread onto the table.
+ *
+ * @public
+ */
+export interface UseDensityUrlStateResult {
+  /** Current row density. */
+  density: TableDensity;
+  /** Switches density. */
+  onDensityChange: (next: TableDensity) => void;
 }

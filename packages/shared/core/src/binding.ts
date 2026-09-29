@@ -960,8 +960,14 @@ export type {
   GroupCollapseState,
   GroupPagingState,
 } from "./grouping/groupingBindingState";
+export {
+  DENSITY_STATE,
+  type DensityFeatureState,
+  type ResolvedDensity,
+} from "./layout/densityContract";
 export type { FullscreenState } from "./layout/layoutBindingState";
 export type { UsePivotUrlStateResult } from "./pivot/pivotBindingState";
+export { ROW_REORDER, type RowReorderState } from "./rows/rowReorderContract";
 export type {
   ChangedCellFlashState,
   HighlightState,
@@ -982,6 +988,7 @@ export type {
 } from "./tree/treeBindingState";
 export type {
   UseColumnLayoutUrlStateResult,
+  UseDensityUrlStateResult,
   UseGroupCollapseUrlStateResult,
   UseRowPinningUrlStateResult,
   UseSavedViewsResult,

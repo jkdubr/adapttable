@@ -9,6 +9,13 @@
  * own `TReorder`, so a React kit and an Angular kit fill the same shapes with
  * their own types.
  */
+import { featureStateKey } from "../features/featureKeys";
+import type {
+  RowDropPosition,
+  RowMoveMenuModel,
+  RowMoveRequest,
+  RowMoveTarget,
+} from "./rowMove";
 import type { RowReorderLabels } from "./rowReorderEngine";
 
 /**
@@ -205,3 +212,98 @@ export interface RowReorderButtonsSlots<TNode = unknown> {
   /** Renders the nested-row destination menu and confirmation. */
   readonly Menu: (props: RowMoveMenuSlotProps) => TNode;
 }
+
+/**
+ * Headless reorder state returned by `useRowReorder`.
+ *
+ * @typeParam TDragEvent - The binding's drag event (React's `DragEvent`).
+ * @typeParam TKeyEvent - The binding's key event (React's `KeyboardEvent`).
+ *
+ * @public
+ */
+export interface RowReorderState<
+  TRow,
+  TDragEvent = unknown,
+  TKeyEvent = unknown,
+> {
+  /** The lifted row, or `null` when idle. */
+  lifted: { rowId: string; from: number } | null;
+  /** Hovered drop index (local), or `null`. */
+  overIndex: number | null;
+  /** Hovered edge, including the middle tree re-parent target. */
+  overPosition: RowDropPosition | null;
+  /** Move awaiting kit-owned confirmation, or `null`. */
+  pendingMove: RowMoveRequest<TRow> | null;
+  /**
+   * Host-owned `confirmMove` is awaiting a decision. Kits disable grips,
+   * buttons and menu items while this is true; they must not draw a second
+   * confirmation surface.
+   */
+  hostConfirmPending: boolean;
+  /** Live-region text. Empty until something happens. */
+  announcement: string;
+  /** Whether this row is the one being moved. */
+  isLifted: (rowId: string) => boolean;
+  /** Whether this row owns the open move confirmation. */
+  isMovePending?: (row: TRow) => boolean;
+  /** Pointer: start a drag from this row. */
+  dragProps: (
+    rowId: string,
+    localIndex: number
+  ) => {
+    draggable: true;
+    onDragStart: (event: TDragEvent) => void;
+    onDragEnd: () => void;
+  };
+  /** Pointer: this row is a drop target. */
+  dropProps: (
+    localIndex: number,
+    row: TRow,
+    windowStart: number
+  ) => {
+    onDragOver: (event: TDragEvent) => void;
+    onDrop: (event: TDragEvent) => void;
+  };
+  /** Keyboard: Space lifts / drops, arrows move, Escape cancels. */
+  handleKeyDown: (
+    event: TKeyEvent,
+    rowId: string,
+    localIndex: number,
+    row: TRow,
+    windowStart: number,
+    rowCount: number
+  ) => void;
+  /** Mobile: swap with the neighbour. */
+  moveBy: (
+    localIndex: number,
+    delta: -1 | 1,
+    row: TRow,
+    windowStart: number,
+    rowCount: number
+  ) => void;
+  /** Keyboard/touch destinations for this row, when nested. */
+  moveMenu: (row: TRow) => RowMoveMenuModel<TRow> | undefined;
+  /** Select a destination from the move menu. */
+  selectMoveTarget: (target: RowMoveTarget<TRow>) => void;
+  /** Confirm the move shown by the kit confirmation surface. */
+  confirmMove: () => void;
+  /** Cancel the move shown by the kit confirmation surface. */
+  cancelMove: () => void;
+  /** Indicator attributes for a row. */
+  rowAttrs: (
+    rowId: string,
+    localIndex: number
+  ) => {
+    "data-dragging"?: "";
+    "data-drop"?: RowDropPosition;
+  };
+}
+
+/**
+ * Feature-state key for the row reorder state, published while the reorder
+ * feature is composed.
+ *
+ * @public
+ */
+export const ROW_REORDER =
+  featureStateKey<RowReorderState<unknown>>("row-reorder");

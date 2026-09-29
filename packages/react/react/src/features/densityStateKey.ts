@@ -5,34 +5,17 @@
  * composed chooser without importing its provider or state hook.
  */
 import { requestDensityChange, resolveDensity } from "@adapttable/core";
+import { DENSITY_STATE, type ResolvedDensity } from "@adapttable/core/binding";
 import { useCallback } from "react";
 
 import type { Density } from "../url/useDensityUrlState";
-import { featureStateKey, useFeatureState } from "./providers";
+import { useFeatureState } from "./providers";
 
-/** State owned by a composed density chooser. */
-export interface DensityFeatureState {
-  /** The chooser's uncontrolled value. */
-  readonly density: Density;
-  /** Update the chooser's uncontrolled value. */
-  readonly setDensity: (next: Density) => void;
-}
-
-/** Published only while the density chooser feature is composed. */
-export const DENSITY_STATE =
-  featureStateKey<DensityFeatureState>("density-chooser");
-
-/**
- * The density and request channel every adapter renders.
- *
- * @public
- */
-export interface ResolvedDensity {
-  /** Controlled value, feature-owned value, or the comfortable default. */
-  readonly density: Density;
-  /** Request a change; controlled tables wait for their prop to update. */
-  readonly onDensityChange: (next: Density) => void;
-}
+export {
+  DENSITY_STATE,
+  type DensityFeatureState,
+  type ResolvedDensity,
+} from "@adapttable/core/binding";
 
 /**
  * Resolve controlled and feature-owned density through one adapter seam.
