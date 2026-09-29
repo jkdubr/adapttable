@@ -10,6 +10,7 @@ export {
   cellNavigation,
   columnMenu,
   densityChooser,
+  editing,
   exportCsv,
   filters,
   fullscreen,

@@ -10,6 +10,7 @@ import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
+import { CellEditHandler } from '@adapttable/angular';
 import { CellNavigationOptions } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
 import { ColumnLayoutState } from '@adapttable/angular';
@@ -281,6 +282,9 @@ export function columnMenu(): AdaptTableFeature;
 
 // @public
 export function densityChooser(): AdaptTableFeature;
+
+// @public
+export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
 
 // @public
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): AdaptTableFeature;

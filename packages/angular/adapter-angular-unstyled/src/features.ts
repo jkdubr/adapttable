@@ -9,6 +9,7 @@ import {
   BULK_BAR,
   type BulkAction,
   cellNavigation as coreAngularCellNavigation,
+  type CellEditHandler,
   type CellNavigationOptions,
   COLUMN_MENU,
   coreBulkActions,
@@ -20,6 +21,7 @@ import {
   coreHeaderFilters,
   coreRowActions,
   coreSavedViews,
+  editing as coreAngularEditing,
   type ExportCsvOptions,
   extendFeature,
   FILTER_DRAWER,
@@ -290,4 +292,20 @@ export function rowReorder<TRow>(
   options?: RowReorderOptions<TRow>
 ): AdaptTableFeature {
   return coreAngularRowReorder(onRowReorder, options);
+}
+
+/**
+ * Edit a single cell in place. The host's write receives the row, column
+ * key and committed value; the table never mutates the array.
+ *
+ * @param onCellEdit - Called when a draft commits.
+ * @param extras - Optional lifecycle observers merged into the patch.
+ *
+ * @public
+ */
+export function editing<TRow>(
+  onCellEdit: CellEditHandler<TRow>,
+  extras: Record<string, unknown> = {}
+): AdaptTableFeature {
+  return coreAngularEditing(onCellEdit, extras);
 }

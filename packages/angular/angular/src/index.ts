@@ -45,6 +45,12 @@ export {
   injectDataTable,
 } from "./dataTable";
 export {
+  type CellEditHandler,
+  type CellEditingOptions,
+  editing,
+  injectCellEditing,
+} from "./editing";
+export {
   ADAPTTABLE_FEATURES,
   type AdaptTableFeature,
   extendFeature,

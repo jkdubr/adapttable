@@ -16,6 +16,7 @@ import { BulkActionContext } from '@adapttable/core';
 import { bulkActionErrorMessage } from '@adapttable/core';
 import { BulkActionOutcome } from '@adapttable/core';
 import { BulkBarSlotProps } from '@adapttable/core/binding';
+import { CellEditingState } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
 import { ChecklistButtonProps } from '@adapttable/core/binding';
@@ -48,6 +49,7 @@ import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
 import { devWarn } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { EditEventHandler } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
@@ -608,6 +610,16 @@ export interface CellContext<TRow> {
 }
 
 // @public
+export type CellEditHandler<TRow> = (row: TRow, columnKey: string, value: unknown) => void | Promise<void>;
+
+// @public
+export interface CellEditingOptions<TRow = unknown> {
+    readonly injector?: Injector;
+    readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditStart?: EditEventHandler<TRow>;
+}
+
+// @public
 export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
 
 // @public
@@ -824,6 +836,9 @@ export interface DensityState {
 export { devWarn }
 
 export { Direction }
+
+// @public
+export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
 
 // @public
 export interface ExportCsvHandlerOptions<TRow> {
@@ -1061,6 +1076,9 @@ export { IconDescriptor }
 
 // @public
 export function injectBulkActionRunner(options: BulkActionRunnerOptions): BulkActionRunnerState;
+
+// @public
+export function injectCellEditing<TRow = unknown>(options?: CellEditingOptions<TRow>): Signal<CellEditingState>;
 
 // @public
 export function injectColumnDrag(injector?: Injector): ColumnDrag;

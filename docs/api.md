@@ -3050,7 +3050,8 @@ controls: the host writes its own markup.
   headless hooks kits call. `cellNavigation` (`CellNavigationOptions`) turns
   on the keyboard grid; `injectGridFocus` is the underlying hook.
   `rowReorder` / `injectRowReorder` (`RowReorderStateOptions`) publish the
-  drag and keyboard grab model.
+  drag and keyboard grab model. `editing` / `injectCellEditing`
+  (`CellEditHandler`, `CellEditingOptions`) arm in-place cell edits.
 - Actions: `injectBulkActionRunner` runs bulk actions and returns a
   `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
   actions column's list, with Duplicate and Delete appended for the host's
@@ -3074,7 +3075,7 @@ keyboard cell navigation with the `data-adapttable-part` names every kit
 shares. Its `features` input composes `columnMenu`, `filters`,
 `headerFilters`, `bulkActions`, `rowActions` (`RowActionsFeatureOptions`),
 `densityChooser`, `fullscreen`, `exportCsv`, `savedViews`,
-`groupingPanel`, `virtualize`, `cellNavigation` and `rowReorder`; `filtersMode`
+`groupingPanel`, `virtualize`, `cellNavigation`, `rowReorder` and `editing`; `filtersMode`
 (`FiltersMode`) picks the anchored popover or the drawer. Each feature draws
 the kit's own native controls. `AdaptGroupingPanel` draws the grouping
 strip with those same native controls. `paginationMode` and `maxHeight` arm
