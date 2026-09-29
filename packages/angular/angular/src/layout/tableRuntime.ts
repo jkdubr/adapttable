@@ -1,19 +1,49 @@
 /**
  * Build the live {@link TableRuntime} Angular Chrome reads from a table and
- * its source.
+ * its source — published through core's {@link TableRuntimePublisher}, the
+ * same path React's chrome extras gate uses.
  */
+import { type TableRuntime, type TableSource } from "@adapttable/core";
 import {
-  type TableRuntime,
-  type TableRuntimeView,
-  type TableSource,
-} from "@adapttable/core";
+  type RuntimeChromeInput,
+  TableRuntimePublisher,
+} from "@adapttable/core/binding";
 import { type Signal } from "@angular/core";
 
 import type { DataTable } from "../dataTable";
 import type { AdaptTableFeature } from "../featureHost";
 
 /**
- * Build the live {@link TableRuntime} a grouping panel controller reads.
+ * The chrome fields {@link TableRuntimePublisher} needs from an Angular
+ * {@link DataTable} and its live source.
+ */
+function chromeFrom<TRow>(
+  table: DataTable<TRow>,
+  source: TableSource<TRow>
+): RuntimeChromeInput<TRow> {
+  const layout = table.layout();
+  return {
+    source,
+    getRowId: (row) => table.rowKey(row),
+    allColumns: table.allColumns(),
+    columnLayout: {
+      visibleColumns: layout.visibleColumns,
+      state: layout.state,
+      setHidden: layout.setHidden,
+      move: layout.move,
+      setOrder: layout.setOrder,
+      setPinned: layout.setPinned,
+    },
+    table: {
+      labels: table.labels(),
+    },
+  };
+}
+
+/**
+ * Build the live {@link TableRuntime} a grouping panel or reorder controller
+ * reads. One publisher per call keeps the neutral table stable across updates,
+ * matching React's RuntimePublisher.
  *
  * @internal
  */
@@ -25,46 +55,15 @@ export function tableRuntimeFor<TRow>(
   const featureIds = features.map(
     (feature, index) => feature.id ?? `feature-${String(index)}`
   );
+  const publisher = new TableRuntimePublisher<TRow>();
+  const publish = () => publisher.update(chromeFrom(table, source()), {});
   return {
-    rowAt: (index) => source().rows[index],
+    rowAt: (index) => {
+      const view = publish();
+      return (view.visibleRows ?? view.rows)[index];
+    },
     labels: () => table.labels(),
     featureIds: () => featureIds,
-    view: (): TableRuntimeView<TRow> | undefined => {
-      const current = source();
-      const columns = table.allColumns();
-      return {
-        rows: current.rows,
-        getRowId: (row) => table.rowKey(row),
-        rowLabel: (row) => table.rowKey(row),
-        groupingState: {
-          groupBy: current.groupBy,
-          aggregateOverrides: current.groupAggregateOverrides ?? {},
-          columnLabel: (key) => {
-            const column = columns.find((entry) => entry.key === key);
-            return typeof column?.header === "string" ? column.header : key;
-          },
-          columns,
-          setGroupBy: current.setGroupBy,
-          initializeGroupBy: current.initializeGroupBy,
-          setAggregateOverrides: current.setGroupAggregateOverrides,
-        },
-        query: {
-          page: current.page,
-          limit: current.limit,
-          total: current.total,
-          defaultLimit: current.defaultLimit,
-          search: current.search,
-          sortBy: current.sortBy,
-          sortDir: current.sortDir,
-          setPage: current.setPage,
-          setLimit: current.setLimit,
-          setSearch: current.setSearch,
-          setSort: current.setSort,
-          extra: current.extra,
-          setExtras: current.setExtras,
-          clearExtras: current.clearExtras,
-        },
-      };
-    },
+    view: () => publish(),
   };
 }
