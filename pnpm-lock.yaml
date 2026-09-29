@@ -378,10 +378,10 @@ importers:
         version: link:../../shared/core
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(yaml@2.9.0))
+        version: 2.7.5(@angular/build@22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.0))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(eb7160fdcfceb6ccb72e5e64a36cf5ed)
+        version: 2.7.5(d16d3e3c2453e7d779e042335991c126)
       '@angular/build':
         specifier: ^22.2.0
         version: 22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0)
@@ -421,16 +421,19 @@ importers:
       '@adapttable/core':
         specifier: workspace:*
         version: link:../../shared/core
+      '@tanstack/angular-virtual':
+        specifier: ^6.0.6
+        version: 6.0.6(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
     devDependencies:
       '@analogjs/vite-plugin-angular':
         specifier: ^2.7.5
-        version: 2.7.5(@angular/build@22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.0))
+        version: 2.7.5(@angular/build@22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(vite@8.3.0(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(yaml@2.9.0))
       '@analogjs/vitest-angular':
         specifier: ^2.7.5
-        version: 2.7.5(d16d3e3c2453e7d779e042335991c126)
+        version: 2.7.5(eb7160fdcfceb6ccb72e5e64a36cf5ed)
       '@angular/build':
         specifier: ^22.2.0
         version: 22.2.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)))(@types/node@26.4.0)(istanbul-lib-instrument@6.0.3)(jiti@2.7.0)(less@4.9.1)(ng-packagr@22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3))(postcss@8.5.26)(rollup@4.62.0)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11)(yaml@2.9.0)
@@ -5377,6 +5380,11 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@tanstack/angular-virtual@6.0.6':
+    resolution: {integrity: sha512-tftxSBtOg321WeZHlZObczcrmE2sc7uXGbW+1d08LA+CtnCfHG7sSGZqCCa+IDPAvwgPOrBbU2Y/i89xrTitlw==}
+    peerDependencies:
+      '@angular/core': '>=20.0.0'
+
   '@tanstack/query-core@5.102.6':
     resolution: {integrity: sha512-jp+GucyQ+fel2ILb8ZLQeqMaAqZL/Bzaj+dKOQiPk4vPdf2rQPEV7heUyEVIhatpY42j4AFHav4DzBa1oTIp/A==}
 
@@ -5390,6 +5398,9 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@tanstack/virtual-core@3.17.11':
+    resolution: {integrity: sha512-+ILjvtHup6Y2hzQ6YzwMgX1Q+oQpxEGOXCEsCNaPoIP0VxMbizIBTmYTDtkerkIQS8/CbP1BRuyt8V/8BCsy1g==}
 
   '@tanstack/virtual-core@3.17.8':
     resolution: {integrity: sha512-BfEvehNpOT75r5Ksc5xW6NZuXujTfb7nlSEyVu4XHG3gdxNg1KqXruWbDewXOUaUYIo4oRbSfkjIajz4MAT8tA==}
@@ -14477,6 +14488,11 @@ snapshots:
       tailwindcss: 4.3.3
       vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.0)
 
+  '@tanstack/angular-virtual@6.0.6(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))':
+    dependencies:
+      '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
+      '@tanstack/virtual-core': 3.17.11
+
   '@tanstack/query-core@5.102.6': {}
 
   '@tanstack/react-query@5.102.6(react@19.2.8)':
@@ -14489,6 +14505,8 @@ snapshots:
       '@tanstack/virtual-core': 3.17.8
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
+
+  '@tanstack/virtual-core@3.17.11': {}
 
   '@tanstack/virtual-core@3.17.8': {}
 

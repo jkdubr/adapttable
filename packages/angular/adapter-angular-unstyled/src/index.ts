@@ -6,15 +6,23 @@
  */
 export { AdaptDataTable, type TableView } from "./dataTable";
 export {
+  batchEditing,
   bulkActions,
+  cellNavigation,
   columnMenu,
   densityChooser,
+  editing,
   exportCsv,
   filters,
   fullscreen,
+  groupingPanel,
   headerFilters,
   rowActions,
   type RowActionsFeatureOptions,
+  rowEditing,
+  rowReorder,
   savedViews,
+  virtualize,
 } from "./features";
+export { AdaptGroupingPanel } from "./groupingPanel";
 export type { FiltersMode, FiltersView } from "./tableFilters";

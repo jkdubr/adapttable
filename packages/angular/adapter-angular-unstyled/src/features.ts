@@ -6,8 +6,13 @@
 import {
   ACTIVE_FILTER_CHIPS,
   type AdaptTableFeature,
+  type BatchEditHandler,
+  batchEditing as coreAngularBatchEditing,
   BULK_BAR,
   type BulkAction,
+  type CellEditHandler,
+  cellNavigation as coreAngularCellNavigation,
+  type CellNavigationOptions,
   COLUMN_MENU,
   coreBulkActions,
   coreColumnMenu,
@@ -18,6 +23,7 @@ import {
   coreHeaderFilters,
   coreRowActions,
   coreSavedViews,
+  editing as coreAngularEditing,
   type ExportCsvOptions,
   extendFeature,
   FILTER_DRAWER,
@@ -25,12 +31,22 @@ import {
   FILTER_POPOVER,
   type FilterDef,
   FILTERS_FORM,
+  GROUPING_PANEL,
+  groupingPanel as coreAngularGroupingPanel,
+  type GroupingPanelExtras,
   type RowAction,
   type RowActionsLayout,
+  type RowEditHandler,
+  rowEditing as coreAngularRowEditing,
+  rowReorder as coreAngularRowReorder,
+  type RowReorderHandler,
+  type RowReorderOptions,
   SAVED_VIEWS,
   type SavedViewsControllerOptions,
   slotRender,
   TOOLBAR_EXTRAS,
+  virtualize as coreAngularVirtualize,
+  type VirtualizeOptions,
 } from "@adapttable/angular";
 
 import { AdaptBulkBar } from "./actions";
@@ -42,6 +58,7 @@ import {
   AdaptFiltersForm,
   AdaptHeaderFilterTrigger,
 } from "./filterOverlays";
+import { AdaptGroupingPanel } from "./groupingPanel";
 import { AdaptSavedViewsMenu } from "./savedViews";
 import {
   AdaptDensityButton,
@@ -215,4 +232,114 @@ export function savedViews(
   return extendFeature(coreSavedViews(options), [
     slotRender(SAVED_VIEWS, () => AdaptSavedViewsMenu),
   ]);
+}
+
+/**
+ * The interactive grouping strip: chips, carets, aggregations and the
+ * ungroup target, drawn with native controls. The panel owns the group-by
+ * state; composing it turns grouping on.
+ *
+ * @param groupBy - Initial grouping keys; a URL that already carries one keeps it.
+ * @param extras - Row-aware aggregate options.
+ *
+ * @public
+ */
+export function groupingPanel<TRow = unknown>(
+  groupBy?: string | readonly string[],
+  extras: GroupingPanelExtras<TRow> = {}
+): AdaptTableFeature {
+  return extendFeature(coreAngularGroupingPanel(groupBy, extras), [
+    slotRender(GROUPING_PANEL, () => AdaptGroupingPanel),
+  ]);
+}
+
+/**
+ * Render only the rows in view. Compose with `paginationMode="infinite"`
+ * (or a grouped/tree page): a flat paged table already bounds what is
+ * mounted, so the window stays off.
+ *
+ * @param options - Master switch or the windowing knobs.
+ *
+ * @public
+ */
+export function virtualize(
+  options: VirtualizeOptions = true
+): AdaptTableFeature {
+  return coreAngularVirtualize(options);
+}
+
+/**
+ * A keyboard grid with a focused cell. Compose it, or set the table's
+ * `cellNavigation` input — either turns the grid on.
+ *
+ * @param options - Optional range-change listener.
+ *
+ * @public
+ */
+export function cellNavigation(
+  options: CellNavigationOptions = {}
+): AdaptTableFeature {
+  return coreAngularCellNavigation(options);
+}
+
+/**
+ * Let rows be dragged, or moved with the keyboard, into a new order. The
+ * table never writes to the host's array — the handler applies the move.
+ *
+ * @param onRowReorder - Called with the from/to indexes and the moved row.
+ * @param options - Move policy and cross-boundary handlers.
+ *
+ * @public
+ */
+export function rowReorder<TRow>(
+  onRowReorder: RowReorderHandler<TRow>,
+  options?: RowReorderOptions<TRow>
+): AdaptTableFeature {
+  return coreAngularRowReorder(onRowReorder, options);
+}
+
+/**
+ * Edit a single cell in place. The host's write receives the row, column
+ * key and committed value; the table never mutates the array.
+ *
+ * @param onCellEdit - Called when a draft commits.
+ * @param extras - Optional lifecycle observers merged into the patch.
+ *
+ * @public
+ */
+export function editing<TRow>(
+  onCellEdit: CellEditHandler<TRow>,
+  extras: Record<string, unknown> = {}
+): AdaptTableFeature {
+  return coreAngularEditing(onCellEdit, extras);
+}
+
+/**
+ * Edit a whole row at once. The host receives one patch of parsed values.
+ *
+ * @param onRowEdit - Called with the row and its changed fields.
+ * @param extras - Optional lifecycle observers merged into the patch.
+ *
+ * @public
+ */
+export function rowEditing<TRow>(
+  onRowEdit: RowEditHandler<TRow>,
+  extras: Record<string, unknown> = {}
+): AdaptTableFeature {
+  return coreAngularRowEditing(onRowEdit, extras);
+}
+
+/**
+ * Collect edits and save them in one batch.
+ *
+ * @param onBatchEdit - Called with every pending row at once.
+ * @param extras - Optional lifecycle observers merged into the patch.
+ *
+ * @public
+ */
+export function batchEditing<TRow>(
+  onBatchEdit: BatchEditHandler<TRow>,
+  extras: Record<string, unknown> = {}
+): AdaptTableFeature {
+  return coreAngularBatchEditing(onBatchEdit, extras);
 }

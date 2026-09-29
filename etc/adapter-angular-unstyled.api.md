@@ -8,14 +8,19 @@ import { ActiveFilterChip } from '@adapttable/angular';
 import { ActiveFilterChipsSlotProps } from '@adapttable/angular';
 import { AdaptCellTemplate } from '@adapttable/angular';
 import { AdaptTableFeature } from '@adapttable/angular';
+import { BatchEditHandler } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
+import { CellEditHandler } from '@adapttable/angular';
+import { CellEditingState } from '@adapttable/angular';
+import { CellNavigationOptions } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
 import { ColumnLayoutState } from '@adapttable/angular';
 import { ColumnMenuSlotProps } from '@adapttable/angular';
 import { ConfirmHandler } from '@adapttable/angular';
 import { DataTable } from '@adapttable/angular';
 import { Direction } from '@adapttable/angular';
+import { ElementRef } from '@angular/core';
 import { ExportCsvOptions } from '@adapttable/angular';
 import { ExtraFilters } from '@adapttable/angular';
 import { FeatureSlotKey } from '@adapttable/angular';
@@ -24,13 +29,21 @@ import { FilterHeaderControlProps } from '@adapttable/angular';
 import { FilterOverlaySlotProps } from '@adapttable/angular';
 import { FiltersFormSlotProps } from '@adapttable/angular';
 import { GridFocus } from '@adapttable/angular';
+import { GroupingPanelExtras } from '@adapttable/angular';
+import { GroupingPanelSlotProps } from '@adapttable/angular';
+import { GroupingPanelSlots } from '@adapttable/angular';
 import * as i0 from '@angular/core';
 import { IconDescriptor } from '@adapttable/angular';
 import { InputSignal } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
+import { PaginationMode } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
+import { RowEditHandler } from '@adapttable/angular';
+import { RowReorderHandler } from '@adapttable/angular';
+import { RowReorderOptions } from '@adapttable/angular';
+import { RowReorderState } from '@adapttable/angular';
 import { RowSelection } from '@adapttable/angular';
 import { SavedViewsControllerOptions } from '@adapttable/angular';
 import { SavedViewsSlotProps } from '@adapttable/angular';
@@ -39,14 +52,20 @@ import { Signal } from '@angular/core';
 import { TableDensity } from '@adapttable/angular';
 import { TableLabels } from '@adapttable/angular';
 import { TableQueryParams } from '@adapttable/angular';
+import { TableVirtualization } from '@adapttable/angular';
 import { TemplateRef } from '@angular/core';
 import { ToolbarExtrasSlotProps } from '@adapttable/angular';
+import { VirtualizeOptions } from '@adapttable/angular';
 import { WritableSignal } from '@angular/core';
 
 // @public
 export class AdaptDataTable<TRow> implements OnInit {
     // @internal
+    protected beginEdit(row: TRow, column: ColumnDef<TRow>): void;
+    // @internal
     protected readonly bulkBarSlot: FeatureSlotKey<BulkBarSlotProps<unknown>>;
+    // @internal
+    protected cancelEdit(): void;
     readonly cellNavigation: InputSignal<boolean>;
     // @internal
     protected readonly cellTemplates: Signal<readonly AdaptCellTemplate[]>;
@@ -56,6 +75,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly columnMenuSlot: FeatureSlotKey<ColumnMenuSlotProps<never>>;
     readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
+    // @internal
+    protected commitEdit(): void;
     readonly confirm: InputSignal<ConfirmHandler | undefined>;
     readonly data: InputSignal<readonly TRow[]>;
     readonly defaultColumnLayout: InputSignal<Partial<ColumnLayoutState> | undefined>;
@@ -78,16 +99,24 @@ export class AdaptDataTable<TRow> implements OnInit {
     };
     readonly filtersMode: InputSignal<FiltersMode>;
     readonly forceMobile: InputSignal<boolean | undefined>;
+    // @internal
+    protected readonly groupingPanelSlot: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
     readonly labels: InputSignal<TableLabels | undefined>;
+    readonly maxHeight: InputSignal<string | number | undefined>;
     ngOnInit(): void;
     // @internal
     protected readonly noResults: Signal<boolean>;
     readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
+    readonly paginationMode: InputSignal<PaginationMode | undefined>;
     // @internal
     protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
+    // @internal
+    protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
+    // @internal
+    protected scrollBoxStyle(): Record<string, string> | null;
     readonly searchPlaceholder: InputSignal<string | undefined>;
     readonly selectable: InputSignal<boolean>;
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
@@ -153,6 +182,16 @@ export class AdaptDataTable<TRow> implements OnInit {
         };
         "defaults": {
             "alias": "defaults";
+            "required": false;
+            "isSignal": true;
+        };
+        "paginationMode": {
+            "alias": "paginationMode";
+            "required": false;
+            "isSignal": true;
+        };
+        "maxHeight": {
+            "alias": "maxHeight";
             "required": false;
             "isSignal": true;
         };
@@ -225,13 +264,39 @@ export class AdaptDataTable<TRow> implements OnInit {
 }
 
 // @public
+export class AdaptGroupingPanel<TRow> {
+    readonly props: InputSignal<GroupingPanelSlotProps<ColumnDef<TRow>>>;
+    // (undocumented)
+    protected readonly slots: GroupingPanelSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupingPanel<any>, "adapt-grouping-panel", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupingPanel<any>, never>;
+}
+
+// @public
+export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+
+// @public
 export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature;
+
+// @public
+export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
 
 // @public
 export function columnMenu(): AdaptTableFeature;
 
 // @public
 export function densityChooser(): AdaptTableFeature;
+
+// @public
+export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
 
 // @public
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): AdaptTableFeature;
@@ -261,6 +326,9 @@ export interface FiltersView {
 export function fullscreen(): AdaptTableFeature;
 
 // @public
+export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string[], extras?: GroupingPanelExtras<TRow>): AdaptTableFeature;
+
+// @public
 export function headerFilters(): AdaptTableFeature;
 
 // @public
@@ -275,24 +343,39 @@ export interface RowActionsFeatureOptions<TRow> {
 }
 
 // @public
+export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+
+// @public
+export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;
+
+// @public
 export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeature;
 
 // @public
 export interface TableView<TRow> {
+    readonly bodyColSpan: Signal<number>;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
     readonly columnMenu: boolean;
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
     readonly confirm: ConfirmHandler;
     readonly density: Signal<TableDensity>;
+    readonly editing: Signal<CellEditingState> | undefined;
     readonly filters: FiltersView | undefined;
     readonly grid: GridFocus<TRow> | undefined;
+    readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
+    readonly onCellEdit: CellEditHandler<TRow> | undefined;
+    readonly reorder: Signal<RowReorderState<TRow>> | undefined;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
     readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
     readonly selection: RowSelection | undefined;
     readonly table: DataTable<TRow>;
     readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
+    readonly virtualization: Signal<TableVirtualization<TRow>>;
 }
+
+// @public
+export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

@@ -21,6 +21,7 @@ export {
   AdaptHeader,
   type ResolvedRenderer,
 } from "./cell";
+export { cellNavigation, type CellNavigationOptions } from "./cellNavigation";
 export { AdaptChecklistChrome, type ChecklistSlots } from "./checklist";
 export {
   type CellContext,
@@ -43,6 +44,20 @@ export {
   type DataTableOptions,
   injectDataTable,
 } from "./dataTable";
+export {
+  type BatchEditHandler,
+  batchEditing,
+  type BatchEditingInjectOptions,
+  type CellEditHandler,
+  type CellEditingOptions,
+  editing,
+  injectBatchEditing,
+  injectCellEditing,
+  injectRowEditing,
+  type RowEditHandler,
+  rowEditing,
+  type RowEditingInjectOptions,
+} from "./editing";
 export {
   ADAPTTABLE_FEATURES,
   type AdaptTableFeature,
@@ -73,10 +88,28 @@ export {
   type GridFocusOptions,
   injectGridFocus,
 } from "./gridFocus";
+export {
+  groupingPanel,
+  type GroupingPanelExtras,
+  type GroupingPanelStateOptions,
+  injectGroupingPanelState,
+} from "./grouping";
+export {
+  AdaptGroupingPanelChrome,
+  type AngularGroupingPanelAggregationItemProps,
+  type AngularGroupingPanelSurfaceProps,
+  type GroupingPanelSlots,
+} from "./groupingPanel";
 export { AdaptIcon } from "./icon";
 export * from "./kitExports";
 export { AdaptLiveRegion } from "./liveRegion";
 export { injectIsMobile, type IsMobileOptions } from "./mobile";
+export {
+  injectRowReorder,
+  rowReorder,
+  type RowReorderState,
+  type RowReorderStateOptions,
+} from "./rowReorder";
 export {
   injectSavedViews,
   type SavedViewsOptions,
@@ -115,19 +148,57 @@ export {
   type TableUrlStateOptions,
   urlAdapterFor,
 } from "./url";
+export {
+  injectKeyedVirtualization,
+  injectKeyedVirtualizer,
+  injectTableVirtualization,
+  injectTableVirtualizer,
+  type KeyedVirtualizationOptions,
+  type TableVirtualizationOptions,
+  virtualize,
+  type VirtualizeOptions,
+} from "./virtualize";
+export type {
+  BatchEditingState,
+  BatchRowEdit,
+  CellEditingState,
+  RowEditingState,
+} from "@adapttable/core";
+export type { RowReorderHandler, RowReorderOptions } from "@adapttable/core";
 export type {
   CellRange,
   Direction,
   ExtraFilters,
   GridCell,
+  KeyedVirtualization,
   PaginationInfo,
+  PaginationMode,
   PaginationSlot,
   SortDirection,
   TableLabels,
   TableQueryParams,
   TableSource,
+  TableVirtualization,
+  VirtualTableRow,
+} from "@adapttable/core";
+export {
+  beginCellEdit,
+  isCellEditable,
+  parseCellEditValue,
+  readEditableCellValue,
+  resolveCellEditor,
+} from "@adapttable/core";
+export {
+  devWarn,
+  resolveVirtualRows,
+  rowSourceIndex,
+  virtualColumnSpan,
 } from "@adapttable/core";
 export type {
   ChromeBodyRegion,
   HeaderSelectionState,
+} from "@adapttable/core/binding";
+export {
+  isBodyEligible,
+  virtualizeIgnoredOnPage,
 } from "@adapttable/core/binding";

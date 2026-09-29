@@ -8,6 +8,9 @@ import { ACTIONS_COLUMN_KEY } from '@adapttable/core';
 import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
 import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
+import { BatchEditingState } from '@adapttable/core';
+import { BatchRowEdit } from '@adapttable/core';
+import { beginCellEdit } from '@adapttable/core';
 import { bindHeaderFilterDismiss } from '@adapttable/core';
 import { BooleanFieldWidget } from '@adapttable/core';
 import { BULK_BAR } from '@adapttable/core/binding';
@@ -16,6 +19,7 @@ import { BulkActionContext } from '@adapttable/core';
 import { bulkActionErrorMessage } from '@adapttable/core';
 import { BulkActionOutcome } from '@adapttable/core';
 import { BulkBarSlotProps } from '@adapttable/core/binding';
+import { CellEditingState } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
 import { ChecklistButtonProps } from '@adapttable/core/binding';
@@ -39,12 +43,17 @@ import { coreDensityChooser } from '@adapttable/core/binding';
 import { coreExportCsv } from '@adapttable/core/binding';
 import { coreFilters } from '@adapttable/core/binding';
 import { coreFullscreen } from '@adapttable/core/binding';
+import { coreGrouping } from '@adapttable/core/binding';
+import { coreGroupingPanel } from '@adapttable/core/binding';
 import { coreHeaderFilters } from '@adapttable/core/binding';
 import { coreRowActions } from '@adapttable/core/binding';
 import { coreSavedViews } from '@adapttable/core/binding';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
+import { devWarn } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
+import { EditableColumnLike } from '@adapttable/core';
+import { EditEventHandler } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
@@ -52,6 +61,7 @@ import { ExtraFilters } from '@adapttable/core';
 import { eyeIcon } from '@adapttable/core/binding';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
+import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
@@ -84,6 +94,18 @@ import { filterWidgetKind } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GridCell } from '@adapttable/core';
 import { GRIP_ICON } from '@adapttable/core/binding';
+import { GROUPING_PANEL } from '@adapttable/core/binding';
+import { GroupingPanelAggregationRemoveProps } from '@adapttable/core/binding';
+import { GroupingPanelChecklistProps } from '@adapttable/core/binding';
+import { GroupingPanelChipProps } from '@adapttable/core/binding';
+import { GroupingPanelDropZoneProps } from '@adapttable/core/binding';
+import { GroupingPanelRemoveZoneProps } from '@adapttable/core/binding';
+import { GroupingPanelRestoreProps } from '@adapttable/core/binding';
+import { GroupingPanelSelectProps } from '@adapttable/core/binding';
+import { GroupingPanelSlotProps } from '@adapttable/core/binding';
+import { GroupingPanelState } from '@adapttable/core/binding';
+import { GroupingPanelState as GroupingPanelState_2 } from '@adapttable/core';
+import { GroupingPanelSurfaceProps } from '@adapttable/core/binding';
 import { hasActiveHeaderFilter } from '@adapttable/core';
 import { headerFilterInsideSelector } from '@adapttable/core';
 import { HeaderSelectionState } from '@adapttable/core/binding';
@@ -93,13 +115,17 @@ import { IconDescriptor } from '@adapttable/core/binding';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
+import { isBodyEligible } from '@adapttable/core/binding';
+import { isCellEditable } from '@adapttable/core';
 import { joinRelativeToken } from '@adapttable/core';
+import { KeyedVirtualization } from '@adapttable/core';
 import { listFilterValues } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { offersAllMatching } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
+import { parseCellEditValue } from '@adapttable/core';
 import { PIN_ICON } from '@adapttable/core/binding';
 import { pinActionLabel } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
@@ -107,13 +133,21 @@ import { PinSide } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { RangeFieldWidget } from '@adapttable/core';
 import { RangeOp } from '@adapttable/core';
+import { readEditableCellValue } from '@adapttable/core';
 import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
 import { RELATIVE_PRESETS } from '@adapttable/core';
 import { RelativePreset } from '@adapttable/core';
 import { REORDER_COLUMN_KEY } from '@adapttable/core';
+import { resolveCellEditor } from '@adapttable/core';
 import { resolveDisabledReason } from '@adapttable/core';
+import { resolveVirtualRows } from '@adapttable/core';
 import { RowAction } from '@adapttable/core';
 import { RowActionsLayout } from '@adapttable/core';
+import { RowEditingState } from '@adapttable/core';
+import { RowReorderHandler } from '@adapttable/core';
+import { RowReorderOptions } from '@adapttable/core';
+import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
+import { rowSourceIndex } from '@adapttable/core';
 import { runRowAction } from '@adapttable/core';
 import { SAVED_VIEWS } from '@adapttable/core/binding';
 import { SavedView } from '@adapttable/core';
@@ -136,6 +170,7 @@ import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
 import { TableViewState } from '@adapttable/core';
 import { TableViewStore } from '@adapttable/core';
+import { TableVirtualization } from '@adapttable/core';
 import { TemplateRef } from '@angular/core';
 import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
@@ -146,6 +181,10 @@ import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { UseSavedViewsResult } from '@adapttable/core/binding';
+import { virtualColumnSpan } from '@adapttable/core';
+import { virtualizeIgnoredOnPage } from '@adapttable/core/binding';
+import { VirtualizeInput } from '@adapttable/core/binding';
+import { VirtualTableRow } from '@adapttable/core';
 import { visibleRowActions } from '@adapttable/core';
 import { watchOverlayDismiss } from '@adapttable/core';
 
@@ -379,6 +418,51 @@ export class AdaptFilterTreeChrome<TRow> {
 }
 
 // @public
+export class AdaptGroupingPanelChrome<TRow> {
+    readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
+    readonly dir: InputSignal<Direction | undefined>;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    readonly mobile: InputSignal<boolean>;
+    readonly slots: InputSignal<GroupingPanelSlots>;
+    readonly state: InputSignal<GroupingPanelState_2>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupingPanelChrome<any>, "adapt-grouping-panel-chrome", never, {
+        "state": {
+            "alias": "state";
+            "required": true;
+            "isSignal": true;
+        };
+        "columns": {
+            "alias": "columns";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "mobile": {
+            "alias": "mobile";
+            "required": false;
+            "isSignal": true;
+        };
+        "dir": {
+            "alias": "dir";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupingPanelChrome<any>, never>;
+}
+
+// @public
 export class AdaptHeader<TRow> {
     readonly column: InputSignal<ColumnDef<TRow>>;
     protected readonly context: Signal<HeaderContext<TRow>>;
@@ -479,7 +563,48 @@ export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry>
 export type AngularFilterTreeDisclosureProps = FilterTreeDisclosureProps<TemplateRef<unknown>>;
 
 // @public
+export interface AngularGroupingPanelAggregationItemProps {
+    // (undocumented)
+    readonly "data-adapttable-part": "grouping-aggregation-item";
+    // (undocumented)
+    readonly children: TemplateRef<unknown>;
+    // (undocumented)
+    readonly label: string;
+    // (undocumented)
+    readonly readOnly: boolean;
+    // (undocumented)
+    readonly readOnlyLabel: string;
+}
+
+// @public
+export type AngularGroupingPanelSurfaceProps = GroupingPanelSurfaceProps<TemplateRef<unknown>, DragEvent>;
+
+// @public
 export type Attrs = Readonly<Record<string, unknown>>;
+
+// @public
+export type BatchEditHandler<TRow> = (edits: readonly BatchRowEdit<TRow>[]) => void | Promise<void>;
+
+// @public
+export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+
+// @public
+export interface BatchEditingInjectOptions<TRow> {
+    readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
+    readonly enabled?: MaybeSignal<boolean>;
+    readonly featureHost?: FeatureHostState_2;
+    readonly injector?: Injector;
+    readonly onBatchEdit?: BatchEditHandler<TRow>;
+    readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditStart?: EditEventHandler<TRow>;
+}
+
+export { BatchEditingState }
+
+export { BatchRowEdit }
+
+export { beginCellEdit }
 
 export { bindHeaderFilterDismiss }
 
@@ -516,6 +641,26 @@ export interface CellContext<TRow> {
     readonly row: TRow;
     readonly rowIndex: number;
     readonly value: unknown;
+}
+
+// @public
+export type CellEditHandler<TRow> = (row: TRow, columnKey: string, value: unknown) => void | Promise<void>;
+
+// @public
+export interface CellEditingOptions<TRow = unknown> {
+    readonly injector?: Injector;
+    readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditStart?: EditEventHandler<TRow>;
+}
+
+export { CellEditingState }
+
+// @public
+export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
+
+// @public
+export interface CellNavigationOptions {
+    readonly onRangeChange?: (range: CellRange | null) => void;
 }
 
 export { CellRange }
@@ -622,6 +767,10 @@ export { coreFilters }
 
 export { coreFullscreen }
 
+export { coreGrouping }
+
+export { coreGroupingPanel }
+
 export { coreHeaderFilters }
 
 export { coreRowActions }
@@ -720,7 +869,12 @@ export interface DensityState {
     readonly setDensity: (next: TableDensity) => void;
 }
 
+export { devWarn }
+
 export { Direction }
+
+// @public
+export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
 
 // @public
 export interface ExportCsvHandlerOptions<TRow> {
@@ -891,6 +1045,55 @@ export interface GridFocusOptions<TRow> {
 
 export { GRIP_ICON }
 
+export { GROUPING_PANEL }
+
+// @public
+export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string[], extras?: GroupingPanelExtras<TRow>): AdaptTableFeature;
+
+export { GroupingPanelAggregationRemoveProps }
+
+export { GroupingPanelChecklistProps }
+
+export { GroupingPanelChipProps }
+
+export { GroupingPanelDropZoneProps }
+
+// @public
+export interface GroupingPanelExtras<TRow = unknown> {
+    readonly groupAggregates?: (rows: readonly TRow[]) => unknown;
+}
+
+export { GroupingPanelRemoveZoneProps }
+
+export { GroupingPanelRestoreProps }
+
+export { GroupingPanelSelectProps }
+
+export { GroupingPanelSlotProps }
+
+// @public
+export interface GroupingPanelSlots {
+    readonly AggregationItem: Type<unknown>;
+    readonly AggregationPicker: Type<unknown>;
+    readonly AggregationRemove: Type<unknown>;
+    readonly AggregationRestore: Type<unknown>;
+    readonly Chip: Type<unknown>;
+    readonly DropZone: Type<unknown>;
+    readonly RemoveZone: Type<unknown>;
+    readonly Select: Type<unknown>;
+    readonly Surface: Type<unknown>;
+}
+
+export { GroupingPanelState }
+
+// @public
+export interface GroupingPanelStateOptions<TRow> {
+    readonly features: readonly AdaptTableFeature[];
+    readonly injector?: Injector;
+    readonly source: Signal<TableSource<TRow>>;
+    readonly table: DataTable<TRow>;
+}
+
 export { hasActiveHeaderFilter }
 
 // @public
@@ -908,7 +1111,13 @@ export { hideAllColumns }
 export { IconDescriptor }
 
 // @public
+export function injectBatchEditing<TRow>(options: BatchEditingInjectOptions<TRow>): Signal<BatchEditingState<TRow>>;
+
+// @public
 export function injectBulkActionRunner(options: BulkActionRunnerOptions): BulkActionRunnerState;
+
+// @public
+export function injectCellEditing<TRow = unknown>(options?: CellEditingOptions<TRow>): Signal<CellEditingState>;
 
 // @public
 export function injectColumnDrag(injector?: Injector): ColumnDrag;
@@ -935,7 +1144,25 @@ export function injectFullscreen(element: Signal<HTMLElement | undefined>, injec
 export function injectGridFocus<TRow>(options: GridFocusOptions<TRow>): GridFocus<TRow>;
 
 // @public
+export function injectGroupingPanelState<TRow>(options: GroupingPanelStateOptions<TRow>): Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
+
+// @public
 export function injectIsMobile(options?: IsMobileOptions): Signal<boolean>;
+
+// @public
+export function injectKeyedVirtualization(options: KeyedVirtualizationOptions): Signal<KeyedVirtualization>;
+
+// @public
+export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
+    readonly virtualization: Signal<KeyedVirtualization>;
+    readonly scrollToIndex: (index: number) => void;
+};
+
+// @public
+export function injectRowEditing<TRow>(options: RowEditingInjectOptions<TRow>): Signal<RowEditingState<TRow>>;
+
+// @public
+export function injectRowReorder<TRow>(options: RowReorderStateOptions<TRow>): Signal<RowReorderState<TRow>> | undefined;
 
 // @public
 export function injectRowSelection<TRow>(options: RowSelectionOptions<TRow>): RowSelection;
@@ -947,12 +1174,39 @@ export function injectSavedViews(options: SavedViewsOptions): SavedViewsState;
 export function injectTableUrlState(options?: TableUrlStateOptions): TableUrlState;
 
 // @public
+export function injectTableVirtualization<TRow>(options: TableVirtualizationOptions<TRow>): Signal<TableVirtualization<TRow>>;
+
+// @public
+export function injectTableVirtualizer<TRow>(options: TableVirtualizationOptions<TRow>): {
+    readonly virtualization: Signal<TableVirtualization<TRow>>;
+    readonly scrollToIndex: (index: number) => void;
+};
+
+export { isBodyEligible }
+
+export { isCellEditable }
+
+// @public
 export interface IsMobileOptions {
     readonly breakpoint?: number;
     readonly injector?: Injector;
 }
 
 export { joinRelativeToken }
+
+export { KeyedVirtualization }
+
+// @public
+export interface KeyedVirtualizationOptions {
+    readonly enabled?: Signal<boolean> | boolean;
+    readonly estimateSize?: Signal<number | ((index: number) => number)> | number | ((index: number) => number);
+    readonly getScrollElement?: () => Element | null;
+    readonly injector?: Injector;
+    readonly keys: Signal<readonly string[]>;
+    readonly onEndReached?: () => void;
+    readonly overscan?: Signal<number> | number;
+    readonly scrollMargin?: Signal<number> | number;
+}
 
 export { listFilterValues }
 
@@ -968,7 +1222,11 @@ export { offersAllMatching }
 
 export { PaginationInfo }
 
+export { PaginationMode }
+
 export { PaginationSlot }
+
+export { parseCellEditValue }
 
 export { PIN_ICON }
 
@@ -986,6 +1244,8 @@ export function rangeFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: 
 
 export { RangeOp }
 
+export { readEditableCellValue }
+
 export { RELATIVE_PRESET_LABEL_KEYS }
 
 export { RELATIVE_PRESETS }
@@ -996,6 +1256,8 @@ export { RelativePreset }
 export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
 
 export { REORDER_COLUMN_KEY }
+
+export { resolveCellEditor }
 
 // @public
 export function resolveColumns<TRow>(columns: readonly ColumnDef<TRow>[], locale?: string): ColumnDef<TRow>[];
@@ -1008,6 +1270,8 @@ export interface ResolvedRenderer<TContext> {
     readonly inputs: Record<string, unknown>;
     readonly template: TemplateRef<TContext> | null;
 }
+
+export { resolveVirtualRows }
 
 export { RowAction }
 
@@ -1027,6 +1291,44 @@ export interface RowActionsOptions<TRow> {
     readonly labels: Signal<Required<TableLabels>>;
     readonly onDeleteRow?: (row: TRow) => void;
     readonly onDuplicateRow?: (row: TRow) => void;
+}
+
+// @public
+export type RowEditHandler<TRow> = (row: TRow, patch: Readonly<Record<string, unknown>>) => void | Promise<void>;
+
+// @public
+export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+
+// @public
+export interface RowEditingInjectOptions<TRow> {
+    readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
+    readonly enabled?: MaybeSignal<boolean>;
+    readonly featureHost?: FeatureHostState_2;
+    readonly injector?: Injector;
+    readonly onEditCancel?: EditEventHandler<TRow>;
+    readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditStart?: EditEventHandler<TRow>;
+    readonly onRowEdit?: RowEditHandler<TRow>;
+}
+
+export { RowEditingState }
+
+// @public
+export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;
+
+export { RowReorderHandler }
+
+export { RowReorderOptions }
+
+// @public
+export type RowReorderState<TRow> = RowReorderState_2<TRow, DragEvent, KeyboardEvent>;
+
+// @public
+export interface RowReorderStateOptions<TRow> {
+    readonly features: readonly AdaptTableFeature[];
+    readonly injector?: Injector;
+    readonly source: Signal<TableSource<TRow>>;
+    readonly table: DataTable<TRow>;
 }
 
 // @public
@@ -1056,6 +1358,8 @@ export interface RowSelectionOptions<TRow> {
     readonly rows: Signal<readonly TRow[]>;
     readonly selectedIds?: MaybeSignalOptional<readonly string[]>;
 }
+
+export { rowSourceIndex }
 
 export { runRowAction }
 
@@ -1137,6 +1441,22 @@ export interface TableUrlStateOptions {
     readonly urlSync?: boolean;
 }
 
+export { TableVirtualization }
+
+// @public
+export interface TableVirtualizationOptions<TRow> {
+    readonly enabled?: Signal<boolean> | boolean;
+    readonly estimateSize?: Signal<number | ((index: number) => number)> | number | ((index: number) => number);
+    readonly expandable?: Signal<boolean> | boolean;
+    readonly getScrollElement?: () => Element | null;
+    readonly injector?: Injector;
+    readonly onEndReached?: () => void;
+    readonly overscan?: Signal<number> | number;
+    readonly rowKey: (row: TRow) => string;
+    readonly rows: Signal<readonly TRow[]>;
+    readonly scrollMargin?: Signal<number> | number;
+}
+
 // @public
 export function textFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<TextFieldWidget>;
 
@@ -1152,6 +1472,18 @@ export { unpinAllColumns }
 export function urlAdapterFor(options: Pick<TableUrlStateOptions, "urlAdapter" | "urlSync">, injector: Injector): UrlStateAdapter;
 
 export { UrlStateAdapter }
+
+export { virtualColumnSpan }
+
+// @public
+export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;
+
+export { virtualizeIgnoredOnPage }
+
+// @public
+export type VirtualizeOptions = VirtualizeInput;
+
+export { VirtualTableRow }
 
 export { visibleRowActions }
 

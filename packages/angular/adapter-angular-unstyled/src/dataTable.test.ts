@@ -1,8 +1,15 @@
-import { AdaptCellTemplate, type ColumnDef } from "@adapttable/angular";
-import { Component, signal } from "@angular/core";
+import {
+  AdaptCellTemplate,
+  type AdaptTableFeature,
+  type ColumnDef,
+  type PaginationMode,
+} from "@adapttable/angular";
+import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdaptDataTable } from "./dataTable";
+import { editing, rowReorder, virtualize } from "./features";
 
 interface City {
   id: string;
@@ -20,6 +27,15 @@ const COLUMNS: ColumnDef<City>[] = [
   { key: "name", sortable: true, accessor: (row) => row.name },
   { key: "country", mobileLabel: "Land", accessor: (row) => row.country },
 ];
+
+function queryParts(element: HTMLElement) {
+  const part = <T extends HTMLElement>(name: string) =>
+    element.querySelector<T>(`[data-adapttable-part="${name}"]`);
+  const parts = <T extends HTMLElement>(name: string) => [
+    ...element.querySelectorAll<T>(`[data-adapttable-part="${name}"]`),
+  ];
+  return { part, parts };
+}
 
 @Component({
   imports: [AdaptDataTable, AdaptCellTemplate],
@@ -56,11 +72,7 @@ async function mount() {
   fixture.autoDetectChanges();
   await fixture.whenStable();
   const element = fixture.nativeElement as HTMLElement;
-  const part = <T extends HTMLElement>(name: string) =>
-    element.querySelector<T>(`[data-adapttable-part="${name}"]`);
-  const parts = <T extends HTMLElement>(name: string) => [
-    ...element.querySelectorAll<T>(`[data-adapttable-part="${name}"]`),
-  ];
+  const { part, parts } = queryParts(element);
   const ids = () => parts("row").map((row) => row.dataset.rowId);
   return {
     fixture,
@@ -110,7 +122,7 @@ describe("the unstyled Angular table", () => {
     select.value = "10";
     select.dispatchEvent(new Event("change"));
     await settle();
-    expect(ids().length).toBe(10);
+    expect(ids()).toHaveLength(10);
   });
 
   it("searches, says nothing matched, and offers to clear", async () => {
@@ -123,7 +135,7 @@ describe("the unstyled Angular table", () => {
     await new Promise((resolve) => setTimeout(resolve, 350));
     await settle();
     expect(part("empty")?.textContent).toContain("No results");
-    expect(parts("row").length).toBe(0);
+    expect(parts("row")).toHaveLength(0);
     expect(part("footer")).toBeNull();
     part<HTMLButtonElement>("empty-clear")?.click();
     await settle();
@@ -157,12 +169,12 @@ describe("the unstyled Angular table", () => {
     fixture.componentInstance.mobile.set(true);
     await settle();
     expect(part("footer")).toBeNull();
-    expect(parts("card").length).toBe(5);
+    expect(parts("card")).toHaveLength(5);
     const button = part<HTMLButtonElement>("load-more-button");
     expect(button?.textContent?.trim()).toBe("Load more");
     button?.click();
     await settle();
-    expect(parts("card").length).toBe(10);
+    expect(parts("card")).toHaveLength(10);
   });
 
   it("gives every card its label and a checkbox on a phone", async () => {
@@ -180,5 +192,160 @@ describe("the unstyled Angular table", () => {
     await settle();
     expect(fixture.componentInstance.changes.at(-1)).toEqual(["1"]);
     expect(parts("card")[0]?.hasAttribute("data-selected")).toBe(true);
+  });
+});
+
+@Component({
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="data"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+      [defaults]="{ limit: 10 }"
+      [features]="features()"
+      [paginationMode]="paginationMode()"
+      [maxHeight]="maxHeight()"
+      [forceMobile]="forceMobile()"
+    />
+  `,
+})
+class FeatureHost {
+  readonly features = input<readonly AdaptTableFeature[]>([]);
+  readonly paginationMode = input<PaginationMode | undefined>(undefined);
+  readonly maxHeight = input<number | string | undefined>(undefined);
+  readonly forceMobile = input<boolean | undefined>(undefined);
+  readonly data = CITIES;
+  readonly columns: ColumnDef<City>[] = [
+    {
+      key: "name",
+      accessor: (row) => row.name,
+      editable: true,
+    },
+    { key: "country", accessor: (row) => row.country },
+  ];
+  readonly rowKey = (row: City) => row.id;
+}
+
+async function mountFeatures(options: {
+  features: readonly AdaptTableFeature[];
+  paginationMode?: PaginationMode;
+  maxHeight?: number | string;
+  forceMobile?: boolean;
+}) {
+  const fixture = TestBed.createComponent(FeatureHost);
+  fixture.componentRef.setInput("features", options.features);
+  if (options.paginationMode !== undefined) {
+    fixture.componentRef.setInput("paginationMode", options.paginationMode);
+  }
+  if (options.maxHeight !== undefined) {
+    fixture.componentRef.setInput("maxHeight", options.maxHeight);
+  }
+  if (options.forceMobile !== undefined) {
+    fixture.componentRef.setInput("forceMobile", options.forceMobile);
+  }
+  fixture.autoDetectChanges();
+  await fixture.whenStable();
+  const element = fixture.nativeElement as HTMLElement;
+  document.body.append(element);
+  return {
+    fixture,
+    element,
+    ...queryParts(element),
+    settle: () => fixture.whenStable(),
+  };
+}
+
+afterEach(() => {
+  document.body.replaceChildren();
+});
+
+describe("unstyled Angular editing and virtualize", () => {
+  it("opens, commits and cancels an in-place cell editor", async () => {
+    const onCellEdit = vi.fn();
+    const { part, parts, settle } = await mountFeatures({
+      features: [editing(onCellEdit)],
+    });
+    const cell = parts("cell")[0];
+    expect(cell).toBeTruthy();
+    cell?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    await settle();
+    const editor = part<HTMLInputElement>("cell-editor");
+    expect(editor).not.toBeNull();
+    if (!editor) return;
+    editor.value = "Renamed";
+    editor.dispatchEvent(new Event("input"));
+    editor.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+    );
+    await settle();
+    expect(onCellEdit).toHaveBeenCalledOnce();
+    expect(onCellEdit.mock.calls[0]?.[1]).toBe("name");
+    expect(onCellEdit.mock.calls[0]?.[2]).toBe("Renamed");
+
+    parts("cell")[0]?.dispatchEvent(
+      new MouseEvent("dblclick", { bubbles: true })
+    );
+    await settle();
+    const again = part<HTMLInputElement>("cell-editor");
+    expect(again).not.toBeNull();
+    again?.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    );
+    await settle();
+    expect(part("cell-editor")).toBeNull();
+  });
+
+  it("warns when virtualize is composed on a paged table", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await mountFeatures({
+      features: [virtualize()],
+      paginationMode: "paged",
+    });
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("windows an infinite body and sizes the scroll box", async () => {
+    const { part, parts } = await mountFeatures({
+      features: [
+        virtualize({
+          estimateRowSize: 40,
+          estimateCardSize: 120,
+          virtualOverscan: 2,
+          virtualScrollMargin: 0,
+        }),
+        rowReorder(vi.fn()),
+      ],
+      paginationMode: "infinite",
+      maxHeight: 240,
+    });
+    const box = part("scroll-box");
+    expect(box?.style.maxHeight).toBe("240px");
+    expect(box?.style.overflow).toBe("auto");
+    // jsdom has no measured viewport: the window is armed with a spacer
+    // rather than mounted rows (same as the headless virtualize tests).
+    expect(part("virtual-pad-bottom")).not.toBeNull();
+    expect(parts("reorder-header")).toHaveLength(1);
+  });
+
+  it("accepts a string maxHeight on the scroll box", async () => {
+    const { part } = await mountFeatures({
+      features: [virtualize()],
+      paginationMode: "infinite",
+      maxHeight: "50vh",
+    });
+    expect(part("scroll-box")?.style.maxHeight).toBe("50vh");
+  });
+
+  it("uses the card size estimate when virtualizing on a phone", async () => {
+    const { part } = await mountFeatures({
+      features: [virtualize({ estimateCardSize: 160 })],
+      paginationMode: "infinite",
+      maxHeight: 320,
+      forceMobile: true,
+    });
+    expect(part("cards")).not.toBeNull();
   });
 });
