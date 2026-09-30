@@ -29,22 +29,12 @@ import {
   input,
 } from "@angular/core";
 
-/** Slot props for a desktop group row. */
-type RowProps = GroupHeaderRowSlotProps<
-  never,
-  SelectionState,
-  ColumnDef<never>
->;
-
-/** Slot props for a phone group card. */
-type CardProps = GroupHeaderCardSlotProps<
-  never,
-  SelectionState,
-  ColumnDef<never>
->;
-
 /** The entry either slot draws. */
-type Entry = RowProps["entry"];
+type Entry = GroupHeaderRowSlotProps<
+  never,
+  SelectionState,
+  ColumnDef<never>
+>["entry"];
 
 /** A chevron pointing into the row; the toggle turns it down when open. */
 const CHEVRON: IconDescriptor = {
@@ -60,7 +50,11 @@ const CHEVRON: IconDescriptor = {
   shapes: [{ tag: "path", d: "m9 6 6 6-6 6" }],
 };
 
-/** The "show more" button inside a more row or card. */
+/**
+ * The "show more" button inside a more row or card.
+ *
+ * @public
+ */
 @Component({
   selector: "adapt-group-more",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,59 +70,60 @@ const CHEVRON: IconDescriptor = {
     </button>
   `,
 })
-class AdaptGroupMore {
+export class AdaptGroupMore {
   readonly props = input.required<GroupMoreButtonSlotProps>();
 }
 
 /** What both the row and the card derive from one entry. */
-class GroupEntryView {
-  constructor(
-    private readonly entry: () => Entry,
-    private readonly selection: () => SelectionState | null
-  ) {}
-
-  readonly parts = computed(() => groupRowParts(this.entry().kind));
-  /** Neither a footer nor a "show more" row has a toggle or a count. */
-  readonly plain = computed(() => this.entry().kind !== "group");
-  readonly expanded = computed(() => {
-    const entry = this.entry();
-    return entry.kind !== "group" || !entry.collapsed;
+function groupEntryView(
+  entry: () => Entry,
+  selection: () => SelectionState | null
+) {
+  const group = computed(() => {
+    const current = entry();
+    return current.kind === "group" ? current : undefined;
   });
-  readonly collapsed = computed(() => {
-    const entry = this.entry();
-    return entry.kind === "group" && entry.collapsed ? "true" : null;
-  });
-  readonly group = computed(() => {
-    const entry = this.entry();
-    return entry.kind === "group" ? entry : undefined;
-  });
-  readonly footer = computed(() => {
-    const entry = this.entry();
-    return entry.kind === "groupFooter" ? entry : undefined;
-  });
-  readonly more = computed(() => {
-    const entry = this.entry();
-    return entry.kind === "groupMore" ? entry : undefined;
-  });
-  readonly selectState = computed(() => {
-    const group = this.group();
-    const selection = this.selection();
-    return group && selection
-      ? groupSelectionState(group.leafIds, selection.selectedIds)
-      : undefined;
-  });
-  readonly count = computed(() => {
-    const group = this.group();
-    return group ? groupLeafCount(group) : 0;
-  });
-  readonly aggregateCells = computed(() => {
-    const entry = this.entry();
-    return entry.kind === "groupMore" ? undefined : entry.aggregateCells;
-  });
-  readonly aggregateOps = computed(() => {
-    const entry = this.entry();
-    return entry.kind === "groupMore" ? undefined : entry.aggregateOps;
-  });
+  return {
+    parts: computed(() => groupRowParts(entry().kind)),
+    /** Neither a footer nor a "show more" row has a toggle or a count. */
+    plain: computed(() => entry().kind !== "group"),
+    expanded: computed(() => {
+      const current = entry();
+      return current.kind !== "group" || !current.collapsed;
+    }),
+    collapsed: computed(() => {
+      const current = entry();
+      return current.kind === "group" && current.collapsed ? "true" : null;
+    }),
+    group,
+    footer: computed(() => {
+      const current = entry();
+      return current.kind === "groupFooter" ? current : undefined;
+    }),
+    more: computed(() => {
+      const current = entry();
+      return current.kind === "groupMore" ? current : undefined;
+    }),
+    selectState: computed(() => {
+      const open = group();
+      const current = selection();
+      return open && current
+        ? groupSelectionState(open.leafIds, current.selectedIds)
+        : undefined;
+    }),
+    count: computed(() => {
+      const open = group();
+      return open ? groupLeafCount(open) : 0;
+    }),
+    aggregateCells: computed(() => {
+      const current = entry();
+      return current.kind === "groupMore" ? undefined : current.aggregateCells;
+    }),
+    aggregateOps: computed(() => {
+      const current = entry();
+      return current.kind === "groupMore" ? undefined : current.aggregateOps;
+    }),
+  };
 }
 
 /**
@@ -245,11 +240,14 @@ class GroupEntryView {
 })
 export class AdaptGroupHeaderRow {
   /** Slot props from the table's group-header-row fill. */
-  readonly props = input.required<RowProps>();
+  readonly props =
+    input.required<
+      GroupHeaderRowSlotProps<never, SelectionState, ColumnDef<never>>
+    >();
 
   protected readonly chevron = CHEVRON;
   protected readonly moreSlots = { Button: AdaptGroupMore };
-  protected readonly view = new GroupEntryView(
+  protected readonly view = groupEntryView(
     () => this.props().entry,
     () => this.props().selection
   );
@@ -355,11 +353,14 @@ export class AdaptGroupHeaderRow {
 })
 export class AdaptGroupHeaderCard {
   /** Slot props from the table's group-header-card fill. */
-  readonly props = input.required<CardProps>();
+  readonly props =
+    input.required<
+      GroupHeaderCardSlotProps<never, SelectionState, ColumnDef<never>>
+    >();
 
   protected readonly chevron = CHEVRON;
   protected readonly moreSlots = { Button: AdaptGroupMore };
-  protected readonly view = new GroupEntryView(
+  protected readonly view = groupEntryView(
     () => this.props().entry,
     () => this.props().selection
   );

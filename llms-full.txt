@@ -19908,9 +19908,11 @@ controls — `columnMenu` (`AdaptColumnMenu`), `filters` (`AdaptFiltersForm`,
 (`AdaptDensityButton`), `fullscreen` (`AdaptFullscreenButton`), `exportCsv`
 (`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`), `grouping`
 (`AdaptGroupHeaderRow` on desktop and `AdaptGroupHeaderCard` on phones draw
-group headers, footers and "show more" rows), `groupingPanel`
+group headers, footers and "show more" rows, the last with `AdaptGroupMore`),
+`groupingPanel`
 (`AdaptGroupingPanel`), `virtualize`, `cellNavigation`, `rowReorder`,
-`editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL`,
+`editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
+opens `AdaptNativeCellEditor`,
 `AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`
 (`AdaptBatchEditBar` fills `BATCH_EDIT_BAR`) — each importable from its own
 subpath (or from `@adapttable/angular-unstyled/features`). `standardPreset`

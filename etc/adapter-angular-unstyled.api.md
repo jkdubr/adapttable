@@ -584,9 +584,62 @@ export class AdaptGroupHeaderCard {
     protected readonly moreSlots: {
         Button: typeof AdaptGroupMore;
     };
-    readonly props: InputSignal<CardProps>;
+    readonly props: InputSignal<GroupHeaderCardSlotProps<never, SelectionState, ColumnDef<never>>>;
     // (undocumented)
-    protected readonly view: GroupEntryView;
+    protected readonly view: {
+        parts: Signal<    {
+        row: string;
+        cell: string;
+        card: string;
+        label: string;
+        }>;
+        plain: Signal<boolean>;
+        expanded: Signal<boolean>;
+        collapsed: Signal<"true" | null>;
+        group: Signal<    {
+        kind: "group";
+        key: string;
+        value: unknown;
+        label: string;
+        level: number;
+        groupBy: string;
+        path: readonly string[];
+        group?: RowGroupRef;
+        leafRows: readonly never[];
+        leafIds: readonly string[];
+        serverCount?: number;
+        aggregateCells?: Partial<Record<string, DisplayValue>>;
+        aggregateOps?: GroupAggregateOps;
+        collapsed: boolean;
+        } | undefined>;
+        footer: Signal<    {
+        kind: "groupFooter";
+        key: string;
+        groupKey: string;
+        level: number;
+        groupBy: string;
+        label: string;
+        leafRows: readonly never[];
+        leafIds: readonly string[];
+        aggregateCells?: Partial<Record<string, DisplayValue>>;
+        aggregateOps?: GroupAggregateOps;
+        } | undefined>;
+        more: Signal<    {
+        kind: "groupMore";
+        key: string;
+        groupKey?: string;
+        level: number;
+        scope: "groups" | "rows";
+        remaining: number;
+        leafRows: readonly never[];
+        leafIds: readonly string[];
+        label: string;
+        } | undefined>;
+        selectState: Signal<HeaderSelectionState | undefined>;
+        count: Signal<number>;
+        aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+    };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
         "props": {
@@ -614,9 +667,62 @@ export class AdaptGroupHeaderRow {
     protected readonly moreSlots: {
         Button: typeof AdaptGroupMore;
     };
-    readonly props: InputSignal<RowProps>;
+    readonly props: InputSignal<GroupHeaderRowSlotProps<never, SelectionState, ColumnDef<never>>>;
     // (undocumented)
-    protected readonly view: GroupEntryView;
+    protected readonly view: {
+        parts: Signal<    {
+        row: string;
+        cell: string;
+        card: string;
+        label: string;
+        }>;
+        plain: Signal<boolean>;
+        expanded: Signal<boolean>;
+        collapsed: Signal<"true" | null>;
+        group: Signal<    {
+        kind: "group";
+        key: string;
+        value: unknown;
+        label: string;
+        level: number;
+        groupBy: string;
+        path: readonly string[];
+        group?: RowGroupRef;
+        leafRows: readonly never[];
+        leafIds: readonly string[];
+        serverCount?: number;
+        aggregateCells?: Partial<Record<string, DisplayValue>>;
+        aggregateOps?: GroupAggregateOps;
+        collapsed: boolean;
+        } | undefined>;
+        footer: Signal<    {
+        kind: "groupFooter";
+        key: string;
+        groupKey: string;
+        level: number;
+        groupBy: string;
+        label: string;
+        leafRows: readonly never[];
+        leafIds: readonly string[];
+        aggregateCells?: Partial<Record<string, DisplayValue>>;
+        aggregateOps?: GroupAggregateOps;
+        } | undefined>;
+        more: Signal<    {
+        kind: "groupMore";
+        key: string;
+        groupKey?: string;
+        level: number;
+        scope: "groups" | "rows";
+        remaining: number;
+        leafRows: readonly never[];
+        leafIds: readonly string[];
+        label: string;
+        } | undefined>;
+        selectState: Signal<HeaderSelectionState | undefined>;
+        count: Signal<number>;
+        aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+    };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {
         "props": {
@@ -644,6 +750,22 @@ export class AdaptGroupingPanel<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupingPanel<any>, never>;
+}
+
+// @public
+export class AdaptGroupMore {
+    // (undocumented)
+    readonly props: InputSignal<GroupMoreButtonSlotProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMore, "adapt-group-more", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGroupMore, never>;
 }
 
 // @internal
@@ -684,6 +806,44 @@ export class AdaptMobileCards<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMobileCards<any>, never>;
+}
+
+// @public
+export class AdaptNativeCellEditor implements AfterViewInit {
+    // (undocumented)
+    protected commitBoolean(checked: boolean): void;
+    // (undocumented)
+    protected readonly editorInputType: typeof editorInputType;
+    // (undocumented)
+    protected readonly editorValidationProps: typeof editorValidationProps;
+    // (undocumented)
+    protected readonly isBooleanEditor: typeof isBooleanEditor;
+    // (undocumented)
+    protected readonly isDraftChecked: typeof isDraftChecked;
+    // (undocumented)
+    protected readonly isMultiSelectEditor: typeof isMultiSelectEditor;
+    // (undocumented)
+    protected readonly isSelectEditor: typeof isSelectEditor;
+    // (undocumented)
+    protected readonly multiDraftFromSelect: typeof multiDraftFromSelect;
+    // (undocumented)
+    ngAfterViewInit(): void;
+    // (undocumented)
+    protected onKeyDown(event: KeyboardEvent): void;
+    // (undocumented)
+    readonly props: InputSignal<EditableCellEditorCtrl>;
+    // (undocumented)
+    protected readonly readMultiDraft: typeof readMultiDraft;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptNativeCellEditor, "adapt-native-cell-editor", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptNativeCellEditor, never>;
 }
 
 // @internal

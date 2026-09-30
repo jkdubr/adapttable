@@ -85,6 +85,12 @@ class AdaptEditCellButton {
   readonly props = input.required<EditableCellButtonProps>();
 }
 
+/**
+ * The native editor a cell opens: a text, number or date input, a checkbox,
+ * or a select, focused and committed as the editing controller says.
+ *
+ * @public
+ */
 @Component({
   selector: "adapt-native-cell-editor",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -160,7 +166,7 @@ class AdaptEditCellButton {
     }
   `,
 })
-class AdaptNativeCellEditor implements AfterViewInit {
+export class AdaptNativeCellEditor implements AfterViewInit {
   readonly props = input.required<EditableCellEditorCtrl>();
   private readonly el = viewChild<ElementRef<HTMLElement>>("el");
 

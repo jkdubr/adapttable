@@ -12,12 +12,16 @@ export { AdaptAutoFilterForm } from "./components/autoFilterForm";
 export { AdaptBulkBar } from "./components/bulkActionBar";
 export { AdaptColumnMenu } from "./components/columnMenu";
 export { AdaptDesktopTable } from "./components/desktopTable";
-export { AdaptEditableCell } from "./components/editableCell";
+export {
+  AdaptEditableCell,
+  AdaptNativeCellEditor,
+} from "./components/editableCell";
 export { AdaptFilterDrawer, AdaptFiltersForm } from "./components/filterPanel";
 export { AdaptFilterPopover } from "./components/filterPopover";
 export {
   AdaptGroupHeaderCard,
   AdaptGroupHeaderRow,
+  AdaptGroupMore,
 } from "./components/groupHeader";
 export { AdaptGroupingPanel } from "./components/groupingPanel";
 export { type MenuPopover, menuPopover } from "./components/menuPopover";
