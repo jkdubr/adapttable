@@ -90,6 +90,7 @@ import { ExportHandlerState } from '@adapttable/core/binding';
 import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
 import { ExtraFilters } from '@adapttable/core';
 import { eyeIcon } from '@adapttable/core/binding';
+import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core/binding';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
@@ -189,7 +190,9 @@ import { PIN_ICON } from '@adapttable/core/binding';
 import { pinActionLabel } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
 import { PinSide } from '@adapttable/core';
+import { QueryAggregate } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
+import { QuerySupport } from '@adapttable/core';
 import { RangeFieldWidget } from '@adapttable/core';
 import { RangeOp } from '@adapttable/core';
 import { readMultiDraft } from '@adapttable/core';
@@ -252,6 +255,7 @@ import { stopCellEditKeyboard } from '@adapttable/core';
 import { stopEditKeys } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
+import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
 import { TableViewState } from '@adapttable/core';
@@ -568,7 +572,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "facets" | "extra" | "setExtra" | "setExtras">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "facets" | "setExtra" | "setExtras" | "allFilteredRows" | "extra">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -814,7 +818,7 @@ export class AdaptFilterTreeChrome<TRow> {
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly registry: InputSignal<FilterTypeRegistry>;
     readonly slots: InputSignal<FilterTreeSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "filterTree" | "setFilterTree">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "setFilterTree" | "filterTree">>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterTreeChrome<any>, "adapt-filter-tree-chrome", never, {
         "defs": {
@@ -2250,6 +2254,9 @@ export function injectRowSelection<TRow>(options: RowSelectionOptions<TRow>): Ro
 export function injectSavedViews(options: SavedViewsOptions): SavedViewsState;
 
 // @public
+export function injectServerData<TRow>(options: ServerDataOptions<TRow>): Signal<TableSource<TRow>>;
+
+// @public
 export function injectTableUrlState(options?: TableUrlStateOptions): TableUrlState;
 
 // @public
@@ -2574,6 +2581,30 @@ export interface SavedViewsState extends Omit<UseSavedViewsResult, "views" | "de
 }
 
 export { SelectionState }
+
+// @public
+export interface ServerDataOptions<TRow> extends Omit<TableUrlStateOptions, "injector"> {
+    readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
+    readonly columns?: MaybeSignalOptional<readonly ColumnMetadata<TRow>[]>;
+    readonly error?: MaybeSignalOptional<Error | null>;
+    readonly expandedIds?: MaybeSignalOptional<readonly string[]>;
+    readonly facetKeys?: MaybeSignalOptional<readonly string[]>;
+    readonly facets?: MaybeSignalOptional<FacetMap>;
+    readonly forceMobile?: MaybeSignalOptional<boolean>;
+    readonly injector?: Injector;
+    readonly loading?: MaybeSignalOptional<boolean>;
+    readonly mobileBreakpoint?: number;
+    readonly nextCursor?: MaybeSignalOptional<string | null>;
+    readonly onQueryChange?: (query: TableQuery, info: {
+        signal: AbortSignal;
+        key: string;
+    }) => void | Promise<void>;
+    readonly paginationMode?: MaybeSignal<PaginationMode>;
+    readonly responseKey?: MaybeSignalOptional<string>;
+    readonly rows: MaybeSignal<readonly TRow[]>;
+    readonly supports?: MaybeSignalOptional<QuerySupport>;
+    readonly total: MaybeSignal<number>;
+}
 
 export { showAllColumns }
 

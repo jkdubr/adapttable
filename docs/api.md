@@ -2974,6 +2974,16 @@ comes from a kit through a slot.
 - `injectFrontendData(options)` is the in-memory tier: it takes
   `FrontendDataOptions` (the rows, as a value or a signal, plus the URL-state
   options) and returns a signal of the core `TableSource`.
+- `injectServerData(options)` is the server tier: it takes
+  `ServerDataOptions` — the page the host fetched (`rows`, `total`, and
+  `loading`, `error`, `nextCursor` as values or signals), what the endpoint
+  `supports`, and `onQueryChange` — and returns a signal of the core
+  `TableSource`. `onQueryChange` receives one consolidated query per real
+  change, once on first render with the URL-restored values; the request it
+  supersedes has its `signal` aborted, and so does the one in flight when the
+  injection context is destroyed. `isLoading` is the first load only; in
+  infinite mode `fetchNextPage` appends; with `supports.cursor` the query
+  carries the token the server issued, and paging back retraces them.
 - `injectTableUrlState(options)` is the URL-synced view state: a
   `TableUrlState` with a `state` signal and the store's setters, configured by
   `TableUrlStateOptions`. `ADAPTTABLE_URL_ADAPTER` is the injection token that

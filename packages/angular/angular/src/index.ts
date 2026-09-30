@@ -234,6 +234,7 @@ export {
   type FrontendDataOptions,
   injectFrontendData,
 } from "./source/frontendData";
+export { injectServerData, type ServerDataOptions } from "./source/serverData";
 export {
   type ExternalStore,
   fromStore,
