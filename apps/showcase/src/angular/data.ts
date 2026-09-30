@@ -35,6 +35,7 @@ export {
   makeLargeDirectory,
   PEOPLE,
   type Person,
+  reportsTo,
 } from "../people";
 
 const s = strings("en");

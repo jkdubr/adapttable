@@ -33,12 +33,12 @@ describe("the generated showcase pages", () => {
   it("writes one page per matrix entry and per replaced address", () => {
     // Twenty-two pages per React adapter — a landing plus twenty-one
     // features — across all eight kits; the Angular unstyled kit's landing
-    // plus the nine features it renders; and the eight replaced top-level
+    // plus the ten features it renders; and the eight replaced top-level
     // addresses. Kit `/accessibility/` URLs are matrix pages again, not
     // redirects to editing. Written out rather than recomputed from the
     // matrix: the writer reads that same list, so a derived count would agree
     // with itself no matter what it produced.
-    assert.equal(files.length, 8 * 22 + (1 + 9) + 8);
+    assert.equal(files.length, 8 * 22 + (1 + 10) + 8);
     assert.equal(new Set(files.map((file) => file.dir)).size, files.length);
   });
 

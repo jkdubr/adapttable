@@ -23,6 +23,7 @@ import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
 import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 import { savedViews } from "@adapttable/angular-unstyled/saved-views";
+import { tree } from "@adapttable/angular-unstyled/tree";
 import { virtualize } from "@adapttable/angular-unstyled/virtualize";
 import { applyRowReorder } from "@adapttable/core";
 import {
@@ -50,6 +51,7 @@ import {
   type PeopleParams,
   peopleRows,
   type Person,
+  reportsTo,
   rowKey,
 } from "./data";
 
@@ -562,6 +564,41 @@ export class AdaptShowcaseLandingTable {
   readonly features: readonly AdaptTableFeature[] = [filters(FILTER_DEFS)];
 }
 
+/**
+ * Tree: the seed's org chart — each team's lead first, everyone else on the
+ * team under them — one page of thirty so no branch splits across pages.
+ */
+@Component({
+  selector: "adapt-showcase-tree",
+  imports: [AdaptDataTable],
+  template: `
+    <div class="mx-demo">
+      <div class="hint-row">
+        <span class="hint">Each team lead opens onto their team</span>
+      </div>
+      <div class="mx-demo__body">
+        <adapt-data-table
+          tableLabel="People"
+          [urlSync]="false"
+          [data]="rows"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [defaults]="{ limit: 30 }"
+          [features]="features"
+        />
+      </div>
+    </div>
+  `,
+})
+class TreeBody {
+  readonly rows = PEOPLE;
+  readonly columns = COLUMNS;
+  readonly rowKey = rowKey;
+  readonly features: readonly AdaptTableFeature[] = [
+    tree<Person>({ getParentId: reportsTo, treeColumn: "person" }),
+  ];
+}
+
 /** Feature slug to the demo that page shows. */
 export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
   filtering: FilteringBody,
@@ -573,4 +610,5 @@ export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
   scale: ScaleBody,
   "mobile-cards": MobileCardsBody,
   "saved-views": SavedViewsBody,
+  tree: TreeBody,
 };

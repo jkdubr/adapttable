@@ -294,6 +294,7 @@ export const SHOWCASE_ADAPTERS = [
       "scale",
       "mobile-cards",
       "saved-views",
+      "tree",
     ],
   },
 ];
@@ -762,6 +763,56 @@ export function People({ rows, onSave }) {
       "Sorting and filtering apply within the tree rather than flattening it. Moving a child under a new parent is a host callback on the row-reordering page — the table never rewrites your tree.",
     ],
     card: "Nesting, chevrons, URL expansion, and host-owned tree moves.",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { tree } from "{pkg}/tree";
+
+interface Employee {
+  id: string;
+  name: string;
+  team: string;
+  managerId?: string;
+}
+
+const columns: ColumnDef<Employee>[] = [{ key: "name" }, { key: "team" }];
+
+@Component({
+  selector: "app-org",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="people()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class Org {
+  readonly people = input.required<readonly Employee[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Employee) => row.id;
+  readonly features = [
+    tree<Employee>({ getParentId: (row) => row.managerId, treeColumn: "name" }),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Explore a {kit} {framework} tree table with parent-child rows, expandable branches, lazy children and phone cards. Includes integration code.",
+        card: "Nesting, chevrons, lazy children, and a tree on phones.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "A tree grid is a different shape from a grouped table: the rows themselves nest, rather than being collected under synthetic headers. Compose `tree()` with `getChildren` or `getParentId` and it renders the hierarchy.",
+        "Children indent under their parent and a native chevron in the tree column opens and closes each branch. Give `hasChildren` and `onLoadChildren` and a branch fetches its children as it opens, showing that it is loading; a failed fetch closes it again, so the next click retries.",
+        "On a phone each card leads with the same chevron and indents by depth. Sorting reorders each branch in place, and a search shows the rows it matches.",
+      ],
+    },
     snippet: `import { DataTable } from "{pkg}";
 import { tree } from "{pkg}/tree";
 

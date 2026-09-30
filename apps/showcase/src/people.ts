@@ -640,3 +640,22 @@ export function largePerson(index: number): Person {
     teamAr: `${cycle(LARGE_AREAS_AR, area)} ${squadNumber}`,
   };
 }
+
+/**
+ * The org chart already inside the seed: the first person on each team leads
+ * it, everyone else on that team reports to them. Derived rather than stored,
+ * so the tree demo and every other demo read the identical thirty rows.
+ */
+const TEAM_LEAD = new Map<string, string>();
+for (const person of PEOPLE) {
+  if (!TEAM_LEAD.has(person.team)) TEAM_LEAD.set(person.team, person.id);
+}
+
+/** The id of a person's manager, or `undefined` for a team lead. */
+export function reportsTo(person: Person): string | undefined {
+  if (person.managerId !== undefined) {
+    return person.managerId ?? undefined;
+  }
+  const lead = TEAM_LEAD.get(person.team);
+  return lead === person.id ? undefined : lead;
+}
