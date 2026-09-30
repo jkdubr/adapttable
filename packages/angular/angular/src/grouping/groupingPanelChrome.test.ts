@@ -346,14 +346,14 @@ describe("AdaptGroupingPanelChrome", () => {
       '[data-adapttable-part="grouping-add"]'
     );
     expect(add).not.toBeNull();
-    if (!add) return;
+    if (!add) throw new Error("add is not rendered");
     add.value = "budget";
     add.dispatchEvent(new Event("change"));
     element
       .querySelector<HTMLButtonElement>(
         '[aria-label="Remove Team from grouping"]'
-      )
-      ?.click();
+      )!
+      .click();
     await settle();
     expect(host.added).toEqual(["budget"]);
     expect(host.removed).toEqual(["team"]);
@@ -436,7 +436,7 @@ describe("AdaptGroupingPanelChrome", () => {
       '[data-adapttable-part="grouping-aggregation-operation"]'
     );
     expect(operation).not.toBeNull();
-    if (!operation) return;
+    if (!operation) throw new Error("operation is not rendered");
     operation.value = "";
     operation.dispatchEvent(new Event("change"));
     operation.value = "count";
@@ -446,17 +446,17 @@ describe("AdaptGroupingPanelChrome", () => {
     element
       .querySelector<HTMLButtonElement>(
         '[data-adapttable-part="grouping-aggregations-restore"]'
-      )
-      ?.click();
+      )!
+      .click();
     expect(host.restored).toEqual(["yes"]);
     const picker = element.querySelector<HTMLSelectElement>(
       '[data-adapttable-part="grouping-aggregation-add"]'
     );
-    if (!picker) return;
+    if (!picker) throw new Error("picker is not rendered");
     picker.value = "team";
     picker.dispatchEvent(new Event("change"));
     expect(host.toggled).toEqual(["add:team"]);
-    element.querySelector<HTMLButtonElement>(".uncheck")?.click();
+    element.querySelector<HTMLButtonElement>(".uncheck")!.click();
     await settle();
     expect(host.toggled).toContain("remove:team");
     host.state.update((current) => ({
@@ -478,34 +478,45 @@ describe("AdaptGroupingPanelChrome", () => {
     expect(part(element, "grouping-aggregations-restore")).toBeNull();
   });
 
-  it("moves focus to the picker after an aggregation is removed", async () => {
+  it("moves focus to the next aggregation's remove control, then to the picker", async () => {
     const { host, element, settle } = await mount();
+    const item = (columnKey: string) => ({
+      columnKey,
+      operationId: "sum",
+      editable: true,
+      origin: "reader" as const,
+      operations: [{ id: "sum", builtIn: true }],
+    });
     host.state.update((current) => ({
       ...current,
       aggregations: {
-        items: [
-          {
-            columnKey: "budget",
-            operationId: undefined,
-            editable: true,
-            origin: "reader",
-            operations: [{ id: "sum", builtIn: true }],
-          },
+        items: [item("budget"), item("code")],
+        candidates: [
+          { columnKey: "budget", active: true, operations: [] },
+          { columnKey: "code", active: true, operations: [] },
         ],
-        candidates: [{ columnKey: "code", active: false, operations: [] }],
         atDefaults: true,
         hasDefaults: false,
       },
     }));
     await settle();
-    element
-      .querySelector<HTMLButtonElement>(
-        '[data-adapttable-part="grouping-aggregation-remove"]'
-      )
-      ?.click();
+    const removeBudget = element.querySelector<HTMLButtonElement>(
+      '[aria-label="Remove Budget aggregation"]'
+    )!;
+    removeBudget.focus();
+    removeBudget.click();
     await settle();
     expect(host.toggled).toEqual(["remove:budget"]);
-    expect(part(element, "grouping-aggregation-item")).toBeNull();
+    expect(document.activeElement).toBe(
+      element.querySelector('[aria-label="Remove Code aggregation"]')
+    );
+
+    (document.activeElement as HTMLButtonElement).click();
+    await settle();
+    expect(host.toggled).toEqual(["remove:budget", "remove:code"]);
+    expect(document.activeElement).toBe(
+      part(element, "grouping-aggregation-add")
+    );
   });
 
   it("shows the ungroup target only while a chip is dragged", async () => {
@@ -523,7 +534,7 @@ describe("AdaptGroupingPanelChrome", () => {
     await settle();
     const zone = part(element, "grouping-remove-zone");
     expect(zone?.getAttribute("data-active")).toBe("true");
-    zone?.dispatchEvent(new Event("drop"));
+    zone!.dispatchEvent(new Event("drop"));
     expect(seen).toEqual(["drop"]);
     host.state.update((current) => ({
       ...current,
@@ -533,7 +544,7 @@ describe("AdaptGroupingPanelChrome", () => {
     expect(part(element, "grouping-remove-zone")).toBeNull();
   });
 
-  it("lets an inner drop win over the chip row", async () => {
+  it("lets an inner drop target's drop win over the chip row's", async () => {
     const { host, element, settle } = await mount();
     const seen: string[] = [];
     host.state.update((current) => ({
@@ -541,27 +552,36 @@ describe("AdaptGroupingPanelChrome", () => {
       groupBy: ["team", "budget"],
       drag: { key: "code", source: "header", overIndex: 1 },
       dropProps: (index) => ({
-        onDragEnter: (event) => {
-          seen.push(`enter:${String(index)}`);
-          event.preventDefault();
-        },
         onDrop: (event) => {
           seen.push(`drop:${String(index)}`);
-          if (index === 1) event.preventDefault();
+          event.preventDefault();
         },
       }),
     }));
-    host.dir.set("rtl");
     await settle();
-    const row = element.querySelector<HTMLElement>(
-      '[data-adapttable-part="grouping-item"]'
+    const zones = [
+      ...element.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="grouping-drop-zone"]'
+      ),
+    ];
+    const rows = [
+      ...element.querySelectorAll<HTMLElement>(
+        '[data-adapttable-part="grouping-item"]'
+      ),
+    ];
+    expect(zones).toHaveLength(3);
+    expect(rows[1]!.contains(zones[2]!)).toBe(true);
+
+    // The last zone inserts at 2; the chip row around it would insert at 1.
+    zones[2]!.dispatchEvent(
+      new Event("drop", { bubbles: true, cancelable: true })
     );
-    const entered = new Event("dragenter", { bubbles: true });
-    row?.dispatchEvent(entered);
-    const dropped = new Event("drop", { bubbles: true, cancelable: true });
-    Object.defineProperty(dropped, "defaultPrevented", { get: () => true });
-    row?.dispatchEvent(dropped);
-    expect(seen.some((entry) => entry.startsWith("enter:"))).toBe(true);
-    expect(part(element, "grouping-panel")?.getAttribute("dir")).toBe("rtl");
+    expect(seen).toEqual(["drop:2"]);
+
+    seen.length = 0;
+    rows[1]!.dispatchEvent(
+      new Event("drop", { bubbles: true, cancelable: true })
+    );
+    expect(seen).toEqual(["drop:1"]);
   });
 });

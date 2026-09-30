@@ -35,7 +35,7 @@ describe("injectColumnDrag", () => {
     const source = drag.rowAttrs("a", 0, move);
     expect(source.draggable).toBe("true");
     (source.onDragStart as Handler)(dragEvent("dragstart", data));
-    expect(drag.rowAttrs("a", 0, move)["data-dragging"]).toBeDefined();
+    expect(drag.rowAttrs("a", 0, move)["data-dragging"]).toBe("");
     const target = drag.rowAttrs("b", 2, move);
     (target.onDragOver as Handler)(dragEvent("dragover", data));
     expect(drag.rowAttrs("b", 2, move)["data-drop"]).toBe("after");

@@ -109,12 +109,12 @@ describe("menuPopover", () => {
     );
     window.dispatchEvent(new Event("resize"));
     element
-      .querySelector(".inside")
-      ?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      .querySelector(".inside")!
+      .dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     expect(popover.open()).toBe(true);
     element
-      .querySelector(".outside")
-      ?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      .querySelector(".outside")!
+      .dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     await settle();
     expect(popover.open()).toBe(false);
   });

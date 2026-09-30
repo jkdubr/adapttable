@@ -1,4 +1,5 @@
 import { featureOptionsOf } from "@adapttable/angular";
+import { AdaptEditableCell } from "@adapttable/angular-unstyled";
 import { batchEditing } from "@adapttable/angular-unstyled/batch-editing";
 import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
 import { editing, rowEditing } from "@adapttable/angular-unstyled/editing";
@@ -47,7 +48,7 @@ describe("unstyled Angular feature wrappers", () => {
     expect(featureOptionsOf([cell])).toMatchObject({
       onCellEdit,
     });
-    expect(cell.renders?.[0]?.render({} as never)).toBeDefined();
+    expect(cell.renders?.[0]?.render({} as never)).toBe(AdaptEditableCell);
     expect(cell.renders?.some((fill) => fill.slot.id === "editable-cell")).toBe(
       true
     );
@@ -55,7 +56,7 @@ describe("unstyled Angular feature wrappers", () => {
       rowEditing: true,
       onRowEdit,
     });
-    expect(row.renders?.[0]?.render({} as never)).toBeDefined();
+    expect(row.renders?.[0]?.render({} as never)).toBe(AdaptEditableCell);
     expect(row.renders?.some((fill) => fill.slot.id === "editable-cell")).toBe(
       true
     );

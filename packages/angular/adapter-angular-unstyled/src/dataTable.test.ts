@@ -112,15 +112,15 @@ describe("the unstyled Angular table", () => {
     ]);
     expect(numbers[0]?.getAttribute("aria-current")).toBe("page");
     expect(part<HTMLButtonElement>("page-prev")?.disabled).toBe(true);
-    numbers[2]?.click();
+    numbers[2]!.click();
     await settle();
     expect(ids()).toEqual(["11", "12", "13", "14", "15"]);
-    part<HTMLButtonElement>("page-prev")?.click();
+    part<HTMLButtonElement>("page-prev")!.click();
     await settle();
     expect(ids()).toEqual(["6", "7", "8", "9", "10"]);
     const select = part<HTMLSelectElement>("rows-per-page");
     expect(select?.value).toBe("5");
-    if (!select) return;
+    if (!select) throw new Error("select is not rendered");
     select.value = "10";
     select.dispatchEvent(new Event("change"));
     await settle();
@@ -131,7 +131,7 @@ describe("the unstyled Angular table", () => {
     const { part, parts, settle } = await mount();
     const search = part<HTMLInputElement>("search");
     expect(search?.placeholder).toBe("Find a city");
-    if (!search) return;
+    if (!search) throw new Error("search is not rendered");
     search.value = "Atlantis";
     search.dispatchEvent(new Event("input"));
     await new Promise((resolve) => setTimeout(resolve, 350));
@@ -139,7 +139,7 @@ describe("the unstyled Angular table", () => {
     expect(part("empty")?.textContent).toContain("No results");
     expect(parts("row")).toHaveLength(0);
     expect(part("footer")).toBeNull();
-    part<HTMLButtonElement>("empty-clear")?.click();
+    part<HTMLButtonElement>("empty-clear")!.click();
     await settle();
     // Clearing filters leaves the search: the host typed it.
     expect(part("empty")).not.toBeNull();
@@ -147,10 +147,10 @@ describe("the unstyled Angular table", () => {
 
   it("reports selection changes and shows the ids the host controls", async () => {
     const { fixture, part, parts, settle } = await mount();
-    parts<HTMLInputElement>("checkbox")[1]?.click();
+    parts<HTMLInputElement>("checkbox")[1]!.click();
     await settle();
     expect(fixture.componentInstance.changes.at(-1)).toEqual(["1"]);
-    part<HTMLInputElement>("checkbox")?.click();
+    part<HTMLInputElement>("checkbox")!.click();
     await settle();
     expect(fixture.componentInstance.changes.at(-1)).toEqual([
       "1",
@@ -174,7 +174,7 @@ describe("the unstyled Angular table", () => {
     expect(parts("card")).toHaveLength(5);
     const button = part<HTMLButtonElement>("load-more-button");
     expect(button?.textContent?.trim()).toBe("Load more");
-    button?.click();
+    button!.click();
     await settle();
     expect(parts("card")).toHaveLength(10);
   });
@@ -190,7 +190,7 @@ describe("the unstyled Angular table", () => {
         .slice(0, 2)
         .map((label) => label.textContent?.trim())
     ).toEqual(["Name", "Land"]);
-    cards[0]?.querySelector<HTMLInputElement>("input")?.click();
+    cards[0]?.querySelector<HTMLInputElement>("input")!.click();
     await settle();
     expect(fixture.componentInstance.changes.at(-1)).toEqual(["1"]);
     expect(parts("card")[0]?.hasAttribute("data-selected")).toBe(true);
@@ -267,8 +267,8 @@ describe("unstyled Angular editing and virtualize", () => {
   it("ignores a double-click when editing is not composed", async () => {
     const { part, parts, settle } = await mountFeatures({ features: [] });
     const cell = parts("cell")[0];
-    expect(cell).toBeTruthy();
-    cell?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    expect(cell).not.toBeUndefined();
+    cell!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
     await settle();
     expect(part("edit-cell-editor")).toBeNull();
     expect(part("edit-cell-activate")).toBeNull();
@@ -281,11 +281,11 @@ describe("unstyled Angular editing and virtualize", () => {
     });
     const activate = parts("edit-cell-activate")[0];
     expect(activate).not.toBeNull();
-    activate?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    activate!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
     await settle();
     const editor = part<HTMLInputElement>("edit-cell-editor");
     expect(editor).not.toBeNull();
-    if (!editor) return;
+    if (!editor) throw new Error("editor is not rendered");
     editor.value = "Renamed";
     editor.dispatchEvent(new Event("input"));
     editor.dispatchEvent(
@@ -296,13 +296,13 @@ describe("unstyled Angular editing and virtualize", () => {
     expect(onCellEdit.mock.calls[0]?.[1]).toBe("name");
     expect(onCellEdit.mock.calls[0]?.[2]).toBe("Renamed");
 
-    parts("edit-cell-activate")[0]?.dispatchEvent(
+    parts("edit-cell-activate")[0]!.dispatchEvent(
       new MouseEvent("dblclick", { bubbles: true })
     );
     await settle();
     const again = part<HTMLInputElement>("edit-cell-editor");
     expect(again).not.toBeNull();
-    again?.dispatchEvent(
+    again!.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
     );
     await settle();
@@ -368,7 +368,10 @@ describe("unstyled Angular editing and virtualize", () => {
     const spacer = part("virtual-spacer");
     expect(spacer).not.toBeNull();
     expect(spacer!.querySelector("td")!.style.height).toMatch(/^[1-9]\d*px$/);
-    expect(parts("reorder-header")).toHaveLength(1);
+    // The reorder column is drawn and the spacer spans it with the data.
+    const [reorderHeader] = parts("reorder-header");
+    expect(reorderHeader!.getAttribute("aria-label")).toBe("Reorder row");
+    expect(spacer!.querySelector("td")!.colSpan).toBe(COLUMNS.length + 1);
   });
 
   it("accepts a string maxHeight on the scroll box", async () => {

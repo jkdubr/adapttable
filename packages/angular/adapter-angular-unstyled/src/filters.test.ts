@@ -126,7 +126,7 @@ async function mount(
     );
   const type = async (control: Element | null | undefined, value: string) => {
     const target = control as HTMLInputElement | HTMLSelectElement | null;
-    if (!target) return;
+    if (!target) throw new Error("target is not rendered");
     target.value = value;
     target.dispatchEvent(
       new Event(target instanceof HTMLSelectElement ? "change" : "input")
@@ -134,7 +134,7 @@ async function mount(
     await settle();
   };
   const openFilters = async () => {
-    part<HTMLButtonElement>("filters-button")?.click();
+    part<HTMLButtonElement>("filters-button")!.click();
     await settle();
   };
   return {
@@ -202,10 +202,10 @@ describe("the unstyled Angular filters", () => {
     const boxes = parts<HTMLInputElement>("filter-checkbox", field("Team")).map(
       (label) => label.querySelector("input")
     );
-    boxes[1]?.click();
+    boxes[1]!.click();
     await settle();
     expect(ids()).toEqual(["3"]);
-    boxes[1]?.click();
+    boxes[1]!.click();
     await settle();
     expect(ids()).toEqual(["1", "3"]);
   });
@@ -240,11 +240,15 @@ describe("the unstyled Angular filters", () => {
     await openFilters();
     await type(part("filter-select", field("City")), "Amman");
     expect(ids()).toEqual(["2"]);
-    parts<HTMLButtonElement>("chip-remove")[0]?.click();
+    parts<HTMLButtonElement>("chip-remove")[0]!.click();
     await settle();
     expect(ids()).toEqual(["1", "2", "3"]);
+    // The chip sits outside the popover, so removing one closed it.
+    expect(part("filters-popover")).toBeNull();
+    await openFilters();
     await type(part("filter-select", field("City")), "Amman");
-    part<HTMLButtonElement>("filters-clear")?.click();
+    expect(ids()).toEqual(["2"]);
+    part<HTMLButtonElement>("filters-clear")!.click();
     await settle();
     expect(ids()).toEqual(["1", "2", "3"]);
     expect(part("chips")).toBeNull();
@@ -256,13 +260,13 @@ describe("the unstyled Angular filters", () => {
     const summary = part("filter-tree-summary");
     expect(summary?.textContent).toContain("Advanced");
     const tree = part<HTMLDetailsElement>("filter-tree");
-    if (!tree) return;
+    if (!tree) throw new Error("tree is not rendered");
     tree.open = true;
     tree.dispatchEvent(new Event("toggle"));
     await settle();
     const addCondition = () =>
       [...(part("filter-tree-actions")?.querySelectorAll("button") ?? [])][0];
-    addCondition()?.click();
+    addCondition()!.click();
     await settle();
     const condition = part("filter-tree-condition");
     expect(condition).not.toBeNull();
@@ -272,14 +276,14 @@ describe("the unstyled Angular filters", () => {
     expect(chips.length).toBeGreaterThan(1);
     [
       ...(part("filter-tree-actions")?.querySelectorAll("button") ?? []),
-    ][1]?.click();
+    ][1]!.click();
     await settle();
     expect(parts("filter-tree-group").length).toBe(2);
     await type(
       part("filter-operator", part("filter-tree-group") ?? undefined),
       "or"
     );
-    parts<HTMLButtonElement>("filter-tree-remove")[0]?.click();
+    parts<HTMLButtonElement>("filter-tree-remove")[0]!.click();
     await settle();
     expect(ids()).toEqual(["1", "2", "3"]);
   });
@@ -297,16 +301,16 @@ describe("the unstyled Angular filters", () => {
     expect(part("filters-backdrop")).not.toBeNull();
     expect(document.activeElement).toBe(panel);
     const last = part<HTMLButtonElement>("filters-done");
-    last?.focus();
+    last!.focus();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
     );
-    part<HTMLButtonElement>("filters-done")?.click();
+    part<HTMLButtonElement>("filters-done")!.click();
     await settle();
     expect(part("filters-panel")).toBeNull();
     await openFilters();
-    part<HTMLButtonElement>("filters-backdrop")?.click();
+    part<HTMLButtonElement>("filters-backdrop")!.click();
     await settle();
     expect(part("filters-panel")).toBeNull();
     await openFilters();
@@ -323,7 +327,7 @@ describe("the unstyled Angular filters", () => {
     const triggers = parts<HTMLDetailsElement>("filter-header-trigger");
     expect(triggers.length).toBe(3);
     const trigger = triggers[1];
-    if (!trigger) return;
+    if (!trigger) throw new Error("trigger is not rendered");
     trigger.open = true;
     trigger.dispatchEvent(new Event("toggle"));
     await settle();
@@ -344,20 +348,20 @@ describe("the unstyled Angular filters", () => {
     const { part, parts, openFilters } = await mount([filters(DEFS)], "drawer");
     await openFilters();
     const panel = part("filters-panel");
-    if (!panel) return;
+    if (!panel) throw new Error("panel is not rendered");
     const focusables = [
       ...panel.querySelectorAll<HTMLElement>("button, input, select"),
     ];
     const first = focusables[0];
     const last = focusables[focusables.length - 1];
-    first?.focus();
+    first!.focus();
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Tab", shiftKey: true })
     );
     expect(document.activeElement).toBe(last);
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
     expect(document.activeElement).toBe(first);
-    part<HTMLButtonElement>("filters-button")?.focus();
+    part<HTMLButtonElement>("filters-button")!.focus();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
     expect(document.activeElement).toBe(first);
     expect(parts("filters-panel")).toHaveLength(1);
@@ -366,7 +370,7 @@ describe("the unstyled Angular filters", () => {
   it("keeps the popover open for a press inside it or on a removed node", async () => {
     const { part, openFilters, settle } = await mount();
     await openFilters();
-    part("filters-popover")?.click();
+    part("filters-popover")!.click();
     document.createElement("div").click();
     const detached = document.createElement("span");
     document.body.append(detached);
@@ -382,13 +386,13 @@ describe("the unstyled Angular filters", () => {
     const { part, openFilters, settle } = await mount();
     await openFilters();
     const input = part("filters-popover")?.querySelector("input");
-    input?.focus();
+    input!.focus();
     document.body.click();
     await settle();
     expect(part("filters-popover")).not.toBeNull();
     const button = part<HTMLButtonElement>("filters-button");
-    button?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
-    button?.click();
+    button!.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+    button!.click();
     await settle();
     expect(part("filters-popover")).toBeNull();
   });
@@ -422,8 +426,8 @@ describe("the unstyled Angular filters", () => {
         label.querySelector("input")
       );
     expect(boxes()).toHaveLength(2);
-    expect(part("filter-checklist-count")?.textContent).toBeTruthy();
-    boxes()[0]?.click();
+    expect(part("filter-checklist-count")!.textContent).toBe("(1)");
+    boxes()[0]!.click();
     await settle();
     expect(ids()).toHaveLength(1);
     const search = part<HTMLInputElement>("filter-checklist-search");
@@ -436,7 +440,7 @@ describe("the unstyled Angular filters", () => {
     const [, clear] = [
       ...(part("filter-checklist-actions")?.querySelectorAll("button") ?? []),
     ];
-    clear?.click();
+    clear!.click();
     await settle();
     expect(ids()).toHaveLength(3);
   });

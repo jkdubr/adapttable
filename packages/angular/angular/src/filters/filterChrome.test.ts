@@ -190,12 +190,12 @@ async function mountTree() {
       (node) => node.textContent?.trim() === label
     );
   const choose = (select: HTMLSelectElement | undefined, value: string) => {
-    if (!select) return;
+    if (!select) throw new Error("select is not rendered");
     select.value = value;
     select.dispatchEvent(new Event("change"));
   };
   const typeInto = (field: HTMLInputElement | undefined, value: string) => {
-    if (!field) return;
+    if (!field) throw new Error("field is not rendered");
     field.value = value;
     field.dispatchEvent(new Event("input"));
   };
@@ -206,13 +206,13 @@ describe("AdaptFilterTreeChrome", () => {
   it("opens from its disclosure and builds a tree with the kit's controls", async () => {
     const { host, element, settle, button } = await mountTree();
     expect(element.querySelector("fieldset")).toBeNull();
-    element.querySelector<HTMLButtonElement>(".toggle")?.click();
+    element.querySelector<HTMLButtonElement>(".toggle")!.click();
     await settle();
-    button("Add condition")[0]?.click();
+    button("Add condition")[0]!.click();
     await settle();
     expect(host.tree()?.conditions).toHaveLength(1);
     expect(element.querySelector("fieldset")?.dataset.depth).toBe("0");
-    button("Add group")[0]?.click();
+    button("Add group")[0]!.click();
     await settle();
     expect(
       element.querySelector(
@@ -220,21 +220,21 @@ describe("AdaptFilterTreeChrome", () => {
       )
     ).not.toBeNull();
     // Remove the nested group, then the condition.
-    button("Remove group")[0]?.click();
+    button("Remove group")[0]!.click();
     await settle();
-    button("Remove condition")[0]?.click();
+    button("Remove condition")[0]!.click();
     await settle();
     expect(host.tree()?.conditions ?? []).toHaveLength(0);
   });
 
   it("adds a group from the empty builder, and toggles closed", async () => {
     const { host, element, settle, button } = await mountTree();
-    element.querySelector<HTMLButtonElement>(".toggle")?.click();
+    element.querySelector<HTMLButtonElement>(".toggle")!.click();
     await settle();
-    button("Add group")[0]?.click();
+    button("Add group")[0]!.click();
     await settle();
     expect(host.tree()?.conditions).toHaveLength(1);
-    element.querySelector<HTMLButtonElement>(".toggle")?.click();
+    element.querySelector<HTMLButtonElement>(".toggle")!.click();
     await settle();
     expect(element.querySelector("fieldset")).toBeNull();
   });
@@ -366,18 +366,18 @@ describe("AdaptChecklistChrome", () => {
     expect(
       element.querySelector('[data-adapttable-part="filter-label"]')
         ?.textContent
-    ).toBeTruthy();
+    ).toBe("City");
     expect(boxes()).toHaveLength(2);
-    boxes()[0]?.click();
+    boxes()[0]!.click();
     await settle();
-    expect(host.source().extra.city).toBeDefined();
+    expect(host.source().extra.city).toEqual(["Amman"]);
     const [selectAll, clear] = [
       ...element.querySelectorAll<HTMLButtonElement>("test-button button"),
     ];
-    clear?.click();
+    clear!.click();
     await settle();
     expect(host.source().rows).toHaveLength(3);
-    selectAll?.click();
+    selectAll!.click();
     await settle();
     expect(boxes().every((box) => box.checked)).toBe(true);
   });
@@ -387,7 +387,7 @@ describe("AdaptChecklistChrome", () => {
     const search = element.querySelector<HTMLInputElement>(
       'input[type="search"]'
     );
-    if (!search) return;
+    if (!search) throw new Error("search is not rendered");
     search.value = "zzz";
     search.dispatchEvent(new Event("input"));
     await settle();
@@ -396,7 +396,7 @@ describe("AdaptChecklistChrome", () => {
       element.querySelector(
         '[data-adapttable-part="filter-checklist-list"] span'
       )?.textContent
-    ).toBeTruthy();
+    ).toBe("No matching values");
   });
 
   it("windows a long list, reading its scroll position", async () => {
@@ -413,7 +413,7 @@ describe("AdaptChecklistChrome", () => {
     expect(list?.dataset.virtualized).toBe("true");
     const before = boxes().length;
     expect(before).toBeLessThan(200);
-    if (!list) return;
+    if (!list) throw new Error("list is not rendered");
     Object.defineProperty(list, "clientWidth", { value: 400 });
     list.scrollTop = 2000;
     list.dispatchEvent(new Event("scroll"));

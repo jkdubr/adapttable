@@ -117,10 +117,10 @@ describe("injectGroupingPanelState", () => {
     await fixture.whenStable();
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector(".keys")?.textContent).toBe("team");
-    element.querySelector<HTMLButtonElement>(".add")?.click();
+    element.querySelector<HTMLButtonElement>(".add")!.click();
     await fixture.whenStable();
     expect(element.querySelector(".keys")?.textContent).toBe("team,budget");
-    element.querySelector<HTMLButtonElement>(".remove")?.click();
+    element.querySelector<HTMLButtonElement>(".remove")!.click();
     await fixture.whenStable();
     expect(element.querySelector(".keys")?.textContent).toBe("budget");
   });

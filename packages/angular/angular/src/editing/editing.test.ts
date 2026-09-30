@@ -95,7 +95,10 @@ describe("injectCellEditing", () => {
 
     editing().begin("1", "title", "Ship", TASK);
     fixture.detectChanges();
-    expect(fixture.componentInstance.onEditStart).toHaveBeenCalled();
+    expect(fixture.componentInstance.onEditStart).toHaveBeenCalledOnce();
+    expect(
+      fixture.componentInstance.onEditStart.mock.calls[0]![0]
+    ).toMatchObject({ rowId: "1", columnKey: "title" });
     expect(editing().active).toEqual({ rowId: "1", columnKey: "title" });
     expect(editing().isActive("1", "title")).toBe(true);
     expect(fixture.nativeElement.querySelector(".draft")?.textContent).toBe(
@@ -116,7 +119,7 @@ describe("injectCellEditing", () => {
     editing().begin("1", "title", "Ship", TASK);
     editing().cancel();
     fixture.detectChanges();
-    expect(fixture.componentInstance.onEditCancel).toHaveBeenCalled();
+    expect(fixture.componentInstance.onEditCancel).toHaveBeenCalledOnce();
     expect(editing().active).toBeNull();
   });
 
@@ -157,19 +160,34 @@ describe("injectRowEditing", () => {
     expect(editing().activeRowId).toBeNull();
   });
 
-  it("accepts an explicit injector and signal columns", () => {
+  it("follows a columns signal: a column made editable joins the patch", () => {
     const injector = TestBed.inject(Injector);
-    const columns = signal(COLUMNS);
-    const editing = injectRowEditing<Task>({
+    const onRowEdit = vi.fn();
+    const columns = signal<{ key: string; editable?: boolean }[]>([
+      { key: "title", editable: true },
+      { key: "owner" },
+    ]);
+    const editing = injectRowEditing<Task & { owner?: string }>({
       injector,
       enabled: signal(true),
       columns,
-      onRowEdit: vi.fn(),
+      onRowEdit,
     });
     editing().begin(TASK, "1");
-    expect(editing().isEditing("1")).toBe(true);
-    columns.set([{ key: "title", editable: true }]);
+    editing().setDraft("owner", "Ada");
+    editing().save();
+    expect(onRowEdit).not.toHaveBeenCalled();
     editing().cancel();
+
+    columns.set([
+      { key: "title", editable: true },
+      { key: "owner", editable: true },
+    ]);
+    TestBed.tick();
+    editing().begin(TASK, "1");
+    editing().setDraft("owner", "Ada");
+    editing().save();
+    expect(onRowEdit).toHaveBeenCalledExactlyOnceWith(TASK, { owner: "Ada" });
   });
 });
 
@@ -186,7 +204,11 @@ describe("injectBatchEditing", () => {
     );
     editing().saveAll();
     fixture.detectChanges();
-    expect(fixture.componentInstance.onBatchEdit).toHaveBeenCalled();
+    expect(
+      fixture.componentInstance.onBatchEdit
+    ).toHaveBeenCalledExactlyOnceWith([
+      { row: TASK, rowId: "1", patch: { title: "Ship it" } },
+    ]);
     expect(editing().pending).toBe(false);
   });
 

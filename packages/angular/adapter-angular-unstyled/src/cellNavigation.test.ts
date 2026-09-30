@@ -73,6 +73,30 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
+describe("cellNavigation() (unstyled Angular)", () => {
+  it("turns the table into one tab stop whose cells the arrows move between", async () => {
+    const { settle } = await mount();
+    const table = document.querySelector('[data-adapttable-part="table"]')!;
+    expect(table.getAttribute("role")).toBe("grid");
+    const all = cells();
+    expect(all.map((cell) => cell.getAttribute("tabindex"))).toEqual([
+      "0",
+      "-1",
+      "-1",
+      "-1",
+      "-1",
+      "-1",
+    ]);
+    all[0]!.focus();
+    press("ArrowRight");
+    await settle();
+    expect(document.activeElement).toBe(cells()[1]);
+    press("ArrowDown");
+    await settle();
+    expect(document.activeElement).toBe(cells()[3]);
+  });
+});
+
 describe("cellNavigation({ onRangeChange }) (unstyled Angular)", () => {
   it("tells the host each rectangle the reader selects, and null when it collapses", async () => {
     const { onRangeChange, settle } = await mount();

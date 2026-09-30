@@ -163,7 +163,7 @@ describe("row reorder keyboard page clamp", () => {
     ];
     expect(grips).toHaveLength(10);
     const grip = grips[0];
-    expect(grip).toBeTruthy();
+    expect(grip).not.toBeUndefined();
 
     grip!.dispatchEvent(
       new KeyboardEvent("keydown", { key: " ", bubbles: true })
@@ -192,7 +192,7 @@ describe("row reorder keyboard page clamp", () => {
     expect(grips.length).toBeGreaterThanOrEqual(10);
     expect(grips.length).toBeLessThan(50);
     const grip = grips[0];
-    expect(grip).toBeTruthy();
+    expect(grip).not.toBeUndefined();
     const loadedCount = grips.length;
 
     grip!.dispatchEvent(
@@ -374,7 +374,7 @@ describe("row reorder kit controls", () => {
     const confirm = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll("button")
     ).find((button) => button.textContent?.trim() === "Move");
-    expect(confirm).toBeTruthy();
+    expect(confirm).not.toBeUndefined();
     confirm!.click();
     expect(fixture.componentInstance.onConfirm).toHaveBeenCalledOnce();
   });
@@ -398,7 +398,7 @@ describe("row reorder kit controls", () => {
     const cancel = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll("button")
     ).find((button) => button.textContent?.trim() === "Cancel");
-    expect(cancel).toBeTruthy();
+    expect(cancel).not.toBeUndefined();
     cancel!.click();
     expect(fixture.componentInstance.onCancel).toHaveBeenCalledOnce();
   });
