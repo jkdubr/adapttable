@@ -1,7 +1,8 @@
+import type * as core from "@adapttable/core";
 import { createMemoryAdapter } from "@adapttable/core";
 import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ColumnDef } from "../columnDef";
 import { injectDataTable } from "../dataTable";
@@ -9,6 +10,27 @@ import { groupingPanel } from "../features/groupingPanel";
 import { injectFrontendData } from "../source/frontendData";
 import { ADAPTTABLE_URL_ADAPTER } from "../url/tableUrlState";
 import { injectGroupingPanelState } from "./groupingPanelState";
+
+const reconcile = vi.fn();
+
+vi.mock("@adapttable/core", async (importOriginal) => {
+  const actual = await importOriginal<typeof core>();
+  return {
+    ...actual,
+    createGroupingPanelController: (
+      ...args: Parameters<typeof actual.createGroupingPanelController>
+    ) => {
+      const controller = actual.createGroupingPanelController(...args);
+      return {
+        ...controller,
+        reconcile: () => {
+          reconcile();
+          controller.reconcile();
+        },
+      };
+    },
+  };
+});
 
 interface Person {
   id: string;
@@ -106,5 +128,89 @@ describe("injectGroupingPanelState", () => {
   it("returns nothing without the panel feature", () => {
     const fixture = TestBed.createComponent(EmptyHost);
     expect(fixture.componentInstance.panel).toBeUndefined();
+  });
+});
+
+interface ReconcileRow {
+  id: string;
+  team: string;
+  points: number;
+}
+
+const RECONCILE_ROWS: ReconcileRow[] = Array.from(
+  { length: 40 },
+  (_, index) => ({
+    id: String(index),
+    team: index % 2 === 0 ? "A" : "B",
+    points: index,
+  })
+);
+
+const RECONCILE_COLUMNS: ColumnDef<ReconcileRow>[] = [
+  { key: "team", header: "Team" },
+  {
+    key: "points",
+    header: "Points",
+    aggregatable: { operations: ["sum", "avg"] },
+  },
+];
+
+@Component({ template: "" })
+class ReconcileHost {
+  readonly source = injectFrontendData<ReconcileRow>({
+    data: signal(RECONCILE_ROWS),
+    columns: RECONCILE_COLUMNS,
+    getRowId: (row) => row.id,
+    defaults: { limit: 10 },
+  });
+  private readonly features = [groupingPanel()];
+  private readonly table = injectDataTable<ReconcileRow>({
+    source: this.source,
+    columns: RECONCILE_COLUMNS,
+    rowKey: (row) => row.id,
+    features: this.features,
+  });
+  readonly panel = injectGroupingPanelState({
+    table: this.table,
+    source: this.source,
+    features: this.features,
+  })!;
+}
+
+describe("injectGroupingPanelState reconcile", () => {
+  beforeEach(() => {
+    reconcile.mockClear();
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: ADAPTTABLE_URL_ADAPTER,
+          useValue: createMemoryAdapter(),
+        },
+      ],
+    });
+  });
+
+  it("runs when a reader's aggregate choice changes, not on paging, search or grouping", async () => {
+    const fixture = TestBed.createComponent(ReconcileHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const host = fixture.componentInstance;
+    const first = reconcile.mock.calls.length;
+    expect(first).toBe(1);
+
+    host.source().setPage(2);
+    await fixture.whenStable();
+    host.source().setSearch("x");
+    await fixture.whenStable();
+    expect(reconcile).toHaveBeenCalledTimes(first);
+
+    host.panel().state.add("team");
+    await fixture.whenStable();
+    expect(reconcile).toHaveBeenCalledTimes(first);
+
+    host.source().setGroupAggregateOverrides!({ points: "avg" });
+    await fixture.whenStable();
+    expect(reconcile).toHaveBeenCalledTimes(first + 1);
+    expect(host.source().groupAggregateOverrides).toEqual({ points: "avg" });
   });
 });

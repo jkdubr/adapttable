@@ -17,12 +17,11 @@ import {
 } from "@adapttable/core/binding";
 import {
   computed,
-  DestroyRef,
   effect,
   inject,
   Injector,
   type Signal,
-  signal,
+  untracked,
 } from "@angular/core";
 
 import type { ColumnDef } from "../columnDef";
@@ -87,7 +86,6 @@ export function injectGroupingPanelState<TRow>(
   if (!feature) return undefined;
 
   const injector = options.injector ?? inject(Injector);
-  const destroyRef = injector.get(DestroyRef);
   const runtime = tableRuntimeFor(
     options.table,
     options.source,
@@ -99,9 +97,6 @@ export function injectGroupingPanelState<TRow>(
     runtime: runtime as TableRuntime,
     groupAggregates: extras.groupAggregates,
   });
-  destroyRef.onDestroy(() => {
-    // Controllers hold listeners only; nothing to dispose beyond unsubscribing.
-  });
 
   const snapshot = fromStore(
     {
@@ -111,30 +106,26 @@ export function injectGroupingPanelState<TRow>(
     { injector }
   );
 
+  // Once, after the table is up: the controller seeds the keys only when
+  // nothing (the URL, a saved view) already carries some.
   effect(
     () => {
-      controller.configure({
-        runtime: runtime as TableRuntime,
-        groupAggregates: extras.groupAggregates,
+      untracked(() => {
+        controller.initialize(feature.initialGroupBy);
       });
     },
     { injector }
   );
 
-  const seeded = signal(false);
+  // A link, a saved view or a configuration change can carry an operation a
+  // column no longer allows; reconcile whenever what that depends on changes.
+  const reconcileKey = computed(() => controller.reconcileKey());
   effect(
     () => {
-      if (seeded()) return;
-      seeded.set(true);
-      controller.initialize(feature.initialGroupBy);
-    },
-    { injector }
-  );
-
-  effect(
-    () => {
-      controller.reconcileKey();
-      controller.reconcile();
+      reconcileKey();
+      untracked(() => {
+        controller.reconcile();
+      });
     },
     { injector }
   );

@@ -27,7 +27,6 @@ import {
   isSignal,
   runInInjectionContext,
   type Signal,
-  signal,
 } from "@angular/core";
 import {
   type AngularVirtualizer,
@@ -174,16 +173,12 @@ export function injectTableVirtualizer<TRow>(
     const scrollMargin = (): number => readNumber(options.scrollMargin, 0);
     const expandable = (): boolean => readFlag(options.expandable, false);
     const elementMode = options.getScrollElement !== undefined;
-    // Stable identity, re-keyed ONLY when the data changes: the virtualizer
-    // memoises its measurements on `getItemKey`, so an inline `rowKey` would
-    // invalidate the cache every time. The extractor reads through a ref.
-    const rowKeyRef = signal(options.rowKey);
-    effect(() => {
-      rowKeyRef.set(options.rowKey);
-    });
+    // The virtualizer memoises measurements on `getItemKey`, so the key reads
+    // the host's rowKey through one stable extractor.
+    const { rowKey } = options;
     const getItemKey = (index: number): string => {
       const row = options.rows()[index];
-      return row === undefined ? String(index) : rowKeyRef()(row);
+      return row === undefined ? String(index) : rowKey(row);
     };
 
     // Both injectors must run unconditionally; exactly one is enabled.
@@ -227,7 +222,7 @@ export function injectTableVirtualizer<TRow>(
       const rows = options.rows();
       const materialized = materializeWindowRows(
         rows,
-        rowKeyRef(),
+        rowKey,
         on,
         active ? items : []
       );
