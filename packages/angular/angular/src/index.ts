@@ -306,24 +306,7 @@ export type {
   TableVirtualization,
   VirtualTableRow,
 } from "@adapttable/core";
-export {
-  beginCellEdit,
-  isCellEditable,
-  parseCellEditValue,
-  readEditableCellValue,
-  resolveCellEditor,
-} from "@adapttable/core";
-export {
-  devWarn,
-  resolveVirtualRows,
-  rowSourceIndex,
-  virtualColumnSpan,
-} from "@adapttable/core";
 export type {
   ChromeBodyRegion,
   HeaderSelectionState,
-} from "@adapttable/core/binding";
-export {
-  isBodyEligible,
-  virtualizeIgnoredOnPage,
 } from "@adapttable/core/binding";

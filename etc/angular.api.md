@@ -14,7 +14,6 @@ import { BatchEditBarProps } from '@adapttable/core/binding';
 import { BatchEditButtonProps } from '@adapttable/core/binding';
 import { BatchEditingState } from '@adapttable/core';
 import { BatchRowEdit } from '@adapttable/core';
-import { beginCellEdit } from '@adapttable/core';
 import { bindHeaderFilterDismiss } from '@adapttable/core';
 import { bodyWindowKind } from '@adapttable/core/binding';
 import { BooleanFieldWidget } from '@adapttable/core';
@@ -171,9 +170,7 @@ import { Injector } from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { insertExtraRows } from '@adapttable/core/binding';
 import { insertExtrasBeforeRows } from '@adapttable/core/binding';
-import { isBodyEligible } from '@adapttable/core/binding';
 import { isBooleanEditor } from '@adapttable/core';
-import { isCellEditable } from '@adapttable/core';
 import { isDraftChecked } from '@adapttable/core';
 import { isExtraEntry } from '@adapttable/core/binding';
 import { isFirstEditableColumn } from '@adapttable/core';
@@ -188,7 +185,6 @@ import { offersAllMatching } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
-import { parseCellEditValue } from '@adapttable/core';
 import { PIN_ICON } from '@adapttable/core/binding';
 import { pinActionLabel } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
@@ -196,7 +192,6 @@ import { PinSide } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { RangeFieldWidget } from '@adapttable/core';
 import { RangeOp } from '@adapttable/core';
-import { readEditableCellValue } from '@adapttable/core';
 import { readMultiDraft } from '@adapttable/core';
 import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
 import { RELATIVE_PRESETS } from '@adapttable/core';
@@ -209,7 +204,6 @@ import { resolveEditableCellDisplay } from '@adapttable/core';
 import { resolveEditingArming } from '@adapttable/core';
 import { resolveMobileLabel } from '@adapttable/core/binding';
 import { resolveRowEditTrigger } from '@adapttable/core';
-import { resolveVirtualRows } from '@adapttable/core';
 import { restoreFocusSoon } from '@adapttable/core';
 import { ROW_EDIT_ACTIONS } from '@adapttable/core/binding';
 import { ROW_REORDER_ANNOUNCER } from '@adapttable/core/binding';
@@ -237,7 +231,6 @@ import { RowReorderLabels } from '@adapttable/core/binding';
 import { RowReorderMoveButtonProps } from '@adapttable/core/binding';
 import { RowReorderOptions } from '@adapttable/core';
 import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
-import { rowSourceIndex } from '@adapttable/core';
 import { RowValidator } from '@adapttable/core';
 import { runRowAction } from '@adapttable/core';
 import { SAVED_VIEWS } from '@adapttable/core/binding';
@@ -274,7 +267,6 @@ import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { UseSavedViewsResult } from '@adapttable/core/binding';
-import { virtualColumnSpan } from '@adapttable/core';
 import { virtualizeIgnoredOnPage } from '@adapttable/core/binding';
 import { VirtualizeInput } from '@adapttable/core/binding';
 import { VirtualTableRow } from '@adapttable/core';
@@ -1441,8 +1433,6 @@ export { BatchEditingState }
 
 export { BatchRowEdit }
 
-export { beginCellEdit }
-
 export { bindHeaderFilterDismiss }
 
 export { bodyWindowKind }
@@ -2275,11 +2265,7 @@ export { insertExtraRows }
 
 export { insertExtrasBeforeRows }
 
-export { isBodyEligible }
-
 export { isBooleanEditor }
-
-export { isCellEditable }
 
 export { isDraftChecked }
 
@@ -2343,8 +2329,6 @@ export { PaginationMode }
 
 export { PaginationSlot }
 
-export { parseCellEditValue }
-
 export { PIN_ICON }
 
 export { pinActionLabel }
@@ -2360,8 +2344,6 @@ export function provideAdaptTableFeatures(...features: readonly AdaptTableFeatur
 export function rangeFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<RangeFieldWidget>;
 
 export { RangeOp }
-
-export { readEditableCellValue }
 
 export { readMultiDraft }
 
@@ -2404,8 +2386,6 @@ export { resolveEditingArming }
 export { resolveMobileLabel }
 
 export { resolveRowEditTrigger }
-
-export { resolveVirtualRows }
 
 export { restoreFocusSoon }
 
@@ -2567,8 +2547,6 @@ export interface RowSelectionOptions<TRow> {
     readonly selectedIds?: MaybeSignalOptional<readonly string[]>;
 }
 
-export { rowSourceIndex }
-
 export { runRowAction }
 
 // @public
@@ -2705,8 +2683,6 @@ export { unpinAllColumns }
 export function urlAdapterFor(options: Pick<TableUrlStateOptions, "urlAdapter" | "urlSync">, injector: Injector): UrlStateAdapter;
 
 export { UrlStateAdapter }
-
-export { virtualColumnSpan }
 
 // @public
 export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;

@@ -88,12 +88,14 @@ export {
   rowEditConflict,
 } from "@adapttable/core";
 export {
+  devWarn,
   groupAggregateEntries,
   groupedViewSource,
   groupLeafCount,
   groupRowLayout,
   groupSelectionState,
   mobileCardListStyle,
+  resolveCellEditor,
   windowGroupedEntries,
 } from "@adapttable/core";
 export type {
@@ -213,4 +215,5 @@ export {
   isExtraEntry,
   resolveBodyVirtualization,
   resolveMobileLabel,
+  virtualizeIgnoredOnPage,
 } from "@adapttable/core/binding";
