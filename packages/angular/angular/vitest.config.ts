@@ -18,6 +18,12 @@ export default defineConfig({
   plugins: [angular({ tsconfig: path.join(packageDir, "tsconfig.spec.json") })],
   resolve: {
     alias: [
+      // The router entry reaches the primary entry by package name, as
+      // ng-packagr requires; tests resolve it to source.
+      {
+        find: /^@adapttable\/angular$/,
+        replacement: path.resolve(packageDir, "src/index.ts"),
+      },
       {
         find: /^@adapttable\/core$/,
         replacement: path.resolve(packageDir, "../../shared/core/src/index.ts"),
@@ -32,7 +38,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "router/**/*.test.ts"],
     clearMocks: true,
     restoreMocks: true,
     pool: "threads",
@@ -41,8 +47,13 @@ export default defineConfig({
     coverage: {
       provider: "istanbul",
       reporter: ["text", "lcov", "html"],
-      include: ["src/**/*.ts"],
-      exclude: ["src/**/*.test.ts", "src/**/index.ts"],
+      include: ["src/**/*.ts", "router/**/*.ts"],
+      exclude: [
+        "src/**/*.test.ts",
+        "src/**/index.ts",
+        "router/**/*.test.ts",
+        "router/index.ts",
+      ],
       thresholds: {
         statements: 95,
         branches: 90,

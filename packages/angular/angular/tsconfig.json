@@ -17,6 +17,7 @@
     "formula",
     "pivot",
     "sparkline",
+    "router",
     "stream",
     "vitest.config.ts",
     "vitest.setup.ts"

@@ -174,15 +174,15 @@ export function injectTableData<TRow>(
     });
   });
   const tier = computed(() => plan().tier);
-  // The URL store reads its list and number keys, and whether it owns the
-  // URL, once, when it is made.
+  // Which tier owns the URL is decided once, when the stores are made; the
+  // filter keys the URL parses as lists and numbers follow the runtime.
   const first = untracked(plan);
   const urlOptions = {
     urlAdapter: options.urlAdapter,
     urlKey: options.urlKey,
     defaults: options.defaults,
-    arrayExtraKeys: first.runtime.arrayExtraKeys,
-    numberExtraKeys: first.runtime.numberExtraKeys,
+    arrayExtraKeys: computed(() => plan().runtime.arrayExtraKeys),
+    numberExtraKeys: computed(() => plan().runtime.numberExtraKeys),
   };
   const onServer = computed(() => tier() === "server");
   const onFrontend = computed(() => tier() === "frontend");

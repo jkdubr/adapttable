@@ -9,19 +9,22 @@ import {
   resolveUrlAdapter,
   type TableQueryParams,
   type TableViewState,
+  type TableViewStateConfig,
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
 import {
   assertInInjectionContext,
+  computed,
   DestroyRef,
   inject,
   InjectionToken,
   Injector,
   type Signal,
+  untracked,
 } from "@angular/core";
 
-import { fromStore } from "../store";
+import { fromStore, type MaybeSignalOptional, readMaybe } from "../store";
 
 /**
  * The URL adapter every table in this injector reads and writes, when the
@@ -51,12 +54,17 @@ export interface TableUrlStateOptions {
    * of the URL. Defaults to `true`.
    */
   readonly urlSync?: boolean;
-  /** Initial values applied when the URL has no value for a key. */
-  readonly defaults?: Partial<TableQueryParams> & { extra?: ExtraFilters };
+  /**
+   * Initial values applied when the URL has no value for a key. A signal
+   * reconfigures the store when it moves.
+   */
+  readonly defaults?: MaybeSignalOptional<
+    Partial<TableQueryParams> & { extra?: ExtraFilters }
+  >;
   /** Extra-filter keys whose values are parsed as numbers. */
-  readonly numberExtraKeys?: readonly string[];
+  readonly numberExtraKeys?: MaybeSignalOptional<readonly string[]>;
   /** Extra-filter keys whose values are comma-separated arrays. */
-  readonly arrayExtraKeys?: readonly string[];
+  readonly arrayExtraKeys?: MaybeSignalOptional<readonly string[]>;
   /**
    * Namespace for this table's URL params, so several tables share one URL:
    * with `urlKey: "left"` the params become `left.q`, `left.page`, …
@@ -109,20 +117,37 @@ export function injectTableUrlState(
   if (!options.injector) assertInInjectionContext(injectTableUrlState);
   const injector = options.injector ?? inject(Injector);
   const adapter = urlAdapterFor(options, injector);
+  const config = computed((): TableViewStateConfig => ({
+    defaults: readMaybe(options.defaults),
+    numberExtraKeys: readMaybe(options.numberExtraKeys),
+    arrayExtraKeys: readMaybe(options.arrayExtraKeys),
+  }));
   const store = createTableViewStore(
-    { adapter, urlKey: options.urlKey },
     {
-      defaults: options.defaults,
-      numberExtraKeys: options.numberExtraKeys,
-      arrayExtraKeys: options.arrayExtraKeys,
-    }
+      adapter,
+      urlKey: options.urlKey,
+    },
+    untracked(config)
   );
+  // Later configuration reaches the store through `configure`, which keeps
+  // every unchanged value's identity; the store reads it when its state is
+  // read, so the state is derived rather than notified.
+  const configured = computed(() => {
+    const next = config();
+    store.configure(next);
+    return next;
+  });
+  const snapshot = fromStore(store, { injector });
   // Two tables on one adapter without distinct urlKeys clobber each other's
   // params — the store warns in development.
   injector.get(DestroyRef).onDestroy(store.claimNamespace());
 
   return {
-    state: fromStore(store, { injector }),
+    state: computed(() => {
+      configured();
+      snapshot();
+      return store.getSnapshot();
+    }),
     setPage: store.setPage,
     setLimit: store.setLimit,
     setSort: store.setSort,

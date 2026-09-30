@@ -5,7 +5,6 @@
 import {
   type ColumnMetadata,
   createExportController,
-  createUrlSliceStore,
   densitySlice,
   exportButtonLabel,
   type ExportCsvOptions,
@@ -36,7 +35,8 @@ import {
 } from "@angular/core";
 
 import { fromStore } from "../store";
-import { type TableUrlStateOptions, urlAdapterFor } from "../url/tableUrlState";
+import type { TableUrlStateOptions } from "../url/tableUrlState";
+import { injectUrlSlice } from "../url/urlSlice";
 
 /**
  * Options for {@link injectDensity}.
@@ -76,19 +76,10 @@ export interface DensityState {
 export function injectDensity(options: DensityOptions = {}): DensityState {
   if (!options.injector) assertInInjectionContext(injectDensity);
   const injector = options.injector ?? inject(Injector);
-  const store = createUrlSliceStore(
-    { adapter: urlAdapterFor(options, injector), urlKey: options.urlKey },
-    densitySlice,
-    { defaultDensity: options.defaultDensity }
-  );
-  // A change still waiting on its debounce is written before the table goes.
-  injector.get(DestroyRef).onDestroy(() => {
-    store.flush();
+  const slice = injectUrlSlice({ ...options, injector }, densitySlice, {
+    defaultDensity: options.defaultDensity,
   });
-  return {
-    density: fromStore(store, { injector }),
-    setDensity: store.set,
-  };
+  return { density: slice.value, setDensity: slice.set };
 }
 
 /**

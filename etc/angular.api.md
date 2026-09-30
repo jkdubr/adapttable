@@ -230,6 +230,7 @@ import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
+import { RowPinState } from '@adapttable/core/binding';
 import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/core/binding';
 import { RowReorderHandleProps as RowReorderHandleProps_2 } from '@adapttable/core/binding';
 import { RowReorderHandler } from '@adapttable/core';
@@ -272,6 +273,7 @@ import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
 import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
 import { Type } from '@angular/core';
 import { unpinAllColumns } from '@adapttable/core/binding';
+import { UrlSliceSpec } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
 import { UseColumnLayoutResult } from '@adapttable/core';
 import { UseSavedViewsResult } from '@adapttable/core/binding';
@@ -576,7 +578,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "facets" | "extra" | "setExtra" | "setExtras">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "setExtra" | "setExtras" | "allFilteredRows" | "facets" | "extra">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -822,7 +824,7 @@ export class AdaptFilterTreeChrome<TRow> {
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly registry: InputSignal<FilterTypeRegistry>;
     readonly slots: InputSignal<FilterTreeSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "filterTree" | "setFilterTree">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "setFilterTree" | "filterTree">>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterTreeChrome<any>, "adapt-filter-tree-chrome", never, {
         "defs": {
@@ -1576,6 +1578,17 @@ export interface ColumnLayoutOptions {
 
 export { ColumnLayoutState }
 
+// @public
+export interface ColumnLayoutUrlState {
+    readonly layout: Signal<ColumnLayoutState>;
+    readonly onLayoutChange: (layout: ColumnLayoutState) => void;
+}
+
+// @public
+export interface ColumnLayoutUrlStateOptions extends UrlSliceOptions {
+    readonly defaultColumnLayout?: MaybeSignalOptional<Partial<ColumnLayoutState>>;
+}
+
 export { columnMenuActions }
 
 export { ColumnMenuChoice }
@@ -1754,6 +1767,17 @@ export interface DensityOptions extends Pick<TableUrlStateOptions, "urlAdapter" 
 export interface DensityState {
     readonly density: Signal<TableDensity>;
     readonly setDensity: (next: TableDensity) => void;
+}
+
+// @public
+export interface DensityUrlState {
+    readonly density: Signal<TableDensity>;
+    readonly onDensityChange: (density: TableDensity) => void;
+}
+
+// @public
+export interface DensityUrlStateOptions extends UrlSliceOptions {
+    readonly defaultDensity?: MaybeSignalOptional<TableDensity>;
 }
 
 export { desktopBodySlots }
@@ -2055,6 +2079,17 @@ export interface GroupCollapseOptions {
 
 export { GroupCollapseState }
 
+// @public
+export interface GroupCollapseUrlState {
+    readonly collapsedGroupIds: Signal<string[]>;
+    readonly onCollapsedGroupIdsChange: (ids: string[]) => void;
+}
+
+// @public
+export interface GroupCollapseUrlStateOptions extends UrlSliceOptions {
+    readonly defaultCollapsedGroupIds?: MaybeSignalOptional<readonly string[]>;
+}
+
 export { GroupedFlatEntry }
 
 export { groupedViewSource }
@@ -2213,6 +2248,9 @@ export function injectCellSaveState<TRow>(options?: CellSaveStateInjectOptions<T
 export function injectColumnDrag(injector?: Injector): ColumnDrag;
 
 // @public
+export function injectColumnLayoutUrlState(options?: ColumnLayoutUrlStateOptions): ColumnLayoutUrlState;
+
+// @public
 export function injectColumnRenameEditor(options: ColumnRenameEditorOptions): ColumnRenameEditorState;
 
 // @public
@@ -2223,6 +2261,9 @@ export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTabl
 
 // @public
 export function injectDensity(options?: DensityOptions): DensityState;
+
+// @public
+export function injectDensityUrlState(options?: DensityUrlStateOptions): DensityUrlState;
 
 // @public
 export function injectEditValidation<TRow>(options?: EditValidationInjectOptions<TRow>): Signal<EditValidationState<TRow>>;
@@ -2241,6 +2282,9 @@ export function injectGridFocus<TRow>(options: GridFocusOptions<TRow>): GridFocu
 
 // @public
 export function injectGroupCollapse(options?: GroupCollapseOptions): Signal<GroupCollapseState>;
+
+// @public
+export function injectGroupCollapseUrlState(options?: GroupCollapseUrlStateOptions): GroupCollapseUrlState;
 
 // @public
 export function injectGrouping<TRow>(options: GroupingOptions<TRow>): Signal<TableGrouping<TRow> | undefined> | undefined;
@@ -2276,6 +2320,9 @@ export function injectRowEditing<TRow>(options: RowEditingInjectOptions<TRow>): 
 export function injectRowPairMeasurer(options: RowPairMeasurerOptions): RowPairMeasurer;
 
 // @public
+export function injectRowPinningUrlState(options?: UrlSliceOptions): RowPinningUrlState;
+
+// @public
 export function injectRowReorder<TRow>(options: RowReorderStateOptions<TRow>): Signal<RowReorderState<TRow>> | undefined;
 
 // @public
@@ -2301,6 +2348,9 @@ export function injectTableVirtualizer<TRow>(options: TableVirtualizationOptions
     readonly virtualization: Signal<TableVirtualization<TRow>>;
     readonly scrollToIndex: (index: number) => void;
 };
+
+// @public
+export function injectUrlSlice<T, TConfig extends object>(options: UrlSliceOptions, spec: UrlSliceSpec<T, TConfig>, config: MaybeSignal<TConfig>): UrlSlice<T>;
 
 export { insertExtraRows }
 
@@ -2542,6 +2592,14 @@ export interface RowPairMeasurerOptions {
 }
 
 // @public
+export interface RowPinningUrlState {
+    readonly onPinnedRowIdsChange: (pinned: RowPinState) => void;
+    readonly pinnedRowIds: Signal<RowPinState>;
+}
+
+export { RowPinState }
+
+// @public
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;
 
 // @public
@@ -2772,12 +2830,12 @@ export interface TableUrlState extends Pick<TableViewStore, "setPage" | "setLimi
 
 // @public
 export interface TableUrlStateOptions {
-    readonly arrayExtraKeys?: readonly string[];
-    readonly defaults?: Partial<TableQueryParams> & {
+    readonly arrayExtraKeys?: MaybeSignalOptional<readonly string[]>;
+    readonly defaults?: MaybeSignalOptional<Partial<TableQueryParams> & {
         extra?: ExtraFilters;
-    };
+    }>;
     readonly injector?: Injector;
-    readonly numberExtraKeys?: readonly string[];
+    readonly numberExtraKeys?: MaybeSignalOptional<readonly string[]>;
     readonly urlAdapter?: UrlStateAdapter;
     readonly urlKey?: string;
     readonly urlSync?: boolean;
@@ -2812,6 +2870,18 @@ export { unpinAllColumns }
 
 // @public
 export function urlAdapterFor(options: Pick<TableUrlStateOptions, "urlAdapter" | "urlSync">, injector: Injector): UrlStateAdapter;
+
+// @public
+export interface UrlSlice<T> {
+    readonly latest: () => T;
+    readonly set: (value: T) => void;
+    readonly value: Signal<T>;
+}
+
+// @public
+export interface UrlSliceOptions extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "urlKey"> {
+    readonly injector?: Injector;
+}
 
 export { UrlStateAdapter }
 

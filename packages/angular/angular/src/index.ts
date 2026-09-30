@@ -257,6 +257,25 @@ export {
   type MaybeSignalOptional,
 } from "./store";
 export {
+  type ColumnLayoutUrlState,
+  type ColumnLayoutUrlStateOptions,
+  injectColumnLayoutUrlState,
+} from "./url/columnLayoutUrlState";
+export {
+  type DensityUrlState,
+  type DensityUrlStateOptions,
+  injectDensityUrlState,
+} from "./url/densityUrlState";
+export {
+  type GroupCollapseUrlState,
+  type GroupCollapseUrlStateOptions,
+  injectGroupCollapseUrlState,
+} from "./url/groupCollapseUrlState";
+export {
+  injectRowPinningUrlState,
+  type RowPinningUrlState,
+} from "./url/rowPinningUrlState";
+export {
   injectSavedViews,
   type SavedViewsOptions,
   type SavedViewsState,
@@ -268,6 +287,11 @@ export {
   type TableUrlStateOptions,
   urlAdapterFor,
 } from "./url/tableUrlState";
+export {
+  injectUrlSlice,
+  type UrlSlice,
+  type UrlSliceOptions,
+} from "./url/urlSlice";
 export { AdaptColumnSpacer } from "./virtual/columnSpacer";
 export {
   type ColumnWindow,
@@ -326,6 +350,7 @@ export type {
   TableVirtualization,
   VirtualTableRow,
 } from "@adapttable/core";
+export type { RowPinState } from "@adapttable/core/binding";
 export type {
   ChromeBodyRegion,
   HeaderSelectionState,

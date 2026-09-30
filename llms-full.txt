@@ -19779,8 +19779,27 @@ comes from a kit through a slot.
   as signals.
 - `injectTableUrlState(options)` is the URL-synced view state: a
   `TableUrlState` with a `state` signal and the store's setters, configured by
-  `TableUrlStateOptions`. `ADAPTTABLE_URL_ADAPTER` is the injection token that
-  sets the URL adapter every table under an injector uses.
+  `TableUrlStateOptions`, whose `defaults`, `numberExtraKeys` and
+  `arrayExtraKeys` may be signals the state follows. `ADAPTTABLE_URL_ADAPTER`
+  is the injection token that sets the URL adapter every table under an
+  injector uses.
+- The other pieces of view state keep to the URL the same way:
+  `injectColumnLayoutUrlState` (`ColumnLayoutUrlStateOptions`, returning a
+  `ColumnLayoutUrlState` with the `layout` signal and `onLayoutChange`),
+  `injectDensityUrlState` (`DensityUrlStateOptions`, `DensityUrlState`),
+  `injectGroupCollapseUrlState` (`GroupCollapseUrlStateOptions`,
+  `GroupCollapseUrlState`) and `injectRowPinningUrlState`
+  (`RowPinningUrlState`, holding a `RowPinState`). Each is an `injectUrlSlice`
+  (`UrlSliceOptions`, returning a `UrlSlice`: the `value` signal, `set` and
+  `latest`) over core's slice: it reads its default while the URL is silent,
+  writes after the store's debounce, flushes a waiting write when its
+  injection context is destroyed, and follows a URL someone else changed.
+- `@adapttable/angular/router` keeps table state in the Angular Router's URL:
+  `provideAdaptTableRouterUrl()` provides `ADAPTTABLE_URL_ADAPTER` for an
+  application or a route, and `angularRouterAdapter()` builds the adapter
+  itself. It writes through `navigateByUrl` — replacing the history entry
+  unless a write pushes — keeps the path and fragment, and tells the table
+  about navigations it did not make. `@angular/router` is an optional peer.
 - `injectDataTable(options)` is the headless table, configured by
   `DataTableOptions` and returning `DataTable`: rows, visible columns,
   pagination, sort, search, labels and direction as signals, plus the core
