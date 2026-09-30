@@ -1,10 +1,11 @@
 /**
- * Editing feature factories for Angular: cell, row and batch editing over
- * core's binding factories.
+ * Editing feature factories for Angular: cell, row and batch editing, and
+ * the marks on unsaved edits, over core's binding factories.
  */
 import type { EditEventHandler } from "@adapttable/core";
 import {
   coreBatchEditing,
+  coreDirtyIndicators,
   coreEditing,
   coreRowEditing,
 } from "@adapttable/core/binding";
@@ -90,6 +91,17 @@ export function batchEditing<TRow>(
   extras: Record<string, unknown> = {}
 ): AdaptTableFeature {
   return coreBatchEditing(onBatchEdit, extras);
+}
+
+/**
+ * Marks on the cells and rows that hold unsaved edits.
+ *
+ * @returns The feature.
+ *
+ * @public
+ */
+export function dirtyIndicators(): AdaptTableFeature {
+  return coreDirtyIndicators();
 }
 
 export type {

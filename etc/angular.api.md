@@ -29,6 +29,7 @@ import { CellEditingState } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSaveState } from '@adapttable/core';
+import { CellSpanAppearance } from '@adapttable/core';
 import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
 import { ChecklistButtonProps } from '@adapttable/core/binding';
 import { ChecklistCheckboxProps } from '@adapttable/core/binding';
@@ -47,7 +48,10 @@ import { ColumnMenuRow } from '@adapttable/core';
 import { columnMenuRows } from '@adapttable/core';
 import { ColumnMenuSlotProps } from '@adapttable/core/binding';
 import { ColumnMetadata } from '@adapttable/core';
+import { Command } from '@adapttable/core';
 import { ConfirmHandler } from '@adapttable/core';
+import { ContextMenuItem } from '@adapttable/core';
+import { ContextMenuTarget } from '@adapttable/core';
 import { coreBulkActions } from '@adapttable/core/binding';
 import { coreColumnMenu } from '@adapttable/core/binding';
 import { coreDensityChooser } from '@adapttable/core/binding';
@@ -89,6 +93,7 @@ import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
 import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
 import { ExtraFilters } from '@adapttable/core';
+import { ExtraRow } from '@adapttable/core';
 import { eyeIcon } from '@adapttable/core/binding';
 import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
@@ -127,6 +132,7 @@ import { FilterValue } from '@adapttable/core';
 import { filterWidgetKind } from '@adapttable/core';
 import { focusEditorOnMount } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
+import { GetCellSpan } from '@adapttable/core';
 import { GridCell } from '@adapttable/core';
 import { GRIP_ICON } from '@adapttable/core/binding';
 import { GROUP_HEADER_CARD } from '@adapttable/core/binding';
@@ -193,6 +199,7 @@ import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
 import { PIN_ICON } from '@adapttable/core/binding';
 import { pinActionLabel } from '@adapttable/core';
+import { PinnedRows } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
 import { PinSide } from '@adapttable/core';
 import { QueryAggregate } from '@adapttable/core';
@@ -229,6 +236,7 @@ import { rowEditControls } from '@adapttable/core';
 import { RowEditControlsOptions } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
+import { RowHeight } from '@adapttable/core';
 import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
 import { RowPatchEvent } from '@adapttable/core';
@@ -241,6 +249,7 @@ import { RowReorderLabels } from '@adapttable/core/binding';
 import { RowReorderMoveButtonProps } from '@adapttable/core/binding';
 import { RowReorderOptions } from '@adapttable/core';
 import { RowReorderState as RowReorderState_2 } from '@adapttable/core/binding';
+import { RowStyle } from '@adapttable/core';
 import { RowValidator } from '@adapttable/core';
 import { runRowAction } from '@adapttable/core';
 import { SAVED_VIEWS } from '@adapttable/core/binding';
@@ -248,6 +257,7 @@ import { SavedView } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsSlotProps } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
+import { Shortcut } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
 import { showSimpleFilterFields } from '@adapttable/core';
 import { SidePanelEntry } from '@adapttable/core/binding';
@@ -1473,6 +1483,9 @@ export interface BulkActionRunnerState {
     readonly run: (action: BulkAction, ids: string[], context?: BulkActionContext) => void;
 }
 
+// @public
+export function bulkActions(actions: readonly BulkAction[]): AdaptTableFeature;
+
 export { BulkBarSlotProps }
 
 export { CellConflictAsk }
@@ -1529,6 +1542,11 @@ export interface CellSaveStateInjectOptions<TRow> {
 }
 
 // @public
+export function cellSpan<TRow>(getCellSpan: GetCellSpan<TRow>, cellSpanAppearance?: CellSpanAppearance): AdaptTableFeature;
+
+export { CellSpanAppearance }
+
+// @public
 export interface ChangedCellFlash {
     readonly clear: () => void;
     readonly flashAttrs: (rowId: string, columnKey: string) => Attrs;
@@ -1566,6 +1584,9 @@ export { ChromeBodySlot }
 export { chromeColumnPlan }
 
 export { chromeRenderModel }
+
+// @public
+export function collapsibleColumnGroups(): AdaptTableFeature;
 
 export { COLUMN_MENU }
 
@@ -1606,6 +1627,9 @@ export interface ColumnLayoutUrlState {
 export interface ColumnLayoutUrlStateOptions extends UrlSliceOptions {
     readonly defaultColumnLayout?: MaybeSignalOptional<Partial<ColumnLayoutState>>;
 }
+
+// @public
+export function columnMenu(): AdaptTableFeature;
 
 export { columnMenuActions }
 
@@ -1650,6 +1674,9 @@ export interface ColumnRenameEditorState {
 }
 
 // @public
+export function columnSelectionCheckbox(): AdaptTableFeature;
+
+// @public
 export interface ColumnWindow<TRow> {
     readonly columns: readonly ColumnDef<TRow>[];
     readonly enabled: boolean;
@@ -1668,10 +1695,36 @@ export interface ColumnWindowOptions<TRow> {
     readonly widths?: Signal<Readonly<Record<string, number>> | undefined>;
 }
 
+export { Command }
+
+// @public
+export function commandPalette(options?: boolean | CommandPaletteOptions): AdaptTableFeature;
+
+// @public
+export interface CommandPaletteOptions {
+    readonly button?: boolean;
+    readonly commands?: readonly Command[];
+    readonly onOpenChange?: (open: boolean) => void;
+    readonly open?: boolean;
+    readonly shortcuts?: readonly Shortcut[];
+}
+
 // @public
 export function commitBooleanDraft(ctrl: EditableCellEditorCtrl, checked: boolean): void;
 
 export { ConfirmHandler }
+
+// @public
+export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): AdaptTableFeature;
+
+export { ContextMenuItem }
+
+// @public
+export interface ContextMenuOptions<TRow> {
+    readonly items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
+}
+
+export { ContextMenuTarget }
 
 export { coreBulkActions }
 
@@ -1806,6 +1859,9 @@ export { devWarn }
 
 export { Direction }
 
+// @public
+export function dirtyIndicators(): AdaptTableFeature;
+
 export { EDITABLE_CELL }
 
 // @public
@@ -1927,12 +1983,22 @@ export { EXTRA_ROW_PARTS }
 
 export { ExtraFilters }
 
+export { ExtraRow }
+
+// @public
+export function extraRows(rows: readonly ExtraRow[]): AdaptTableFeature;
+
 export { eyeIcon }
 
 export { FacetMap }
 
 // @public
+export function feature(id: string, patch?: FeaturePatch, setup?: AdaptTableFeature["setup"]): AdaptTableFeature;
+
+// @public
 export function featureOptionsOf(features: readonly AdaptTableFeature[]): Readonly<Record<string, unknown>>;
+
+export { FeaturePatch }
 
 export { FeatureRender }
 
@@ -2024,6 +2090,9 @@ export { FilterValue }
 
 export { filterWidgetKind }
 
+// @public
+export function fitColumns(): AdaptTableFeature;
+
 export { focusEditorOnMount }
 
 // @public
@@ -2055,6 +2124,8 @@ export interface FrontendDataOptions<TRow> extends Omit<TableUrlStateOptions, "i
 }
 
 export { FullscreenState }
+
+export { GetCellSpan }
 
 export { GridCell }
 
@@ -2227,6 +2298,9 @@ export interface HeaderContext<TRow> {
 }
 
 export { headerFilterInsideSelector }
+
+// @public
+export function headerFilters(): AdaptTableFeature;
 
 export { HeaderSelectionState }
 
@@ -2451,6 +2525,9 @@ export { mobileCardListStyle }
 // @public
 export function multiDraftFromSelect(select: HTMLSelectElement): string;
 
+// @public
+export function multiSort(): AdaptTableFeature;
+
 export { nextPinSide }
 
 export { offersAllMatching }
@@ -2467,9 +2544,18 @@ export { PIN_ICON }
 
 export { pinActionLabel }
 
+export { PinnedRows }
+
+// @public
+export function pinnedSummaryRows<TRow>(pinnedRows: PinnedRows<TRow>): AdaptTableFeature;
+
 export { PinOffset }
 
 export { PinSide }
+
+// @public
+function print_2(onPrint: () => void, printButton?: boolean): AdaptTableFeature;
+export { print_2 as print }
 
 // @public
 export function provideAdaptTableFeatures(...features: readonly AdaptTableFeature[]): EnvironmentProviders;
@@ -2517,6 +2603,9 @@ export { RelativePreset }
 export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
 
 export { REORDER_COLUMN_KEY }
+
+// @public
+export function resizableColumns(): AdaptTableFeature;
 
 // @public
 export interface ResizableVirtualizer {
@@ -2577,6 +2666,16 @@ export interface RowActionsOptions<TRow> {
     readonly onDuplicateRow?: (row: TRow) => void;
 }
 
+// @public
+export function rowAppearance<TRow>(options: RowAppearanceOptions<TRow>): AdaptTableFeature;
+
+// @public
+export interface RowAppearanceOptions<TRow> {
+    readonly rowClassName?: (row: TRow, index: number) => string | undefined;
+    readonly rowHeight?: RowHeight<TRow>;
+    readonly rowStyle?: RowStyle<TRow>;
+}
+
 export { RowEditActionsProps }
 
 // @public
@@ -2620,6 +2719,8 @@ export interface RowEditingInjectOptions<TRow> {
 export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
 
 export { RowEditingState }
+
+export { RowHeight }
 
 // @public
 export function rowIsDirty<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): boolean;
@@ -2715,6 +2816,8 @@ export interface RowSelectionOptions<TRow> {
     readonly selectedIds?: MaybeSignalOptional<readonly string[]>;
 }
 
+export { RowStyle }
+
 export { runRowAction }
 
 // @public
@@ -2725,6 +2828,9 @@ export interface RuntimeGrouping<TRow> {
 export { SAVED_VIEWS }
 
 export { SavedView }
+
+// @public
+export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeature;
 
 export { SavedViewsControllerOptions }
 
@@ -2764,9 +2870,24 @@ export interface ServerDataOptions<TRow> extends Omit<TableUrlStateOptions, "inj
     readonly total: MaybeSignal<number>;
 }
 
+export { Shortcut }
+
 export { showAllColumns }
 
 export { showSimpleFilterFields }
+
+// @public
+export function sidePanel(options: SidePanelOptions): AdaptTableFeature;
+
+export { SidePanelEntry }
+
+// @public
+export interface SidePanelOptions {
+    readonly onOpenChange: (key: string | null) => void;
+    readonly open: string | null;
+    readonly panels: readonly SidePanelEntry[];
+    readonly side?: "start" | "end";
+}
 
 // @public
 export type SlotComponent = Type<unknown>;
@@ -2785,6 +2906,9 @@ export interface SlotTable {
 export { SortDirection }
 
 export { splitRelativeToken }
+
+// @public
+export function statusBar(): AdaptTableFeature;
 
 export { stopCellEditKeyboard }
 
@@ -2909,6 +3033,9 @@ export { TextOp }
 export { TOOLBAR_EXTRAS }
 
 export { ToolbarExtrasSlotProps }
+
+// @public
+export function undoRedoButtons(): AdaptTableFeature;
 
 export { unpinAllColumns }
 

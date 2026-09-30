@@ -19835,6 +19835,17 @@ comes from a kit through a slot.
   `extendFeature` adds renders to a feature, which is how a kit puts its own
   controls in; `featureOptionsOf` is the merged configuration of a feature
   list.
+- Built-in feature factories write the same configuration as every other
+  binding's, each over its core half: `cellSpan`, `extraRows`,
+  `pinnedSummaryRows`, `rowAppearance` (`RowAppearanceOptions`),
+  `columnMenu`, `resizableColumns`, `collapsibleColumnGroups`, `multiSort`,
+  `fitColumns`, `columnSelectionCheckbox`, `headerFilters`, `bulkActions`,
+  `savedViews`, `print`, `statusBar`, `undoRedoButtons`, `dirtyIndicators`,
+  `commandPalette` (`CommandPaletteOptions`), `contextMenu`
+  (`ContextMenuOptions`) and `sidePanel` (`SidePanelOptions`). Commands,
+  context-menu entries and panels in their options register on the live
+  table. `feature(id, patch, setup)` puts a host plugin on the same surface.
+  A kit extends a factory with the components that fill its slots.
 - Slots: `AdaptSlot` draws what the table's features put in one named slot,
   handing each component the slot's props; `SlotFills` is the table's map of
   fills, `SlotTable` what a slot component can ask of its table, and

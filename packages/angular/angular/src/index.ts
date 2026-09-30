@@ -122,10 +122,37 @@ export {
 } from "./features/cellNavigation";
 export {
   batchEditing,
+  dirtyIndicators,
   editing,
   type EditingLifecycleExtras,
   rowEditing,
 } from "./features/editing";
+export {
+  bulkActions,
+  cellSpan,
+  collapsibleColumnGroups,
+  columnMenu,
+  columnSelectionCheckbox,
+  commandPalette,
+  type CommandPaletteOptions,
+  contextMenu,
+  type ContextMenuOptions,
+  extraRows,
+  feature,
+  fitColumns,
+  headerFilters,
+  multiSort,
+  pinnedSummaryRows,
+  print,
+  resizableColumns,
+  rowAppearance,
+  type RowAppearanceOptions,
+  savedViews,
+  sidePanel,
+  type SidePanelOptions,
+  statusBar,
+  undoRedoButtons,
+} from "./features/factories";
 export {
   grouping,
   type GroupingExtras,
@@ -340,17 +367,27 @@ export type {
 export type { RowReorderHandler, RowReorderOptions } from "@adapttable/core";
 export type {
   CellRange,
+  CellSpanAppearance,
+  Command,
+  ContextMenuItem,
+  ContextMenuTarget,
   Direction,
   ExtraFilters,
+  ExtraRow,
   FacetMap,
+  GetCellSpan,
   GridCell,
   KeyedVirtualization,
   PaginatedResponse,
   PaginationInfo,
   PaginationMode,
   PaginationSlot,
+  PinnedRows,
   QueryAggregate,
   QuerySupport,
+  RowHeight,
+  RowStyle,
+  Shortcut,
   SortDirection,
   TableLabels,
   TableQuery,
@@ -359,7 +396,11 @@ export type {
   TableVirtualization,
   VirtualTableRow,
 } from "@adapttable/core";
-export type { RowPinState } from "@adapttable/core/binding";
+export type {
+  FeaturePatch,
+  RowPinState,
+  SidePanelEntry,
+} from "@adapttable/core/binding";
 export type {
   ChromeBodyRegion,
   HeaderSelectionState,
