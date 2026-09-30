@@ -180,6 +180,31 @@ export const coreDir = (root = REPO_ROOT) =>
 export const packageNameAt = (dir) =>
   JSON.parse(readFileSync(join(dir, "package.json"), "utf8")).name;
 
+/**
+ * The directories a kit's sources live in: `src`, and each secondary entry
+ * point beside it (an Angular kit's `editing/`, `grouping/`, …).
+ *
+ * @param {Kit} kit
+ * @param {string} [root] repository root to read, for fixtures
+ * @returns {string[]}
+ */
+export function kitSourceDirs(kit, root = REPO_ROOT) {
+  const dir = kitDir(kit, root);
+  const entries = readdirSync(dir)
+    .filter((entry) => {
+      const path = join(dir, entry);
+      return (
+        statSync(path).isDirectory() &&
+        existsSync(join(path, "ng-package.json"))
+      );
+    })
+    .sort()
+    .map((entry) => join(dir, entry));
+  // A placeholder kit with no sources yet renders nothing.
+  const src = join(dir, "src");
+  return existsSync(src) ? [src, ...entries] : entries;
+}
+
 /** The kits the structural parts contract binds: every shell, every native. */
 export const contractKits = (kits = KITS) =>
   kits.filter((kit) => kit.role === "shell" || kit.role === "native");

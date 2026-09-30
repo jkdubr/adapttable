@@ -68,7 +68,7 @@
  * plain attribute or as a binding to a string literal. Core's chrome is
  * per-framework too: `@adapttable/core` plus the binding the kit builds on.
  */
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -79,9 +79,9 @@ import {
   frameworkFiles,
   FRAMEWORKS,
   frameworksIn,
-  kitDir,
   kitRegistryErrors,
   KITS,
+  kitSourceDirs,
   nativeKits,
   NEUTRAL,
   shellKits,
@@ -94,7 +94,7 @@ import { REPO_ROOT } from "./packages.mjs";
  * `--report` prints the difference; an entry leaves this map when its kit
  * joins the contract.
  */
-const REPORT_REFERENCES = {
+export const REPORT_REFERENCES = {
   "adapter-angular-unstyled": "adapter-unstyled",
   "adapter-ng-zorro": "adapter-antd",
 };
@@ -335,27 +335,6 @@ function namesIn(files, patterns) {
     }
   }
   return found;
-}
-
-/**
- * The directories a kit's sources live in: `src`, and each secondary entry
- * point beside it (an Angular kit's `editing/`, `grouping/`, …).
- */
-function kitSourceDirs(kit, root) {
-  const dir = kitDir(kit, root);
-  const entries = readdirSync(dir)
-    .filter((entry) => {
-      const path = join(dir, entry);
-      return (
-        statSync(path).isDirectory() &&
-        existsSync(join(path, "ng-package.json"))
-      );
-    })
-    .sort()
-    .map((entry) => join(dir, entry));
-  // A placeholder kit with no sources yet renders nothing.
-  const src = join(dir, "src");
-  return existsSync(src) ? [src, ...entries] : entries;
 }
 
 /** Every file of a kit's sources its framework's guards read. */

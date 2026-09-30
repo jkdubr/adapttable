@@ -11,11 +11,17 @@
  * spelled in that framework's syntax.
  *
  *   node scripts/check-feature-parity.mjs
+ *
+ * `--report` prints, for each private kit measured against a reference kit,
+ * the subpaths the reference exports and the kit does not — with the features
+ * each one carries — and what this check would say about the kit's own files,
+ * then exits 0.
  */
 import { readFileSync } from "node:fs";
 import { basename, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { REPORT_REFERENCES } from "./check-parts-parity.mjs";
 import {
   bindingDir,
   coreDir,
@@ -24,6 +30,7 @@ import {
   kitDir,
   kitRegistryErrors,
   KITS,
+  kitSourceDirs,
   packageNameAt,
   publishedKits,
 } from "./kits.mjs";
@@ -58,8 +65,11 @@ const HEADER_RULES = {
 };
 const HEADER_NAMED = /leaf\.headerProps\s*\[/;
 
-/** The root table's file name, without its framework's extension. */
-const ROOT_TABLE = "DataTable";
+/**
+ * The root table's file name, without its framework's extension, in any
+ * casing: a React kit's `DataTable.tsx`, an Angular kit's `dataTable.ts`.
+ */
+const ROOT_TABLE = "datatable";
 
 /**
  * The code, without its comments.
@@ -147,15 +157,17 @@ function subpathsOf(manifest) {
 
 /**
  * The layers a kit is built ON: the neutral engine and its framework's
- * binding, either at any subpath. A kit that renders another kit restyled
- * builds on that kit too — shadcn's kit IS unstyled's components restyled.
- * Everything else under `@adapttable/` is another kit's pixels, which is what
- * this rule keeps out.
+ * binding, either at any subpath, and the kit's own package — an Angular
+ * kit's secondary entry reaches its primary entry by package name. A kit that
+ * renders another kit restyled builds on that kit too — shadcn's kit IS
+ * unstyled's components restyled. Everything else under `@adapttable/` is
+ * another kit's pixels, which is what this rule keeps out.
  */
 function layersOf(kit, kits, root) {
   const layers = [
     packageNameAt(coreDir(root)),
     packageNameAt(bindingDir(kit.framework, root)),
+    packageNameAt(kitDir(kit, root)),
   ];
   const base = kits.find((other) => other.name === kit.base);
   if (kit.role === "derived" && base) {
@@ -196,10 +208,10 @@ function fileProblems(kit, kits, root) {
   const allowed = layersOf(kit, kits, root);
   const packagesRoot = join(root, "packages");
   let passesHeaderProps = false;
-  for (const file of frameworkFiles(
-    join(kitDir(kit, root), "src"),
-    kit.framework
-  )) {
+  const files = kitSourceDirs(kit, root).flatMap((dir) =>
+    frameworkFiles(dir, kit.framework)
+  );
+  for (const file of files) {
     // An import in a doc comment is an EXAMPLE — `@adapttable/mui/preset` in
     // the preset's own usage block is what a reader types, not what this
     // module pulls in. Scan the code.
@@ -213,13 +225,39 @@ function fileProblems(kit, kits, root) {
       ...importProblems(text, rel, allowed)
     );
     if (
-      basename(file, extname(file)) === ROOT_TABLE &&
+      basename(file, extname(file)).toLowerCase() === ROOT_TABLE &&
       FEATURES_BARREL.test(text)
     ) {
       problems.push(`${rel}: root table imports the features aggregate barrel`);
     }
   }
   return { problems, passesHeaderProps };
+}
+
+/** A kit's manifest, read from its package folder. */
+const manifestOf = (kit, root) =>
+  JSON.parse(readFileSync(join(kitDir(kit, root), "package.json"), "utf8"));
+
+/**
+ * Every problem with one kit: a subpath it does not export, and what its own
+ * files do wrong.
+ */
+function kitProblems(kit, kits, root, subpaths) {
+  const pkg = manifestOf(kit, root);
+  const exports = pkg.exports ?? {};
+  const problems = subpaths
+    .filter((subpath) => !(subpath in exports))
+    .map((subpath) => `${pkg.name}: missing export ${subpath}`);
+  const files = fileProblems(kit, kits, root);
+  problems.push(...files.problems);
+  // A kit that renders another kit restyled has no header of its own.
+  if (kit.role === "derived" || files.passesHeaderProps) return problems;
+  problems.push(
+    HEADER_RULES[kit.framework]
+      ? `${pkg.name}: never passes core's header-cell props to its header element`
+      : `${pkg.name}: no header-props rule for ${kit.framework} in scripts/check-feature-parity.mjs`
+  );
+  return problems;
 }
 
 /**
@@ -252,29 +290,78 @@ export function checkFeatureParity({
     };
   }
 
-  const problems = [];
-  for (const kit of published) {
-    const pkg = JSON.parse(
-      readFileSync(join(kitDir(kit, root), "package.json"), "utf8")
-    );
-    const exports = pkg.exports ?? {};
-    for (const subpath of subpaths) {
-      if (!(subpath in exports)) {
-        problems.push(`${pkg.name}: missing export ${subpath}`);
-      }
-    }
-
-    const files = fileProblems(kit, kits, root);
-    problems.push(...files.problems);
-    // A kit that renders another kit restyled has no header of its own.
-    if (kit.role === "derived" || files.passesHeaderProps) continue;
-    problems.push(
-      HEADER_RULES[kit.framework]
-        ? `${pkg.name}: never passes core's header-cell props to its header element`
-        : `${pkg.name}: no header-props rule for ${kit.framework} in scripts/check-feature-parity.mjs`
-    );
-  }
+  const problems = published.flatMap((kit) =>
+    kitProblems(kit, kits, root, subpaths)
+  );
   return { problems, kits: published.length, subpaths: subpaths.length };
+}
+
+/** Subpaths every package exports whatever it ships. */
+const PACKAGE_SUBPATHS = new Set([".", "./package.json"]);
+
+/**
+ * What each private kit still lacks against its reference: every subpath the
+ * reference exports and the kit does not, with the manifest features on it,
+ * and the problems this check finds in the kit's own files.
+ *
+ * @param {object} [options] everything the report reads, for fixtures
+ * @param {string} [options.root] repository root
+ * @param {readonly import("./kits.mjs").Kit[]} [options.kits] the kit registry
+ * @param {Record<string, string>} [options.references] private kit → reference kit
+ * @param {{ features: Record<string, { id: string, subpath: string }> }} [options.manifest]
+ *   the feature classification
+ * @returns {{ kit: string, reference: string, subpaths: { subpath: string, features: string[] }[], problems: string[] }[]}
+ */
+export function featureGapReport({
+  root = REPO_ROOT,
+  kits = KITS,
+  references = REPORT_REFERENCES,
+  manifest = JSON.parse(
+    readFileSync(join(root, "scripts", "feature-classification.json"), "utf8")
+  ),
+} = {}) {
+  const byName = new Map(kits.map((kit) => [kit.name, kit]));
+  const featuresOn = (subpath) =>
+    Object.values(manifest.features)
+      .filter((feature) => `./${feature.subpath}` === subpath)
+      .map((feature) => feature.id)
+      .sort();
+  return kits
+    .filter((kit) => kit.role === "private" && byName.has(references[kit.name]))
+    .map((kit) => {
+      const reference = byName.get(references[kit.name]);
+      const has = manifestOf(kit, root).exports ?? {};
+      const subpaths = Object.keys(manifestOf(reference, root).exports ?? {})
+        .filter(
+          (subpath) => !PACKAGE_SUBPATHS.has(subpath) && !(subpath in has)
+        )
+        .sort()
+        .map((subpath) => ({ subpath, features: featuresOn(subpath) }));
+      return {
+        kit: kit.name,
+        reference: reference.name,
+        subpaths,
+        problems: kitProblems(kit, kits, root, []),
+      };
+    });
+}
+
+/** Print the gap report: one block per private kit. */
+function printReport() {
+  for (const { kit, reference, subpaths, problems } of featureGapReport()) {
+    console.log(
+      `${kit} is missing ${subpaths.length} subpath(s) ${reference} exports:`
+    );
+    for (const { subpath, features } of subpaths) {
+      console.log(
+        features.length > 0
+          ? `  ${subpath} — ${features.join(", ")}`
+          : `  ${subpath}`
+      );
+    }
+    console.log(`${kit}: ${problems.length} problem(s) in its own files:`);
+    for (const problem of problems) console.log(`  ${problem}`);
+  }
 }
 
 function main() {
@@ -290,4 +377,7 @@ function main() {
   );
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  if (process.argv.includes("--report")) printReport();
+  else main();
+}
