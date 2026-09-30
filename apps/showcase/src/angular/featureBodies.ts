@@ -24,6 +24,8 @@ import { filters } from "@adapttable/angular-unstyled/filters";
 import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
 import { nestedTable } from "@adapttable/angular-unstyled/nested-table";
+import { rowActions } from "@adapttable/angular-unstyled/row-actions";
+import { rowPinning } from "@adapttable/angular-unstyled/row-pinning";
 import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 import { savedViews } from "@adapttable/angular-unstyled/saved-views";
 import { tree } from "@adapttable/angular-unstyled/tree";
@@ -679,6 +681,41 @@ class NestedTablesBody {
   ];
 }
 
+/** Rows: pin a row to the top or bottom from its 3-dot menu. */
+@Component({
+  selector: "adapt-showcase-rows",
+  imports: [AdaptDataTable],
+  template: `
+    <div class="mx-demo">
+      <div class="hint-row">
+        <span class="hint">Open a row's ⋯ menu to pin it</span>
+        <span class="hint">Pinned rows stay put while the rest scroll</span>
+      </div>
+      <div class="mx-demo__body">
+        <adapt-data-table
+          tableLabel="People"
+          urlKey="rows"
+          [maxHeight]="420"
+          [data]="rows"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [defaults]="{ limit: 30 }"
+          [features]="features"
+        />
+      </div>
+    </div>
+  `,
+})
+class RowsBody {
+  readonly rows = PEOPLE;
+  readonly columns = COLUMNS;
+  readonly rowKey = rowKey;
+  readonly features: readonly AdaptTableFeature[] = [
+    rowPinning(),
+    rowActions<Person>([], { layout: "menu" }),
+  ];
+}
+
 /** Feature slug to the demo that page shows. */
 export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
   filtering: FilteringBody,
@@ -692,4 +729,5 @@ export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
   "saved-views": SavedViewsBody,
   tree: TreeBody,
   "nested-tables": NestedTablesBody,
+  rows: RowsBody,
 };

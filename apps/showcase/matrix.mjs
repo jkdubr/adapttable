@@ -296,6 +296,7 @@ export const SHOWCASE_ADAPTERS = [
       "saved-views",
       "tree",
       "nested-tables",
+      "rows",
     ],
   },
 ];
@@ -1673,6 +1674,52 @@ export function People({ rows, columns, setRows }) {
       "The pin actions, the menu and the merged cells are {kit}. Independent pinned summary rows — totals that are not data rows — live on the aggregation page.",
     ],
     card: "Pin rows, merge cells, and a 3-dot menu for add and delete.",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { rowActions } from "{pkg}/row-actions";
+import { rowPinning } from "{pkg}/row-pinning";
+
+const columns: ColumnDef<Person>[] = [{ key: "name" }, { key: "team" }];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [
+    rowPinning(),
+    rowActions<Person>([], { layout: "menu" }),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        title: "{kit} table row pinning — AdaptTable",
+        description:
+          "Try {kit} {framework} table row pinning: keep rows at the top or bottom of a scroll box from each row's menu, kept in the URL.",
+        card: "Pin rows to the top or bottom from a 3-dot menu.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "A row is more than a record. Pin it to the top or the bottom from its 3-dot menu, and it stays put while the rest of the rows scroll beneath it.",
+        '`rowPinning()` and a `"menu"` row-actions layout are what this page turns on. The table holds the pinned rows and keeps them in the URL, so a reload or a shared link keeps them where they were; pass `pinnedRowIds` to hold them yourself.',
+        "Grouping and trees refuse pinning: a nested list is not a flat pin stack.",
+      ],
+    },
     snippet: `import { DataTable } from "{pkg}";
 import { cellSpan } from "{pkg}/cell-span";
 import { rowPinning } from "{pkg}/row-pinning";
