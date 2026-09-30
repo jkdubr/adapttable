@@ -41,6 +41,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.ts", "row-reorder/**/*.test.ts"],
+    // Server rendering runs in Node without the browser testing platform.
+    exclude: ["src/**/*.ssr.test.ts"],
     clearMocks: true,
     restoreMocks: true,
     pool: "threads",

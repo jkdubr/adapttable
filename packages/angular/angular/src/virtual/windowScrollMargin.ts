@@ -13,6 +13,7 @@ import {
   untracked,
 } from "@angular/core";
 
+import { onBrowser } from "../hooks/platform";
 import { type MaybeSignal, readMaybe } from "../store";
 
 export {
@@ -58,7 +59,11 @@ export function injectMeasuredWindowScrollMargin(
   effect(
     (onCleanup) => {
       const element = options.element();
-      if (!readMaybe(options.enabled) || element === null) {
+      if (
+        !readMaybe(options.enabled) ||
+        element === null ||
+        !onBrowser(injector)
+      ) {
         margin.set(0);
         return;
       }

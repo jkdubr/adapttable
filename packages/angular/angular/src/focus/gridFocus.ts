@@ -34,6 +34,7 @@ import {
 import type { Attrs } from "../attrs";
 import type { ColumnDef } from "../columnDef";
 import type { DataTable } from "../dataTable";
+import { onBrowser } from "../hooks/platform";
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
 
 /**
@@ -163,7 +164,7 @@ export function injectGridFocus<TRow>(
   // A pointer released outside the table would leave a drag armed.
   effect(
     (onCleanup) => {
-      if (!enabled() || typeof window === "undefined") return;
+      if (!enabled() || !onBrowser(injector)) return;
       onCleanup(controller.watchPointerRelease(window));
     },
     { injector }

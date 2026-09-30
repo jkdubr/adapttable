@@ -10,9 +10,11 @@ import {
   signal,
 } from "@angular/core";
 
+import { onBrowser } from "./platform";
+
 /**
- * A signal that is `true` while the media query matches. Without
- * `matchMedia` — on the server — it is `false`.
+ * A signal that is `true` while the media query matches. On the server, or
+ * without `matchMedia`, it is `false`.
  *
  * @param query - The media query, e.g. `(max-width: 768px)`.
  * @param injector - The injector to run in. Omit inside an injection context.
@@ -26,7 +28,7 @@ export function injectMediaQuery(
 ): Signal<boolean> {
   if (!injector) assertInInjectionContext(injectMediaQuery);
   const context = injector ?? inject(Injector);
-  if (typeof globalThis.matchMedia !== "function") {
+  if (!onBrowser(context) || typeof globalThis.matchMedia !== "function") {
     return signal(false).asReadonly();
   }
   const list = globalThis.matchMedia(query);

@@ -23,6 +23,7 @@ import {
   type FeatureHostState,
   type FullscreenState,
 } from "@adapttable/core/binding";
+import { DOCUMENT } from "@angular/common";
 import {
   assertInInjectionContext,
   computed,
@@ -34,6 +35,7 @@ import {
   signal,
 } from "@angular/core";
 
+import { onBrowser } from "../hooks/platform";
 import { fromStore } from "../store";
 import type { TableUrlStateOptions } from "../url/tableUrlState";
 import { injectUrlSlice } from "../url/urlSlice";
@@ -99,34 +101,32 @@ export function injectFullscreen(
 ): Signal<FullscreenState> {
   if (!injector) assertInInjectionContext(injectFullscreen);
   const context = injector ?? inject(Injector);
-  const supported =
-    typeof document !== "undefined" && document.fullscreenEnabled;
+  const doc = context.get(DOCUMENT);
+  const supported = onBrowser(context) && doc.fullscreenEnabled;
   const active = signal(false);
   effect(
     (onCleanup) => {
       const target = element();
       if (!supported) return;
       const sync = (): void => {
-        active.set(
-          target !== undefined && document.fullscreenElement === target
-        );
+        active.set(target !== undefined && doc.fullscreenElement === target);
       };
       sync();
-      document.addEventListener("fullscreenchange", sync);
+      doc.addEventListener("fullscreenchange", sync);
       onCleanup(() => {
-        document.removeEventListener("fullscreenchange", sync);
+        doc.removeEventListener("fullscreenchange", sync);
       });
     },
     { injector: context }
   );
   const exit = (): void => {
-    if (document.fullscreenElement) void document.exitFullscreen();
+    if (doc.fullscreenElement) void doc.exitFullscreen();
   };
   const toggle = (): void => {
     const target = element();
     if (!supported || !target) return;
-    if (document.fullscreenElement === target) {
-      void document.exitFullscreen();
+    if (doc.fullscreenElement === target) {
+      void doc.exitFullscreen();
       return;
     }
     // A browser refuses fullscreen a real gesture did not ask for; that is

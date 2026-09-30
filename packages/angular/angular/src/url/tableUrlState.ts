@@ -13,6 +13,7 @@ import {
   type TableViewStore,
   type UrlStateAdapter,
 } from "@adapttable/core";
+import { PlatformLocation } from "@angular/common";
 import {
   assertInInjectionContext,
   computed,
@@ -24,13 +25,14 @@ import {
   untracked,
 } from "@angular/core";
 
+import { onBrowser } from "../hooks/platform";
 import { fromStore, type MaybeSignalOptional, readMaybe } from "../store";
 
 /**
  * The URL adapter every table in this injector reads and writes, when the
  * table names none. Provide an adapter over the Angular Router here to keep
  * table state in the router's URL; without one, tables use the browser's
- * History API.
+ * History API, and a server render reads the request's URL.
  *
  * @public
  */
@@ -46,7 +48,7 @@ export const ADAPTTABLE_URL_ADAPTER = new InjectionToken<UrlStateAdapter>(
 export interface TableUrlStateOptions {
   /**
    * URL-state backend. Defaults to {@link ADAPTTABLE_URL_ADAPTER}, then the
-   * browser History API.
+   * browser History API — on the server, the request's query string.
    */
   readonly urlAdapter?: UrlStateAdapter;
   /**
@@ -166,8 +168,9 @@ export function injectTableUrlState(
 
 /**
  * The URL backend a table's state goes through: its own adapter, else the
- * injector's, else the History API — or a private memory store when the
- * table does not sync with the URL.
+ * injector's, else the History API (on the server, the request's query
+ * string) — or a private memory store when the table does not sync with the
+ * URL.
  *
  * @param options - The table's URL options.
  * @param injector - Where {@link ADAPTTABLE_URL_ADAPTER} is looked up.
@@ -183,9 +186,11 @@ export function urlAdapterFor(
     options.urlAdapter ??
     injector.get(ADAPTTABLE_URL_ADAPTER, null, { optional: true }) ??
     undefined;
-  return resolveUrlAdapter(
-    provided,
-    options.urlSync ?? true,
-    createMemoryAdapter()
-  );
+  const syncing = options.urlSync ?? true;
+  // The server renders the slice the request asks for, which is the one the
+  // browser's History API reads back when the page hydrates.
+  if (provided === undefined && syncing && !onBrowser(injector)) {
+    return createMemoryAdapter(injector.get(PlatformLocation).search);
+  }
+  return resolveUrlAdapter(provided, syncing, createMemoryAdapter());
 }

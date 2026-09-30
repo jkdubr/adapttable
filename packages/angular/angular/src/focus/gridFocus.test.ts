@@ -2,7 +2,7 @@
  * The keyboard grid reports the selected rectangle to the host.
  */
 import { createMemoryAdapter } from "@adapttable/core";
-import { Component, signal } from "@angular/core";
+import { Component, PLATFORM_ID, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -128,5 +128,14 @@ describe("injectGridFocus range reporting", () => {
       anchor: { row: 0, col: 0 },
       head: { row: 1, col: 0 },
     });
+  });
+});
+
+describe("injectGridFocus on a server platform", () => {
+  it("leaves the window's pointer release alone", async () => {
+    TestBed.overrideProvider(PLATFORM_ID, { useValue: "server" });
+    const listen = vi.spyOn(globalThis, "addEventListener");
+    await mount();
+    expect(listen).not.toHaveBeenCalledWith("mouseup", expect.any(Function));
   });
 });
