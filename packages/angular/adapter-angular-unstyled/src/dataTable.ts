@@ -26,6 +26,7 @@ import {
   chromeRenderModel,
   COLUMN_MENU,
   type ColumnDef,
+  type ColumnInput,
   type ColumnLayoutState,
   type ColumnMenuSlotProps,
   type ConfirmHandler,
@@ -54,6 +55,7 @@ import {
   FILTERS_FORM,
   FILTERS_ICON,
   type FilterTypeSpec,
+  flattenColumns,
   type GridFocus,
   type GroupedFlatEntry,
   groupedViewSource,
@@ -627,6 +629,8 @@ export interface TableView<TRow> {
   readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
   /** Whether a kit draws the tree column's cell. */
   readonly treeCellFilled: boolean;
+  /** Whether each column header carries a column-selection checkbox. */
+  readonly columnSelect: boolean;
   /** The live row detail, when `rowDetail()` or `nestedTable()` is composed. */
   readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
   /** Each window row's expand toggle props, keyed by row id. */
@@ -737,8 +741,8 @@ export class AdaptDataTable<TRow> implements OnInit {
   readonly facets = input<FacetMap>();
   /** Server tier: filter keys to count; defaults to every checklist filter. */
   readonly facetKeys = input<readonly string[]>();
-  /** The columns, in order. */
-  readonly columns = input.required<readonly ColumnDef<TRow>[]>();
+  /** The columns in order, and header groups over them. */
+  readonly columns = input.required<readonly ColumnInput<TRow>[]>();
   /** A row's stable id. */
   readonly rowKey = input.required<(row: TRow) => string>();
   /** The table's accessible name. Defaults to the `table` label. */
@@ -921,7 +925,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       responseKey: this.responseKey,
       facets: this.facets,
       facetKeys: this.facetKeys,
-      columns: this.columns,
+      columns: computed(() => flattenColumns(this.columns()).leaves),
       engine: filtersOn || headerOn ? FILTER_ENGINE_IMPL : undefined,
       filters: filtersOn ? (declaredFilters as FilterDef<TRow>[]) : undefined,
       filterTypes: featureOptions.filterTypes as FilterTypeSpec[] | undefined,
@@ -1407,6 +1411,8 @@ export class AdaptDataTable<TRow> implements OnInit {
       reorder,
       tree,
       treeCellFilled: table.slotFills.has(TREE_CELL.id),
+      columnSelect:
+        grid !== undefined && featureOptions.columnSelectionCheckbox === true,
       rowDetail,
       expandToggles,
       detailParent,

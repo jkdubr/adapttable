@@ -45,9 +45,17 @@
       "types": "./dist/types/adapttable-angular-unstyled-cell-navigation.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-cell-navigation.mjs"
     },
+    "./column-groups": {
+      "types": "./dist/types/adapttable-angular-unstyled-column-groups.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-column-groups.mjs"
+    },
     "./column-menu": {
       "types": "./dist/types/adapttable-angular-unstyled-column-menu.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-column-menu.mjs"
+    },
+    "./column-selection": {
+      "types": "./dist/types/adapttable-angular-unstyled-column-selection.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-column-selection.mjs"
     },
     "./density": {
       "types": "./dist/types/adapttable-angular-unstyled-density.d.ts",

@@ -37,6 +37,7 @@ export type {
   UrlStateAdapter,
 } from "@adapttable/core";
 export type { SavedView, SavedViewsControllerOptions } from "@adapttable/core";
+export type { ColumnGroupRecord } from "@adapttable/core";
 export {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
@@ -241,3 +242,14 @@ export {
 } from "@adapttable/core/binding";
 export { pinnedRowSticky } from "@adapttable/core/binding";
 export { pinnedRowPart } from "@adapttable/core/binding";
+export {
+  COLUMN_GROUP_TOGGLE,
+  COLUMN_SELECT,
+  columnGroupHeaderCaption,
+  type ColumnSelectCheckboxChromeProps,
+  groupedHeaderCellStyle,
+  groupedHeaderLabelStyle,
+  type HeaderGroupCell,
+  type HtmlGroupedHeaderCell,
+  htmlGroupedHeaderPlan,
+} from "@adapttable/core/binding";

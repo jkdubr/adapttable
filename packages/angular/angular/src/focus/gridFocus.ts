@@ -18,6 +18,7 @@ import {
   gridContainerAttributes,
   type GridFocusControllerOptions,
   gridRowAttributes,
+  isGridColumnSelected,
   reportedCellRange,
 } from "@adapttable/core";
 import {
@@ -76,6 +77,10 @@ export interface GridFocus<TRow> {
   readonly announcement: Signal<string>;
   /** Move focus to a cell. */
   readonly focusCell: (cell: GridCell) => void;
+  /** Whether a whole column is the selection. */
+  readonly isColumnSelected: (col: number) => boolean;
+  /** Select a whole column, or clear the selection when it already is. */
+  readonly toggleColumn: (col: number) => void;
   /** The table element's attributes, the grid's merged in. */
   readonly tableAttrs: () => Attrs;
   /** A header cell's attributes, with its column position. */
@@ -214,6 +219,17 @@ export function injectGridFocus<TRow>(
     range: computed(() => (enabled() ? snapshot().range : null)),
     announcement: computed(() => (enabled() ? snapshot().announcement : "")),
     focusCell: controller.focusCell,
+    isColumnSelected: (col) =>
+      isGridColumnSelected(
+        {
+          enabled: enabled(),
+          range: snapshot().range,
+          firstRowIndex: table.windowStart(),
+          loadedRows: table.rows().length,
+        },
+        col
+      ),
+    toggleColumn: controller.toggleColumn,
     tableAttrs: () => {
       const base = table.tableAttrs();
       if (!enabled()) return base;

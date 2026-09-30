@@ -5,14 +5,12 @@
     [adaptAttrs]="v.grid ? v.grid.tableAttrs() : v.table.tableAttrs()"
   >
     <thead data-adapttable-part="thead">
-      <tr
-        data-adapttable-part="header-row"
-        [adaptAttrs]="v.table.headerRowAttrs()"
-      >
+      <ng-template #leadingHeaders let-band>
         @if (v.rowDetail) {
           <th
             data-adapttable-part="expand-header"
             scope="col"
+            [attr.rowspan]="band > 1 ? band : null"
             [attr.aria-label]="v.table.labels().expandRow"
           ></th>
         }
@@ -20,60 +18,152 @@
           <th
             data-adapttable-part="reorder-header"
             scope="col"
+            [attr.rowspan]="band > 1 ? band : null"
             [attr.aria-label]="v.table.labels().reorderRow"
           ></th>
         }
         @if (v.selection; as selection) {
-          <th data-adapttable-part="selection-header" scope="col">
+          <th
+            data-adapttable-part="selection-header"
+            scope="col"
+            [attr.rowspan]="band > 1 ? band : null"
+          >
             <input
               data-adapttable-part="checkbox"
               [adaptAttrs]="selection.headerCheckboxAttrs()"
             />
           </th>
         }
-        @if (v.columnSpacers(); as spacers) {
-          <adapt-column-spacer [width]="spacers.start" side="start" as="th" />
-        }
-        @for (column of v.columns(); track column.key) {
-          <th
-            data-adapttable-part="header-cell"
-            [adaptAttrs]="headerCells().get(column.key)!"
-          >
-            @if (column.sortable) {
-              <button
-                data-adapttable-part="sort-button"
-                [adaptAttrs]="v.table.sortButtonAttrs(column)"
-              >
-                <span [adaptHeader]="column"></span>
-                @if (v.table.sortBy() === column.key) {
-                  <span aria-hidden="true">{{
-                    v.table.sortDir() === "desc" ? "▼" : "▲"
-                  }}</span>
-                }
-              </button>
-            } @else {
-              <span [adaptHeader]="column"></span>
-            }
-            @if (v.filters?.header) {
-              @if (v.filters.headerProps().get(column.key); as hp) {
-                <ng-container
-                  [adaptSlot]="filterSlots.header"
-                  [adaptSlotProps]="hp"
-                  [adaptSlotTable]="v.table"
-                />
-              }
-            }
-          </th>
-        }
-        @if (v.columnSpacers(); as spacers) {
-          <adapt-column-spacer [width]="spacers.end" side="end" as="th" />
-        }
+      </ng-template>
+      <ng-template #trailingHeaders let-band>
         @if (v.showActions()) {
-          <th data-adapttable-part="actions-header" scope="col">
+          <th
+            data-adapttable-part="actions-header"
+            scope="col"
+            [attr.rowspan]="band > 1 ? band : null"
+          >
             {{ v.table.labels().actions }}
           </th>
         }
-      </tr>
+      </ng-template>
+      <ng-template #leafHeader let-column let-rowSpan="rowSpan">
+        <th
+          data-adapttable-part="header-cell"
+          [adaptAttrs]="headerCells().get(column.key)!"
+          [attr.rowspan]="rowSpan > 1 ? rowSpan : null"
+        >
+          @if (column.sortable) {
+            <button
+              data-adapttable-part="sort-button"
+              [adaptAttrs]="v.table.sortButtonAttrs(column)"
+            >
+              <span [adaptHeader]="column"></span>
+              @if (v.table.sortBy() === column.key) {
+                <span aria-hidden="true">{{
+                  v.table.sortDir() === "desc" ? "▼" : "▲"
+                }}</span>
+              }
+            </button>
+          } @else {
+            <span [adaptHeader]="column"></span>
+          }
+          @if (columnSelects().get(column.key); as select) {
+            <ng-container
+              [adaptSlot]="columnSelectSlot"
+              [adaptSlotProps]="select"
+              [adaptSlotTable]="v.table"
+            />
+          }
+          @if (v.filters?.header) {
+            @if (v.filters.headerProps().get(column.key); as hp) {
+              <ng-container
+                [adaptSlot]="filterSlots.header"
+                [adaptSlotProps]="hp"
+                [adaptSlotTable]="v.table"
+              />
+            }
+          }
+        </th>
+      </ng-template>
+      @if (headerPlan(); as plan) {
+        @for (row of plan; track $index; let first = $first, last = $last) {
+          <tr
+            [attr.data-adapttable-part]="
+              last ? 'header-row' : 'header-group-row'
+            "
+            [adaptAttrs]="last ? v.table.headerRowAttrs() : noAttrs"
+          >
+            @if (first) {
+              <ng-container
+                [ngTemplateOutlet]="leadingHeaders"
+                [ngTemplateOutletContext]="{ $implicit: plan.length }"
+              />
+            }
+            @for (cell of row; track cell.key) {
+              @if (cell.kind === "leaf") {
+                <ng-container
+                  [ngTemplateOutlet]="leafHeader"
+                  [ngTemplateOutletContext]="{
+                    $implicit: v.columns()[cell.columnIndex],
+                    rowSpan: cell.rowSpan,
+                  }"
+                />
+              } @else {
+                <th
+                  data-adapttable-part="header-group-cell"
+                  scope="colgroup"
+                  [attr.colspan]="cell.colSpan"
+                  [attr.rowspan]="cell.rowSpan > 1 ? cell.rowSpan : null"
+                  [adaptAttrs]="groupCells().get(cell.key)!.attrs"
+                >
+                  <span [adaptAttrs]="groupLabelAttrs">
+                    @if (groupCells().get(cell.key)!.toggle; as toggle) {
+                      <ng-container
+                        [adaptSlot]="columnGroupToggleSlot"
+                        [adaptSlotProps]="toggle"
+                        [adaptSlotTable]="v.table"
+                      />
+                    }
+                    {{ groupCells().get(cell.key)!.caption }}
+                  </span>
+                </th>
+              }
+            }
+            @if (first) {
+              <ng-container
+                [ngTemplateOutlet]="trailingHeaders"
+                [ngTemplateOutletContext]="{ $implicit: plan.length }"
+              />
+            }
+          </tr>
+        }
+      } @else {
+        <tr
+          data-adapttable-part="header-row"
+          [adaptAttrs]="v.table.headerRowAttrs()"
+        >
+          <ng-container
+            [ngTemplateOutlet]="leadingHeaders"
+            [ngTemplateOutletContext]="{ $implicit: 1 }"
+          />
+          @if (v.columnSpacers(); as spacers) {
+            <adapt-column-spacer [width]="spacers.start" side="start" as="th" />
+          }
+          @for (column of v.columns(); track column.key) {
+            <ng-container
+              [ngTemplateOutlet]="leafHeader"
+              [ngTemplateOutletContext]="{ $implicit: column, rowSpan: 1 }"
+            />
+          }
+          @if (v.columnSpacers(); as spacers) {
+            <adapt-column-spacer [width]="spacers.end" side="end" as="th" />
+          }
+          <ng-container
+            [ngTemplateOutlet]="trailingHeaders"
+            [ngTemplateOutletContext]="{ $implicit: 1 }"
+          />
+        </tr>
+      }
     </thead>
     <tbody data-adapttable-part="tbody">
       @for (slot of v.body(); track slot.key) {

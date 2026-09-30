@@ -40,7 +40,14 @@ import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { chromeColumnPlan } from '@adapttable/core/binding';
 import { chromeRenderModel } from '@adapttable/core/binding';
+import { COLUMN_GROUP_TOGGLE } from '@adapttable/core/binding';
 import { COLUMN_MENU } from '@adapttable/core/binding';
+import { COLUMN_SELECT } from '@adapttable/core/binding';
+import { ColumnGroupDef } from '@adapttable/core';
+import { columnGroupHeaderCaption } from '@adapttable/core/binding';
+import { ColumnGroupRecord } from '@adapttable/core';
+import { ColumnGroupToggleButtonProps } from '@adapttable/core/binding';
+import { ColumnGroupToggleProps } from '@adapttable/core/binding';
 import { ColumnLayoutState } from '@adapttable/core';
 import { columnMenuActions } from '@adapttable/core/binding';
 import { ColumnMenuChoice } from '@adapttable/core';
@@ -50,6 +57,8 @@ import { ColumnMenuRow } from '@adapttable/core';
 import { columnMenuRows } from '@adapttable/core';
 import { ColumnMenuSlotProps } from '@adapttable/core/binding';
 import { ColumnMetadata } from '@adapttable/core';
+import { ColumnSelectCheckboxChromeProps } from '@adapttable/core/binding';
+import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
 import { ConfirmHandler } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
@@ -150,6 +159,8 @@ import { GroupByInput } from '@adapttable/core';
 import { GroupCollapseState } from '@adapttable/core/binding';
 import { GroupedFlatEntry } from '@adapttable/core/binding';
 import { GroupedFlatEntry as GroupedFlatEntry_2 } from '@adapttable/core';
+import { groupedHeaderCellStyle } from '@adapttable/core/binding';
+import { groupedHeaderLabelStyle } from '@adapttable/core/binding';
 import { groupedViewSource } from '@adapttable/core';
 import { GroupHeaderCardSlotProps } from '@adapttable/core/binding';
 import { GroupHeaderRowSlotProps } from '@adapttable/core/binding';
@@ -177,9 +188,12 @@ import { groupSelectionState } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
 import { hasActiveHeaderFilter } from '@adapttable/core';
 import { headerFilterInsideSelector } from '@adapttable/core';
+import { HeaderGroupCell } from '@adapttable/core/binding';
 import { HeaderSelectionState } from '@adapttable/core/binding';
 import { hideAllColumns } from '@adapttable/core/binding';
 import { HighlightedCell } from '@adapttable/core';
+import { HtmlGroupedHeaderCell } from '@adapttable/core/binding';
+import { htmlGroupedHeaderPlan } from '@adapttable/core/binding';
 import * as i0 from '@angular/core';
 import { IconDescriptor } from '@adapttable/core/binding';
 import { InjectionToken } from '@angular/core';
@@ -328,6 +342,7 @@ import { visibleRowActions } from '@adapttable/core';
 import { watchOverlayDismiss } from '@adapttable/core';
 import { windowGroupedEntries } from '@adapttable/core';
 import { withRowPinActions } from '@adapttable/core';
+import { WritableSignal } from '@angular/core';
 
 export { ACTIONS_COLUMN_KEY }
 
@@ -668,6 +683,92 @@ export class AdaptChecklistChrome<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptChecklistChrome<any>, never>;
+}
+
+// @public
+export class AdaptColumnGroupToggleChrome {
+    // @internal
+    protected readonly buttonProps: Signal<ColumnGroupToggleButtonProps | undefined>;
+    readonly cell: InputSignal<HeaderGroupCell>;
+    readonly className: InputSignal<string | undefined>;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    readonly onToggle: InputSignal<(id: string) => void>;
+    readonly slots: InputSignal<ColumnGroupToggleSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnGroupToggleChrome, "adapt-column-group-toggle-chrome", never, {
+        "cell": {
+            "alias": "cell";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "onToggle": {
+            "alias": "onToggle";
+            "required": true;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnGroupToggleChrome, never>;
+}
+
+// @public
+export class AdaptColumnSelectCheckboxChrome {
+    // @internal
+    protected readonly checkboxProps: Signal<ColumnSelectCheckboxProps>;
+    readonly checked: InputSignal<boolean>;
+    readonly className: InputSignal<string | undefined>;
+    readonly label: InputSignal<string>;
+    // @internal
+    protected readonly near: WritableSignal<boolean>;
+    readonly onToggle: InputSignal<() => void>;
+    // @internal
+    protected readonly shown: Signal<boolean>;
+    readonly slots: InputSignal<ColumnSelectSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnSelectCheckboxChrome, "adapt-column-select-checkbox-chrome", never, {
+        "label": {
+            "alias": "label";
+            "required": true;
+            "isSignal": true;
+        };
+        "checked": {
+            "alias": "checked";
+            "required": true;
+            "isSignal": true;
+        };
+        "onToggle": {
+            "alias": "onToggle";
+            "required": true;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnSelectCheckboxChrome, never>;
 }
 
 // @public
@@ -1816,7 +1917,11 @@ export { chromeRenderModel }
 // @public
 export function collapsibleColumnGroups(): AdaptTableFeature;
 
+export { COLUMN_GROUP_TOGGLE }
+
 export { COLUMN_MENU }
+
+export { COLUMN_SELECT }
 
 // @public
 export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
@@ -1831,6 +1936,27 @@ export interface ColumnDrag {
     readonly gripAttrs: (key: string, index: number, move: (key: string, toIndex: number) => void, label: string) => Attrs;
     readonly rowAttrs: (key: string, index: number, move: (key: string, toIndex: number) => void) => Attrs;
 }
+
+// @public
+export interface ColumnGroup<TRow> extends Omit<ColumnGroupDef<TRow>, "children"> {
+    readonly children: readonly ColumnInput<TRow>[];
+}
+
+export { columnGroupHeaderCaption }
+
+export { ColumnGroupRecord }
+
+export { ColumnGroupToggleButtonProps }
+
+export { ColumnGroupToggleProps }
+
+// @public
+export interface ColumnGroupToggleSlots {
+    readonly Button: Type<unknown>;
+}
+
+// @public
+export type ColumnInput<TRow> = ColumnDef<TRow> | ColumnGroup<TRow>;
 
 // @public
 export type ColumnLayout<TRow> = UseColumnLayoutResult<TRow>;
@@ -1901,8 +2027,23 @@ export interface ColumnRenameEditorState {
     readonly submit: () => boolean;
 }
 
+export { ColumnSelectCheckboxChromeProps }
+
+export { ColumnSelectCheckboxProps }
+
 // @public
 export function columnSelectionCheckbox(): AdaptTableFeature;
+
+// @public
+export function columnSelectLabel(label: string | undefined, column: {
+    readonly header?: string;
+    readonly key: string;
+}): string;
+
+// @public
+export interface ColumnSelectSlots {
+    readonly Checkbox: Type<unknown>;
+}
 
 // @public
 export interface ColumnWindow<TRow> {
@@ -1987,6 +2128,7 @@ export interface DataTable<TRow> {
     readonly cellAttrs: (column: ColumnDef<TRow>) => Attrs;
     readonly cellValue: (column: ColumnDef<TRow>, row: TRow) => unknown;
     readonly clearFilters: () => void;
+    readonly columnGroups: Signal<ReadonlyMap<string, ColumnGroupRecord<TRow>>>;
     readonly columns: Signal<readonly ColumnDef<TRow>[]>;
     readonly dir: Signal<Direction>;
     readonly emptyVariant: Signal<"noData" | "noResults">;
@@ -1996,6 +2138,7 @@ export interface DataTable<TRow> {
         readonly id: string;
     }) => boolean;
     readonly headerCellAttrs: (column: ColumnDef<TRow>) => Attrs;
+    readonly headerPlan: Signal<HtmlGroupedHeaderCell[][] | null>;
     readonly headerRowAttrs: () => Attrs;
     readonly isEmpty: Signal<boolean>;
     readonly isMobile: Signal<boolean>;
@@ -2034,7 +2177,7 @@ export interface DataTable<TRow> {
 export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly activeFilterCount?: Signal<number>;
     readonly cellTemplates?: Signal<readonly AdaptCellTemplate[]>;
-    readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
+    readonly columns: MaybeSignal<readonly ColumnInput<TRow>[]>;
     readonly columnWidths?: MaybeSignalOptional<Readonly<Record<string, number>>>;
     readonly dir?: MaybeSignal<Direction>;
     readonly features?: readonly AdaptTableFeature[];
@@ -2331,6 +2474,12 @@ export { filterWidgetKind }
 // @public
 export function fitColumns(): AdaptTableFeature;
 
+// @public
+export function flattenColumns<TRow>(columns: readonly ColumnInput<TRow>[]): {
+    readonly leaves: ColumnDef<TRow>[];
+    readonly groups: ReadonlyMap<string, ColumnGroupRecord<TRow>>;
+};
+
 export { focusEditorOnMount }
 
 // @public
@@ -2380,9 +2529,11 @@ export interface GridFocus<TRow> {
     readonly enabled: Signal<boolean>;
     readonly focusCell: (cell: GridCell) => void;
     readonly headerCellAttrs: (column: ColumnDef<TRow>, col: number) => Attrs;
+    readonly isColumnSelected: (col: number) => boolean;
     readonly range: Signal<CellRange | null>;
     readonly rowAttrs: (row: TRow, index: number) => Attrs;
     readonly tableAttrs: () => Attrs;
+    readonly toggleColumn: (col: number) => void;
 }
 
 // @public
@@ -2423,6 +2574,10 @@ export interface GroupCollapseUrlStateOptions extends UrlSliceOptions {
 }
 
 export { GroupedFlatEntry }
+
+export { groupedHeaderCellStyle }
+
+export { groupedHeaderLabelStyle }
 
 export { groupedViewSource }
 
@@ -2545,6 +2700,8 @@ export { headerFilterInsideSelector }
 // @public
 export function headerFilters(): AdaptTableFeature;
 
+export { HeaderGroupCell }
+
 export { HeaderSelectionState }
 
 export { hideAllColumns }
@@ -2559,6 +2716,10 @@ interface Highlight_2 {
     readonly isRowHighlighted: (rowId: string) => boolean;
 }
 export { Highlight_2 as Highlight }
+
+export { HtmlGroupedHeaderCell }
+
+export { htmlGroupedHeaderPlan }
 
 export { IconDescriptor }
 

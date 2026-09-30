@@ -10,10 +10,19 @@ import {
   AdaptRowDetail,
   AdaptSlot,
   type Attrs,
+  COLUMN_GROUP_TOGGLE,
+  COLUMN_SELECT,
+  columnGroupHeaderCaption,
+  type ColumnGroupToggleProps,
+  type ColumnSelectCheckboxChromeProps,
+  columnSelectLabel,
   EDITABLE_CELL,
   EXPAND_TOGGLE,
   FILTER_HEADER,
   GROUP_HEADER_ROW,
+  groupedHeaderCellStyle,
+  groupedHeaderLabelStyle,
+  htmlGroupedHeaderPlan,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_HANDLE,
   type RowReorderHandleProps,
@@ -83,6 +92,101 @@ export class AdaptDesktopTable<TRow> {
   protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
   /** The group header slot. @internal */
   protected readonly groupHeaderRowSlot = GROUP_HEADER_ROW;
+  /** The column-selection checkbox slot. @internal */
+  protected readonly columnSelectSlot = COLUMN_SELECT;
+  /** The column-group collapse slot. @internal */
+  protected readonly columnGroupToggleSlot = COLUMN_GROUP_TOGGLE;
+  /** An empty attribute record. @internal */
+  protected readonly noAttrs: Attrs = {};
+  /** A group header's caption line. @internal */
+  protected readonly groupLabelAttrs: Attrs = {
+    style: groupedHeaderLabelStyle(),
+  };
+
+  /**
+   * The header rows while any rendered column sits in a group, over the
+   * columns the body renders, or `null` for one plain row.
+   *
+   * @internal
+   */
+  protected readonly headerPlan = computed(() => {
+    const view = this.view();
+    const table = view.table;
+    return htmlGroupedHeaderPlan(
+      view.columns(),
+      table.layout().state.collapsedGroups ?? [],
+      table.featureOptions.collapsibleColumnGroups === true,
+      table.columnGroups()
+    );
+  });
+
+  /**
+   * Each group header cell's attributes, caption and collapse control,
+   * keyed by cell.
+   *
+   * @internal
+   */
+  protected readonly groupCells = computed(() => {
+    const view = this.view();
+    const table = view.table;
+    const labels = table.labels();
+    const layout = table.layout();
+    const toggles = table.hasSlot(COLUMN_GROUP_TOGGLE);
+    const cells = new Map<
+      string,
+      {
+        readonly attrs: Attrs;
+        readonly caption: string | null;
+        readonly toggle: ColumnGroupToggleProps | undefined;
+      }
+    >();
+    for (const row of this.headerPlan() ?? []) {
+      for (const cell of row) {
+        if (cell.kind !== "group") continue;
+        cells.set(cell.key, {
+          attrs: {
+            style: groupedHeaderCellStyle(
+              cell,
+              "color-mix(in srgb, CanvasText 22%, transparent)"
+            ),
+          },
+          caption: columnGroupHeaderCaption(cell.cell),
+          toggle: toggles
+            ? { cell: cell.cell, labels, onToggle: layout.toggleColumnGroup }
+            : undefined,
+        });
+      }
+    }
+    return cells;
+  });
+
+  /**
+   * Each column's selection checkbox props, keyed by column, while the
+   * feature and the keyboard grid are on.
+   *
+   * @internal
+   */
+  protected readonly columnSelects = computed(() => {
+    const view = this.view();
+    const selects = new Map<string, ColumnSelectCheckboxChromeProps>();
+    const grid = view.grid;
+    if (!view.columnSelect || !grid) return selects;
+    const label = view.table.labels().selectColumn;
+    const index = view.columnIndex();
+    for (const column of view.columns()) {
+      const col = index.get(column.key);
+      if (col === undefined) continue;
+      selects.set(column.key, {
+        label: columnSelectLabel(label, column),
+        checked: grid.isColumnSelected(col),
+        onToggle: () => {
+          grid.toggleColumn(col);
+        },
+      });
+    }
+    return selects;
+  });
+
   /** The row-expansion toggle slot. @internal */
   protected readonly expandToggleSlot = EXPAND_TOGGLE;
   /** The tree column's cell slot. @internal */

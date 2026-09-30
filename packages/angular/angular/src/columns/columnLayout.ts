@@ -3,6 +3,7 @@
  * order, pinning, widths and names, over core's column-layout controller.
  */
 import {
+  type ColumnGroupRecord,
   type ColumnLayoutState,
   columnLayoutVisibleColumns,
   columnPinInsets,
@@ -57,7 +58,13 @@ export type ColumnLayout<TRow> = UseColumnLayoutResult<TRow>;
 export function columnLayoutFor<TRow>(
   columns: Signal<readonly ColumnDef<TRow>[]>,
   options: ColumnLayoutOptions,
-  injector: Injector
+  injector: Injector,
+  groups: {
+    /** The header groups over the columns, by id. */
+    readonly columnGroups: Signal<ReadonlyMap<string, ColumnGroupRecord<TRow>>>;
+    /** Whether the reader may collapse a group to one column. */
+    readonly collapsible: boolean;
+  } = { columnGroups: computed(() => new Map()), collapsible: false }
 ): Signal<ColumnLayout<TRow>> {
   const controller = createColumnLayoutController<TRow, ColumnDef<TRow>>(
     options.defaultColumnLayout
@@ -83,12 +90,15 @@ export function columnLayoutFor<TRow>(
     controller.configure({
       columns: untracked(columns),
       onColumnRename: options.onColumnRename,
+      collapsibleColumnGroups: groups.collapsible,
+      columnGroups: untracked(groups.columnGroups),
     });
   };
   configure();
   effect(
     () => {
       columns();
+      groups.columnGroups();
       configure();
     },
     { injector }
@@ -100,7 +110,10 @@ export function columnLayoutFor<TRow>(
 
   return computed(() => {
     const current = controlled() ?? own();
-    const visibleColumns = columnLayoutVisibleColumns(columns(), current);
+    const visibleColumns = columnLayoutVisibleColumns(columns(), current, {
+      collapsibleColumnGroups: groups.collapsible,
+      columnGroups: groups.columnGroups(),
+    });
     const insets = columnPinInsets(visibleColumns, current);
     return {
       state: current,

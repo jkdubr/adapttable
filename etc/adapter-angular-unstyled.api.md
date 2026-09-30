@@ -19,10 +19,17 @@ import { ChecklistSlots } from '@adapttable/angular';
 import { ChromeBodySlot } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
 import { ColumnDrag } from '@adapttable/angular';
+import { ColumnGroupToggleButtonProps } from '@adapttable/angular';
+import { ColumnGroupToggleProps } from '@adapttable/angular';
+import { ColumnGroupToggleSlots } from '@adapttable/angular';
+import { ColumnInput } from '@adapttable/angular';
 import { ColumnLayoutState } from '@adapttable/angular';
 import { ColumnMenuRow } from '@adapttable/angular';
 import { ColumnMenuSlotProps } from '@adapttable/angular';
 import { ColumnModel } from '@adapttable/core';
+import { ColumnSelectCheckboxChromeProps } from '@adapttable/angular';
+import { ColumnSelectCheckboxProps } from '@adapttable/angular';
+import { ColumnSelectSlots } from '@adapttable/angular';
 import { ConfirmHandler } from '@adapttable/angular';
 import { DataTable } from '@adapttable/angular';
 import { DesktopRowWiringArgs } from '@adapttable/angular';
@@ -55,6 +62,7 @@ import { GroupMoreButtonSlotProps } from '@adapttable/angular';
 import { GroupRowCell } from '@adapttable/core';
 import { GroupRowLayout } from '@adapttable/core';
 import { HeaderSelectionState } from '@adapttable/core';
+import { HtmlGroupedHeaderCell } from '@adapttable/angular';
 import * as i0 from '@angular/core';
 import { IconDescriptor } from '@adapttable/angular';
 import { Injector } from '@angular/core';
@@ -171,6 +179,38 @@ export class AdaptBulkBar {
 }
 
 // @public
+export class AdaptColumnGroupButton {
+    readonly props: InputSignal<ColumnGroupToggleButtonProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnGroupButton, "adapt-column-group-button", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnGroupButton, never>;
+}
+
+// @public
+export class AdaptColumnGroupToggle {
+    readonly props: InputSignal<ColumnGroupToggleProps>;
+    // @internal (undocumented)
+    protected readonly slots: ColumnGroupToggleSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnGroupToggle, "adapt-column-group-toggle", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnGroupToggle, never>;
+}
+
+// @public
 export class AdaptColumnMenu {
     // (undocumented)
     protected readonly actionsKey = "actions";
@@ -206,6 +246,38 @@ export class AdaptColumnMenu {
 }
 
 // @public
+export class AdaptColumnSelectBox {
+    readonly props: InputSignal<ColumnSelectCheckboxProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnSelectBox, "adapt-column-select-box", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnSelectBox, never>;
+}
+
+// @public
+export class AdaptColumnSelectCheckbox {
+    readonly props: InputSignal<ColumnSelectCheckboxChromeProps>;
+    // @internal (undocumented)
+    protected readonly slots: ColumnSelectSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnSelectCheckbox, "adapt-column-select-checkbox", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnSelectCheckbox, never>;
+}
+
+// @public
 export class AdaptDataTable<TRow> implements OnInit {
     readonly aggregates: InputSignal<readonly QueryAggregate[] | undefined>;
     // @internal
@@ -220,7 +292,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly columnLayoutChange: OutputEmitterRef<ColumnLayoutState>;
     // @internal
     protected readonly columnMenuSlot: FeatureSlotKey<ColumnMenuSlotProps<never>>;
-    readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
+    readonly columns: InputSignal<readonly ColumnInput<TRow>[]>;
     readonly confirm: InputSignal<ConfirmHandler | undefined>;
     readonly data: InputSignal<readonly TRow[] | undefined>;
     readonly defaultColumnLayout: InputSignal<Partial<ColumnLayoutState> | undefined>;
@@ -503,14 +575,25 @@ export class AdaptDensityButton {
 
 // @internal
 export class AdaptDesktopTable<TRow> {
+    protected readonly columnGroupToggleSlot: FeatureSlotKey<ColumnGroupToggleProps>;
+    protected readonly columnSelects: Signal<Map<string, ColumnSelectCheckboxChromeProps>>;
+    protected readonly columnSelectSlot: FeatureSlotKey<ColumnSelectCheckboxChromeProps>;
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
     protected readonly expandToggleSlot: FeatureSlotKey<ExpandToggleSlotProps>;
     protected readonly filterSlots: {
         header: FeatureSlotKey<FilterHeaderControlProps<never>>;
     };
+    protected readonly groupCells: Signal<Map<string, {
+    readonly attrs: Attrs;
+    readonly caption: string | null;
+    readonly toggle: ColumnGroupToggleProps | undefined;
+    }>>;
     protected readonly groupHeaderRowSlot: FeatureSlotKey<GroupHeaderRowSlotProps<never, unknown, ColumnModel<never>>>;
+    protected readonly groupLabelAttrs: Attrs;
     protected readonly headerCells: Signal<Map<string, Readonly<Record<string, unknown>>>>;
+    protected readonly headerPlan: Signal<HtmlGroupedHeaderCell[][] | null>;
     readonly maxHeight: InputSignal<string | number | undefined>;
+    protected readonly noAttrs: Attrs;
     protected reorderHandleProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderHandleProps_2<never>;
     protected readonly reorderHandleSlot: FeatureSlotKey<RowReorderHandleProps<never, unknown>>;
     protected readonly rowEditActionsSlot: FeatureSlotKey<RowEditActionsProps<never>>;
@@ -749,7 +832,7 @@ export class AdaptGroupHeaderCard {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
@@ -832,7 +915,7 @@ export class AdaptGroupHeaderRow {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {
@@ -1127,6 +1210,7 @@ export interface TableView<TRow> {
     readonly columnMenu: boolean;
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;
     readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+    readonly columnSelect: boolean;
     readonly columnSpacers: Signal<{
         start: number;
         end: number;

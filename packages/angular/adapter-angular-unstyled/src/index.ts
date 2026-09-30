@@ -10,7 +10,15 @@
 export { AdaptFilterChips } from "./components/activeFilterChips";
 export { AdaptAutoFilterForm } from "./components/autoFilterForm";
 export { AdaptBulkBar } from "./components/bulkActionBar";
+export {
+  AdaptColumnGroupButton,
+  AdaptColumnGroupToggle,
+} from "./components/columnGroupToggle";
 export { AdaptColumnMenu } from "./components/columnMenu";
+export {
+  AdaptColumnSelectBox,
+  AdaptColumnSelectCheckbox,
+} from "./components/columnSelectCheckbox";
 export { AdaptDesktopTable } from "./components/desktopTable";
 export {
   AdaptEditableCell,

@@ -7,6 +7,7 @@
 import {
   autoSizeColumns,
   columnFlexShares,
+  type ColumnGroupRecord,
   computePagination,
   deriveSortByOptions,
   devWarn,
@@ -44,6 +45,8 @@ import {
   fetchNextBodyPage,
   headerCellAttributes,
   headerRowAttributes,
+  type HtmlGroupedHeaderCell,
+  htmlGroupedHeaderPlan,
   rowAttributes,
   searchInputAttributes,
   sortButtonAttributes,
@@ -65,7 +68,13 @@ import {
 
 import type { Attrs } from "./attrs";
 import type { AdaptCellTemplate } from "./cell";
-import { type CellContext, type ColumnDef, resolveColumns } from "./columnDef";
+import {
+  type CellContext,
+  type ColumnDef,
+  type ColumnInput,
+  flattenColumns,
+  resolveColumns,
+} from "./columnDef";
 import {
   type ColumnLayout,
   columnLayoutFor,
@@ -90,8 +99,8 @@ import { type MaybeSignal, type MaybeSignalOptional, readMaybe } from "./store";
 export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
   /** The rows and view state, from `injectFrontendData` or your own tier. */
   readonly source: Signal<TableSource<TRow>>;
-  /** Column definitions. */
-  readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
+  /** Column definitions, and header groups over them. */
+  readonly columns: MaybeSignal<readonly ColumnInput<TRow>[]>;
   /** A row's stable id. */
   readonly rowKey: (row: TRow) => string;
   /** The table's accessible name. Defaults to the `table` label. */
@@ -153,6 +162,13 @@ export interface DataTable<TRow> {
   readonly columns: Signal<readonly ColumnDef<TRow>[]>;
   /** Every declared column, hidden ones included, defaults filled. */
   readonly allColumns: Signal<readonly ColumnDef<TRow>[]>;
+  /** The header groups over the columns, by id. */
+  readonly columnGroups: Signal<ReadonlyMap<string, ColumnGroupRecord<TRow>>>;
+  /**
+   * The header rows while any column sits in a group — group cells spanning
+   * their columns, then the columns — or `null` for one plain header row.
+   */
+  readonly headerPlan: Signal<HtmlGroupedHeaderCell[][] | null>;
   /**
    * The user's column layout: hidden, ordered, pinned, resized and renamed
    * columns, and every change a column menu makes.
@@ -294,9 +310,13 @@ export function injectDataTable<TRow>(
     () => options.columnWidths && readMaybe(options.columnWidths)
   );
 
+  const featureOptions = featureOptionsOf(options.features ?? []);
+  const tree = computed(() => flattenColumns(readMaybe(options.columns)));
+  const columnGroups = computed(() => tree().groups);
+  const collapsibleGroups = featureOptions.collapsibleColumnGroups === true;
   const allColumns = computed(() => {
     const templates = options.cellTemplates?.() ?? [];
-    const declared = readMaybe(options.columns).map((column) => {
+    const declared = tree().leaves.map((column) => {
       if (column.cell) return column;
       const template = templates.find(
         (candidate) => candidate.key() === column.key
@@ -331,7 +351,10 @@ export function injectDataTable<TRow>(
     { injector }
   );
 
-  const layout = columnLayoutFor(allColumns, options, injector);
+  const layout = columnLayoutFor(allColumns, options, injector, {
+    columnGroups,
+    collapsible: collapsibleGroups,
+  });
   const columns = computed(() =>
     visibleColumns(
       layout().visibleColumns as ColumnDef<TRow>[],
@@ -419,6 +442,15 @@ export function injectDataTable<TRow>(
     isEmpty,
     columns,
     allColumns,
+    columnGroups,
+    headerPlan: computed(() =>
+      htmlGroupedHeaderPlan(
+        columns(),
+        layout().state.collapsedGroups ?? [],
+        collapsibleGroups,
+        columnGroups()
+      )
+    ),
     layout,
     isMobile,
     labels,
@@ -459,7 +491,7 @@ export function injectDataTable<TRow>(
     windowStart,
     statusAnnouncement,
     featureHost: featureHostFor(injector, options.features),
-    featureOptions: featureOptionsOf(options.features ?? []),
+    featureOptions,
     slotFills,
     hasSlot: (slot) => slotFills.has(slot.id),
     toggleSort,

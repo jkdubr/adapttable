@@ -3082,6 +3082,21 @@ comes from a kit through a slot.
   `ADAPTTABLE_SLOT_TABLE` the token that provides it. `AdaptControl` draws one
   kit control with the props a structural component computed for it, and
   `AdaptIcon` draws a core glyph as SVG.
+- Column groups: a table's `columns` take `ColumnInput`s — columns, and
+  `ColumnGroup`s whose caption spans their `children`. `flattenColumns`
+  flattens them into the columns, each carrying its group path, and the
+  group records. The table's `columnGroups` are those records and its
+  `headerPlan` the grouped header rows (group cells spanning their columns,
+  then the columns), or `null` when nothing is grouped. With
+  `collapsibleColumnGroups`, a group collapses to its `collapsedKey` column
+  through the layout's `toggleColumnGroup`, and `AdaptColumnGroupToggleChrome`
+  (`ColumnGroupToggleSlots`) draws its control through the kit's button.
+- Column selection: `columnSelectionCheckbox` puts a checkbox in each column
+  header that selects the whole column, over the keyboard grid's
+  `isColumnSelected` and `toggleColumn`. `AdaptColumnSelectCheckboxChrome`
+  (`ColumnSelectSlots`) holds the kit's checkbox: on a hovering pointer it
+  fades in on hover or focus, and its clicks and keys never reach the header
+  or the grid. `columnSelectLabel` names it for the column.
 - Column layout: `DataTableOptions` takes `ColumnLayoutOptions` (controlled
   or default layout, the change callback and the rename handler), and the
   table's `layout` is a `ColumnLayout` signal — hidden, order, pins, widths
@@ -3263,7 +3278,12 @@ controls — `columnMenu` (`AdaptColumnMenu`), `filters` (`AdaptFiltersForm`,
 (`AdaptGroupHeaderRow` on desktop and `AdaptGroupHeaderCard` on phones draw
 group headers, footers and "show more" rows, the last with `AdaptGroupMore`),
 `groupingPanel`
-(`AdaptGroupingPanel`), `tree` (`TreeFeatureOptions`; `AdaptTreeCell` fills
+(`AdaptGroupingPanel`), `collapsibleColumnGroups`
+(`/column-groups`; `AdaptColumnGroupToggle` with `AdaptColumnGroupButton`
+fills `COLUMN_GROUP_TOGGLE`, and the desktop header draws each `ColumnGroup`
+as a spanning group row), `columnSelectionCheckbox` (`/column-selection`;
+`AdaptColumnSelectCheckbox` with the native `AdaptColumnSelectBox` fills
+`COLUMN_SELECT`), `tree` (`TreeFeatureOptions`; `AdaptTreeCell` fills
 `TREE_CELL` with `TreeCellSlotProps`, the cell's content as a template,
 `AdaptTreeToggle` leads each phone card, and `AdaptTreeButton` is the native
 chevron), `rowDetail` and `nestedTable` (`@adapttable/angular-unstyled/row-detail`

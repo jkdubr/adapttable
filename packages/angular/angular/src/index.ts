@@ -32,11 +32,20 @@ export {
 export {
   type CellContext,
   type ColumnDef,
+  type ColumnGroup,
+  type ColumnInput,
+  flattenColumns,
   type FooterContext,
   type HeaderContext,
   type Renderer,
   resolveColumns,
 } from "./columnDef";
+export {
+  AdaptColumnGroupToggleChrome,
+  type ColumnGroupToggleButtonProps,
+  type ColumnGroupToggleProps,
+  type ColumnGroupToggleSlots,
+} from "./columns/columnGroupToggle";
 export {
   type ColumnLayout,
   type ColumnLayoutOptions,
@@ -215,6 +224,12 @@ export {
   type AngularFilterTreeDisclosureProps,
   type FilterTreeSlots,
 } from "./filters/filterTreeChrome";
+export {
+  AdaptColumnSelectCheckboxChrome,
+  type ColumnSelectCheckboxProps,
+  columnSelectLabel,
+  type ColumnSelectSlots,
+} from "./focus/columnSelectCheckbox";
 export {
   type GridFocus,
   type GridFocusOptions,

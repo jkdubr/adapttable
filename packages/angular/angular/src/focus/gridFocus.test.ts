@@ -131,6 +131,28 @@ describe("injectGridFocus range reporting", () => {
   });
 });
 
+describe("injectGridFocus column selection", () => {
+  it("selects a whole column, and clears it on a second toggle", async () => {
+    const fixture = TestBed.createComponent(Host);
+    document.body.append(fixture.nativeElement as HTMLElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const { grid } = fixture.componentInstance;
+    expect(grid.isColumnSelected(1)).toBe(false);
+    grid.toggleColumn(1);
+    await fixture.whenStable();
+    expect(grid.isColumnSelected(1)).toBe(true);
+    expect(grid.isColumnSelected(0)).toBe(false);
+    expect(grid.range()).toMatchObject({
+      anchor: { row: 0, col: 1 },
+      head: { row: 1, col: 1 },
+    });
+    grid.toggleColumn(1);
+    await fixture.whenStable();
+    expect(grid.isColumnSelected(1)).toBe(false);
+  });
+});
+
 describe("injectGridFocus on a server platform", () => {
   it("leaves the window's pointer release alone", async () => {
     TestBed.overrideProvider(PLATFORM_ID, { useValue: "server" });
