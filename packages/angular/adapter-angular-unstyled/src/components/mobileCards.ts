@@ -14,6 +14,9 @@ import {
   ROW_REORDER_BUTTONS,
   type RowReorderButtonsProps,
   type RowReorderState,
+  TREE_TOGGLE,
+  treeCardStyle,
+  type TreeToggleProps,
 } from "@adapttable/angular";
 import {
   ChangeDetectionStrategy,
@@ -56,6 +59,41 @@ export class AdaptMobileCards<TRow> {
   protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
   /** The group header slot. @internal */
   protected readonly groupHeaderCardSlot = GROUP_HEADER_CARD;
+  /** The tree disclosure slot. @internal */
+  protected readonly treeToggleSlot = TREE_TOGGLE;
+
+  /**
+   * Each tree card's disclosure props and indent, keyed by row id, while
+   * the rows are a tree.
+   *
+   * @internal
+   */
+  protected readonly treeCards = computed(() => {
+    const view = this.view();
+    const tree = view.tree?.();
+    const cards = new Map<
+      string,
+      {
+        readonly toggle: TreeToggleProps<never>;
+        readonly indent: string | null;
+      }
+    >();
+    if (!tree) return cards;
+    const labels = view.table.labels();
+    for (const entry of tree.entries) {
+      cards.set(entry.key, {
+        // Slot props erase the row type: core types every slot's row as
+        // `never`.
+        toggle: {
+          entry,
+          labels,
+          onToggle: tree.expansion.toggle,
+        } as unknown as TreeToggleProps<never>,
+        indent: treeCardStyle(entry.level).marginInlineStart ?? null,
+      });
+    }
+    return cards;
+  });
 
   private buttonsPropsCache = new Map<string, RowReorderButtonsProps<never>>();
   private buttonsPropsToken = "";

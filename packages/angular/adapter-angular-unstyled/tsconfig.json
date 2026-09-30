@@ -34,6 +34,7 @@
     "row-actions",
     "row-reorder",
     "saved-views",
+    "tree",
     "virtualize",
     "vitest.config.ts",
     "vitest.setup.ts"

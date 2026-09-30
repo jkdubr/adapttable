@@ -166,6 +166,13 @@ export {
   type GroupingPanelExtras,
 } from "./features/groupingPanel";
 export { rowReorder } from "./features/rowReorder";
+export {
+  injectTree,
+  type TableTree,
+  tree,
+  type TreeFeatureOptions,
+  type TreeOptions,
+} from "./features/tree";
 export { virtualize, type VirtualizeOptions } from "./features/virtualize";
 export {
   AdaptChecklistChrome,
@@ -293,6 +300,23 @@ export {
   readMaybe,
 } from "./store";
 export {
+  injectLazyChildren,
+  type LazyChildrenInjectOptions,
+  type LazyChildrenState,
+} from "./tree/lazyChildren";
+export { AdaptTreeCellChrome } from "./tree/treeCell";
+export {
+  injectTreeExpansion,
+  type TreeExpansionOptions,
+  type TreeExpansionState,
+} from "./tree/treeExpansion";
+export {
+  AdaptTreeToggleChrome,
+  type TreeToggleButtonProps,
+  type TreeToggleProps,
+  type TreeToggleSlots,
+} from "./tree/treeToggle";
+export {
   type ColumnLayoutUrlState,
   type ColumnLayoutUrlStateOptions,
   injectColumnLayoutUrlState,
@@ -394,6 +418,7 @@ export type {
   TableQueryParams,
   TableSource,
   TableVirtualization,
+  TreeEntry,
   VirtualTableRow,
 } from "@adapttable/core";
 export type {

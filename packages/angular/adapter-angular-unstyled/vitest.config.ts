@@ -68,6 +68,7 @@ export default defineConfig({
         "row-actions/**/*.ts",
         "row-reorder/**/*.ts",
         "saved-views/**/*.ts",
+        "tree/**/*.ts",
         "virtualize/**/*.ts",
       ],
       exclude: [

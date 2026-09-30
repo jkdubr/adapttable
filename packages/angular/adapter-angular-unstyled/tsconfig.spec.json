@@ -24,6 +24,7 @@
     "row-actions",
     "row-reorder",
     "saved-views",
+    "tree",
     "virtualize"
   ]
 }

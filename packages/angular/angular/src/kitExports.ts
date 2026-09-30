@@ -99,6 +99,7 @@ export {
   resolveCellEditor,
   windowGroupedEntries,
 } from "@adapttable/core";
+export { treeCardStyle } from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,
@@ -217,4 +218,9 @@ export {
   resolveBodyVirtualization,
   resolveMobileLabel,
   virtualizeIgnoredOnPage,
+} from "@adapttable/core/binding";
+export {
+  TREE_CELL,
+  TREE_TOGGLE,
+  type TreeCellProps,
 } from "@adapttable/core/binding";

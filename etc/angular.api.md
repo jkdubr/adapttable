@@ -188,6 +188,8 @@ import { isMultiSelectEditor } from '@adapttable/core';
 import { isSelectEditor } from '@adapttable/core';
 import { joinRelativeToken } from '@adapttable/core';
 import { KeyedVirtualization } from '@adapttable/core';
+import { LazyChildrenOptions } from '@adapttable/core';
+import { LazyChildrenState } from '@adapttable/core/binding';
 import { listFilterValues } from '@adapttable/core';
 import { mobileCardListStyle } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
@@ -272,6 +274,7 @@ import { stopCellEditKeyboard } from '@adapttable/core';
 import { stopEditKeys } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
+import { TableLabels as TableLabels_2 } from '@adapttable/core/binding';
 import { TableQuery } from '@adapttable/core';
 import { TableQueryParams } from '@adapttable/core';
 import { TableSource } from '@adapttable/core';
@@ -283,6 +286,15 @@ import { TextFieldWidget } from '@adapttable/core';
 import { TextOp } from '@adapttable/core';
 import { TOOLBAR_EXTRAS } from '@adapttable/core/binding';
 import { ToolbarExtrasSlotProps } from '@adapttable/core/binding';
+import { TREE_CELL } from '@adapttable/core/binding';
+import { TREE_TOGGLE } from '@adapttable/core/binding';
+import { treeCardStyle } from '@adapttable/core';
+import { TreeCellProps } from '@adapttable/core/binding';
+import { TreeEntry } from '@adapttable/core';
+import { TreeEntry as TreeEntry_2 } from '@adapttable/core/binding';
+import { TreeExpansionState } from '@adapttable/core/binding';
+import { TreeToggleButtonProps } from '@adapttable/core/binding';
+import { TreeToggleProps } from '@adapttable/core/binding';
 import { Type } from '@angular/core';
 import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlSliceSpec } from '@adapttable/core';
@@ -1400,6 +1412,127 @@ export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry>
 }
 
 // @public
+export class AdaptTreeCellChrome {
+    readonly className: InputSignal<string | undefined>;
+    readonly columnKey: InputSignal<string>;
+    readonly entry: InputSignal<TreeEntry_2<unknown> | undefined>;
+    // @internal (undocumented)
+    protected readonly ignoreToggle: () => void;
+    readonly labels: InputSignal<TableLabels_2 | undefined>;
+    readonly onToggle: InputSignal<((id: string) => void) | undefined>;
+    readonly slots: InputSignal<TreeToggleSlots>;
+    readonly spacerClassName: InputSignal<string | undefined>;
+    readonly toggleClassName: InputSignal<string | undefined>;
+    readonly treeColumnKey: InputSignal<string | undefined>;
+    // @internal
+    protected readonly treeEntry: Signal<TreeEntry_2<unknown> | undefined>;
+    // @internal
+    protected readonly wrapperStyle: Signal<    {
+    paddingInlineStart?: string;
+    display: string;
+    alignItems: string;
+    gap: string;
+    }>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTreeCellChrome, "adapt-tree-cell-chrome", never, {
+        "entry": {
+            "alias": "entry";
+            "required": false;
+            "isSignal": true;
+        };
+        "columnKey": {
+            "alias": "columnKey";
+            "required": true;
+            "isSignal": true;
+        };
+        "treeColumnKey": {
+            "alias": "treeColumnKey";
+            "required": false;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "onToggle": {
+            "alias": "onToggle";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "toggleClassName": {
+            "alias": "toggleClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "spacerClassName": {
+            "alias": "spacerClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, ["*"], true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTreeCellChrome, never>;
+}
+
+// @public
+export class AdaptTreeToggleChrome {
+    // @internal
+    protected readonly buttonProps: Signal<TreeToggleButtonProps | undefined>;
+    readonly entry: InputSignal<TreeEntry_2<unknown>>;
+    readonly labels: InputSignal<TableLabels_2 | undefined>;
+    readonly onToggle: InputSignal<(id: string) => void>;
+    readonly slots: InputSignal<TreeToggleSlots>;
+    readonly spacerClassName: InputSignal<string | undefined>;
+    readonly toggleClassName: InputSignal<string | undefined>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTreeToggleChrome, "adapt-tree-toggle-chrome", never, {
+        "entry": {
+            "alias": "entry";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "onToggle": {
+            "alias": "onToggle";
+            "required": true;
+            "isSignal": true;
+        };
+        "toggleClassName": {
+            "alias": "toggleClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "spacerClassName": {
+            "alias": "spacerClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTreeToggleChrome, never>;
+}
+
+// @public
 export type AngularFilterTreeDisclosureProps = FilterTreeDisclosureProps<TemplateRef<unknown>>;
 
 // @public
@@ -2417,6 +2550,9 @@ export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
 };
 
 // @public
+export function injectLazyChildren<TRow>(options: LazyChildrenInjectOptions<TRow>): Signal<LazyChildrenState<TRow>>;
+
+// @public
 export function injectMeasuredWindowScrollMargin(options: MeasuredWindowScrollMarginOptions): Signal<number>;
 
 // @public
@@ -2465,6 +2601,12 @@ export function injectTableVirtualizer<TRow>(options: TableVirtualizationOptions
 };
 
 // @public
+export function injectTree<TRow>(options: TreeOptions<TRow>): Signal<TableTree<TRow> | undefined> | undefined;
+
+// @public
+export function injectTreeExpansion(options?: TreeExpansionOptions): Signal<TreeExpansionState>;
+
+// @public
 export function injectUrlSlice<T, TConfig extends object>(options: UrlSliceOptions, spec: UrlSliceSpec<T, TConfig>, config: MaybeSignal<TConfig>): UrlSlice<T>;
 
 export { insertExtraRows }
@@ -2504,6 +2646,13 @@ export interface KeyedVirtualizationOptions {
     readonly overscan?: Signal<number> | number;
     readonly scrollMargin?: Signal<number> | number;
 }
+
+// @public
+export interface LazyChildrenInjectOptions<TRow> extends LazyChildrenOptions<TRow> {
+    readonly injector?: Injector;
+}
+
+export { LazyChildrenState }
 
 export { listFilterValues }
 
@@ -2992,6 +3141,16 @@ export { TableQueryParams }
 export { TableSource }
 
 // @public
+export interface TableTree<TRow> {
+    readonly allEntries: readonly TreeEntry<TRow>[];
+    readonly columnKey: string | undefined;
+    readonly entries: readonly TreeEntry<TRow>[];
+    readonly expansion: TreeExpansionState;
+    readonly failedIds: ReadonlySet<string>;
+    readonly loadingIds: ReadonlySet<string>;
+}
+
+// @public
 export interface TableUrlState extends Pick<TableViewStore, "setPage" | "setLimit" | "setSort" | "setGroupBy" | "initializeGroupBy" | "setGroupAggregateOverrides" | "toggleSortLevel" | "setSearch" | "setExtra" | "setExtras" | "setFilterTree" | "clearExtras" | "clearAll"> {
     readonly state: Signal<TableViewState>;
 }
@@ -3033,6 +3192,56 @@ export { TextOp }
 export { TOOLBAR_EXTRAS }
 
 export { ToolbarExtrasSlotProps }
+
+// @public
+export function tree<TRow>(options?: TreeFeatureOptions<TRow>): AdaptTableFeature;
+
+export { TREE_CELL }
+
+export { TREE_TOGGLE }
+
+export { treeCardStyle }
+
+export { TreeCellProps }
+
+export { TreeEntry }
+
+// @public
+export interface TreeExpansionOptions {
+    readonly expandedIds?: MaybeSignalOptional<readonly string[]>;
+    readonly injector?: Injector;
+    readonly onExpandedIdsChange?: (ids: string[]) => void;
+}
+
+export { TreeExpansionState }
+
+// @public
+export interface TreeFeatureOptions<TRow> {
+    readonly expandedIds?: readonly string[];
+    readonly getChildren?: (row: TRow) => readonly TRow[] | undefined;
+    readonly getParentId?: (row: TRow) => string | undefined;
+    readonly hasChildren?: (row: TRow) => boolean;
+    readonly onExpandedIdsChange?: (ids: string[]) => void;
+    readonly onLoadChildren?: (row: TRow) => void | Promise<void>;
+    readonly treeColumn?: string;
+}
+
+// @public
+export interface TreeOptions<TRow> {
+    readonly features: readonly AdaptTableFeature[];
+    readonly injector?: Injector;
+    readonly source: Signal<TableSource<TRow>>;
+    readonly table: Pick<DataTable<TRow>, "columns" | "rowKey">;
+}
+
+export { TreeToggleButtonProps }
+
+export { TreeToggleProps }
+
+// @public
+export interface TreeToggleSlots {
+    readonly Button: Type<unknown>;
+}
 
 // @public
 export function undoRedoButtons(): AdaptTableFeature;

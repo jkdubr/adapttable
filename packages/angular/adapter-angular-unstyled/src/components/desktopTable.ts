@@ -15,17 +15,22 @@ import {
   ROW_REORDER_HANDLE,
   type RowReorderHandleProps,
   type RowReorderState,
+  type TableTree,
+  TREE_CELL,
+  type TreeCellProps,
 } from "@adapttable/angular";
+import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   type ElementRef,
   input,
+  type TemplateRef,
   viewChild,
 } from "@angular/core";
 
-import type { TableView } from "../dataTable";
+import type { BodyRow, TableView } from "../dataTable";
 import { AdaptRowActions } from "./rowActionButtons";
 
 /**
@@ -46,6 +51,7 @@ import { AdaptRowActions } from "./rowActionButtons";
     AdaptHeader,
     AdaptRowActions,
     AdaptSlot,
+    NgTemplateOutlet,
   ],
   templateUrl: "./desktopTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,9 +78,13 @@ export class AdaptDesktopTable<TRow> {
   protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
   /** The group header slot. @internal */
   protected readonly groupHeaderRowSlot = GROUP_HEADER_ROW;
+  /** The tree column's cell slot. @internal */
+  protected readonly treeCellSlot = TREE_CELL;
 
   private handlePropsCache = new Map<string, RowReorderHandleProps<never>>();
   private handlePropsToken = "";
+  private treeCellCache = new Map<string, TreeCellProps<never>>();
+  private treeCellModel: TableTree<TRow> | undefined;
 
   /**
    * The scroll box that owns `maxHeight`, when virtualization tracks it.
@@ -168,6 +178,41 @@ export class AdaptDesktopTable<TRow> {
       rowCount,
     } as unknown as RowReorderHandleProps<never>;
     this.handlePropsCache.set(key, props);
+    return props;
+  }
+
+  /**
+   * Props for the tree column's cell on one body row, or `undefined` when
+   * that cell is drawn plain. Cached per tree model, so the slot sees the
+   * same object until the tree or the row's content template changes.
+   *
+   * @internal
+   */
+  protected treeCellProps(
+    entry: BodyRow<TRow>,
+    columnKey: string,
+    children: TemplateRef<unknown>
+  ): TreeCellProps<never> | undefined {
+    const view = this.view();
+    const tree = view.tree?.();
+    if (!tree || !view.treeCellFilled || !entry.treeEntry) return undefined;
+    if (columnKey !== tree.columnKey) return undefined;
+    if (tree !== this.treeCellModel) {
+      this.treeCellCache = new Map();
+      this.treeCellModel = tree;
+    }
+    const cached = this.treeCellCache.get(entry.treeEntry.key);
+    if (cached?.children === children) return cached;
+    // Slot props erase the row type: core types every slot's row as `never`.
+    const props = {
+      entry: entry.treeEntry,
+      columnKey,
+      treeColumnKey: tree.columnKey,
+      labels: view.table.labels(),
+      onToggle: tree.expansion.toggle,
+      children,
+    } as unknown as TreeCellProps<never>;
+    this.treeCellCache.set(entry.treeEntry.key, props);
     return props;
   }
 

@@ -78,6 +78,7 @@ import {
   injectRowSelection,
   injectTableData,
   injectTableVirtualization,
+  injectTree,
   insertExtraRows,
   insertExtrasBeforeRows,
   type PaginationMode,
@@ -106,9 +107,12 @@ import {
   type TableQueryHandler,
   type TableQueryParams,
   type TableSource,
+  type TableTree,
   type TableVirtualization,
   TOOLBAR_EXTRAS,
   type ToolbarExtrasSlotProps,
+  TREE_CELL,
+  type TreeEntry,
   urlAdapterFor,
   virtualizeIgnoredOnPage,
   windowGroupedEntries,
@@ -421,16 +425,20 @@ interface BodyWindow<TRow> {
   readonly virtualization: TableVirtualization<TRow>;
   /** The grouped entries in the window, while grouping renders. */
   readonly groupingEntries: readonly GroupedFlatEntry<TRow>[] | undefined;
+  /** The tree entries in the window, while the rows are a tree. */
+  readonly treeEntries: readonly TreeEntry<TRow>[] | undefined;
 }
 
 /**
  * The body window for a composed {@link virtualize} feature, or every row
  * and entry when the feature is absent. A grouped body windows over its
- * entries — headers, footers and leaves — rather than over the rows.
+ * entries — headers, footers and leaves — and a tree over its open nodes,
+ * rather than over the rows.
  */
 function bodyWindowFor<TRow>(options: {
   readonly table: DataTable<TRow>;
   readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
+  readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
   readonly featureOptions: Readonly<Record<string, unknown>>;
   readonly rowKey: (row: TRow) => string;
   readonly maxHeight: number | string | undefined;
@@ -441,6 +449,7 @@ function bodyWindowFor<TRow>(options: {
   const {
     table,
     grouping,
+    tree,
     featureOptions,
     rowKey,
     maxHeight,
@@ -451,14 +460,16 @@ function bodyWindowFor<TRow>(options: {
   const source = table.source;
   const wantVirtualize = featureOptions.virtualize === true;
   const groupEntries = computed(() => grouping?.()?.entries);
+  const treeEntries = computed(() => tree?.()?.entries);
   const bodyChrome = computed(() => {
     const entries = groupEntries();
+    const nodes = treeEntries();
     return {
       body: table.bodyRegion(),
       isPaged: source().paginationMode === "paged",
       source: source(),
       grouping: entries === undefined ? undefined : { entries },
-      tree: undefined,
+      tree: nodes === undefined ? undefined : { entries: nodes },
       isMobile: table.isMobile(),
     };
   });
@@ -480,6 +491,7 @@ function bodyWindowFor<TRow>(options: {
         paddingBottom: 0,
       },
       groupingEntries: groupEntries(),
+      treeEntries: treeEntries(),
     }));
   }
   const sizes = {
@@ -517,8 +529,12 @@ function bodyWindowFor<TRow>(options: {
     injector,
   });
   const keyed = injectKeyedVirtualization({
-    keys: computed(() => (groupEntries() ?? []).map((entry) => entry.key)),
-    enabled: computed(() => kind() === "grouped"),
+    keys: computed(() =>
+      (kind() === "tree" ? (treeEntries() ?? []) : (groupEntries() ?? [])).map(
+        (entry) => entry.key
+      )
+    ),
+    enabled: computed(() => kind() === "grouped" || kind() === "tree"),
     estimateSize,
     overscan,
     scrollMargin,
@@ -528,6 +544,7 @@ function bodyWindowFor<TRow>(options: {
   });
   return computed(() => {
     const entries = groupEntries();
+    const nodes = treeEntries();
     const window = keyed();
     return {
       virtualization: resolveBodyVirtualization(window, flat()),
@@ -535,6 +552,10 @@ function bodyWindowFor<TRow>(options: {
         entries === undefined
           ? undefined
           : windowGroupedEntries(entries, window.indices),
+      treeEntries:
+        nodes === undefined
+          ? undefined
+          : windowGroupedEntries(nodes, window.indices),
     };
   });
 }
@@ -577,6 +598,10 @@ export interface TableView<TRow> {
     Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
   /** Row reorder state, when the feature is composed. */
   readonly reorder: Signal<RowReorderState<TRow>> | undefined;
+  /** The live tree, when `tree()` is composed. */
+  readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
+  /** Whether a kit draws the tree column's cell. */
+  readonly treeCellFilled: boolean;
   /**
    * Cell editing bundle, when an editing feature is composed — state, channel,
    * validation, save tracking and lifecycle observers for the gate.
@@ -1035,6 +1060,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       injector,
     });
     groupingRef.set(grouping);
+    const tree = injectTree<TRow>({ table, source, features, injector });
     const groupingPanel = injectGroupingPanelState({
       table,
       source: viewSource,
@@ -1071,6 +1097,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     const bodyWindow = bodyWindowFor({
       table,
       grouping,
+      tree,
       featureOptions,
       rowKey: (row) => this.rowKey()(row),
       maxHeight: this.maxHeight(),
@@ -1146,7 +1173,10 @@ export class AdaptDataTable<TRow> implements OnInit {
         paddingBottom: window.virtualization.paddingBottom,
         grouping: entries === undefined ? undefined : { entries },
         entries: window.virtualization.rows,
-        tree: undefined,
+        tree:
+          window.treeEntries === undefined
+            ? undefined
+            : { entries: window.treeEntries },
         getRowId: rowKey(),
         columnSpan: bodyColSpan(),
         rows: table.source().rows,
@@ -1198,6 +1228,8 @@ export class AdaptDataTable<TRow> implements OnInit {
       savedViews,
       groupingPanel,
       reorder,
+      tree,
+      treeCellFilled: table.slotFills.has(TREE_CELL.id),
       editing,
       editableCells,
       showActions,

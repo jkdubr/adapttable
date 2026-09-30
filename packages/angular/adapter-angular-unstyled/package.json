@@ -101,6 +101,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-saved-views.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-saved-views.mjs"
     },
+    "./tree": {
+      "types": "./dist/types/adapttable-angular-unstyled-tree.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-tree.mjs"
+    },
     "./virtualize": {
       "types": "./dist/types/adapttable-angular-unstyled-virtualize.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-virtualize.mjs"

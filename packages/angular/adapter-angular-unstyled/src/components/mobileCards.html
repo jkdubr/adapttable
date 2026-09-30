@@ -25,11 +25,20 @@
       }
       @case ("row") {
         @let entry = slot.wiring;
+        @let treeCard = treeCards().get(rowId(entry.row));
         <li
           style="display: block"
           [adaptAttrs]="entry.cardAttrs"
           [attr.data-index]="entry.index"
+          [style.margin-inline-start]="treeCard?.indent ?? null"
         >
+          @if (treeCard) {
+            <ng-container
+              [adaptSlot]="treeToggleSlot"
+              [adaptSlotProps]="treeCard.toggle"
+              [adaptSlotTable]="v.table"
+            />
+          }
           @if (v.selection; as selection) {
             <input
               data-adapttable-part="checkbox"

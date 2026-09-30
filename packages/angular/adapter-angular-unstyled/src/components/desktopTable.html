@@ -149,22 +149,33 @@
                       : v.table.cellAttrs(column)
                   "
                 >
-                  @if (v.editableCells; as editableCells) {
+                  <ng-template #cellContent>
+                    @if (v.editableCells; as editableCells) {
+                      <ng-container
+                        [adaptSlot]="editableCellSlot"
+                        [adaptSlotProps]="
+                          editableCells().get(
+                            rowId(entry.row) + ':' + column.key
+                          )!
+                        "
+                        [adaptSlotTable]="v.table"
+                      />
+                    } @else {
+                      <span
+                        [adaptCell]="column"
+                        [adaptCellRow]="entry.row"
+                        [adaptCellIndex]="entry.index"
+                      ></span>
+                    }
+                  </ng-template>
+                  @if (treeCellProps(entry, column.key, cellContent); as tree) {
                     <ng-container
-                      [adaptSlot]="editableCellSlot"
-                      [adaptSlotProps]="
-                        editableCells().get(
-                          rowId(entry.row) + ':' + column.key
-                        )!
-                      "
+                      [adaptSlot]="treeCellSlot"
+                      [adaptSlotProps]="tree"
                       [adaptSlotTable]="v.table"
                     />
                   } @else {
-                    <span
-                      [adaptCell]="column"
-                      [adaptCellRow]="entry.row"
-                      [adaptCellIndex]="entry.index"
-                    ></span>
+                    <ng-container [ngTemplateOutlet]="cellContent" />
                   }
                 </td>
               }

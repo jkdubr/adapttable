@@ -38,6 +38,12 @@ export {
   AdaptFullscreenButton,
 } from "./components/toolbarExtras";
 export {
+  AdaptTreeButton,
+  AdaptTreeCell,
+  AdaptTreeToggle,
+  type TreeCellSlotProps,
+} from "./components/treeControls";
+export {
   AdaptDataTable,
   type BodyRow,
   type BodySlot,

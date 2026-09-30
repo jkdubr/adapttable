@@ -90,9 +90,14 @@ import { TableLabels } from '@adapttable/angular';
 import { TableQueryHandler } from '@adapttable/angular';
 import { TableQueryParams } from '@adapttable/angular';
 import { TableSource } from '@adapttable/angular';
+import { TableTree } from '@adapttable/angular';
 import { TableVirtualization } from '@adapttable/angular';
 import { TemplateRef } from '@angular/core';
 import { ToolbarExtrasSlotProps } from '@adapttable/angular';
+import { TreeCellProps } from '@adapttable/angular';
+import { TreeToggleButtonProps } from '@adapttable/angular';
+import { TreeToggleProps } from '@adapttable/angular';
+import { TreeToggleSlots } from '@adapttable/angular';
 import { WritableSignal } from '@angular/core';
 
 // @public
@@ -497,6 +502,8 @@ export class AdaptDesktopTable<TRow> {
     protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
     protected scrollBoxStyle(): Record<string, string> | null;
     scrollElement(): HTMLElement | null;
+    protected treeCellProps(entry: BodyRow<TRow>, columnKey: string, children: TemplateRef<unknown>): TreeCellProps<never> | undefined;
+    protected readonly treeCellSlot: FeatureSlotKey<TreeCellProps<never, unknown>>;
     readonly view: InputSignal<TableView<TRow>>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDesktopTable<any>, "adapt-desktop-table", never, {
@@ -855,6 +862,11 @@ export class AdaptMobileCards<TRow> {
     readonly rowKey: InputSignal<(row: TRow) => string>;
     protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
     scrollElement(): HTMLElement | null;
+    protected readonly treeCards: Signal<Map<string, {
+    readonly toggle: TreeToggleProps<never>;
+    readonly indent: string | null;
+    }>>;
+    protected readonly treeToggleSlot: FeatureSlotKey<TreeToggleProps<never>>;
     readonly view: InputSignal<TableView<TRow>>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMobileCards<any>, "adapt-mobile-cards", never, {
@@ -967,6 +979,55 @@ export class AdaptSavedViewsMenu implements OnInit {
 }
 
 // @public
+export class AdaptTreeButton {
+    readonly props: InputSignal<TreeToggleButtonProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTreeButton, "adapt-tree-button", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTreeButton, never>;
+}
+
+// @public
+export class AdaptTreeCell {
+    readonly props: InputSignal<TreeCellSlotProps>;
+    // @internal (undocumented)
+    protected readonly slots: TreeToggleSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTreeCell, "adapt-tree-cell", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTreeCell, never>;
+}
+
+// @public
+export class AdaptTreeToggle {
+    readonly props: InputSignal<TreeToggleProps<unknown>>;
+    // @internal (undocumented)
+    protected readonly slots: TreeToggleSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTreeToggle, "adapt-tree-toggle", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTreeToggle, never>;
+}
+
+// @public
 export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
     readonly cardAttrs: Attrs;
     readonly rowAttrs: Attrs;
@@ -1054,8 +1115,13 @@ export interface TableView<TRow> {
     readonly showActions: Signal<boolean>;
     readonly table: DataTable<TRow>;
     readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
+    readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
+    readonly treeCellFilled: boolean;
     readonly virtualization: Signal<TableVirtualization<TRow>>;
 }
+
+// @public
+export type TreeCellSlotProps = TreeCellProps<unknown, TemplateRef<unknown>>;
 
 // (No @packageDocumentation comment for this package)
 

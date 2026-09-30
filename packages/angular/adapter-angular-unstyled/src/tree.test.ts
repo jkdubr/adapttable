@@ -1,0 +1,234 @@
+/**
+ * Tree rows through the unstyled table: the chevron in the tree column, the
+ * indent by depth, children fetched as a node opens, and the same disclosure
+ * at the head of each phone card.
+ */
+import {
+  type AdaptTableFeature,
+  type ColumnDef,
+  tree as bindingTree,
+} from "@adapttable/angular";
+import { tree } from "@adapttable/angular-unstyled/tree";
+import { virtualize } from "@adapttable/angular-unstyled/virtualize";
+import { Component, signal } from "@angular/core";
+import { TestBed } from "@angular/core/testing";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { AdaptDataTable } from "./dataTable";
+
+interface Person {
+  id: string;
+  name: string;
+  team: string;
+  reports?: Person[];
+}
+
+const PEOPLE: Person[] = [
+  {
+    id: "1",
+    name: "Ada",
+    team: "Core",
+    reports: [
+      {
+        id: "2",
+        name: "Grace",
+        team: "Core",
+        reports: [{ id: "3", name: "Linus", team: "Web" }],
+      },
+    ],
+  },
+  { id: "4", name: "Alan", team: "Data" },
+];
+
+const COLUMNS: ColumnDef<Person>[] = [
+  { key: "name", accessor: (row) => row.name },
+  { key: "team", accessor: (row) => row.team },
+];
+
+let mobile = false;
+let onLoadChildren: ((row: Person) => Promise<void>) | undefined;
+let features: readonly AdaptTableFeature[] | undefined;
+
+@Component({
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+      [forceMobile]="mobile"
+      paginationMode="infinite"
+      [maxHeight]="400"
+      [features]="features"
+    />
+  `,
+})
+class Host {
+  readonly rows = signal<readonly Person[]>(PEOPLE);
+  readonly columns = COLUMNS;
+  readonly rowKey = (row: Person) => row.id;
+  readonly mobile = mobile;
+  readonly features = features ?? [
+    tree<Person>({
+      getChildren: (row) => row.reports,
+      hasChildren: (row) => row.reports !== undefined || row.id === "4",
+      onLoadChildren,
+    }),
+  ];
+}
+
+async function mount() {
+  const fixture = TestBed.createComponent(Host);
+  document.body.append(fixture.nativeElement as HTMLElement);
+  fixture.autoDetectChanges();
+  await fixture.whenStable();
+  return {
+    host: fixture.componentInstance,
+    settle: () => fixture.whenStable(),
+  };
+}
+
+const parts = (name: string) => [
+  ...document.querySelectorAll<HTMLElement>(`[data-adapttable-part="${name}"]`),
+];
+const rowIds = (part: "row" | "card") =>
+  parts(part).map((row) => row.getAttribute("data-row-id"));
+const toggleOf = (container: Element) =>
+  container.querySelector<HTMLButtonElement>(
+    '[data-adapttable-part="tree-toggle"]'
+  )!;
+const rowById = (id: string) =>
+  document.querySelector(`[data-adapttable-part="row"][data-row-id="${id}"]`)!;
+
+afterEach(() => {
+  document.body.replaceChildren();
+  mobile = false;
+  onLoadChildren = undefined;
+  features = undefined;
+});
+
+describe("the unstyled table's tree", () => {
+  it("starts folded, with a chevron in the tree column only", async () => {
+    await mount();
+    expect(rowIds("row")).toEqual(["1", "4"]);
+    const cells = rowById("1").querySelectorAll(
+      '[data-adapttable-part="cell"]'
+    );
+    const treeCell = cells[0]!.querySelector(
+      '[data-adapttable-part="tree-cell"]'
+    );
+    expect(treeCell?.textContent).toContain("Ada");
+    expect(
+      cells[1]!.querySelector('[data-adapttable-part="tree-cell"]')
+    ).toBeNull();
+    expect(cells[1]!.textContent.trim()).toBe("Core");
+    const toggle = toggleOf(rowById("1"));
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(toggle.getAttribute("aria-label")).toBe("Expand row");
+  });
+
+  it("opens a node to show its children, indented by depth", async () => {
+    const { settle } = await mount();
+    toggleOf(rowById("1")).click();
+    await settle();
+    expect(rowIds("row")).toEqual(["1", "2", "4"]);
+    expect(toggleOf(rowById("1")).getAttribute("aria-expanded")).toBe("true");
+    const child = rowById("2").querySelector<HTMLElement>(
+      '[data-adapttable-part="tree-cell"]'
+    )!;
+    expect(child.style.paddingInlineStart).toBe("1.5rem");
+
+    toggleOf(rowById("2")).click();
+    await settle();
+    expect(rowIds("row")).toEqual(["1", "2", "3", "4"]);
+    // A leaf holds the chevron's place, so its name lines up.
+    expect(
+      rowById("3").querySelector('[data-adapttable-part="tree-spacer"]')
+    ).not.toBeNull();
+
+    toggleOf(rowById("1")).click();
+    await settle();
+    expect(rowIds("row")).toEqual(["1", "4"]);
+  });
+
+  it("fetches a node's children as it opens, and shows it loading", async () => {
+    let finish!: () => void;
+    onLoadChildren = vi.fn(
+      () =>
+        new Promise<void>((done) => {
+          finish = done;
+        })
+    );
+    const { host, settle } = await mount();
+    toggleOf(rowById("4")).click();
+    await settle();
+    expect(onLoadChildren).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "4" })
+    );
+    expect(toggleOf(rowById("4")).getAttribute("aria-busy")).toBe("true");
+
+    host.rows.set([
+      PEOPLE[0]!,
+      { ...PEOPLE[1]!, reports: [{ id: "5", name: "Barbara", team: "Data" }] },
+    ]);
+    finish();
+    await settle();
+    await vi.waitFor(() => {
+      expect(toggleOf(rowById("4")).getAttribute("aria-busy")).toBeNull();
+    });
+    expect(rowIds("row")).toEqual(["1", "4", "5"]);
+  });
+
+  it("leads each phone card with the disclosure, and indents a child card", async () => {
+    mobile = true;
+    const { settle } = await mount();
+    const card = (id: string) =>
+      document.querySelector<HTMLElement>(
+        `[data-adapttable-part="card"][data-row-id="${id}"]`
+      )!;
+    expect(rowIds("card")).toEqual(["1", "4"]);
+    toggleOf(card("1")).click();
+    await settle();
+    expect(rowIds("card")).toEqual(["1", "2", "4"]);
+    expect(card("2").style.marginInlineStart).toBe("1.25rem");
+    expect(card("1").style.marginInlineStart).toBe("");
+    expect(toggleOf(card("1")).getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("windows a virtualized tree over its open nodes", async () => {
+    // jsdom lays nothing out: give the scroll box a height to window into.
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(
+      function (this: HTMLElement) {
+        return this.dataset.adapttablePart === "scroll-box" ? 200 : 40;
+      }
+    );
+    features = [
+      tree<Person>({ getChildren: (row) => row.reports }),
+      virtualize({ estimateRowSize: 40 }),
+    ];
+    const { settle } = await mount();
+    expect(rowIds("row")).toEqual(["1", "4"]);
+    toggleOf(rowById("1")).click();
+    await settle();
+    expect(rowIds("row")).toEqual(["1", "2", "4"]);
+    expect(
+      rowById("2").querySelector('[data-adapttable-part="tree-cell"]')
+    ).not.toBeNull();
+  });
+
+  it("draws the rows flat when no hierarchy is given", async () => {
+    features = [tree<Person>()];
+    await mount();
+    expect(rowIds("row")).toEqual(["1", "4"]);
+    expect(parts("tree-cell")).toEqual([]);
+  });
+
+  it("walks the tree but draws each cell plain when no kit fills the tree cell", async () => {
+    features = [bindingTree<Person>({ getChildren: (row) => row.reports })];
+    await mount();
+    expect(rowIds("row")).toEqual(["1", "4"]);
+    expect(parts("tree-cell")).toEqual([]);
+    expect(rowById("1").textContent).toContain("Ada");
+  });
+});
