@@ -11,6 +11,7 @@ import {
   inject,
   input,
   Renderer2,
+  RendererStyleFlags2,
 } from "@angular/core";
 
 import { primitiveText } from "./columnDef";
@@ -57,6 +58,63 @@ const ATTRIBUTE_NAMES: Readonly<Record<string, string>> = {
  * an empty `draggable` is not draggable.
  */
 const ENUMERATED = new Set(["draggable", "spellcheck", "contenteditable"]);
+
+/**
+ * Style properties whose number is a plain number, not a length — React's
+ * list, so a style record means the same in every binding.
+ */
+const UNITLESS = new Set([
+  "animationIterationCount",
+  "aspectRatio",
+  "borderImageOutset",
+  "borderImageSlice",
+  "borderImageWidth",
+  "columnCount",
+  "columns",
+  "fillOpacity",
+  "flex",
+  "flexGrow",
+  "flexShrink",
+  "floodOpacity",
+  "fontWeight",
+  "gridArea",
+  "gridColumn",
+  "gridColumnEnd",
+  "gridColumnStart",
+  "gridRow",
+  "gridRowEnd",
+  "gridRowStart",
+  "lineClamp",
+  "lineHeight",
+  "opacity",
+  "order",
+  "orphans",
+  "scale",
+  "stopOpacity",
+  "strokeDasharray",
+  "strokeDashoffset",
+  "strokeMiterlimit",
+  "strokeOpacity",
+  "strokeWidth",
+  "tabSize",
+  "widows",
+  "zIndex",
+  "zoom",
+]);
+
+/** A style key as CSS spells it: `insetInlineStart` → `inset-inline-start`. */
+function cssProperty(key: string): string {
+  if (key.startsWith("--")) return key;
+  return key.replaceAll(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
+
+/** A style value as CSS reads it: a length's number in pixels. */
+function cssValue(key: string, value: unknown): unknown {
+  if (typeof value !== "number" || key.startsWith("--") || UNITLESS.has(key)) {
+    return value;
+  }
+  return `${String(value)}px`;
+}
 
 /** The attribute text for a value, or `null` to remove the attribute. */
 function attributeText(name: string, value: unknown): string | null {
@@ -148,10 +206,16 @@ export class AdaptAttrs {
   private applyStyle(style: unknown): Set<string> {
     const set = new Set<string>();
     const entries = Object.entries((style ?? {}) as Record<string, unknown>);
-    for (const [property, value] of entries) {
+    for (const [key, value] of entries) {
       if (value === undefined || value === null) continue;
+      const property = cssProperty(key);
       set.add(property);
-      this.renderer.setStyle(this.element.nativeElement, property, value);
+      this.renderer.setStyle(
+        this.element.nativeElement,
+        property,
+        cssValue(key, value),
+        RendererStyleFlags2.DashCase
+      );
     }
     return set;
   }
@@ -167,7 +231,9 @@ export class AdaptAttrs {
       if (!attributes.has(name)) this.renderer.removeAttribute(host, name);
     }
     for (const property of this.styles) {
-      if (!styles.has(property)) this.renderer.removeStyle(host, property);
+      if (!styles.has(property)) {
+        this.renderer.removeStyle(host, property, RendererStyleFlags2.DashCase);
+      }
     }
     for (const name of this.handlers.keys()) {
       if (!(name in attrs)) this.handlers.delete(name);

@@ -67,6 +67,25 @@ describe("AdaptAttrs", () => {
     expect(button.style.minWidth).toBe("");
   });
 
+  it("writes a numeric length in pixels, and a unitless property as it is", async () => {
+    const { button } = await mount({
+      style: {
+        top: 48,
+        insetInlineStart: 150,
+        width: 0,
+        zIndex: 3,
+        opacity: 0.5,
+        flexGrow: 2,
+      },
+    });
+    expect(button.style.top).toBe("48px");
+    expect(button.style.getPropertyValue("inset-inline-start")).toBe("150px");
+    expect(button.style.width).toBe("0px");
+    expect(button.style.zIndex).toBe("3");
+    expect(button.style.opacity).toBe("0.5");
+    expect(button.style.flexGrow).toBe("2");
+  });
+
   it("sets value as the property", async () => {
     const { button, update } = await mount({ value: "one" });
     expect(button.value).toBe("one");
