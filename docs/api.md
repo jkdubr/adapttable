@@ -2973,12 +2973,14 @@ comes from a kit through a slot.
 
 - `injectFrontendData(options)` is the in-memory tier: it takes
   `FrontendDataOptions` (the rows, as a value or a signal, plus the URL-state
-  options) and returns a signal of the core `TableSource`.
+  options, and `isLoading`, `isFetching`, `error` and `refetch` to show when
+  the rows came from a request) and returns a signal of the core
+  `TableSource`.
 - `injectServerData(options)` is the server tier: it takes
   `ServerDataOptions` — the page the host fetched (`rows`, `total`, and
   `loading`, `error`, `nextCursor` as values or signals), what the endpoint
-  `supports`, and `onQueryChange` — and returns a signal of the core
-  `TableSource`. `onQueryChange` receives one consolidated query per real
+  `supports`, and `onQueryChange`, a `TableQueryHandler` or a signal of one —
+  and returns a signal of the core `TableSource`. `onQueryChange` receives one consolidated query per real
   change, once on first render with the URL-restored values; the request it
   supersedes has its `signal` aborted, and so does the one in flight when the
   injection context is destroyed. `isLoading` is the first load only; in
@@ -2995,6 +2997,16 @@ comes from a kit through a slot.
   mode the table shows the last page, in infinite mode every page so far, and
   `fetchNextPage` appends. With `supports.cursor` and `nextCursor`, paging
   forward sends the token the last page returned.
+- `injectTableData(options)` chooses the tier a table runs on from
+  `TableDataOptions`: a prebuilt `source`; `data` with `onQueryChange` (or
+  `mode: "server"`), which the server tier asks the host to fetch; or `data`
+  alone, which the frontend tier searches, sorts and pages — and with
+  `mode: "frontend"`, `onQueryChange` is told of each change, not of the
+  first render. Given the filter `engine`, it merges the declared `filters`
+  with the columns' `filter` shorthands, loads each filter's own option list
+  once, and counts checklist facets from the rows when no server answered
+  them. It returns `TableDataResult`: the `source` and the filter `runtime`,
+  as signals.
 - `injectTableUrlState(options)` is the URL-synced view state: a
   `TableUrlState` with a `state` signal and the store's setters, configured by
   `TableUrlStateOptions`. `ADAPTTABLE_URL_ADAPTER` is the injection token that
@@ -3146,7 +3158,10 @@ comes from a kit through a slot.
 
 `@adapttable/angular-unstyled` is the Angular table drawn with native HTML;
 it is private and not published. `AdaptDataTable` (`<adapt-data-table>`)
-takes the rows, columns and row key as inputs and renders search, sorting,
+takes the rows, columns and row key as inputs — or a prebuilt `source`, or
+the page a host fetches through `onQueryChange` with `total`, `loading`,
+`error`, `supports`, `aggregates`, `responseKey`, `facets` and `facetKeys`,
+the tier chosen by `injectTableData` and `mode` — and renders search, sorting,
 paging, the phone card layout, row selection and keyboard cell navigation
 with the `data-adapttable-part` names every kit shares. `AdaptDesktopTable`
 and `AdaptMobileCards` are the desktop body and phone card list;

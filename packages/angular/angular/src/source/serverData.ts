@@ -40,6 +40,17 @@ import {
 } from "../url/tableUrlState";
 
 /**
+ * What the server tier calls with each new query: run the request, and abort
+ * it when `info.signal` says a newer query superseded it.
+ *
+ * @public
+ */
+export type TableQueryHandler = (
+  query: TableQuery,
+  info: { signal: AbortSignal; key: string }
+) => void | Promise<void>;
+
+/**
  * Options for {@link injectServerData}.
  *
  * @public
@@ -85,12 +96,10 @@ export interface ServerDataOptions<TRow> extends Omit<
   /**
    * Called with the consolidated query whenever it changes — including once
    * on first render with the URL-restored values. The previous call's
-   * `signal` is aborted when a newer query supersedes it.
+   * `signal` is aborted when a newer query supersedes it. A signal holding
+   * none sends nothing.
    */
-  readonly onQueryChange?: (
-    query: TableQuery,
-    info: { signal: AbortSignal; key: string }
-  ) => void | Promise<void>;
+  readonly onQueryChange?: MaybeSignalOptional<TableQueryHandler>;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }
@@ -151,7 +160,7 @@ export function injectServerData<TRow>(
         responseKey: readMaybe(options.responseKey),
         expandedIds: readMaybe(options.expandedIds),
         facetKeys: readMaybe(options.facetKeys),
-        onQueryChange: options.onQueryChange,
+        onQueryChange: readMaybe(options.onQueryChange),
       },
       { ...url.state(), setPage: url.setPage }
     );

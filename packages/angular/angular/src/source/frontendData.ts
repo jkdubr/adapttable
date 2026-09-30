@@ -61,6 +61,14 @@ export interface FrontendDataOptions<TRow> extends Omit<
   readonly locale?: MaybeSignalOptional<string>;
   /** Pagination mode. Defaults to `"auto"` (mobile → infinite). */
   readonly paginationMode?: MaybeSignal<PaginationMode>;
+  /** A loading flag to show, when the rows come from a request. */
+  readonly isLoading?: MaybeSignalOptional<boolean>;
+  /** A fetching flag to show, when the rows come from a request. */
+  readonly isFetching?: MaybeSignalOptional<boolean>;
+  /** A failure to show, when the rows come from a request. */
+  readonly error?: MaybeSignalOptional<Error | null>;
+  /** Re-run the request the rows came from. */
+  readonly refetch?: () => Promise<unknown> | void;
   /** Force the mobile state instead of reading the viewport. */
   readonly forceMobile?: MaybeSignalOptional<boolean>;
   /** The mobile breakpoint in pixels. Defaults to 768. */
@@ -133,14 +141,15 @@ export function injectFrontendData<TRow>(
       allFilteredRows: current.allFilteredRows,
       allSearchedRows: current.allSearchedRows,
       total: current.total,
-      isLoading: false,
-      isFetching: false,
+      isLoading: readMaybe(options.isLoading) ?? false,
+      isFetching: readMaybe(options.isFetching) ?? false,
       isFetchingNextPage: false,
       hasNextPage: current.hasNextPage,
       fetchNextPage: () => {
         if (current.hasNextPage) url.setPage(current.page + 1);
       },
-      error: null,
+      error: readMaybe(options.error) ?? null,
+      refetch: options.refetch,
       paginationMode: mode(),
       page: current.page,
       limit: state.limit,

@@ -41,12 +41,13 @@ import {
   estimateBodyItemSize,
   type ExportCsvOptions,
   type ExtraFilters,
+  type FacetMap,
   featureOptionsOf,
   FILTER_DRAWER,
+  FILTER_ENGINE_IMPL,
   FILTER_HEADER,
   FILTER_POPOVER,
   type FilterDef,
-  filterRuntimeFor,
   FILTERS_FORM,
   FILTERS_ICON,
   type FilterTypeSpec,
@@ -65,7 +66,6 @@ import {
   injectDensity,
   injectEditValidation,
   injectExportCsv,
-  injectFrontendData,
   injectFullscreen,
   injectGridFocus,
   injectGrouping,
@@ -76,10 +76,13 @@ import {
   injectRowEditing,
   injectRowReorder,
   injectRowSelection,
+  injectTableData,
   injectTableVirtualization,
   insertExtraRows,
   insertExtrasBeforeRows,
   type PaginationMode,
+  type QueryAggregate,
+  type QuerySupport,
   resolveBodyVirtualization,
   resolveEditingArming,
   resolveRowEditTrigger,
@@ -100,7 +103,9 @@ import {
   type TableDensity,
   type TableGrouping,
   type TableLabels,
+  type TableQueryHandler,
   type TableQueryParams,
+  type TableSource,
   type TableVirtualization,
   TOOLBAR_EXTRAS,
   type ToolbarExtrasSlotProps,
@@ -633,8 +638,45 @@ export interface TableView<TRow> {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdaptDataTable<TRow> implements OnInit {
-  /** Every row. The host owns the array. */
-  readonly data = input.required<readonly TRow[]>();
+  /**
+   * The rows: every row for a table that searches, sorts and pages them
+   * itself, or the current page when `onQueryChange` fetches it. The host
+   * owns the array.
+   */
+  readonly data = input<readonly TRow[]>();
+  /**
+   * A prebuilt source — `injectQuerySource`'s, or any `TableSource` — in
+   * place of `data`. Read once.
+   */
+  readonly source = input<Signal<TableSource<TRow>> | TableSource<TRow>>();
+  /**
+   * `"server"` makes `onQueryChange` fetch the rows; `"frontend"` keeps the
+   * table's own processing and makes `onQueryChange` a notification. Absent:
+   * `data` with `onQueryChange` is server, `data` alone is frontend.
+   */
+  readonly mode = input<"frontend" | "server">();
+  /**
+   * Called with one consolidated query per real change: on the server tier
+   * the host fetches that page and the superseded request's `signal` is
+   * aborted; on the frontend tier it is told what the reader did.
+   */
+  readonly onQueryChange = input<TableQueryHandler>();
+  /** Server tier: the row count across every page. */
+  readonly total = input<number>();
+  /** A request in flight. */
+  readonly loading = input<boolean>();
+  /** A failure to show. */
+  readonly error = input<Error | null>();
+  /** Server tier: what the endpoint can answer beyond the baseline query. */
+  readonly supports = input<QuerySupport>();
+  /** Server tier: aggregates to ask the endpoint for. */
+  readonly aggregates = input<readonly QueryAggregate[]>();
+  /** Server tier: the `key` of the query the current `data` answers. */
+  readonly responseKey = input<string>();
+  /** Server tier: distinct-value counts from the last fetch. */
+  readonly facets = input<FacetMap>();
+  /** Server tier: filter keys to count; defaults to every checklist filter. */
+  readonly facetKeys = input<readonly string[]>();
   /** The columns, in order. */
   readonly columns = input.required<readonly ColumnDef<TRow>[]>();
   /** A row's stable id. */
@@ -787,18 +829,6 @@ export class AdaptDataTable<TRow> implements OnInit {
     const declaredFilters = featureOptions.filters;
     const filtersOn = Array.isArray(declaredFilters);
     const headerOn = featureOptions.headerFilters === true;
-    const runtime =
-      filtersOn || headerOn
-        ? filterRuntimeFor<TRow>({
-            columns: this.columns,
-            defs: filtersOn
-              ? (declaredFilters as FilterDef<TRow>[])
-              : undefined,
-            data: this.data,
-            filterTypes: featureOptions.filterTypes as
-              FilterTypeSpec[] | undefined,
-          })
-        : undefined;
     // Filled once the table exists; the table reads the count lazily.
     const filtersRef: { current?: FiltersView } = {};
     // One URL backend for the table, its density and its saved views — a
@@ -806,21 +836,33 @@ export class AdaptDataTable<TRow> implements OnInit {
     const urlAdapter = urlAdapterFor({ urlSync: this.urlSync() }, injector);
     const viewportMobile = injectIsMobile({ injector });
     const isMobile = computed(() => this.forceMobile() ?? viewportMobile());
-    const source = injectFrontendData<TRow>({
+    const prebuilt = this.source();
+    const data = injectTableData<TRow>({
+      source: prebuilt,
       data: this.data,
+      mode: this.mode,
+      onQueryChange: this.onQueryChange,
+      total: this.total,
+      loading: this.loading,
+      error: this.error,
+      supports: this.supports,
+      aggregates: this.aggregates,
+      responseKey: this.responseKey,
+      facets: this.facets,
+      facetKeys: this.facetKeys,
       columns: this.columns,
+      engine: filtersOn || headerOn ? FILTER_ENGINE_IMPL : undefined,
+      filters: filtersOn ? (declaredFilters as FilterDef<TRow>[]) : undefined,
+      filterTypes: featureOptions.filterTypes as FilterTypeSpec[] | undefined,
       getRowId: (row) => this.rowKey()(row),
       forceMobile: isMobile,
       urlAdapter,
       urlKey: this.urlKey(),
       defaults: this.defaults(),
-      paginationMode: this.paginationMode(),
-      filterFn: runtime?.filterFn,
-      filterTreeFn: runtime?.filterTreeFn,
-      arrayExtraKeys: runtime?.arrayExtraKeys,
-      numberExtraKeys: runtime?.numberExtraKeys,
+      paginationMode: this.paginationMode() ?? "auto",
       injector,
     });
+    const source = data.source;
     const declaredBulk = featureOptions.bulkActions;
     const bulk = Array.isArray(declaredBulk)
       ? (declaredBulk as BulkAction[])
@@ -865,21 +907,22 @@ export class AdaptDataTable<TRow> implements OnInit {
       onColumnRename: this.onColumnRename(),
       injector,
     });
-    const filters = runtime
-      ? filtersViewFor({
-          table,
-          source,
-          runtime: runtime.runtime,
-          mode: this.filtersMode(),
-          button: filtersOn,
-          header: headerOn,
-          closeHeaderFilterOnSelect: this.closeHeaderFilterOnSelect(),
-          dir: table.dir,
-          extraChips: this.extraChips,
-          form: this.filtersForm,
-          trigger: this.filtersTrigger,
-        })
-      : undefined;
+    const filters =
+      filtersOn || headerOn
+        ? filtersViewFor({
+            table,
+            source,
+            runtime: data.runtime,
+            mode: this.filtersMode(),
+            button: filtersOn,
+            header: headerOn,
+            closeHeaderFilterOnSelect: this.closeHeaderFilterOnSelect(),
+            dir: table.dir,
+            extraChips: this.extraChips,
+            form: this.filtersForm,
+            trigger: this.filtersTrigger,
+          })
+        : undefined;
     filtersRef.current = filters;
     const confirm = this.confirm() ?? defaultConfirm;
     const rowActions = rowActionsFor<TRow>({

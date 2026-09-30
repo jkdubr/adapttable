@@ -99,11 +99,13 @@ import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
 import { FILTER_DRAWER } from '@adapttable/core/binding';
+import { FILTER_ENGINE_IMPL } from '@adapttable/core';
 import { FILTER_HEADER } from '@adapttable/core/binding';
 import { FILTER_POPOVER } from '@adapttable/core/binding';
 import { filterColumnMenuRows } from '@adapttable/core/binding';
 import { FilterDef } from '@adapttable/core';
 import { filterDefForColumn } from '@adapttable/core';
+import { FilterEngine } from '@adapttable/core';
 import { FilterFormSource } from '@adapttable/core';
 import { FilterHeaderControlProps } from '@adapttable/core/binding';
 import { filterLabel } from '@adapttable/core';
@@ -574,7 +576,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "setExtra" | "setExtras" | "allFilteredRows" | "facets" | "extra">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "facets" | "extra" | "setExtra" | "setExtras">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -820,7 +822,7 @@ export class AdaptFilterTreeChrome<TRow> {
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly registry: InputSignal<FilterTypeRegistry>;
     readonly slots: InputSignal<FilterTreeSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "setFilterTree" | "filterTree">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "filterTree" | "setFilterTree">>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterTreeChrome<any>, "adapt-filter-tree-chrome", never, {
         "defs": {
@@ -1885,6 +1887,8 @@ export { ExtraFilters }
 
 export { eyeIcon }
 
+export { FacetMap }
+
 // @public
 export function featureOptionsOf(features: readonly AdaptTableFeature[]): Readonly<Record<string, unknown>>;
 
@@ -1893,6 +1897,8 @@ export { FeatureRender }
 export { FeatureSlotKey }
 
 export { FILTER_DRAWER }
+
+export { FILTER_ENGINE_IMPL }
 
 export { FILTER_HEADER }
 
@@ -1990,6 +1996,7 @@ export interface FromStoreOptions {
 export interface FrontendDataOptions<TRow> extends Omit<TableUrlStateOptions, "injector"> {
     readonly columns?: MaybeSignal<readonly ColumnMetadata<TRow>[]>;
     readonly data: MaybeSignal<readonly TRow[]>;
+    readonly error?: MaybeSignalOptional<Error | null>;
     readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     readonly filterTreeFn?: (row: TRow, tree: QueryFilterGroup) => boolean;
     readonly forceMobile?: MaybeSignalOptional<boolean>;
@@ -1997,9 +2004,12 @@ export interface FrontendDataOptions<TRow> extends Omit<TableUrlStateOptions, "i
     readonly getSearchText?: (row: TRow) => string;
     readonly getSortValue?: (row: TRow, columnKey: string) => SortableValue;
     readonly injector?: Injector;
+    readonly isFetching?: MaybeSignalOptional<boolean>;
+    readonly isLoading?: MaybeSignalOptional<boolean>;
     readonly locale?: MaybeSignalOptional<string>;
     readonly mobileBreakpoint?: number;
     readonly paginationMode?: MaybeSignal<PaginationMode>;
+    readonly refetch?: () => Promise<unknown> | void;
 }
 
 export { FullscreenState }
@@ -2278,6 +2288,9 @@ export function injectSavedViews(options: SavedViewsOptions): SavedViewsState;
 export function injectServerData<TRow>(options: ServerDataOptions<TRow>): Signal<TableSource<TRow>>;
 
 // @public
+export function injectTableData<TRow>(options: TableDataOptions<TRow>): TableDataResult<TRow>;
+
+// @public
 export function injectTableUrlState(options?: TableUrlStateOptions): TableUrlState;
 
 // @public
@@ -2351,6 +2364,8 @@ export { nextPinSide }
 
 export { offersAllMatching }
 
+export { PaginatedResponse }
+
 export { PaginationInfo }
 
 export { PaginationMode }
@@ -2367,6 +2382,8 @@ export { PinSide }
 
 // @public
 export function provideAdaptTableFeatures(...features: readonly AdaptTableFeature[]): EnvironmentProviders;
+
+export { QueryAggregate }
 
 // @public
 export interface QuerySourceOptions<TRow, TParams extends TableQueryParams, TPage> extends Omit<TableUrlStateOptions, "injector"> {
@@ -2386,6 +2403,8 @@ export interface QuerySourceOptions<TRow, TParams extends TableQueryParams, TPag
     readonly selectPage?: PageSelector<TRow, TPage>;
     readonly supports?: MaybeSignalOptional<QuerySupport>;
 }
+
+export { QuerySupport }
 
 // @public
 export function rangeFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<RangeFieldWidget>;
@@ -2635,10 +2654,7 @@ export interface ServerDataOptions<TRow> extends Omit<TableUrlStateOptions, "inj
     readonly loading?: MaybeSignalOptional<boolean>;
     readonly mobileBreakpoint?: number;
     readonly nextCursor?: MaybeSignalOptional<string | null>;
-    readonly onQueryChange?: (query: TableQuery, info: {
-        signal: AbortSignal;
-        key: string;
-    }) => void | Promise<void>;
+    readonly onQueryChange?: MaybeSignalOptional<TableQueryHandler>;
     readonly paginationMode?: MaybeSignal<PaginationMode>;
     readonly responseKey?: MaybeSignalOptional<string>;
     readonly rows: MaybeSignal<readonly TRow[]>;
@@ -2672,6 +2688,42 @@ export { stopCellEditKeyboard }
 
 export { stopEditKeys }
 
+// @public
+export interface TableDataOptions<TRow> extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey"> {
+    readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
+    readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
+    readonly data?: MaybeSignalOptional<readonly TRow[]>;
+    readonly engine?: FilterEngine;
+    readonly error?: MaybeSignalOptional<Error | null>;
+    readonly facetKeys?: MaybeSignalOptional<readonly string[]>;
+    readonly facets?: MaybeSignalOptional<FacetMap>;
+    readonly featureHost?: Signal<FeatureHostState | undefined>;
+    readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
+    readonly filters?: readonly FilterDef<TRow>[];
+    readonly filterTypes?: readonly FilterTypeSpec[];
+    readonly forceMobile?: MaybeSignalOptional<boolean>;
+    readonly getRowId?: (row: TRow) => string;
+    readonly getSearchText?: (row: TRow) => string;
+    readonly getSortValue?: (row: TRow, columnKey: string) => SortableValue;
+    readonly injector?: Injector;
+    readonly loading?: MaybeSignalOptional<boolean>;
+    readonly locale?: MaybeSignalOptional<string>;
+    readonly mobileBreakpoint?: number;
+    readonly mode?: MaybeSignalOptional<"frontend" | "server">;
+    readonly onQueryChange?: MaybeSignalOptional<TableQueryHandler>;
+    readonly paginationMode?: MaybeSignal<PaginationMode>;
+    readonly responseKey?: MaybeSignalOptional<string>;
+    readonly source?: MaybeSignalOptional<TableSource<TRow>>;
+    readonly supports?: MaybeSignalOptional<QuerySupport>;
+    readonly total?: MaybeSignalOptional<number>;
+}
+
+// @public
+export interface TableDataResult<TRow> {
+    readonly runtime: Signal<FilterRuntime<TRow>>;
+    readonly source: Signal<TableSource<TRow>>;
+}
+
 export { TableDensity }
 
 // @public
@@ -2700,6 +2752,14 @@ export interface TableGrouping<TRow> {
 }
 
 export { TableLabels }
+
+export { TableQuery }
+
+// @public
+export type TableQueryHandler = (query: TableQuery, info: {
+    signal: AbortSignal;
+    key: string;
+}) => void | Promise<void>;
 
 export { TableQueryParams }
 

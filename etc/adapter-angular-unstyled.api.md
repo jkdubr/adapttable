@@ -36,6 +36,7 @@ import { editorInputType } from '@adapttable/angular';
 import { editorValidationProps } from '@adapttable/angular';
 import { ElementRef } from '@angular/core';
 import { ExtraFilters } from '@adapttable/angular';
+import { FacetCounts } from '@adapttable/core';
 import { FeatureSlotKey } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
 import { FilterHeaderControlProps } from '@adapttable/angular';
@@ -65,6 +66,8 @@ import { multiDraftFromSelect } from '@adapttable/angular';
 import { OnInit } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
 import { PaginationMode } from '@adapttable/angular';
+import { QueryAggregate } from '@adapttable/angular';
+import { QuerySupport } from '@adapttable/angular';
 import { readMultiDraft } from '@adapttable/angular';
 import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
@@ -84,6 +87,7 @@ import { Signal } from '@angular/core';
 import { TableDensity } from '@adapttable/angular';
 import { TableGrouping } from '@adapttable/angular';
 import { TableLabels } from '@adapttable/angular';
+import { TableQueryHandler } from '@adapttable/angular';
 import { TableQueryParams } from '@adapttable/angular';
 import { TableSource } from '@adapttable/angular';
 import { TableVirtualization } from '@adapttable/angular';
@@ -194,6 +198,7 @@ export class AdaptColumnMenu {
 
 // @public
 export class AdaptDataTable<TRow> implements OnInit {
+    readonly aggregates: InputSignal<readonly QueryAggregate[] | undefined>;
     // @internal
     protected readonly batchEditBarSlot: FeatureSlotKey<BatchEditBarProps<never>>;
     // @internal
@@ -208,7 +213,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     protected readonly columnMenuSlot: FeatureSlotKey<ColumnMenuSlotProps<never>>;
     readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
     readonly confirm: InputSignal<ConfirmHandler | undefined>;
-    readonly data: InputSignal<readonly TRow[]>;
+    readonly data: InputSignal<readonly TRow[] | undefined>;
     readonly defaultColumnLayout: InputSignal<Partial<ColumnLayoutState> | undefined>;
     readonly defaults: InputSignal<(Partial<TableQueryParams> & {
     extra?: ExtraFilters;
@@ -217,7 +222,10 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly desktopTable: Signal<AdaptDesktopTable<any> | undefined>;
     readonly dir: InputSignal<Direction>;
+    readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
+    readonly facetKeys: InputSignal<readonly string[] | undefined>;
+    readonly facets: InputSignal<Readonly<Record<string, FacetCounts>> | undefined>;
     readonly features: InputSignal<readonly AdaptTableFeature[]>;
     // @internal
     protected readonly filtersIcon: IconDescriptor;
@@ -234,18 +242,22 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly groupingPanelSlot: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
     readonly labels: InputSignal<TableLabels | undefined>;
+    readonly loading: InputSignal<boolean | undefined>;
     readonly maxHeight: InputSignal<string | number | undefined>;
     // @internal
     protected readonly mobileCards: Signal<AdaptMobileCards<any> | undefined>;
+    readonly mode: InputSignal<"frontend" | "server" | undefined>;
     ngOnInit(): void;
     // @internal
     protected readonly noResults: Signal<boolean>;
     readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
+    readonly onQueryChange: InputSignal<TableQueryHandler | undefined>;
     readonly paginationMode: InputSignal<PaginationMode | undefined>;
     // @internal
     protected readonly reorderAnnouncerSlot: FeatureSlotKey<    {
     announcement: string;
     }>;
+    readonly responseKey: InputSignal<string | undefined>;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
@@ -253,9 +265,12 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly selectable: InputSignal<boolean>;
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
     readonly selectionChange: OutputEmitterRef<string[]>;
+    readonly source: InputSignal<TableSource<TRow> | Signal<TableSource<TRow>> | undefined>;
+    readonly supports: InputSignal<QuerySupport | undefined>;
     readonly tableLabel: InputSignal<string | undefined>;
     // @internal
     protected readonly toolbarExtrasSlot: FeatureSlotKey<ToolbarExtrasSlotProps>;
+    readonly total: InputSignal<number | undefined>;
     readonly urlKey: InputSignal<string | undefined>;
     readonly urlSync: InputSignal<boolean>;
     // @internal
@@ -264,7 +279,62 @@ export class AdaptDataTable<TRow> implements OnInit {
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptDataTable<any>, "adapt-data-table", never, {
         "data": {
             "alias": "data";
-            "required": true;
+            "required": false;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": false;
+            "isSignal": true;
+        };
+        "mode": {
+            "alias": "mode";
+            "required": false;
+            "isSignal": true;
+        };
+        "onQueryChange": {
+            "alias": "onQueryChange";
+            "required": false;
+            "isSignal": true;
+        };
+        "total": {
+            "alias": "total";
+            "required": false;
+            "isSignal": true;
+        };
+        "loading": {
+            "alias": "loading";
+            "required": false;
+            "isSignal": true;
+        };
+        "error": {
+            "alias": "error";
+            "required": false;
+            "isSignal": true;
+        };
+        "supports": {
+            "alias": "supports";
+            "required": false;
+            "isSignal": true;
+        };
+        "aggregates": {
+            "alias": "aggregates";
+            "required": false;
+            "isSignal": true;
+        };
+        "responseKey": {
+            "alias": "responseKey";
+            "required": false;
+            "isSignal": true;
+        };
+        "facets": {
+            "alias": "facets";
+            "required": false;
+            "isSignal": true;
+        };
+        "facetKeys": {
+            "alias": "facetKeys";
+            "required": false;
             "isSignal": true;
         };
         "columns": {
@@ -638,7 +708,7 @@ export class AdaptGroupHeaderCard {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
@@ -721,7 +791,7 @@ export class AdaptGroupHeaderRow {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {

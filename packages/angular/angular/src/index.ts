@@ -239,7 +239,16 @@ export {
   injectQuerySource,
   type QuerySourceOptions,
 } from "./source/querySource";
-export { injectServerData, type ServerDataOptions } from "./source/serverData";
+export {
+  injectServerData,
+  type ServerDataOptions,
+  type TableQueryHandler,
+} from "./source/serverData";
+export {
+  injectTableData,
+  type TableDataOptions,
+  type TableDataResult,
+} from "./source/tableData";
 export {
   type ExternalStore,
   fromStore,
@@ -300,13 +309,18 @@ export type {
   CellRange,
   Direction,
   ExtraFilters,
+  FacetMap,
   GridCell,
   KeyedVirtualization,
+  PaginatedResponse,
   PaginationInfo,
   PaginationMode,
   PaginationSlot,
+  QueryAggregate,
+  QuerySupport,
   SortDirection,
   TableLabels,
+  TableQuery,
   TableQueryParams,
   TableSource,
   TableVirtualization,

@@ -89,6 +89,7 @@ export {
 } from "@adapttable/core";
 export {
   devWarn,
+  FILTER_ENGINE_IMPL,
   groupAggregateEntries,
   groupedViewSource,
   groupLeafCount,
