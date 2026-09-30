@@ -19754,6 +19754,17 @@ comes from a kit through a slot.
   injection context is destroyed. `isLoading` is the first load only; in
   infinite mode `fetchNextPage` appends; with `supports.cursor` the query
   carries the token the server issued, and paging back retraces them.
+- `injectQuerySource(options)` is the query-library tier: its
+  `QuerySourceOptions.query` is a function that receives the table's params
+  as a signal and returns the host's infinite query — `injectInfiniteQuery`
+  from `@tanstack/angular-query-experimental` (an optional peer), or anything
+  with the `InfiniteQuerySignals` shape; pass a named function so the query's
+  own options type it. It returns a signal of the core `TableSource`. The
+  params follow the view (page, sort, search, filters, grouping) with
+  `baseParams` merged underneath and `sanitizeParams` applied last; in paged
+  mode the table shows the last page, in infinite mode every page so far, and
+  `fetchNextPage` appends. With `supports.cursor` and `nextCursor`, paging
+  forward sends the token the last page returned.
 - `injectTableUrlState(options)` is the URL-synced view state: a
   `TableUrlState` with a `state` signal and the store's setters, configured by
   `TableUrlStateOptions`. `ADAPTTABLE_URL_ADAPTER` is the injection token that

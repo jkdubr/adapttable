@@ -484,6 +484,9 @@ importers:
       '@angular/platform-browser':
         specifier: ^22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
+      '@tanstack/angular-query-experimental':
+        specifier: ^5.102.6
+        version: 5.102.6(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))
       ng-packagr:
         specifier: ^22.2.1
         version: 22.2.1(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(oxc-resolver@11.24.2)(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)
@@ -5412,6 +5415,12 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@tanstack/angular-query-experimental@5.102.6':
+    resolution: {integrity: sha512-PgspS4ZbcMJ1MLsmyb6hwqOAaD4zFapz0kysiOeyoP5Uf2kgRlJVfNFDFI93axseLFT98tzOmfxTJu23f0OyXg==}
+    peerDependencies:
+      '@angular/common': '>=16.0.0'
+      '@angular/core': '>=16.0.0'
+
   '@tanstack/angular-virtual@6.0.6':
     resolution: {integrity: sha512-tftxSBtOg321WeZHlZObczcrmE2sc7uXGbW+1d08LA+CtnCfHG7sSGZqCCa+IDPAvwgPOrBbU2Y/i89xrTitlw==}
     peerDependencies:
@@ -5419,6 +5428,9 @@ packages:
 
   '@tanstack/query-core@5.102.6':
     resolution: {integrity: sha512-jp+GucyQ+fel2ILb8ZLQeqMaAqZL/Bzaj+dKOQiPk4vPdf2rQPEV7heUyEVIhatpY42j4AFHav4DzBa1oTIp/A==}
+
+  '@tanstack/query-devtools@5.102.6':
+    resolution: {integrity: sha512-k5k+iZmHRRZTeON7Gva34+HSdbMaibeZezyLn/XyUY05tQLlgj4MgC9UpuZOBiDe9aMKGg8buGCl+zk8VRA9Zw==}
 
   '@tanstack/react-query@5.102.6':
     resolution: {integrity: sha512-ANz4KZ8z80D85fiz5IAHjpb8XBPLrjOb/0natlD9Ascyy/3p96V86Zw8UbOfA0HDLcvK/A4gNd95r723y5UT2w==}
@@ -14530,12 +14542,23 @@ snapshots:
       tailwindcss: 4.3.3
       vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.105.0)(sass@1.105.0)(yaml@2.9.0)
 
+  '@tanstack/angular-query-experimental@5.102.6(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))':
+    dependencies:
+      '@angular/common': 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
+      '@tanstack/query-core': 5.102.6
+    optionalDependencies:
+      '@tanstack/query-devtools': 5.102.6
+
   '@tanstack/angular-virtual@6.0.6(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2))':
     dependencies:
       '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.2)
       '@tanstack/virtual-core': 3.17.11
 
   '@tanstack/query-core@5.102.6': {}
+
+  '@tanstack/query-devtools@5.102.6':
+    optional: true
 
   '@tanstack/react-query@5.102.6(react@19.2.8)':
     dependencies:

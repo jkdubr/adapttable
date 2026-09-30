@@ -234,6 +234,11 @@ export {
   type FrontendDataOptions,
   injectFrontendData,
 } from "./source/frontendData";
+export {
+  type InfiniteQuerySignals,
+  injectQuerySource,
+  type QuerySourceOptions,
+} from "./source/querySource";
 export { injectServerData, type ServerDataOptions } from "./source/serverData";
 export {
   type ExternalStore,

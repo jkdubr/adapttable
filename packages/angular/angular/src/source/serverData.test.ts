@@ -8,7 +8,7 @@ import {
   type TableQuery,
   type TableSource,
 } from "@adapttable/core";
-import { Component, type Signal, signal } from "@angular/core";
+import { Component, Injector, type Signal, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -35,7 +35,7 @@ interface Sent {
   readonly key: string;
 }
 
-let mode: "paged" | "infinite" = "paged";
+let mode: "paged" | "infinite" | undefined = "paged";
 let supports: QuerySupport | undefined;
 
 @Component({ template: "" })
@@ -44,12 +44,15 @@ class Host {
   readonly total = signal(0);
   readonly loading = signal(true);
   readonly nextCursor = signal<string | null>(null);
+  readonly error = signal<Error | null>(null);
   readonly sent: Sent[] = [];
   readonly source: Signal<TableSource<Row>> = injectServerData<Row>({
     rows: this.rows,
     total: this.total,
     loading: this.loading,
     nextCursor: this.nextCursor,
+    error: this.error,
+    forceMobile: true,
     paginationMode: mode,
     supports,
     defaults: { limit: 3 },
@@ -218,5 +221,35 @@ describe("injectServerData", () => {
     const inFlight = host.sent[0]!.signal;
     fixture.destroy();
     expect(inFlight.aborted).toBe(true);
+  });
+
+  it("shows the failure the host hands back", async () => {
+    const { host, source, settle } = await mount();
+    host.error.set(new Error("the server said no"));
+    host.loading.set(false);
+    await settle();
+    expect(source().error?.message).toBe("the server said no");
+    expect(source().isFetching).toBe(false);
+  });
+
+  it("scrolls a phone infinitely when the mode is left to the viewport", async () => {
+    mode = undefined;
+    const { source } = await mount();
+    expect(source().paginationMode).toBe("infinite");
+  });
+
+  it("runs outside an injection context with the injector it is given", () => {
+    const sent: TableQuery[] = [];
+    const source = injectServerData<Row>({
+      injector: TestBed.inject(Injector),
+      rows: [],
+      total: 0,
+      onQueryChange: (query) => {
+        sent.push(query);
+      },
+    });
+    TestBed.tick();
+    expect(source().rows).toEqual([]);
+    expect(sent).toHaveLength(1);
   });
 });

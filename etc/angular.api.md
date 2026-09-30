@@ -183,6 +183,8 @@ import { listFilterValues } from '@adapttable/core';
 import { mobileCardListStyle } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { offersAllMatching } from '@adapttable/core';
+import { PageSelector } from '@adapttable/core';
+import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
@@ -572,7 +574,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "facets" | "setExtra" | "setExtras" | "allFilteredRows" | "extra">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "setExtra" | "setExtras" | "allFilteredRows" | "facets" | "extra">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -2170,6 +2172,22 @@ export { hideAllColumns }
 export { IconDescriptor }
 
 // @public
+export interface InfiniteQuerySignals<TPage> {
+    readonly data: Signal<{
+        pages: TPage[];
+        pageParams: unknown[];
+    } | undefined>;
+    readonly dataUpdatedAt?: Signal<number>;
+    readonly error: Signal<Error | null>;
+    readonly fetchNextPage: () => Promise<unknown> | void;
+    readonly hasNextPage: Signal<boolean>;
+    readonly isFetching: Signal<boolean>;
+    readonly isFetchingNextPage: Signal<boolean>;
+    readonly isLoading: Signal<boolean>;
+    readonly refetch: () => Promise<unknown> | void;
+}
+
+// @public
 export function injectBatchEditing<TRow>(options: BatchEditingInjectOptions<TRow>): Signal<BatchEditingState<TRow>>;
 
 // @public
@@ -2237,6 +2255,9 @@ export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
 
 // @public
 export function injectMeasuredWindowScrollMargin(options: MeasuredWindowScrollMarginOptions): Signal<number>;
+
+// @public
+export function injectQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(options: QuerySourceOptions<TRow, TParams, TPage>): Signal<TableSource<TRow>>;
 
 // @public
 export function injectRowEditing<TRow>(options: RowEditingInjectOptions<TRow>): Signal<RowEditingState<TRow>>;
@@ -2346,6 +2367,25 @@ export { PinSide }
 
 // @public
 export function provideAdaptTableFeatures(...features: readonly AdaptTableFeature[]): EnvironmentProviders;
+
+// @public
+export interface QuerySourceOptions<TRow, TParams extends TableQueryParams, TPage> extends Omit<TableUrlStateOptions, "injector"> {
+    readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
+    readonly baseParams?: MaybeSignalOptional<Partial<TParams>>;
+    readonly columns?: MaybeSignalOptional<readonly ColumnMetadata<TRow>[]>;
+    readonly expandedIds?: MaybeSignalOptional<readonly string[]>;
+    readonly facetKeys?: MaybeSignalOptional<readonly string[]>;
+    readonly forceMobile?: MaybeSignalOptional<boolean>;
+    readonly injector?: Injector;
+    readonly mobileBreakpoint?: number;
+    readonly nextCursor?: (page: TPage) => string | null | undefined;
+    readonly paginationMode?: MaybeSignal<PaginationMode>;
+    readonly query: (params: Signal<Partial<TParams>>) => InfiniteQuerySignals<TPage>;
+    readonly sanitizeParams?: (params: Partial<TParams>) => Partial<TParams>;
+    readonly selectorKey?: MaybeSignalOptional<string | number>;
+    readonly selectPage?: PageSelector<TRow, TPage>;
+    readonly supports?: MaybeSignalOptional<QuerySupport>;
+}
 
 // @public
 export function rangeFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<RangeFieldWidget>;
