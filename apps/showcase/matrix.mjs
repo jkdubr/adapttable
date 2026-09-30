@@ -295,6 +295,7 @@ export const SHOWCASE_ADAPTERS = [
       "mobile-cards",
       "saved-views",
       "tree",
+      "nested-tables",
     ],
   },
 ];
@@ -1721,6 +1722,68 @@ export function People({ rows, columns, setPinned, spanTeam }) {
       "The expand chevron and both tables are {kit}.",
     ],
     card: "A real table under a row — same engine, own columns, own keys.",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef, NestedTableDefaults } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { nestedTable } from "{pkg}/nested-table";
+
+interface Order {
+  id: string;
+  item: string;
+}
+
+interface Customer {
+  id: string;
+  name: string;
+  orders: Order[];
+}
+
+@Component({
+  selector: "app-orders",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="row().orders"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="defaults().urlSync"
+      [searchable]="defaults().searchable"
+      [tableLabel]="defaults().tableLabel"
+    />
+  \`,
+})
+export class Orders {
+  readonly row = input.required<Customer>();
+  readonly defaults = input.required<NestedTableDefaults>();
+  readonly columns: ColumnDef<Order>[] = [{ key: "item" }];
+  readonly rowKey = (order: Order) => order.id;
+}
+
+@Component({
+  selector: "app-customers",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class Customers {
+  readonly rows = input.required<readonly Customer[]>();
+  readonly columns: ColumnDef<Customer>[] = [{ key: "name" }];
+  readonly rowKey = (row: Customer) => row.id;
+  readonly features = [
+    nestedTable<Customer>((row) => ({
+      label: \`Orders for \${row.name}\`,
+      table: Orders,
+    })),
+  ];
+}`,
+    },
     snippet: `import { DataTable } from "{pkg}";
 import { nestedTable } from "{pkg}/nested-table";
 

@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Scroll a large Unstyled Angular table with row virtualization inside a scroll box. Sorting and filtering keep working on every row." />
-    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/scale/" />
+    <meta name="description" content="Expand a Unstyled table row to a nested detail table. Each child has its own columns, row IDs and controls; explore the working Angular example." />
+    <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/nested-tables/" />
     <meta name="robots" content="noindex, follow" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Unstyled virtualized Angular table — AdaptTable" />
-    <meta property="og:description" content="Scroll a large Unstyled Angular table with row virtualization inside a scroll box. Sorting and filtering keep working on every row." />
-    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/scale/" />
+    <meta property="og:title" content="Unstyled nested tables and expandable rows — AdaptTable" />
+    <meta property="og:description" content="Expand a Unstyled table row to a nested detail table. Each child has its own columns, row IDs and controls; explore the working Angular example." />
+    <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/nested-tables/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Unstyled virtualized Angular table — AdaptTable" />
-    <meta name="twitter:description" content="Scroll a large Unstyled Angular table with row virtualization inside a scroll box. Sorting and filtering keep working on every row." />
+    <meta name="twitter:title" content="Unstyled nested tables and expandable rows — AdaptTable" />
+    <meta name="twitter:description" content="Expand a Unstyled table row to a nested detail table. Each child has its own columns, row IDs and controls; explore the working Angular example." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Scroll a large Unstyled Angular table with row virtualization inside a scroll box. Sorting and filtering keep working on every row.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/scale/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Expand a Unstyled table row to a nested detail table. Each child has its own columns, row IDs and controls; explore the working Angular example.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/nested-tables/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Unstyled virtualized Angular table — AdaptTable</title>
+    <title>Unstyled nested tables and expandable rows — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -158,43 +158,73 @@
     <!-- Replaced by Angular on mount — the served markup carries the page's
          own words so a crawler, and anyone whose bundle has not arrived, reads
          a real page. Written by scripts/build-showcase-html.mjs. -->
-    <div id="root" data-matrix-page="unstyled/scale">
+    <div id="root" data-matrix-page="unstyled/nested-tables">
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
-        <h1>Row and column virtualization in Unstyled</h1>
-        <p>Compose <code>virtualize()</code> and the table renders the rows in view plus a small overscan, whatever the dataset's size — forty thousand rows on this page, a few dozen of them in the page at once.</p>
-        <p>The scroll box scrolls rather than the page, and sorting and filtering keep working on the whole dataset rather than on what is drawn. <code>virtualize({ virtualizeColumns: true })</code> does the same across, for column sets wider than the box.</p>
+        <h1>Nested tables in Unstyled</h1>
+        <p>Open a row and the panel holds another Unstyled table — the same component, not a hand-built list. Each person has recent orders; the inner table has its own columns and row keys.</p>
+        <p><code>nestedTable()</code> mounts the kit's DataTable with defaults that keep the two tables from fighting over the URL. Rows with no nested table can still use <code>rowDetail()</code>.</p>
+        <p>The expand chevron and both tables are Unstyled.</p>
         <h2>The code</h2>
         <pre><code>import { Component, input } from &quot;@angular/core&quot;;
-import type { ColumnDef } from &quot;@adapttable/angular&quot;;
+import type { ColumnDef, NestedTableDefaults } from &quot;@adapttable/angular&quot;;
 import { AdaptDataTable } from &quot;@adapttable/angular-unstyled&quot;;
-import { virtualize } from &quot;@adapttable/angular-unstyled/virtualize&quot;;
+import { nestedTable } from &quot;@adapttable/angular-unstyled/nested-table&quot;;
 
-const columns: ColumnDef&lt;Person&gt;[] = [
-  { key: &quot;name&quot;, sortable: true },
-  { key: &quot;team&quot; },
-  { key: &quot;budget&quot;, sortable: true },
-];
+interface Order {
+  id: string;
+  item: string;
+}
+
+interface Customer {
+  id: string;
+  name: string;
+  orders: Order[];
+}
 
 @Component({
-  selector: &quot;app-people&quot;,
+  selector: &quot;app-orders&quot;,
+  imports: [AdaptDataTable],
+  template: `
+    &lt;adapt-data-table
+      [data]=&quot;row().orders&quot;
+      [columns]=&quot;columns&quot;
+      [rowKey]=&quot;rowKey&quot;
+      [urlSync]=&quot;defaults().urlSync&quot;
+      [searchable]=&quot;defaults().searchable&quot;
+      [tableLabel]=&quot;defaults().tableLabel&quot;
+    /&gt;
+  `,
+})
+export class Orders {
+  readonly row = input.required&lt;Customer&gt;();
+  readonly defaults = input.required&lt;NestedTableDefaults&gt;();
+  readonly columns: ColumnDef&lt;Order&gt;[] = [{ key: &quot;item&quot; }];
+  readonly rowKey = (order: Order) =&gt; order.id;
+}
+
+@Component({
+  selector: &quot;app-customers&quot;,
   imports: [AdaptDataTable],
   template: `
     &lt;adapt-data-table
       [data]=&quot;rows()&quot;
       [columns]=&quot;columns&quot;
       [rowKey]=&quot;rowKey&quot;
-      paginationMode=&quot;infinite&quot;
-      [maxHeight]=&quot;480&quot;
       [features]=&quot;features&quot;
     /&gt;
   `,
 })
-export class People {
-  readonly rows = input.required&lt;readonly Person[]&gt;();
-  readonly columns = columns;
-  readonly rowKey = (row: Person) =&gt; row.id;
-  readonly features = [virtualize()];
+export class Customers {
+  readonly rows = input.required&lt;readonly Customer[]&gt;();
+  readonly columns: ColumnDef&lt;Customer&gt;[] = [{ key: &quot;name&quot; }];
+  readonly rowKey = (row: Customer) =&gt; row.id;
+  readonly features = [
+    nestedTable&lt;Customer&gt;((row) =&gt; ({
+      label: `Orders for ${row.name}`,
+      table: Orders,
+    })),
+  ];
 }</code></pre>
         <h2>Install</h2>
         <pre><code>pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core</code></pre>
@@ -205,14 +235,14 @@ export class People {
           <li><a href="../row-reordering/">Row reordering in Unstyled</a> — Drag or keyboard moves, announced — the host writes.</li>
           <li><a href="../editing/">Inline cell editing in Unstyled</a> — Native editors in the cell; every write goes through your handler.</li>
           <li><a href="../grouping/">Row grouping in Unstyled</a> — Drag, select or keyboard grouping, with totals in the headers.</li>
-          <li><a href="../nested-tables/">Nested tables in Unstyled</a> — A real table under a row — same engine, own columns, own keys.</li>
           <li><a href="../export/">CSV export in Unstyled</a> — One toolbar button, a CSV of the table as it stands.</li>
+          <li><a href="../scale/">Row and column virtualization in Unstyled</a> — 40,000 rows in a scroll box, only the visible ones rendered.</li>
           <li><a href="../tree/">Tree data in Unstyled</a> — Nesting, chevrons, lazy children, and a tree on phones.</li>
           <li><a href="../mobile-cards/">Mobile cards in Unstyled</a> — Every row becomes a card on phones. Automatically, with the same state.</li>
           <li><a href="../saved-views/">Saved views in Unstyled</a> — Name an arrangement and restore it from the menu.</li>
         </ul>
         <p>
-          Reference: <a href="https://adapttable.orwamahmoud.com/react/virtualization/">virtualization</a>. More of this kit:
+          Reference: <a href="https://adapttable.orwamahmoud.com/react/tree-data/">tree-data</a>, <a href="https://adapttable.orwamahmoud.com/react/row-expansion/">row-expansion</a>. More of this kit:
           <a href="../">AdaptTable for Unstyled</a>, or
           <a href="/react/demo/">the live demo</a>.
         </p>

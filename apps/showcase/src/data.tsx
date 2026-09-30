@@ -22,6 +22,7 @@ import {
   allocationCount,
   budget,
   budgetAggregateText,
+  type DemoOrder,
   type DemoStatus,
   dueDate,
   formatCount,
@@ -55,6 +56,8 @@ export {
   DEMO_FILTER_RUNTIME,
   demoFilterDefs,
   demoFilterTypes,
+  type DemoOrder,
+  demoOrders,
   type DemoStatus,
   dueDate,
   formatDate,
@@ -106,36 +109,6 @@ export function nestedOpenIds(
 ): readonly string[] | undefined {
   const first = rows[0]?.id;
   return nested && first ? [first] : undefined;
-}
-
-/** One line item under a person — the nested table's rows. */
-export interface DemoOrder {
-  id: string;
-  item: string;
-  qty: number;
-  amount: number;
-}
-
-const ORDER_ITEMS = [
-  "Analytical engine time",
-  "Punch cards",
-  "Compiler licence",
-  "Support retainer",
-];
-
-/**
- * The orders under one person, derived from their id so the nested-table demo
- * needs no second seed file and stays stable across reloads.
- */
-export function demoOrders(person: Person): DemoOrder[] {
-  const seed = Number(person.id);
-  const count = (seed % 3) + 2;
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${person.id}-${i + 1}`,
-    item: ORDER_ITEMS[(seed + i) % ORDER_ITEMS.length],
-    qty: ((seed + i) % 5) + 1,
-    amount: 1200 + ((seed * 137 + i * 419) % 8800),
-  }));
 }
 
 /** `YYYY-MM-DD` in local time — what a date editor holds. */

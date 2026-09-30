@@ -10,8 +10,10 @@
  */
 import {
   type AdaptTableFeature,
+  type ColumnDef,
   injectQuerySource,
   injectServerData,
+  type NestedTableDefaults,
 } from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
 import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
@@ -21,6 +23,7 @@ import { exportCsv } from "@adapttable/angular-unstyled/export";
 import { filters } from "@adapttable/angular-unstyled/filters";
 import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
+import { nestedTable } from "@adapttable/angular-unstyled/nested-table";
 import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 import { savedViews } from "@adapttable/angular-unstyled/saved-views";
 import { tree } from "@adapttable/angular-unstyled/tree";
@@ -29,6 +32,7 @@ import { applyRowReorder } from "@adapttable/core";
 import {
   Component,
   computed,
+  input,
   type Signal,
   signal,
   type Type,
@@ -41,6 +45,8 @@ import {
 
 import {
   applyPersonEdit,
+  type DemoOrder,
+  demoOrders,
   fetchPeople,
   FILTER_DEFS,
   largePerson,
@@ -599,6 +605,80 @@ class TreeBody {
   ];
 }
 
+/** The nested orders table's columns — a different shape from the parent's. */
+const ORDER_COLUMNS: ColumnDef<DemoOrder>[] = [
+  { key: "item", header: "Item", accessor: (row) => row.item },
+  { key: "qty", header: "Qty", accessor: (row) => row.qty, align: "end" },
+  {
+    key: "amount",
+    header: "Amount",
+    accessor: (row) => `$${row.amount.toLocaleString("en-US")}`,
+    align: "end",
+  },
+];
+
+/** One person's orders: this kit's own table, mounted with the defaults. */
+@Component({
+  selector: "adapt-showcase-orders",
+  imports: [AdaptDataTable],
+  template: `
+    @let d = defaults();
+    <adapt-data-table
+      [data]="orders()"
+      [columns]="columns"
+      [rowKey]="orderKey"
+      [urlSync]="d.urlSync"
+      [searchable]="d.searchable"
+      [density]="d.density"
+      [labels]="d.labels"
+      [tableLabel]="d.tableLabel"
+    />
+  `,
+})
+class OrdersTable {
+  readonly row = input.required<Person>();
+  readonly defaults = input.required<NestedTableDefaults>();
+  readonly orders = computed(() => demoOrders(this.row()));
+  readonly columns = ORDER_COLUMNS;
+  readonly orderKey = (order: DemoOrder) => order.id;
+}
+
+/** Nested tables: each person's recent orders, in a table under the row. */
+@Component({
+  selector: "adapt-showcase-nested-tables",
+  imports: [AdaptDataTable],
+  template: `
+    <div class="mx-demo">
+      <div class="hint-row">
+        <span class="hint">Open a row to see that person's orders</span>
+        <span class="hint">The orders have their own columns and row keys</span>
+      </div>
+      <div class="mx-demo__body">
+        <adapt-data-table
+          tableLabel="People"
+          [urlSync]="false"
+          [data]="rows"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [defaults]="{ limit: 10 }"
+          [features]="features"
+        />
+      </div>
+    </div>
+  `,
+})
+class NestedTablesBody {
+  readonly rows = PEOPLE;
+  readonly columns = COLUMNS;
+  readonly rowKey = rowKey;
+  readonly features: readonly AdaptTableFeature[] = [
+    nestedTable<Person>(
+      (row) => ({ label: `Orders for ${row.name}`, table: OrdersTable }),
+      [PEOPLE[0]!.id]
+    ),
+  ];
+}
+
 /** Feature slug to the demo that page shows. */
 export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
   filtering: FilteringBody,
@@ -611,4 +691,5 @@ export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
   "mobile-cards": MobileCardsBody,
   "saved-views": SavedViewsBody,
   tree: TreeBody,
+  "nested-tables": NestedTablesBody,
 };

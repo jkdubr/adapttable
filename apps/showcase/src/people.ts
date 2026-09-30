@@ -659,3 +659,33 @@ export function reportsTo(person: Person): string | undefined {
   const lead = TEAM_LEAD.get(person.team);
   return lead === person.id ? undefined : lead;
 }
+
+/** One line item under a person — the nested table's rows. */
+export interface DemoOrder {
+  id: string;
+  item: string;
+  qty: number;
+  amount: number;
+}
+
+const ORDER_ITEMS = [
+  "Analytical engine time",
+  "Punch cards",
+  "Compiler licence",
+  "Support retainer",
+];
+
+/**
+ * The orders under one person, derived from their id so the nested-table demo
+ * needs no second seed file and stays stable across reloads.
+ */
+export function demoOrders(person: Person): DemoOrder[] {
+  const seed = Number(person.id);
+  const count = (seed % 3) + 2;
+  return Array.from({ length: count }, (_, i) => ({
+    id: `${person.id}-${i + 1}`,
+    item: cycle(ORDER_ITEMS, seed + i),
+    qty: ((seed + i) % 5) + 1,
+    amount: 1200 + ((seed * 137 + i * 419) % 8800),
+  }));
+}
