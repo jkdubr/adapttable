@@ -29,7 +29,13 @@ import {
   utilization,
 } from "../people";
 
-export { makeLargeDirectory, PEOPLE, type Person } from "../people";
+export { fetchPeople, type PeoplePage, type PeopleParams } from "../mockApi";
+export {
+  largePerson,
+  makeLargeDirectory,
+  PEOPLE,
+  type Person,
+} from "../people";
 
 const s = strings("en");
 

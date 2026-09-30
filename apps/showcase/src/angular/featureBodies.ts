@@ -8,7 +8,11 @@
  * writes and says what it did on the line under the table, so what the host
  * received is on the page.
  */
-import type { AdaptTableFeature } from "@adapttable/angular";
+import {
+  type AdaptTableFeature,
+  injectQuerySource,
+  injectServerData,
+} from "@adapttable/angular";
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
 import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
@@ -21,14 +25,29 @@ import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 import { savedViews } from "@adapttable/angular-unstyled/saved-views";
 import { virtualize } from "@adapttable/angular-unstyled/virtualize";
 import { applyRowReorder } from "@adapttable/core";
-import { Component, computed, signal, type Type } from "@angular/core";
+import {
+  Component,
+  computed,
+  type Signal,
+  signal,
+  type Type,
+} from "@angular/core";
+import {
+  injectInfiniteQuery,
+  provideTanStackQuery,
+  QueryClient,
+} from "@tanstack/angular-query-experimental";
 
 import {
   applyPersonEdit,
+  fetchPeople,
   FILTER_DEFS,
+  largePerson,
   makeLargeDirectory,
   PEOPLE,
   peopleColumns,
+  type PeoplePage,
+  type PeopleParams,
   peopleRows,
   type Person,
   rowKey,
@@ -287,39 +306,169 @@ class ExportBody {
 /** How many rows the scale page windows. */
 const SCALE_ROWS = 40_000;
 
-/** Scale: forty thousand rows, windowed, in a scroll box. */
+/** Where the scale page's rows come from: `?tier=server` or `?tier=query`. */
+type ScaleTier = "frontend" | "server" | "query";
+
+/** The tier the page's URL asks for. */
+function scaleTier(): ScaleTier {
+  const tier = new URLSearchParams(location.search).get("tier");
+  return tier === "server" || tier === "query" ? tier : "frontend";
+}
+
+/** The frontend tier: every row in memory, windowed. */
 @Component({
-  selector: "adapt-showcase-scale",
+  selector: "adapt-showcase-scale-frontend",
   imports: [AdaptDataTable],
   template: `
-    <div class="mx-demo">
-      <div class="hint-row">
-        <span class="hint"
-          >{{ count }} rows — only the ones in view render</span
-        >
-      </div>
-      <div class="mx-demo__body">
-        <adapt-data-table
-          tableLabel="People"
-          [urlSync]="false"
-          paginationMode="infinite"
-          [maxHeight]="480"
-          [data]="rows"
-          [columns]="columns"
-          [rowKey]="rowKey"
-          [defaults]="{ limit: count }"
-          [features]="features"
-        />
-      </div>
-    </div>
+    <adapt-data-table
+      tableLabel="People"
+      [urlSync]="false"
+      paginationMode="infinite"
+      [maxHeight]="480"
+      [data]="rows"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [defaults]="{ limit: count }"
+      [features]="features"
+    />
   `,
 })
-class ScaleBody {
+class ScaleFrontendTable {
   readonly count = SCALE_ROWS;
   readonly rows = makeLargeDirectory(SCALE_ROWS);
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [virtualize()];
+}
+
+/**
+ * The server tier: the table asks for a slice and this answers it, deriving
+ * each row from its index, so the browser never holds the set and the total
+ * the pager reports is the real one.
+ */
+@Component({
+  selector: "adapt-showcase-scale-server",
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      tableLabel="People"
+      [urlSync]="false"
+      [maxHeight]="480"
+      [source]="source"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  `,
+})
+class ScaleServerTable {
+  private readonly slice = signal({ from: 0, limit: 500 });
+  readonly source = injectServerData<Person>({
+    rows: computed(() => {
+      const { from, limit } = this.slice();
+      return Array.from(
+        { length: Math.max(0, Math.min(limit, SCALE_ROWS - from)) },
+        (_, index) => largePerson(from + index)
+      );
+    }),
+    total: SCALE_ROWS,
+    urlSync: false,
+    paginationMode: "infinite",
+    defaults: { limit: 500 },
+    onQueryChange: (query) => {
+      this.slice.set({
+        from: (query.page - 1) * query.limit,
+        limit: query.limit,
+      });
+    },
+  });
+  readonly columns = COLUMNS;
+  readonly rowKey = rowKey;
+  readonly features: readonly AdaptTableFeature[] = [
+    virtualize({ estimateRowSize: 48 }),
+  ];
+}
+
+/** The people endpoint as an infinite query, keyed on the table's params. */
+function injectPeopleQuery(params: Signal<Partial<PeopleParams>>) {
+  return injectInfiniteQuery(() => {
+    const current = params();
+    return {
+      queryKey: ["people", current],
+      queryFn: ({ pageParam }: { pageParam: number }) =>
+        fetchPeople({ ...current, page: pageParam }),
+      initialPageParam: current.page ?? 1,
+      getNextPageParam: (last: PeoplePage) => last.nextPage ?? undefined,
+    };
+  });
+}
+
+/**
+ * The query-library tier: the table's view becomes the params of an Angular
+ * Query infinite query over the people endpoint, and its pages the rows.
+ */
+@Component({
+  selector: "adapt-showcase-scale-query",
+  imports: [AdaptDataTable],
+  providers: [provideTanStackQuery(new QueryClient())],
+  template: `
+    <adapt-data-table
+      tableLabel="People"
+      [urlSync]="false"
+      [source]="source"
+      [columns]="columns"
+      [rowKey]="rowKey"
+    />
+  `,
+})
+class ScaleQueryTable {
+  readonly source = injectQuerySource<Person, PeopleParams, PeoplePage>({
+    query: injectPeopleQuery,
+    urlSync: false,
+    paginationMode: "paged",
+    defaults: { limit: 10 },
+    selectPage: (page) => ({
+      rows: page.items,
+      total: page.total,
+      facets: page.facets,
+    }),
+  });
+  readonly columns = COLUMNS;
+  readonly rowKey = rowKey;
+}
+
+/** Scale: forty thousand rows, windowed, in a scroll box — or served. */
+@Component({
+  selector: "adapt-showcase-scale",
+  imports: [ScaleFrontendTable, ScaleServerTable, ScaleQueryTable],
+  template: `
+    <div class="mx-demo">
+      <div class="hint-row">
+        <span class="hint">{{ hint }}</span>
+      </div>
+      <div class="mx-demo__body">
+        @switch (tier) {
+          @case ("server") {
+            <adapt-showcase-scale-server />
+          }
+          @case ("query") {
+            <adapt-showcase-scale-query />
+          }
+          @default {
+            <adapt-showcase-scale-frontend />
+          }
+        }
+      </div>
+    </div>
+  `,
+})
+class ScaleBody {
+  readonly tier = scaleTier();
+  readonly hint = {
+    frontend: `${SCALE_ROWS} rows — only the ones in view render`,
+    server: `${SCALE_ROWS} rows on the server — each slice fetched as you scroll`,
+    query: "Every page comes from an Angular Query infinite query",
+  }[this.tier];
 }
 
 /** Mobile cards: the same table, every row a card, in a phone-width frame. */
