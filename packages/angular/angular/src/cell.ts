@@ -3,6 +3,7 @@
  * one, its text otherwise. Structure only — the element the content lands in
  * is the host's own `<td>` or `<th>`.
  */
+import { cellValue } from "@adapttable/core";
 import { NgComponentOutlet, NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
@@ -133,7 +134,9 @@ export class AdaptCell<TRow> {
       row,
       rowIndex: this.rowIndex(),
       column,
-      value: column.accessor?.(row) ?? null,
+      // Without an accessor a column reads as core reads it: its plain text,
+      // then its export or sort value, then its key's path.
+      value: column.accessor ? column.accessor(row) : cellValue(row, column),
     };
   });
 
