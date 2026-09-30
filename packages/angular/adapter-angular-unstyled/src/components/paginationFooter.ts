@@ -26,7 +26,9 @@ import type { TableView } from "../dataTable";
           (change)="v.table.setLimit(+$any($event.target).value)"
         >
           @for (size of v.table.pageSizeOptions(); track size) {
-            <option [value]="size">{{ size }}</option>
+            <option [value]="size" [selected]="size === v.table.source().limit">
+              {{ size }}
+            </option>
           }
         </select>
       </label>

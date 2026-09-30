@@ -28,7 +28,7 @@ const ROW: Shift = {
   approved: false,
   day: "2026-08-13",
   age: 36,
-  team: "core",
+  team: "web",
 };
 
 const COLUMNS: ColumnDef<Shift>[] = [
@@ -171,9 +171,11 @@ describe("AdaptEditableCell", () => {
     await settle();
     const select = editor() as HTMLSelectElement;
     expect(select.tagName).toBe("SELECT");
-    const texts = [...select.options].map((option) => option.textContent);
+    const texts = [...select.options].map((option) => option.text);
     expect(texts).toEqual(["Core", "Web"]);
-    expect(select.value).toBe("core");
+    // The row's value, not the first option offered.
+    expect(select.value).toBe("web");
+    expect(select.selectedOptions[0]?.text).toBe("Web");
   });
 
   it("hands the host a number for a number editor", async () => {

@@ -69,6 +69,24 @@ class Host {
   readonly changes: string[][] = [];
 }
 
+@Component({
+  imports: [AdaptDataTable],
+  template: `
+    <adapt-data-table
+      [data]="data"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [urlSync]="false"
+      [defaults]="{ limit: 25 }"
+    />
+  `,
+})
+class TwentyFivePerPage {
+  readonly data = CITIES;
+  readonly columns = COLUMNS;
+  readonly rowKey = (row: City) => row.id;
+}
+
 async function mount() {
   const fixture = TestBed.createComponent(Host);
   fixture.autoDetectChanges();
@@ -125,6 +143,17 @@ describe("the unstyled Angular table", () => {
     select.dispatchEvent(new Event("change"));
     await settle();
     expect(ids()).toHaveLength(10);
+  });
+
+  it("shows the page size in force when it is not the first size offered", async () => {
+    const fixture = TestBed.createComponent(TwentyFivePerPage);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const { part, parts } = queryParts(fixture.nativeElement as HTMLElement);
+    const select = part<HTMLSelectElement>("rows-per-page")!;
+    expect(parts("row")).toHaveLength(25);
+    expect(select.value).toBe("25");
+    expect(select.selectedOptions[0]?.text).toBe("25");
   });
 
   it("searches, says nothing matched, and offers to clear", async () => {

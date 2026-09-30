@@ -139,7 +139,9 @@ class AdaptEditCellButton {
         (blur)="p.commitOnBlur()"
       >
         @for (option of p.selectOptions; track option.value) {
-          <option [value]="option.value">{{ option.label }}</option>
+          <option [value]="option.value" [selected]="option.value === p.draft">
+            {{ option.label }}
+          </option>
         }
       </select>
     } @else {
