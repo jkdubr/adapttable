@@ -63,12 +63,20 @@ test("keeps children under their lead when the table sorts", async ({
 }) => {
   await page.goto(PAGE);
   const lead = (await outline(page))[0]!.id!;
-  await row(page, lead).locator('[data-adapttable-part="tree-toggle"]').click();
+  const toggle = row(page, lead).locator(
+    '[data-adapttable-part="tree-toggle"]'
+  );
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
   const before = await outline(page);
   const children = before.filter((entry) => entry.nested).map((e) => e.id);
 
   await part(page, "sort-button").first().click();
   await part(page, "sort-button").first().click();
+  await expect(part(page, "header-cell").first()).toHaveAttribute(
+    "aria-sort",
+    "descending"
+  );
   const after = await outline(page);
   const at = after.findIndex((entry) => entry.id === lead);
   const block = after.slice(at + 1, at + 1 + children.length);
@@ -79,7 +87,11 @@ test("keeps children under their lead when the table sorts", async ({
 test("shows the rows a search matches", async ({ page }) => {
   await page.goto(PAGE);
   const lead = (await outline(page))[0]!.id!;
-  await row(page, lead).locator('[data-adapttable-part="tree-toggle"]').click();
+  const toggle = row(page, lead).locator(
+    '[data-adapttable-part="tree-toggle"]'
+  );
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
   const child = (await outline(page))[1]!.id!;
   const name = (
     await row(page, child)
@@ -87,12 +99,10 @@ test("shows the rows a search matches", async ({ page }) => {
       .first()
       .innerText()
   ).trim();
-  const shown = (await outline(page)).length;
   await part(page, "search").fill(name);
   await expect
-    .poll(async () => (await outline(page)).length)
-    .toBeLessThan(shown);
-  expect((await outline(page)).map((entry) => entry.id)).toEqual([child]);
+    .poll(async () => (await outline(page)).map((entry) => entry.id))
+    .toEqual([child]);
 });
 
 test.describe("on a phone", () => {
@@ -103,12 +113,15 @@ test.describe("on a phone", () => {
   }) => {
     await page.goto(PAGE);
     const card = page.locator('.mx-demo [data-adapttable-part="card"]').first();
-    const id = await card.getAttribute("data-row-id");
-    await card.locator('[data-adapttable-part="tree-toggle"]').click();
+    const toggle = card.locator('[data-adapttable-part="tree-toggle"]');
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
     const next = page.locator('.mx-demo [data-adapttable-part="card"]').nth(1);
-    await expect(next).not.toHaveAttribute("data-row-id", id!);
+    await expect
+      .poll(() => next.evaluate((element) => element.style.marginInlineStart))
+      .toBe("1.25rem");
     expect(
-      await next.evaluate((element) => element.style.marginInlineStart)
-    ).toBe("1.25rem");
+      await card.evaluate((element) => element.style.marginInlineStart)
+    ).toBe("");
   });
 });

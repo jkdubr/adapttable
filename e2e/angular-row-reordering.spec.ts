@@ -44,11 +44,9 @@ test("lifts a row with Space, moves it with the arrows and drops it", async ({
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Space");
 
-  expect(await people(page, 3)).toEqual([
-    "Alan Turing",
-    "Grace Hopper",
-    "Ada Lovelace",
-  ]);
+  await expect
+    .poll(() => people(page, 3))
+    .toEqual(["Alan Turing", "Grace Hopper", "Ada Lovelace"]);
   await expect(
     page.locator(".mx-demo [aria-live]").filter({ hasText: "moved" })
   ).toHaveText("Row moved from 1 to 3");
