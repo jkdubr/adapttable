@@ -2965,9 +2965,11 @@ capability is decided there, once, rather than per binding.
 
 ## The Angular binding
 
-`@adapttable/angular` is the headless binding for Angular 20 and newer. It
-adapts the same core stores as `@adapttable/react`, as signals, and draws no
-controls: the host writes its own markup.
+`@adapttable/angular` is the Angular binding for Angular 20 and newer. It
+runs the same core stores and controllers as `@adapttable/react`, as
+signals. It lays out structure — rows, cards, headers, keyboard wiring,
+labels, live regions and part names — and every control a reader clicks
+comes from a kit through a slot.
 
 - `injectFrontendData(options)` is the in-memory tier: it takes
   `FrontendDataOptions` (the rows, as a value or a signal, plus the URL-state
@@ -2975,8 +2977,7 @@ controls: the host writes its own markup.
 - `injectTableUrlState(options)` is the URL-synced view state: a
   `TableUrlState` with a `state` signal and the store's setters, configured by
   `TableUrlStateOptions`. `ADAPTTABLE_URL_ADAPTER` is the injection token that
-  sets the URL adapter every table under an injector uses, such as one over the
-  Angular Router.
+  sets the URL adapter every table under an injector uses.
 - `injectDataTable(options)` is the headless table, configured by
   `DataTableOptions` and returning `DataTable`: rows, visible columns,
   pagination, sort, search, labels and direction as signals, plus the core
@@ -2986,21 +2987,14 @@ controls: the host writes its own markup.
   empty, cards or table), `emptyVariant`, `showFooter`, `pagerSlots`,
   `pageSizeOptions`, `canLoadMore` with `loadMore` and the load-more
   attributes for an infinite list, and `statusAnnouncement`, the sentence a
-  sort or a page speaks. `injectIsMobile` (with `IsMobileOptions`) is the viewport breakpoint
-  as a signal.
+  sort or a page speaks. `injectIsMobile` (with `IsMobileOptions`) is the
+  viewport breakpoint as a signal.
 - `injectRowSelection(options)` is row selection as signals, configured by
   `RowSelectionOptions` and returning `RowSelection`: the selected ids, the
   select-all tri-state, the toggles, and the attributes of the row and
   select-all checkboxes. Pass it to `injectDataTable` as `selection`, and each
   row states whether it is selected. It is uncontrolled unless `selectedIds`
   is given.
-- `injectGridFocus(options)` is keyboard cell navigation, configured by
-  `GridFocusOptions` and returning `GridFocus`: the active cell and range as
-  signals, the announcement, and attribute getters that wrap the table's own
-  with the grid's roles, indices, roving tab stop and handlers. Off, they are
-  the table's attributes unchanged.
-- `AdaptLiveRegion` makes an element a polite, visually hidden live region
-  that speaks its text — the table's status and the grid's announcer.
 - `ColumnDef` is the Angular column. Its `cell`, `headerCell` and `footer`
   are a `Renderer`: an `ng-template` or a standalone component, which receives
   a `CellContext` or a `HeaderContext`. `resolveColumns` fills the defaults a
@@ -3008,20 +3002,23 @@ controls: the host writes its own markup.
   template or component.
 - `AdaptCell` and `AdaptHeader` render a column's content into the host's own
   `<td>` and `<th>`, `AdaptCellTemplate` declares a cell template beside the
-  table (`<ng-template adaptCellTemplate="status" let-row>`), and
-  `AdaptAttrs` applies an `Attrs` record to an element.
-- `provideAdaptTableFeatures(...features)` composes features through
-  dependency injection into the `ADAPTTABLE_FEATURES` multi-provider; an
-  `AdaptTableFeature` has any of `apply` (configuration it merges into the
-  table), `setup` (registrations against the live table) and `renders` (the
-  slots it fills, each drawn by a `SlotComponent`). `extendFeature` adds
-  renders to a core feature, which is how a kit puts its own controls in;
-  `featureOptionsOf` is the merged configuration of a feature list.
+  table (`<ng-template adaptCellTemplate="status" let-row>`), `AdaptAttrs`
+  applies an `Attrs` record to an element, and `AdaptLiveRegion` makes an
+  element a polite, visually hidden live region that speaks its text.
+- Features: `provideAdaptTableFeatures(...features)` composes features
+  through dependency injection into the `ADAPTTABLE_FEATURES`
+  multi-provider; an `AdaptTableFeature` has any of `apply` (configuration it
+  merges into the table), `setup` (registrations against the live table) and
+  `renders` (the slots it fills, each drawn by a `SlotComponent`).
+  `extendFeature` adds renders to a feature, which is how a kit puts its own
+  controls in; `featureOptionsOf` is the merged configuration of a feature
+  list.
 - Slots: `AdaptSlot` draws what the table's features put in one named slot,
   handing each component the slot's props; `SlotFills` is the table's map of
   fills, `SlotTable` what a slot component can ask of its table, and
   `ADAPTTABLE_SLOT_TABLE` the token that provides it. `AdaptControl` draws one
-  kit control inside a Chrome, and `AdaptIcon` draws a core glyph as SVG.
+  kit control with the props a structural component computed for it, and
+  `AdaptIcon` draws a core glyph as SVG.
 - Column layout: `DataTableOptions` takes `ColumnLayoutOptions` (controlled
   or default layout, the change callback and the rename handler), and the
   table's `layout` is a `ColumnLayout` signal — hidden, order, pins, widths
@@ -3036,63 +3033,77 @@ controls: the host writes its own markup.
   widgets a kit's form draws. `AdaptFilterTreeChrome` (with
   `AngularFilterTreeDisclosureProps`) and `AdaptChecklistChrome` are the
   nested AND/OR builder and the checklist filter, structure only; the kit
-  hands its controls in `slots`. `AdaptGroupingPanelChrome` is the grouping
-  strip — chips, insertion carets, aggregations and the ungroup target —
-  with `GroupingPanelSlots`, `AngularGroupingPanelSurfaceProps` and
-  `AngularGroupingPanelAggregationItemProps`. `AdaptRowReorderHandleChrome`,
-  `AdaptRowReorderButtonsChrome` and `AdaptRowReorderAnnouncer` are the
-  reorder grip, mobile up/down pair and live region, with
-  `RowReorderHandleSlots` / `RowReorderButtonsSlots`; kits fill
-  `ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and `ROW_REORDER_ANNOUNCER`.
-  `grouping` (with `GroupingExtras`) groups rows under collapsible
-  headers; `injectGrouping` (`GroupingOptions`) is its live model, a
-  `TableGrouping` of headers, footers, "show more" rows and leaves with the
-  actions that change them, and a grouped table renders the full filtered set
-  as one page. `injectGroupCollapse` (`GroupCollapseOptions`) holds which
-  groups are closed, controlled or not, and `injectGroupPaging`
-  (`GroupPagingOptions`) how many more groups or rows are showing.
-  `AdaptGroupMoreButtonChrome` words the "show more" offer and
-  `AdaptGroupToggleSpacer` keeps a footer's indent where a toggle would be.
-  `RuntimeGrouping` is the grouped entries the runtime view reads.
-  `groupingPanel` (with
-  `GroupingPanelExtras`) is the feature that owns the group-by state;
-  `injectGroupingPanelState` (`GroupingPanelStateOptions`) publishes the
-  strip's props for the `GROUPING_PANEL` slot. `virtualize`
-  (`VirtualizeOptions`) windows the body through `@tanstack/angular-virtual`;
-  `injectTableVirtualization` / `injectKeyedVirtualization` (with
-  `TableVirtualizationOptions` / `KeyedVirtualizationOptions`) and the
-  `injectTableVirtualizer` / `injectKeyedVirtualizer` scroll helpers are the
-  headless hooks kits call. A virtualized row or card hands itself to the
-  window's `measureElement`, so rows taller than their estimate keep the true
-  scroll height; `injectRowPairMeasurer` (`RowPairMeasurerOptions`, with
+  hands its controls in `slots`.
+- Grouping: `grouping` (with `GroupingExtras`) groups rows under collapsible
+  headers, with per-group subtotals, optional footers and paged groups.
+  `injectGrouping` (`GroupingOptions`) is its live model, a `TableGrouping`
+  of headers, footers, "show more" rows and leaves with the actions that
+  change them; a grouped table renders the full filtered set as one page.
+  `injectGroupCollapse` (`GroupCollapseOptions`) holds which groups are
+  closed, controlled or not, and `injectGroupPaging` (`GroupPagingOptions`)
+  how many more groups or rows are showing. `AdaptGroupMoreButtonChrome`
+  words the "show more" offer and `AdaptGroupToggleSpacer` keeps a footer's
+  indent where a toggle would be. `RuntimeGrouping` is the grouped entries
+  the runtime view reads. `groupingPanel` (with `GroupingPanelExtras`) adds
+  the interactive strip, which owns the group-by state;
+  `injectGroupingPanelState` (`GroupingPanelStateOptions`) publishes its
+  props for the `GROUPING_PANEL` slot, and `AdaptGroupingPanelChrome` lays it
+  out — chips, insertion carets, aggregations and the ungroup target — with
+  `GroupingPanelSlots`, `AngularGroupingPanelSurfaceProps` and
+  `AngularGroupingPanelAggregationItemProps`. A column header drags into the
+  strip to group by it.
+- Row reorder: `rowReorder` / `injectRowReorder` (`RowReorderStateOptions`)
+  publish the drag and keyboard model: Space lifts and drops, arrows move,
+  Escape cancels, and a grouped table offers a move menu and, under a
+  `confirm` policy, a confirmation before the host is asked.
+  `AdaptRowReorderHandleChrome`, `AdaptRowReorderButtonsChrome` and
+  `AdaptRowReorderAnnouncer` are the grip, the phone up/down pair and the
+  live region, with `RowReorderHandleSlots` / `RowReorderButtonsSlots`; kits
+  fill `ROW_REORDER_HANDLE`, `ROW_REORDER_BUTTONS` and
+  `ROW_REORDER_ANNOUNCER`.
+- Virtualization: `virtualize` (`VirtualizeOptions`) windows the body
+  through `@tanstack/angular-virtual`. `injectTableVirtualization` /
+  `injectKeyedVirtualization` (with `TableVirtualizationOptions` /
+  `KeyedVirtualizationOptions`) and the `injectTableVirtualizer` /
+  `injectKeyedVirtualizer` scroll helpers window rows and keyed entries. A
+  virtualized row or card hands itself to the window's `measureElement`, so
+  rows taller than their estimate keep the true scroll height;
+  `injectRowPairMeasurer` (`RowPairMeasurerOptions`, with
   `ResizableVirtualizer` and `RowPairMeasurer`) measures a row together with
   its open detail panel. `injectMeasuredWindowScrollMargin`
   (`MeasuredWindowScrollMarginOptions`) keeps a page-scrolled window's margin
-  equal to where the list starts, so a table down the page windows the rows in
-  view. `injectColumnWindow` (`ColumnWindowOptions`, returning `ColumnWindow`)
-  windows a wide table's columns — pinned ones always rendered — and
-  `AdaptColumnSpacer` holds the skipped width open on either side. `cellNavigation` (`CellNavigationOptions`) turns
-  on the keyboard grid; `injectGridFocus` is the underlying hook.
-  `rowReorder` / `injectRowReorder` (`RowReorderStateOptions`) publish the
-  drag and keyboard grab model. `editing` / `injectCellEditing`
-  (`CellEditHandler`, `CellEditingOptions`, `EditingLifecycleExtras`) arm
-  in-place cell edits; `injectEditValidation` (`EditValidationInjectOptions`)
-  and `injectCellSaveState` (`CellSaveStateInjectOptions`) track validators
-  and rejected saves. `AdaptEditableCellGate` draws the activate control and
-  editor slot (`EDITABLE_CELL`, `EditableCellSlotProps`,
-  `EditableCellSlots`, `EditableCellEditorCtrl`, `EditableCellActivateProps`,
-  `EditableCellButtonProps`); `AdaptCellConflictNotice`
-  (`CellConflictNoticeProps`) is the keep/take question when a live row moves
-  under the editor. `rowEditing` / `injectRowEditing` (`RowEditHandler`,
-  `RowEditingInjectOptions`) and `batchEditing` / `injectBatchEditing`
-  (`BatchEditHandler`, `BatchEditingInjectOptions`) arm whole-row and
-  batch commits. `AdaptRowEditCell` binds a row's fields to its draft (Enter
-  saves the row, Escape cancels it, the first field takes focus) and
-  `AdaptRowEditActionsChrome` draws its edit, save and cancel controls for
-  the `ROW_EDIT_ACTIONS` slot; `AdaptBatchEditCell` turns every editable cell
-  into a field marked `data-changed` once edited, and
-  `AdaptBatchEditBarChrome` fills `BATCH_EDIT_BAR` with the unsaved-row
-  count, Save all and Cancel all.
+  equal to where the list starts, so a table down the page windows the rows
+  in view. `injectColumnWindow` (`ColumnWindowOptions`, returning
+  `ColumnWindow`) windows a wide table's columns — pinned ones always
+  rendered — and `AdaptColumnSpacer` holds the skipped width open on either
+  side.
+- Cell navigation: `cellNavigation` (`CellNavigationOptions`) makes the
+  table one tab stop whose cells the arrow keys move between, and tells
+  `onRangeChange` the selected rectangle. `injectGridFocus(options)`
+  (`GridFocusOptions`, returning `GridFocus`) is the grid itself: the active
+  cell and range as signals, the announcement, and attribute getters that
+  wrap the table's own with the grid's roles, indices, roving tab stop and
+  handlers. Off, they are the table's attributes unchanged.
+- Editing: `editing` / `injectCellEditing` (`CellEditHandler`,
+  `CellEditingOptions`, `EditingLifecycleExtras`) edit one cell in place;
+  `injectEditValidation` (`EditValidationInjectOptions`) and
+  `injectCellSaveState` (`CellSaveStateInjectOptions`) track validators and
+  rejected saves. `AdaptEditableCellGate` draws the activate control and the
+  editor (`EDITABLE_CELL`, `EditableCellSlotProps`, `EditableCellSlots`,
+  `EditableCellEditorCtrl`, `EditableCellActivateProps`,
+  `EditableCellButtonProps`): Enter or F2 opens a cell, the editor takes
+  focus, and focus returns to the cell after a commit or cancel.
+  `AdaptCellConflictNotice` (`CellConflictNoticeProps`) is the keep/take
+  question when a live row moves under the editor. `rowEditing` /
+  `injectRowEditing` (`RowEditHandler`, `RowEditingInjectOptions`) and
+  `batchEditing` / `injectBatchEditing` (`BatchEditHandler`,
+  `BatchEditingInjectOptions`) edit whole rows and batches. `AdaptRowEditCell`
+  binds a row's fields to its draft (Enter saves the row, Escape cancels it,
+  the first field takes focus) and `AdaptRowEditActionsChrome` draws its
+  edit, save and cancel controls for the `ROW_EDIT_ACTIONS` slot;
+  `AdaptBatchEditCell` turns every editable cell into a field marked
+  `data-changed` once edited, and `AdaptBatchEditBarChrome` fills
+  `BATCH_EDIT_BAR` with the unsaved-row count, Save all and Cancel all.
 - Actions: `injectBulkActionRunner` runs bulk actions and returns a
   `BulkActionRunnerState`; `rowActionsFor` (`RowActionsOptions`) is the
   actions column's list, with Duplicate and Delete appended for the host's
@@ -3106,47 +3117,44 @@ controls: the host writes its own markup.
 - `fromStore(store, options)` turns any core store, an `ExternalStore`, into a
   read-only signal that ends with its injector (`FromStoreOptions`).
   `MaybeSignal` and `MaybeSignalOptional` are the option types that take a
-  value or a signal of one. Secondary entries `./formula`, `./pivot`,
-  `./sparkline` and `./stream` currently export only the reserved markers
-  `__angularFormulaReserved`, `__angularPivotReserved`,
-  `__angularSparklineReserved` and `__angularStreamReserved` until those
-  surfaces land.
+  value or a signal of one. The secondary entries `./formula`, `./pivot`,
+  `./sparkline` and `./stream` are reserved and export no public API; each
+  carries one internal marker (`__angularFormulaReserved`,
+  `__angularPivotReserved`, `__angularSparklineReserved`,
+  `__angularStreamReserved`).
 
-`@adapttable/angular-unstyled` is the Angular table drawn with native HTML,
-unpublished while it reaches parity with the React kits. `AdaptDataTable`
-(`<adapt-data-table>`) takes the rows, columns and row key as inputs and
-renders search, sorting, paging, the phone card layout, row selection and
-keyboard cell navigation with the `data-adapttable-part` names every kit
-shares. `AdaptDesktopTable` and `AdaptMobileCards` are the desktop body and
-phone card list; `AdaptPaginationFooter` is the pager. Its `features` input
-composes factories from secondary entries —
-`columnMenu` (`AdaptColumnMenu`), `filters` (`AdaptFiltersForm`,
+`@adapttable/angular-unstyled` is the Angular table drawn with native HTML;
+it is private and not published. `AdaptDataTable` (`<adapt-data-table>`)
+takes the rows, columns and row key as inputs and renders search, sorting,
+paging, the phone card layout, row selection and keyboard cell navigation
+with the `data-adapttable-part` names every kit shares. `AdaptDesktopTable`
+and `AdaptMobileCards` are the desktop body and phone card list;
+`AdaptPaginationFooter` is the pager. Its `features` input composes
+factories from secondary entries, each drawing the kit's own native
+controls — `columnMenu` (`AdaptColumnMenu`), `filters` (`AdaptFiltersForm`,
 `AdaptFilterDrawer`, `AdaptFilterPopover`, `AdaptFilterChips`,
 `AdaptAutoFilterForm`), `headerFilters`, `bulkActions` (`AdaptBulkBar`),
 `rowActions` (`RowActionsFeatureOptions`), `densityChooser`
 (`AdaptDensityButton`), `fullscreen` (`AdaptFullscreenButton`), `exportCsv`
-(`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`), `groupingPanel`
+(`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`), `grouping`
+(`AdaptGroupHeaderRow` on desktop and `AdaptGroupHeaderCard` on phones draw
+group headers, footers and "show more" rows), `groupingPanel`
 (`AdaptGroupingPanel`), `virtualize`, `cellNavigation`, `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL`,
 `AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`
 (`AdaptBatchEditBar` fills `BATCH_EDIT_BAR`) — each importable from its own
-subpath (or from `@adapttable/angular-unstyled/features`); `standardPreset`
+subpath (or from `@adapttable/angular-unstyled/features`). `standardPreset`
 (`@adapttable/angular-unstyled/preset`, `StandardPresetOptions`) assembles
-the zero-configuration
-set. Overlay helpers `menuPopover` / `MenuPopover`, `OVERLAY_Z` and
-`placeOverlayBelowTrigger` position kit menus. `filtersMode` (`FiltersMode`)
-picks the anchored popover or the drawer.
-Each feature draws the kit's own native controls. `AdaptGroupingPanel` draws
-the grouping strip with those same native controls. `paginationMode` and
-`maxHeight` arm infinite lists and a scroll-box window. `grouping`
-(`@adapttable/angular-unstyled/grouping`) draws group headers, footers and
-"show more" rows with `AdaptGroupHeaderRow` on desktop and
-`AdaptGroupHeaderCard` on phones. `TableView` is what
-the table renders from once its inputs have arrived — its body as `BodySlot`
-entries in reading order, each data row a `BodyRow` — among it each row's
-`RowActionsCell`, the row-edit controls and host actions its actions cell
-draws — and `FiltersView` is
-the filters on that view: the button, the open panel, and the form, overlay,
+the zero-configuration set. Overlay helpers `menuPopover` / `MenuPopover`,
+`OVERLAY_Z` and `placeOverlayBelowTrigger` position kit menus, and
+`filtersMode` (`FiltersMode`) picks the anchored popover or the drawer.
+`paginationMode` arms infinite lists, and `maxHeight` caps the desktop body
+or the phone card list, which then scrolls itself and is what a composed
+`virtualize` windows. `TableView` is what the table renders from once its
+inputs have arrived: its body as `BodySlot` entries in reading order, each
+data row a `BodyRow`, and each row's `RowActionsCell` — the row-edit
+controls and host actions its actions cell draws. `FiltersView` is the
+filters on that view: the button, the open panel, and the form, overlay,
 chips and header funnels.
 
 ## Other packages

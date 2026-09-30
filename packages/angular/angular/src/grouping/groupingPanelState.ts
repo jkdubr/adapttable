@@ -1,6 +1,6 @@
 /**
  * The interactive grouping panel state for Angular: a core controller over
- * the live table, published as a signal the Chrome and the
+ * the live table, published as a signal the grouping strip and the
  * {@link GROUPING_PANEL} slot draw from.
  */
 import {

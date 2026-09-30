@@ -11,8 +11,8 @@ import {
 
 /**
  * Render only the rows in view. Compose with `paginationMode="infinite"`
- * (or a grouped/tree page): a flat paged table already bounds what is
- * mounted, so the window stays off.
+ * (or a grouped page): a flat paged table already bounds what is
+ * rendered, so the window stays off.
  *
  * @param options - Master switch or the windowing knobs.
  *

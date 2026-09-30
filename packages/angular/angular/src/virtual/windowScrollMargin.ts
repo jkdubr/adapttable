@@ -31,7 +31,7 @@ export interface MeasuredWindowScrollMarginOptions {
   readonly enabled: MaybeSignal<boolean>;
   /**
    * The table root or scroll box: any ancestor of the `tbody` or card list.
-   * Read as a signal, so the margin follows the element as it mounts.
+   * Read as a signal, so the margin follows the element once it renders.
    */
   readonly element: () => Element | null;
   /** The injector whose lifetime the measurement follows. */

@@ -311,7 +311,7 @@ export class AdaptRowReorderButtonsChrome<TRow> {
 }
 
 /**
- * The live region for row reorder. Kits mount this only when reorder is armed.
+ * The live region for row reorder. Kits render this only while reorder is composed.
  *
  * @public
  */

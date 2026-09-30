@@ -1,6 +1,6 @@
 /**
  * Per-cell editing controller — core's pipeline bound to Angular's column
- * type and the editing bundle the Chrome hands every cell.
+ * type and the editing bundle the table hands every cell.
  */
 import {
   type EditableCellController,
