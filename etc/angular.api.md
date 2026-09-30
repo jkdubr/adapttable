@@ -66,6 +66,8 @@ import { coreSavedViews } from '@adapttable/core/binding';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
 import { desktopBodySlots } from '@adapttable/core/binding';
+import { desktopDetailMeasureRef } from '@adapttable/core/binding';
+import { desktopRowMeasureRef } from '@adapttable/core/binding';
 import { DesktopRowWiringArgs } from '@adapttable/core/binding';
 import { devWarn } from '@adapttable/core';
 import { Direction } from '@adapttable/core';
@@ -89,6 +91,9 @@ import { EditUnit } from '@adapttable/core';
 import { EditValidationState } from '@adapttable/core';
 import { EnvironmentProviders } from '@angular/core';
 import { estimateBodyItemSize } from '@adapttable/core/binding';
+import { EXPAND_TOGGLE } from '@adapttable/core/binding';
+import { expandChevronIcon } from '@adapttable/core/binding';
+import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
 import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
@@ -192,6 +197,8 @@ import { LazyChildrenOptions } from '@adapttable/core';
 import { LazyChildrenState } from '@adapttable/core/binding';
 import { listFilterValues } from '@adapttable/core';
 import { mobileCardListStyle } from '@adapttable/core';
+import { NestedTableDefaults } from '@adapttable/core';
+import { NestedTableParent } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { offersAllMatching } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
@@ -238,6 +245,7 @@ import { rowEditControls } from '@adapttable/core';
 import { RowEditControlsOptions } from '@adapttable/core';
 import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
+import { RowExpansionState } from '@adapttable/core/binding';
 import { RowHeight } from '@adapttable/core';
 import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
@@ -1040,6 +1048,49 @@ export class AdaptLiveRegion {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptLiveRegion, never>;
+}
+
+// @public
+export class AdaptRowDetail<TRow> {
+    readonly nested: InputSignal<NestedTableFor<TRow> | undefined>;
+    // @internal
+    protected readonly nestedView: Signal<    {
+    label: string;
+    context: NestedTableContext<TRow>;
+    content: ResolvedRenderer<NestedTableContext<TRow>> | null;
+    } | undefined>;
+    // @internal (undocumented)
+    protected readonly ownContext: Signal<RowDetailContext<TRow>>;
+    // @internal
+    protected readonly ownView: Signal<ResolvedRenderer<RowDetailContext<TRow>> | null>;
+    readonly parent: InputSignal<NestedTableParent | undefined>;
+    readonly render: InputSignal<Renderer<RowDetailContext<TRow>> | undefined>;
+    readonly row: InputSignal<TRow>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptRowDetail<any>, "adapt-row-detail", never, {
+        "row": {
+            "alias": "row";
+            "required": true;
+            "isSignal": true;
+        };
+        "render": {
+            "alias": "render";
+            "required": false;
+            "isSignal": true;
+        };
+        "nested": {
+            "alias": "nested";
+            "required": false;
+            "isSignal": true;
+        };
+        "parent": {
+            "alias": "parent";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowDetail<any>, never>;
 }
 
 // @public
@@ -1986,6 +2037,10 @@ export interface DensityUrlStateOptions extends UrlSliceOptions {
 
 export { desktopBodySlots }
 
+export { desktopDetailMeasureRef }
+
+export { desktopRowMeasureRef }
+
 export { DesktopRowWiringArgs }
 
 export { devWarn }
@@ -2088,6 +2143,12 @@ export interface EditValidationInjectOptions<TRow> {
 }
 
 export { estimateBodyItemSize }
+
+export { EXPAND_TOGGLE }
+
+export { expandChevronIcon }
+
+export { ExpandToggleSlotProps }
 
 // @public
 export interface ExportCsvHandlerOptions<TRow> {
@@ -2565,7 +2626,13 @@ export function injectPrefersReducedMotion(injector?: Injector): Signal<boolean>
 export function injectQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(options: QuerySourceOptions<TRow, TParams, TPage>): Signal<TableSource<TRow>>;
 
 // @public
+export function injectRowDetail<TRow>(options: RowDetailOptions): Signal<TableRowDetail<TRow>> | undefined;
+
+// @public
 export function injectRowEditing<TRow>(options: RowEditingInjectOptions<TRow>): Signal<RowEditingState<TRow>>;
+
+// @public
+export function injectRowExpansion(options?: RowExpansionOptions): Signal<RowExpansionState>;
 
 // @public
 export function injectRowPairMeasurer(options: RowPairMeasurerOptions): RowPairMeasurer;
@@ -2676,6 +2743,29 @@ export function multiDraftFromSelect(select: HTMLSelectElement): string;
 
 // @public
 export function multiSort(): AdaptTableFeature;
+
+// @public
+export interface NestedTable<TRow = unknown> {
+    readonly label?: string;
+    readonly table: Renderer<NestedTableContext<TRow>>;
+}
+
+// @public
+export function nestedTable<TRow>(nested: NestedTableFor<TRow>, defaultExpandedRowIds?: readonly string[]): AdaptTableFeature;
+
+// @public
+export interface NestedTableContext<TRow = unknown> {
+    readonly $implicit: NestedTableDefaults;
+    readonly defaults: NestedTableDefaults;
+    readonly row: TRow;
+}
+
+export { NestedTableDefaults }
+
+// @public
+export type NestedTableFor<TRow> = (row: TRow) => NestedTable<TRow> | undefined;
+
+export { NestedTableParent }
 
 export { nextPinSide }
 
@@ -2825,6 +2915,21 @@ export interface RowAppearanceOptions<TRow> {
     readonly rowStyle?: RowStyle<TRow>;
 }
 
+// @public
+export function rowDetail<TRow>(renderRowDetail: Renderer<RowDetailContext<TRow>>, defaultExpandedRowIds?: readonly string[]): AdaptTableFeature;
+
+// @public
+export interface RowDetailContext<TRow> {
+    readonly $implicit: TRow;
+    readonly row: TRow;
+}
+
+// @public
+export interface RowDetailOptions {
+    readonly features: readonly AdaptTableFeature[];
+    readonly injector?: Injector;
+}
+
 export { RowEditActionsProps }
 
 // @public
@@ -2868,6 +2973,14 @@ export interface RowEditingInjectOptions<TRow> {
 export function rowEditingSignature<TRow>(editing: EditableCellEditing<TRow> | undefined, rowId: string): string | null;
 
 export { RowEditingState }
+
+// @public
+export interface RowExpansionOptions {
+    readonly defaultExpandedIds?: readonly string[];
+    readonly injector?: Injector;
+}
+
+export { RowExpansionState }
 
 export { RowHeight }
 
@@ -3137,6 +3250,13 @@ export type TableQueryHandler = (query: TableQuery, info: {
 }) => void | Promise<void>;
 
 export { TableQueryParams }
+
+// @public
+export interface TableRowDetail<TRow> {
+    readonly expansion: RowExpansionState;
+    readonly nested: NestedTableFor<TRow> | undefined;
+    readonly render: Renderer<RowDetailContext<TRow>> | undefined;
+}
 
 export { TableSource }
 

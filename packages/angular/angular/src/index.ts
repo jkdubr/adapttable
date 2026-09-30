@@ -165,6 +165,13 @@ export {
   groupingPanel,
   type GroupingPanelExtras,
 } from "./features/groupingPanel";
+export {
+  injectRowDetail,
+  nestedTable,
+  rowDetail,
+  type RowDetailOptions,
+  type TableRowDetail,
+} from "./features/rowDetail";
 export { rowReorder } from "./features/rowReorder";
 export {
   injectTree,
@@ -247,6 +254,11 @@ export {
 } from "./rows/changedCellFlash";
 export { type Highlight, injectHighlight } from "./rows/highlight";
 export {
+  injectRowExpansion,
+  type RowExpansionOptions,
+  type RowExpansionState,
+} from "./rows/rowExpansion";
+export {
   injectRowReorder,
   type RowReorderState,
   type RowReorderStateOptions,
@@ -304,6 +316,15 @@ export {
   type LazyChildrenInjectOptions,
   type LazyChildrenState,
 } from "./tree/lazyChildren";
+export {
+  AdaptRowDetail,
+  type NestedTable,
+  type NestedTableContext,
+  type NestedTableDefaults,
+  type NestedTableFor,
+  type NestedTableParent,
+  type RowDetailContext,
+} from "./tree/nestedTable";
 export { AdaptTreeCellChrome } from "./tree/treeCell";
 export {
   injectTreeExpansion,

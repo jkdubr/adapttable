@@ -35,6 +35,7 @@ import { EditableCellSlots } from '@adapttable/angular';
 import { editorInputType } from '@adapttable/angular';
 import { editorValidationProps } from '@adapttable/angular';
 import { ElementRef } from '@angular/core';
+import { ExpandToggleSlotProps } from '@adapttable/angular';
 import { ExtraFilters } from '@adapttable/angular';
 import { FacetCounts } from '@adapttable/core';
 import { FeatureSlotKey } from '@adapttable/angular';
@@ -63,6 +64,7 @@ import { isDraftChecked } from '@adapttable/angular';
 import { isMultiSelectEditor } from '@adapttable/angular';
 import { isSelectEditor } from '@adapttable/angular';
 import { multiDraftFromSelect } from '@adapttable/angular';
+import { NestedTableParent } from '@adapttable/angular';
 import { OnInit } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
 import { PaginationMode } from '@adapttable/angular';
@@ -89,6 +91,7 @@ import { TableGrouping } from '@adapttable/angular';
 import { TableLabels } from '@adapttable/angular';
 import { TableQueryHandler } from '@adapttable/angular';
 import { TableQueryParams } from '@adapttable/angular';
+import { TableRowDetail } from '@adapttable/angular';
 import { TableSource } from '@adapttable/angular';
 import { TableTree } from '@adapttable/angular';
 import { TableVirtualization } from '@adapttable/angular';
@@ -266,6 +269,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly rowKey: InputSignal<(row: TRow) => string>;
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
+    readonly searchable: InputSignal<boolean>;
     readonly searchPlaceholder: InputSignal<string | undefined>;
     readonly selectable: InputSignal<boolean>;
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
@@ -374,6 +378,11 @@ export class AdaptDataTable<TRow> implements OnInit {
         };
         "searchPlaceholder": {
             "alias": "searchPlaceholder";
+            "required": false;
+            "isSignal": true;
+        };
+        "searchable": {
+            "alias": "searchable";
             "required": false;
             "isSignal": true;
         };
@@ -488,6 +497,7 @@ export class AdaptDensityButton {
 // @internal
 export class AdaptDesktopTable<TRow> {
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
+    protected readonly expandToggleSlot: FeatureSlotKey<ExpandToggleSlotProps>;
     protected readonly filterSlots: {
         header: FeatureSlotKey<FilterHeaderControlProps<never>>;
     };
@@ -552,6 +562,23 @@ export class AdaptEditableCell<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptEditableCell<any>, never>;
+}
+
+// @public
+export class AdaptExpandToggle {
+    // @internal
+    protected readonly chevron: Signal<IconDescriptor>;
+    readonly props: InputSignal<ExpandToggleSlotProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptExpandToggle, "adapt-expand-toggle", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptExpandToggle, never>;
 }
 
 // @internal
@@ -849,6 +876,7 @@ export class AdaptGroupMore {
 export class AdaptMobileCards<TRow> {
     protected caption(column: ColumnDef<TRow>): string | undefined;
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
+    protected readonly expandToggleSlot: FeatureSlotKey<ExpandToggleSlotProps>;
     protected readonly groupHeaderCardSlot: FeatureSlotKey<GroupHeaderCardSlotProps<never, unknown, ColumnModel<never>>>;
     protected readonly listStyle: Signal<    {
     maxHeight: string;
@@ -1030,6 +1058,7 @@ export class AdaptTreeToggle {
 // @public
 export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
     readonly cardAttrs: Attrs;
+    readonly detailAttrs: Attrs;
     readonly rowAttrs: Attrs;
 }
 
@@ -1097,8 +1126,10 @@ export interface TableView<TRow> {
     } | undefined>;
     readonly confirm: ConfirmHandler;
     readonly density: Signal<TableDensity>;
+    readonly detailParent: Signal<NestedTableParent>;
     readonly editableCells: Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;
     readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
+    readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
     readonly filters: FiltersView | undefined;
     readonly grid: GridFocus<TRow> | undefined;
     readonly groupHeaders: Signal<{
@@ -1110,6 +1141,7 @@ export interface TableView<TRow> {
     readonly reorder: Signal<RowReorderState<TRow>> | undefined;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
+    readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
     readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
     readonly selection: RowSelection | undefined;
     readonly showActions: Signal<boolean>;

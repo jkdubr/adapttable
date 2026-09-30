@@ -6,9 +6,11 @@ import {
   AdaptCell,
   AdaptColumnSpacer,
   AdaptHeader,
+  AdaptRowDetail,
   AdaptSlot,
   type Attrs,
   EDITABLE_CELL,
+  EXPAND_TOGGLE,
   FILTER_HEADER,
   GROUP_HEADER_ROW,
   ROW_EDIT_ACTIONS,
@@ -50,6 +52,7 @@ import { AdaptRowActions } from "./rowActionButtons";
     AdaptColumnSpacer,
     AdaptHeader,
     AdaptRowActions,
+    AdaptRowDetail,
     AdaptSlot,
     NgTemplateOutlet,
   ],
@@ -78,6 +81,8 @@ export class AdaptDesktopTable<TRow> {
   protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
   /** The group header slot. @internal */
   protected readonly groupHeaderRowSlot = GROUP_HEADER_ROW;
+  /** The row-expansion toggle slot. @internal */
+  protected readonly expandToggleSlot = EXPAND_TOGGLE;
   /** The tree column's cell slot. @internal */
   protected readonly treeCellSlot = TREE_CELL;
 

@@ -6,12 +6,14 @@
     [attr.data-density]="v.density()"
   >
     <div data-adapttable-part="toolbar">
-      <div data-adapttable-part="search-field">
-        <input
-          data-adapttable-part="search"
-          [adaptAttrs]="v.table.searchInputAttrs()"
-        />
-      </div>
+      @if (searchable()) {
+        <div data-adapttable-part="search-field">
+          <input
+            data-adapttable-part="search"
+            [adaptAttrs]="v.table.searchInputAttrs()"
+          />
+        </div>
+      }
       @if (v.filters; as f) {
         <ng-template #filtersTrigger>
           <button

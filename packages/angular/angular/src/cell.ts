@@ -63,7 +63,13 @@ export interface ResolvedRenderer<TContext> {
   readonly inputs: Record<string, unknown>;
 }
 
-function resolveRenderer<TContext extends object>(
+/**
+ * Split a renderer into the template to stamp or the component to create,
+ * with only the context fields the component declares as inputs.
+ *
+ * @internal
+ */
+export function resolveRenderer<TContext extends object>(
   renderer: Renderer<TContext> | undefined,
   context: TContext
 ): ResolvedRenderer<TContext> | null {

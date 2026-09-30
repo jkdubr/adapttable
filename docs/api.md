@@ -3154,6 +3154,17 @@ comes from a kit through a slot.
   `AdaptTreeToggleChrome` draws the chevron through the kit's `Button`
   (`TreeToggleSlots`) or a leaf's spacer. Kits fill `TREE_CELL` and
   `TREE_TOGGLE`.
+- Row detail: `rowDetail` renders a panel under an expanded row from an
+  `ng-template` or component handed a `RowDetailContext`; `nestedTable`
+  renders a `NestedTable` per row (`NestedTableFor`) — the kit's own table,
+  mounted from a template handed a `NestedTableContext` of core's
+  `NestedTableDefaults` (no URL writes, no search box, the parent's density
+  and labels, an accessible name). `injectRowDetail` (`RowDetailOptions`) is
+  their live model, a `TableRowDetail`, and `injectRowExpansion`
+  (`RowExpansionOptions`) the open rows, several at once, keyed by id.
+  `AdaptRowDetail` draws a row's detail: its nested table inside a region
+  named for assistive technology, else the host's panel. Kits fill
+  `EXPAND_TOGGLE`.
 - Cell navigation: `cellNavigation` (`CellNavigationOptions`) makes the
   table one tab stop whose cells the arrow keys move between, and tells
   `onRangeChange` the selected rectangle. `injectGridFocus(options)`
@@ -3244,7 +3255,10 @@ group headers, footers and "show more" rows, the last with `AdaptGroupMore`),
 (`AdaptGroupingPanel`), `tree` (`TreeFeatureOptions`; `AdaptTreeCell` fills
 `TREE_CELL` with `TreeCellSlotProps`, the cell's content as a template,
 `AdaptTreeToggle` leads each phone card, and `AdaptTreeButton` is the native
-chevron), `virtualize`, `cellNavigation`, `rowReorder`,
+chevron), `rowDetail` and `nestedTable` (`@adapttable/angular-unstyled/row-detail`
+and `/nested-table`; `AdaptExpandToggle` fills `EXPAND_TOGGLE` in each row's
+leading cell and on each card, and the panel opens beneath the row or inside
+the card), `virtualize`, `cellNavigation`, `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,
 `AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`
@@ -3254,7 +3268,8 @@ subpath (or from `@adapttable/angular-unstyled/features`). `standardPreset`
 the zero-configuration set. Overlay helpers `menuPopover` / `MenuPopover`,
 `OVERLAY_Z` and `placeOverlayBelowTrigger` position kit menus, and
 `filtersMode` (`FiltersMode`) picks the anchored popover or the drawer.
-`paginationMode` arms infinite lists, and `maxHeight` caps the desktop body
+`searchable` draws the search box (on by default; a nested table turns it
+off). `paginationMode` arms infinite lists, and `maxHeight` caps the desktop body
 or the phone card list, which then scrolls itself and is what a composed
 `virtualize` windows. `TableView` is what the table renders from once its
 inputs have arrived: its body as `BodySlot` entries in reading order, each

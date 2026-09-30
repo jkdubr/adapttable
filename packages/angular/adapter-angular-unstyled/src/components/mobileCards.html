@@ -45,6 +45,13 @@
               [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
             />
           }
+          @if (v.rowDetail) {
+            <ng-container
+              [adaptSlot]="expandToggleSlot"
+              [adaptSlotProps]="v.expandToggles().get(entry.id)!"
+              [adaptSlotTable]="v.table"
+            />
+          }
           @for (column of v.table.columns(); track column.key) {
             <div data-adapttable-part="card-row">
               @if (caption(column); as label) {
@@ -98,6 +105,18 @@
                 />
               }
             </div>
+          }
+          @if (v.rowDetail; as detail) {
+            @if (detail().expansion.isExpanded(entry.id)) {
+              <div data-adapttable-part="card-detail">
+                <adapt-row-detail
+                  [row]="entry.row"
+                  [render]="detail().render"
+                  [nested]="detail().nested"
+                  [parent]="v.detailParent()"
+                />
+              </div>
+            }
           }
         </li>
       }

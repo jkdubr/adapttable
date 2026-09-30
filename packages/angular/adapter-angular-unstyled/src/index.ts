@@ -16,6 +16,7 @@ export {
   AdaptEditableCell,
   AdaptNativeCellEditor,
 } from "./components/editableCell";
+export { AdaptExpandToggle } from "./components/expandToggle";
 export { AdaptFilterDrawer, AdaptFiltersForm } from "./components/filterPanel";
 export { AdaptFilterPopover } from "./components/filterPopover";
 export {

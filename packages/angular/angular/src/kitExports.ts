@@ -224,3 +224,12 @@ export {
   TREE_TOGGLE,
   type TreeCellProps,
 } from "@adapttable/core/binding";
+export {
+  EXPAND_TOGGLE,
+  type ExpandToggleSlotProps,
+} from "@adapttable/core/binding";
+export {
+  desktopDetailMeasureRef,
+  desktopRowMeasureRef,
+  expandChevronIcon,
+} from "@adapttable/core/binding";

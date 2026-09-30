@@ -85,6 +85,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-header-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-header-filters.mjs"
     },
+    "./nested-table": {
+      "types": "./dist/types/adapttable-angular-unstyled-nested-table.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-nested-table.mjs"
+    },
     "./preset": {
       "types": "./dist/types/adapttable-angular-unstyled-preset.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-preset.mjs"
@@ -92,6 +96,10 @@
     "./row-actions": {
       "types": "./dist/types/adapttable-angular-unstyled-row-actions.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-row-actions.mjs"
+    },
+    "./row-detail": {
+      "types": "./dist/types/adapttable-angular-unstyled-row-detail.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-row-detail.mjs"
     },
     "./row-reorder": {
       "types": "./dist/types/adapttable-angular-unstyled-row-reorder.d.ts",

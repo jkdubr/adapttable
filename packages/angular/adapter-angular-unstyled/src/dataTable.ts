@@ -32,6 +32,8 @@ import {
   type DataTable,
   defaultConfirm,
   desktopBodySlots,
+  desktopDetailMeasureRef,
+  desktopRowMeasureRef,
   type DesktopRowWiringArgs,
   devWarn,
   type Direction,
@@ -39,6 +41,7 @@ import {
   type EditableCellSlotProps,
   type EditEventHandler,
   estimateBodyItemSize,
+  type ExpandToggleSlotProps,
   type ExportCsvOptions,
   type ExtraFilters,
   type FacetMap,
@@ -73,6 +76,7 @@ import {
   injectIsMobile,
   injectKeyedVirtualization,
   injectMeasuredWindowScrollMargin,
+  injectRowDetail,
   injectRowEditing,
   injectRowReorder,
   injectRowSelection,
@@ -81,6 +85,7 @@ import {
   injectTree,
   insertExtraRows,
   insertExtrasBeforeRows,
+  type NestedTableParent,
   type PaginationMode,
   type QueryAggregate,
   type QuerySupport,
@@ -106,6 +111,7 @@ import {
   type TableLabels,
   type TableQueryHandler,
   type TableQueryParams,
+  type TableRowDetail,
   type TableSource,
   type TableTree,
   type TableVirtualization,
@@ -257,6 +263,11 @@ export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
   readonly rowAttrs: Attrs;
   /** The same row as a phone card: its attributes, measured the same way. */
   readonly cardAttrs: Attrs;
+  /**
+   * The row's detail row's attributes: the window's measure ref, so a row
+   * and its open detail count as one virtual item.
+   */
+  readonly detailAttrs: Attrs;
 }
 
 /**
@@ -439,6 +450,7 @@ function bodyWindowFor<TRow>(options: {
   readonly table: DataTable<TRow>;
   readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
   readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
+  readonly expandable: boolean;
   readonly featureOptions: Readonly<Record<string, unknown>>;
   readonly rowKey: (row: TRow) => string;
   readonly maxHeight: number | string | undefined;
@@ -450,6 +462,7 @@ function bodyWindowFor<TRow>(options: {
     table,
     grouping,
     tree,
+    expandable,
     featureOptions,
     rowKey,
     maxHeight,
@@ -521,6 +534,7 @@ function bodyWindowFor<TRow>(options: {
     rows: computed(() => source().rows),
     rowKey,
     enabled: computed(() => kind() === "flat"),
+    expandable,
     estimateSize,
     overscan,
     scrollMargin,
@@ -602,6 +616,12 @@ export interface TableView<TRow> {
   readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
   /** Whether a kit draws the tree column's cell. */
   readonly treeCellFilled: boolean;
+  /** The live row detail, when `rowDetail()` or `nestedTable()` is composed. */
+  readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
+  /** Each window row's expand toggle props, keyed by row id. */
+  readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
+  /** What this table hands the tables nested under its rows. */
+  readonly detailParent: Signal<NestedTableParent>;
   /**
    * Cell editing bundle, when an editing feature is composed — state, channel,
    * validation, save tracking and lifecycle observers for the gate.
@@ -716,6 +736,11 @@ export class AdaptDataTable<TRow> implements OnInit {
   readonly labels = input<TableLabels>();
   /** The search box's placeholder. Defaults to the `searchPlaceholder` label. */
   readonly searchPlaceholder = input<string>();
+  /**
+   * Draw the search box. On by default; a nested table turns it off, since a
+   * second search box inside a row reads as chrome rather than as a feature.
+   */
+  readonly searchable = input(true);
   /** Keep the view state in the URL. Read once, when the table starts. */
   readonly urlSync = input(true);
   /** Namespace for this table's URL params. Read once. */
@@ -1061,6 +1086,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     });
     groupingRef.set(grouping);
     const tree = injectTree<TRow>({ table, source, features, injector });
+    const rowDetail = injectRowDetail<TRow>({ features, injector });
     const groupingPanel = injectGroupingPanelState({
       table,
       source: viewSource,
@@ -1098,6 +1124,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       table,
       grouping,
       tree,
+      expandable: rowDetail !== undefined,
       featureOptions,
       rowKey: (row) => this.rowKey()(row),
       maxHeight: this.maxHeight(),
@@ -1143,6 +1170,8 @@ export class AdaptDataTable<TRow> implements OnInit {
         editing: editing?.(),
         rowReorder: reorder?.(),
         grouping: entries === undefined ? undefined : { entries },
+        renderRowDetail: rowDetail?.(),
+        expansion: rowDetail?.().expansion,
       });
     });
     const showActions = computed(() => renderModel().showActions);
@@ -1152,11 +1181,14 @@ export class AdaptDataTable<TRow> implements OnInit {
     const columnIndex = computed(
       () => new Map(table.columns().map((column, index) => [column.key, index]))
     );
-    // A virtualized row hands itself to the window, which measures it.
-    const measured = (attrs: Attrs): Attrs => {
-      const measure = virtualization().measureElement;
-      return measure === undefined ? attrs : { ...attrs, ref: measure };
-    };
+    // A virtualized row hands itself to the window, which measures it — with
+    // its open detail row, as one item, when rows can expand.
+    const withRef = (
+      attrs: Attrs,
+      ref: ((node: Element | null) => void) | undefined
+    ): Attrs => (ref === undefined ? attrs : { ...attrs, ref });
+    const measured = (attrs: Attrs): Attrs =>
+      withRef(attrs, virtualization().measureElement);
     const body = computed((): readonly BodySlot<TRow>[] => {
       const window = bodyWindow();
       const entries = window.groupingEntries;
@@ -1180,15 +1212,32 @@ export class AdaptDataTable<TRow> implements OnInit {
         getRowId: rowKey(),
         columnSpan: bodyColSpan(),
         rows: table.source().rows,
-        wiring: (args) => ({
-          ...args,
-          rowAttrs: measured(
-            grid
-              ? grid.rowAttrs(args.row, args.index)
-              : table.rowAttrs(args.row, args.index)
-          ),
-          cardAttrs: measured(table.cardAttrs(args.row, args.index)),
-        }),
+        wiring: (args) => {
+          const window = virtualization();
+          return {
+            ...args,
+            rowAttrs: withRef(
+              grid
+                ? grid.rowAttrs(args.row, args.index)
+                : table.rowAttrs(args.row, args.index),
+              desktopRowMeasureRef(
+                undefined,
+                window.measureRowPair,
+                args.index,
+                window.measureElement
+              )
+            ),
+            cardAttrs: measured(table.cardAttrs(args.row, args.index)),
+            detailAttrs: withRef(
+              {},
+              desktopDetailMeasureRef(
+                undefined,
+                window.measureRowPair,
+                args.index
+              )
+            ),
+          };
+        },
       });
     });
     const bodyRows = computed(() =>
@@ -1205,6 +1254,29 @@ export class AdaptDataTable<TRow> implements OnInit {
       rows: bodyRows,
       rowKey,
     });
+    const expandToggles = computed(() => {
+      const toggles = new Map<string, ExpandToggleSlotProps>();
+      const detail = rowDetail?.();
+      if (!detail) return toggles;
+      const labels = table.labels();
+      const dir = table.dir();
+      for (const entry of bodyRows()) {
+        const id = entry.id;
+        toggles.set(id, {
+          id,
+          expanded: detail.expansion.isExpanded(id),
+          onToggle: detail.expansion.toggle,
+          dir,
+          expandLabel: labels.expandRow,
+          collapseLabel: labels.collapseRow,
+        });
+      }
+      return toggles;
+    });
+    const detailParent = computed((): NestedTableParent => ({
+      density: density(),
+      labels: labels(),
+    }));
     const groupHeaders = groupHeadersFor({
       table,
       grouping: grouping ?? computed(() => undefined),
@@ -1230,6 +1302,9 @@ export class AdaptDataTable<TRow> implements OnInit {
       reorder,
       tree,
       treeCellFilled: table.slotFills.has(TREE_CELL.id),
+      rowDetail,
+      expandToggles,
+      detailParent,
       editing,
       editableCells,
       showActions,

@@ -9,6 +9,13 @@
         data-adapttable-part="header-row"
         [adaptAttrs]="v.table.headerRowAttrs()"
       >
+        @if (v.rowDetail) {
+          <th
+            data-adapttable-part="expand-header"
+            scope="col"
+            [attr.aria-label]="v.table.labels().expandRow"
+          ></th>
+        }
         @if (v.reorder) {
           <th
             data-adapttable-part="reorder-header"
@@ -114,6 +121,15 @@
                   .onDrop($event)
               "
             >
+              @if (v.rowDetail) {
+                <td data-adapttable-part="expand-cell">
+                  <ng-container
+                    [adaptSlot]="expandToggleSlot"
+                    [adaptSlotProps]="v.expandToggles().get(entry.id)!"
+                    [adaptSlotTable]="v.table"
+                  />
+                </td>
+              }
               @if (v.reorder; as reorder) {
                 <td data-adapttable-part="reorder-cell">
                   <ng-container
@@ -204,6 +220,26 @@
                 </td>
               }
             </tr>
+            @if (v.rowDetail; as detail) {
+              @if (detail().expansion.isExpanded(entry.id)) {
+                <tr
+                  data-adapttable-part="detail-row"
+                  [adaptAttrs]="entry.detailAttrs"
+                >
+                  <td
+                    data-adapttable-part="detail-cell"
+                    [attr.colspan]="v.bodyColSpan()"
+                  >
+                    <adapt-row-detail
+                      [row]="entry.row"
+                      [render]="detail().render"
+                      [nested]="detail().nested"
+                      [parent]="v.detailParent()"
+                    />
+                  </td>
+                </tr>
+              }
+            }
           }
         }
       }
