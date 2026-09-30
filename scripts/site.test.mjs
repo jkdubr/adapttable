@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   DEMO_ROOT,
+  DEMO_ROOTS,
   demoRoute,
   docsRoute,
   docsSlug,
@@ -53,5 +54,18 @@ describe("site addresses", () => {
     assert.equal(DEMO_ROOT, `/${FRAMEWORK}/demo/`);
     assert.equal(demoRoute(), DEMO_ROOT);
     assert.equal(demoRoute("mantine/pivot"), `${DEMO_ROOT}mantine/pivot/`);
+  });
+
+  it("mounts each framework's demo pages in that framework's section", () => {
+    assert.equal(demoRoute("", "angular"), "/angular/demo/");
+    assert.equal(
+      demoRoute("unstyled/filtering", "angular"),
+      "/angular/demo/unstyled/filtering/"
+    );
+    assert.equal(demoRoute("mantine", "react"), "/react/demo/mantine/");
+    assert.deepEqual(DEMO_ROOTS, {
+      react: "/react/demo/",
+      angular: "/angular/demo/",
+    });
   });
 });

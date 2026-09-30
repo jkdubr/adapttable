@@ -12,7 +12,7 @@ import {
   matrixPages,
 } from "../apps/showcase/matrix.mjs";
 import { REPLACED_PAGES, SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
-import { DEMO_ROOT, demoRoute } from "./site.mjs";
+import { demoRootOf, demoRoute, FRAMEWORK } from "./site.mjs";
 import { isRedirectPage } from "./sitemap-routes.mjs";
 
 const SHOWCASE = fileURLToPath(new URL("../apps/showcase/", import.meta.url));
@@ -78,6 +78,10 @@ const entryModuleOf = (html) => {
   return src?.startsWith("/") ? src.slice(1) : src;
 };
 
+/** The booting pages of React's kits, whose entries carry the switcher. */
+const reactPages = () =>
+  bootingPages().filter(({ page }) => page.framework === FRAMEWORK);
+
 const sideEffectImportsIn = (source) =>
   [...source.matchAll(SIDE_EFFECT_IMPORT)].map((match) => match[1]);
 
@@ -131,9 +135,10 @@ describe("the showcase page manifest", () => {
     assert.equal(new Set(routes).size, routes.length);
   });
 
-  it("routes every page under the demo root with a trailing slash", () => {
-    for (const { route } of SHOWCASE_PAGES) {
-      assert.equal(route.startsWith(DEMO_ROOT), true, route);
+  it("routes every page under its framework's demo root with a trailing slash", () => {
+    for (const { route, framework } of SHOWCASE_PAGES) {
+      const root = demoRootOf(framework ?? FRAMEWORK);
+      assert.equal(route.startsWith(root), true, route);
       assert.equal(route.endsWith("/"), true, route);
     }
   });
@@ -180,10 +185,11 @@ describe("the showcase page manifest", () => {
 });
 
 /**
- * Every page carries a kit switcher, so every page can be asked to render any
- * kit — and a kit whose stylesheet never loaded renders bare HTML. The
- * stylesheets therefore belong to one shared module, and this walks the
- * manifest to prove no page entry skips it.
+ * Every React page carries a kit switcher, so every React page can be asked
+ * to render any React kit — and a kit whose stylesheet never loaded renders
+ * bare HTML. The stylesheets therefore belong to one shared module, and this
+ * walks the manifest to prove no React page entry skips it. An Angular page
+ * shows its one kit, styled by the page's own stylesheet.
  */
 describe("the kit stylesheets every showcase page loads", () => {
   it("boots a module from every page that is not a redirect", () => {
@@ -200,8 +206,8 @@ describe("the kit stylesheets every showcase page loads", () => {
     }
   });
 
-  it("imports the shared kit-styles module from every page entry", () => {
-    for (const { page, module, source } of bootingPages()) {
+  it("imports the shared kit-styles module from every React page entry", () => {
+    for (const { page, module, source } of reactPages()) {
       assert.ok(
         sideEffectImportsIn(source).includes(KIT_STYLES),
         `${module} (${page.route}) does not import "${KIT_STYLES}" — every kit ` +
@@ -211,7 +217,7 @@ describe("the kit stylesheets every showcase page loads", () => {
   });
 
   it("leaves every kit stylesheet to that module alone", () => {
-    for (const { module, source } of bootingPages()) {
+    for (const { module, source } of reactPages()) {
       for (const imported of sideEffectImportsIn(source)) {
         if (imported === KIT_STYLES || imported === CHROME_SHEET) continue;
         assert.ok(

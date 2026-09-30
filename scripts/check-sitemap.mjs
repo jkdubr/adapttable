@@ -3,18 +3,19 @@
  * Verify the COMPOSED site lists every demo page it actually ships.
  *
  * The docs site (Astro) and the showcase (Vite) build separately and are then
- * copied together — showcase `dist` into `apps/docs/dist/react/demo`. The deployable
- * tree exists only after that copy, so only then can the sitemap be compared
- * with what shipped. This walks every `index.html` built under `react/demo/`, sets
- * aside the pages that merely forward the reader on, and fails with the names
- * of any remaining route the sitemap does not carry.
+ * composed — each framework's demo pages under its demo root
+ * (`scripts/compose-site.mjs`). The deployable tree exists only after that, so
+ * only then can the sitemap be compared with what shipped. This walks every
+ * `index.html` built under every demo root, sets aside the pages that merely
+ * forward the reader on, and fails with the names of any remaining route the
+ * sitemap does not carry.
  *
  * A page is set aside on either of two independent grounds: the manifest marks
  * it `indexable: false`, or its built HTML carries a meta refresh. The sniff is
  * what makes an unregistered stub safe — it is excluded on its own evidence
  * rather than on being listed anywhere.
  *
- * The reverse direction is checked too: a sitemap `<loc>` under `/react/demo/` with
+ * The reverse direction is checked too: a sitemap `<loc>` under a demo root with
  * no built page behind it is a URL that 404s for every crawler that follows it.
  *
  * Runs in the docs workflow right after the compose step, and standalone via
@@ -26,7 +27,7 @@ import { join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { SHOWCASE_PAGES } from "../apps/showcase/pages.mjs";
-import { DEMO_ROOT } from "./site.mjs";
+import { DEMO_ROOT, DEMO_ROOTS } from "./site.mjs";
 import {
   isRedirectPage,
   locsIn,
@@ -34,8 +35,11 @@ import {
   SITE,
 } from "./sitemap-routes.mjs";
 
-/** Where the showcase is mounted inside the composed site. */
+/** Where React's demo pages are mounted inside the composed site. */
 const DEMO_DIR = DEMO_ROOT.slice(1, -1);
+
+/** Every framework's demo root inside the composed site, as a folder. */
+const DEMO_DIRS = Object.values(DEMO_ROOTS).map((root) => root.slice(1, -1));
 
 const DEFAULT_ROOT = fileURLToPath(
   new URL("../apps/docs/dist", import.meta.url)
@@ -48,18 +52,18 @@ const INDEX = "index.html";
  * route order. Directory entries and bundled assets are not pages, so only
  * `index.html` files count.
  */
-export const demoPages = (root) => {
-  const dir = join(root, DEMO_DIR);
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir, { recursive: true })
-    .map((entry) => entry.split(sep).join("/"))
-    .filter((rel) => rel === INDEX || rel.endsWith(`/${INDEX}`))
-    .map((rel) => ({
-      route: routeForFile(`${DEMO_DIR}/${rel}`),
-      file: join(dir, rel),
-    }))
-    .sort((a, b) => a.route.localeCompare(b.route));
-};
+export const demoPages = (root) =>
+  DEMO_DIRS.flatMap((demoDir) => {
+    const dir = join(root, demoDir);
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir, { recursive: true })
+      .map((entry) => entry.split(sep).join("/"))
+      .filter((rel) => rel === INDEX || rel.endsWith(`/${INDEX}`))
+      .map((rel) => ({
+        route: routeForFile(`${demoDir}/${rel}`),
+        file: join(dir, rel),
+      }));
+  }).sort((a, b) => a.route.localeCompare(b.route));
 
 /**
  * Split the built pages into the routes the sitemap must carry and the ones it
@@ -82,7 +86,9 @@ export const classifyDemoPages = (root, manifest = SHOWCASE_PAGES) => {
 /** Demo routes the sitemap advertises that the composed site does not serve. */
 export const deadRoutes = (root, xml) =>
   locsIn(xml)
-    .filter((loc) => loc.startsWith(`${SITE}/${DEMO_DIR}/`))
+    .filter((loc) =>
+      DEMO_DIRS.some((demoDir) => loc.startsWith(`${SITE}/${demoDir}/`))
+    )
     .map((loc) => loc.slice(SITE.length))
     .filter((route) => !existsSync(join(root, route.slice(1), INDEX)));
 
@@ -128,7 +134,7 @@ const main = () => {
   if (!existsSync(join(root, DEMO_DIR))) {
     fail(
       `no demo pages under ${join(root, DEMO_DIR)} — build the docs site and ` +
-        `the showcase, copy apps/showcase/dist into apps/docs/dist/${DEMO_DIR}, then ` +
+        `the showcase, compose them with node scripts/compose-site.mjs, then ` +
         `run this again.`
     );
   }

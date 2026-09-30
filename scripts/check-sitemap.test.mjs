@@ -150,3 +150,35 @@ describe("deadRoutes", () => {
     assert.deepEqual(deadRoutes(composed(), xml), []);
   });
 });
+
+describe("every framework's demo root", () => {
+  const ANGULAR_ROUTE = demoRoute("unstyled/filtering", "angular");
+  const ANGULAR_GHOST = demoRoute("unstyled/ghost", "angular");
+
+  /** The composed site, plus one Angular page under Angular's root. */
+  const withAngular = () => {
+    const root = composed();
+    write(root, join(ANGULAR_ROUTE.slice(1), INDEX), PAGE);
+    return root;
+  };
+
+  it("walks the Angular demo root beside React's", () => {
+    assert.ok(
+      demoPages(withAngular())
+        .map((page) => page.route)
+        .includes(ANGULAR_ROUTE)
+    );
+  });
+
+  it("names an Angular page the sitemap left out, and an Angular route that 404s", () => {
+    const xml = urlset([
+      ROOT_ROUTE,
+      COLUMNS_ROUTE,
+      ORPHAN_ROUTE,
+      ANGULAR_GHOST,
+    ]);
+    const { missing, dead } = auditDemoRoutes(withAngular(), xml, MANIFEST);
+    assert.deepEqual(missing, [ANGULAR_ROUTE]);
+    assert.deepEqual(dead, [ANGULAR_GHOST]);
+  });
+});

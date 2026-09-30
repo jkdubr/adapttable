@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   adapterByKey,
+  builtAdapters,
   featureBySlug,
   frameworkOf,
   matrixPages,
@@ -72,10 +73,16 @@ describe("the generated showcase pages", () => {
   });
 
   it("names the v3 row-reordering and aggregation capabilities in static HTML", () => {
-    const reorder = files.filter((file) =>
+    // React's code on React's pages; the Angular kit's own page states what
+    // it renders.
+    const react = new Set(builtAdapters("react").map((adapter) => adapter.key));
+    const reactFiles = files.filter((file) =>
+      react.has(file.dir.split("/")[0] ?? "")
+    );
+    const reorder = reactFiles.filter((file) =>
       file.dir.endsWith("/row-reordering")
     );
-    const aggregation = files.filter((file) =>
+    const aggregation = reactFiles.filter((file) =>
       file.dir.endsWith("/aggregation")
     );
     assert.equal(reorder.length, 8);

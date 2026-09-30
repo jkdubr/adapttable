@@ -59,6 +59,12 @@ export const SHOWCASE_FRAMEWORKS = [
     binding: "@adapttable/react",
     entry: "/src/entry-matrix.tsx",
   },
+  {
+    key: "angular",
+    label: "Angular",
+    binding: "@adapttable/angular",
+    entry: "/src/angular/entry-matrix.ts",
+  },
 ];
 
 /** The framework every feature's `snippet` is written for. */
@@ -86,17 +92,26 @@ const SNIPPET_FRAMEWORK = "react";
  * @property {boolean} built Whether this adapter has its own landing and
  *   feature pages yet. Until it does, the nav sends readers to the live demo
  *   pinned to that kit, which is a page that exists and shows that kit.
+ * @property {readonly string[]} [features] The slugs of the matrix features
+ *   this kit has a page for, where that is not every one of them — a kit whose
+ *   framework is still gaining features lists the ones it renders today.
+ * @property {boolean} [indexable] `false` keeps the kit's pages out of the
+ *   sitemap and out of search indexes while its package is unpublished.
  * @property {{ title: string, description: string }} [landing] The landing
  *   page's `<title>` and meta description, where the shared pair would not be
  *   true of this kit. The unstyled family is the case it exists for: shadcn and
  *   Tailwind render semantic markup wearing classes, so "rendered with its own
  *   components" is a claim about them that is simply false. Every other kit
- *   uses `LANDING`, and the page body needs no override anywhere — `tagline`
- *   and `surface` already carry what differs.
+ *   uses `LANDING`; `tagline` and `surface` carry what differs in the body.
+ * @property {string[]} [landingIntro] The landing page's paragraphs, where the
+ *   shared ones would not read true of this kit: "a table that belongs in a
+ *   {kit} app" names an app built on a kit, and an unstyled kit is no such
+ *   thing.
  */
 
 /**
- * The eight adapters, in the order the switcher and the nav show them.
+ * Every adapter: React's eight in the order the switcher and the nav show
+ * them, then the Angular kits.
  *
  * `label`, `blurb` and the two accents are the switcher's tokens — the same
  * values `src/themeTokens.ts` re-exports, kept here so the nav, the landing
@@ -270,7 +285,22 @@ export const SHOWCASE_ADAPTERS = [
  *   kit's package, which is the one claim the unstyled family cannot make: it
  *   renders semantic markup and takes classes. Those get an intro of their own
  *   here rather than a sentence bent far enough to cover both.
+ * @property {Record<string, FeatureHead>} [heads] The label, heading, title,
+ *   description or card this feature needs in THIS kit, keyed by adapter, where
+ *   the shared one claims something the kit does not do yet.
  * @property {string[]} docs Documentation slugs this feature is written up in.
+ */
+
+/**
+ * A kit's own wording for a feature's page, field by field; a field left out
+ * is the shared one.
+ *
+ * @typedef {object} FeatureHead
+ * @property {string} [label]
+ * @property {string} [h1]
+ * @property {string} [title]
+ * @property {string} [description]
+ * @property {string} [card]
  */
 
 /**
@@ -1546,12 +1576,12 @@ export const LANDING = {
     "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. Add features through explicit imports. The visible controls are {surface}.",
     "That is the whole trade: one model to learn, and a table that belongs in a {kit} app rather than sitting inside one.",
   ],
-  /** The heading over the feature pages — count comes from the matrix. */
-  gridTitle: `${String(MATRIX_FEATURES.length)} features, each on its own {kit} page`,
+  /** The heading over the feature pages — `{featureCount}` is the kit's own. */
+  gridTitle: "{featureCount} features, each on its own {kit} page",
   gridLead:
     "Every one is the same engine and {kit}'s own components. Each page carries the code for that feature and a table you can drive.",
-  /** The heading over the other seven kits. */
-  kitsTitle: "The same table, in seven other kits",
+  /** The heading over the other kits of the same framework. */
+  kitsTitle: "The same table, in {otherKits}",
   kitsLead:
     "Switching kit changes the components, never the model — the props on this page are the props there.",
 };
@@ -1574,9 +1604,39 @@ export const frameworkOf = (adapter) => {
   return framework;
 };
 
+/** Counts as the copy spells them. */
+const NUMBER_WORDS = [
+  "no",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+];
+
 /**
- * Fill `{kit}`, `{pkg}` and `{peer}` from an adapter, and `{framework}` and
- * `{binding}` from the framework its kit is built on.
+ * "seven other kits" — how many other built kits share this adapter's
+ * framework, as a phrase.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {string}
+ */
+const otherKitsPhrase = (adapter) => {
+  const count = otherKitsOf(adapter).length;
+  const word = NUMBER_WORDS[count] ?? String(count);
+  return `${word} other ${count === 1 ? "kit" : "kits"}`;
+};
+
+/**
+ * Fill `{kit}`, `{pkg}` and `{peer}` from an adapter, `{featureCount}` with how
+ * many feature pages it has and `{otherKits}` with how many other kits share its
+ * framework, and `{framework}` and `{binding}` from the framework its kit is
+ * built on.
  *
  * @param {string} text
  * @param {ShowcaseAdapter} adapter
@@ -1590,6 +1650,8 @@ export const fillTemplate = (text, adapter, framework = frameworkOf(adapter)) =>
     .replaceAll("{kit}", adapter.label)
     .replaceAll("{pkg}", adapter.pkg)
     .replaceAll("{peer}", adapter.peer)
+    .replaceAll("{featureCount}", String(featuresOf(adapter).length))
+    .replaceAll("{otherKits}", otherKitsPhrase(adapter))
     .replaceAll("{framework}", framework.label)
     .replaceAll("{binding}", framework.binding);
 
@@ -1621,6 +1683,23 @@ export const snippetFor = (
 };
 
 /**
+ * A feature's label, heading, title, description and card, as the kit it is
+ * written for states them.
+ *
+ * @param {MatrixFeature} feature
+ * @param {ShowcaseAdapter} adapter
+ * @returns {Required<FeatureHead>}
+ */
+export const headFor = (feature, adapter) => ({
+  label: feature.label,
+  h1: feature.h1,
+  title: feature.title,
+  description: feature.description,
+  card: feature.card,
+  ...feature.heads?.[adapter.key],
+});
+
+/**
  * The paragraphs a feature page opens with, for the kit it is written for.
  *
  * @param {MatrixFeature} feature
@@ -1640,13 +1719,63 @@ export const landingHead = (adapter) =>
   adapter.landing ?? { title: LANDING.title, description: LANDING.description };
 
 /**
- * The adapters whose own pages are built. Every other kit is reachable, and
- * shown, through the live demo pinned to it.
+ * The paragraphs this kit's landing page opens with.
  *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {string[]}
+ */
+export const landingIntro = (adapter) => adapter.landingIntro ?? LANDING.intro;
+
+/**
+ * The adapters built on one framework.
+ *
+ * @param {string} framework A key of {@link SHOWCASE_FRAMEWORKS}.
  * @returns {ShowcaseAdapter[]}
  */
-export const builtAdapters = () =>
-  SHOWCASE_ADAPTERS.filter((adapter) => adapter.built);
+export const adaptersOf = (framework) =>
+  SHOWCASE_ADAPTERS.filter((adapter) => adapter.framework === framework);
+
+/**
+ * The adapters of one framework whose own pages are built — React's unless
+ * another framework is named, since the kit switcher, the nav and the live
+ * demo are React's. Every other kit is reachable, and shown, through the live
+ * demo pinned to it.
+ *
+ * @param {string} [framework] A key of {@link SHOWCASE_FRAMEWORKS}.
+ * @returns {ShowcaseAdapter[]}
+ */
+export const builtAdapters = (framework = SNIPPET_FRAMEWORK) =>
+  adaptersOf(framework).filter((adapter) => adapter.built);
+
+/**
+ * The other built kits on this adapter's framework, in matrix order.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {ShowcaseAdapter[]}
+ */
+export const otherKitsOf = (adapter) =>
+  builtAdapters(adapter.framework).filter((other) => other.key !== adapter.key);
+
+/**
+ * The matrix features this kit has a page for, in demand order.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {MatrixFeature[]}
+ */
+export const featuresOf = (adapter) =>
+  adapter.features
+    ? MATRIX_FEATURES.filter((feature) =>
+        adapter.features?.includes(feature.slug)
+      )
+    : MATRIX_FEATURES;
+
+/**
+ * Whether this kit's pages belong in the sitemap and in search indexes.
+ *
+ * @param {ShowcaseAdapter} adapter
+ * @returns {boolean}
+ */
+export const isIndexable = (adapter) => adapter.indexable !== false;
 
 /**
  * One built page of the matrix: an adapter landing, or an adapter's feature.
@@ -1657,6 +1786,7 @@ export const builtAdapters = () =>
  *   whose entry the page boots.
  * @property {string | null} feature The feature slug, or `null` for the landing.
  * @property {string} dir The directory under the showcase root.
+ * @property {boolean} indexable Whether the page belongs in the sitemap.
  */
 
 /**
@@ -1665,20 +1795,24 @@ export const builtAdapters = () =>
  * @returns {MatrixPageSpec[]}
  */
 export const matrixPages = () =>
-  builtAdapters().flatMap((adapter) => [
-    {
-      adapter: adapter.key,
-      framework: frameworkOf(adapter).key,
-      feature: null,
-      dir: adapter.key,
-    },
-    ...MATRIX_FEATURES.map((feature) => ({
-      adapter: adapter.key,
-      framework: frameworkOf(adapter).key,
-      feature: feature.slug,
-      dir: `${adapter.key}/${feature.slug}`,
-    })),
-  ]);
+  SHOWCASE_FRAMEWORKS.flatMap((framework) =>
+    builtAdapters(framework.key).flatMap((adapter) => [
+      {
+        adapter: adapter.key,
+        framework: framework.key,
+        feature: null,
+        dir: adapter.key,
+        indexable: isIndexable(adapter),
+      },
+      ...featuresOf(adapter).map((feature) => ({
+        adapter: adapter.key,
+        framework: framework.key,
+        feature: feature.slug,
+        dir: `${adapter.key}/${feature.slug}`,
+        indexable: isIndexable(adapter),
+      })),
+    ])
+  );
 
 /**
  * The adapter with this key.

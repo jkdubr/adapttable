@@ -53,18 +53,42 @@ export const docsSlug = (page) =>
  */
 export const docsRoute = (page) => `/${docsSlug(page)}/`;
 
+/**
+ * Where a framework's demo pages are mounted inside the composed site: in
+ * that framework's section, `/<framework>/demo/`.
+ *
+ * @param {string} framework - A framework key, e.g. `react`.
+ * @returns {string} With a leading and a trailing slash.
+ */
+export const demoRootOf = (framework) => `/${framework}/demo/`;
+
+/**
+ * The demo sections the site serves, by framework: React's under
+ * `/react/demo/`, Angular's under `/angular/demo/`.
+ *
+ * @type {Readonly<Record<string, string>>}
+ */
+export const DEMO_ROOTS = Object.freeze({
+  react: demoRootOf("react"),
+  angular: demoRootOf("angular"),
+});
+
 /** The route the showcase is mounted at inside the composed site. */
-export const DEMO_ROOT = `/${FRAMEWORK}/demo/`;
+export const DEMO_ROOT = demoRootOf(FRAMEWORK);
 
 /**
  * The route of a showcase page.
  *
  * @param {string} [dir] - The page's directory inside the showcase, e.g.
  *   `mantine/pivot`; omitted for the showcase landing page.
+ * @param {string} [framework] - The framework whose demo section serves the
+ *   page; {@link FRAMEWORK} when omitted.
  * @returns {string} Always with a trailing slash.
  */
-export const demoRoute = (dir = "") =>
-  dir === "" ? DEMO_ROOT : `${DEMO_ROOT}${dir}/`;
+export const demoRoute = (dir = "", framework = FRAMEWORK) => {
+  const root = demoRootOf(framework);
+  return dir === "" ? root : `${root}${dir}/`;
+};
 
 /**
  * An absolute URL on the published site.

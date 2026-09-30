@@ -100,6 +100,9 @@ export default defineConfig(
     // `@adapttable/i18n` is left out too: it carries react only as a dev
     // dependency for its tests and ships no component.
     files: REACT_SOURCES,
+    // The showcase's Angular pages are Angular, compiled by Angular's own
+    // compiler; React's rules have nothing to say about them.
+    ignores: ["apps/showcase/src/angular/**"],
     settings: { react: { version: "detect" } },
     rules: {
       ...react.configs.recommended.rules,
