@@ -831,13 +831,13 @@ export class People {
     heads: {
       unstyled: {
         description:
-          "A {kit} {framework} data table that becomes cards on phones — automatic below the mobile breakpoint, with the same columns and state and a load-more button in place of the pager.",
+          "A {kit} {framework} data table that becomes cards on phones — automatic below the mobile breakpoint, with the same columns and state and infinite scroll in place of the pager.",
       },
     },
     intros: {
       unstyled: [
         "Below the mobile breakpoint every row becomes a card — same columns, same row content, same query state. This page forces the card layout inside a phone-width frame.",
-        "Per column, `mobileLabel` and `hideOnMobile` tune what a card shows, and on a phone the pager gives way to a button that loads the next rows. There is no second layout to build.",
+        "Per column, `mobileLabel` and `hideOnMobile` tune what a card shows, and on a phone the pager gives way to infinite scroll: the next rows load as the list reaches its end. There is no second layout to build.",
       ],
     },
     label: "Mobile cards",
