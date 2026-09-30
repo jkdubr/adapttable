@@ -38,7 +38,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
-    include: ["src/**/*.test.ts", "router/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "router/**/*.test.ts", "stream/**/*.test.ts"],
     clearMocks: true,
     restoreMocks: true,
     pool: "threads",
@@ -47,12 +47,14 @@ export default defineConfig({
     coverage: {
       provider: "istanbul",
       reporter: ["text", "lcov", "html"],
-      include: ["src/**/*.ts", "router/**/*.ts"],
+      include: ["src/**/*.ts", "router/**/*.ts", "stream/**/*.ts"],
       exclude: [
         "src/**/*.test.ts",
         "src/**/index.ts",
         "router/**/*.test.ts",
         "router/index.ts",
+        "stream/**/*.test.ts",
+        "stream/index.ts",
       ],
       thresholds: {
         statements: 95,

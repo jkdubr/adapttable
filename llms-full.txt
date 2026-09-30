@@ -19939,11 +19939,32 @@ comes from a kit through a slot.
 - `fromStore(store, options)` turns any core store, an `ExternalStore`, into a
   read-only signal that ends with its injector (`FromStoreOptions`).
   `MaybeSignal` and `MaybeSignalOptional` are the option types that take a
-  value or a signal of one. The secondary entries `./formula`, `./pivot`,
-  `./sparkline` and `./stream` are reserved and export no public API; each
-  carries one internal marker (`__angularFormulaReserved`,
-  `__angularPivotReserved`, `__angularSparklineReserved`,
-  `__angularStreamReserved`).
+  value or a signal of one, and `readMaybe` reads either. The secondary
+  entries `./formula`, `./pivot` and `./sparkline` are reserved and export no
+  public API; each carries one internal marker (`__angularFormulaReserved`,
+  `__angularPivotReserved`, `__angularSparklineReserved`).
+- `injectHighlight(enabled)` marks a row (`flashRow`) or a cell
+  (`flashCell`) for a moment over core's highlight store and returns a
+  `Highlight`: `isRowHighlighted` and `isCellHighlighted`, tracked where they
+  are read, `clear`, and `animated`, false when the reader prefers reduced
+  motion, when the mark is shorter and still. `injectChangedCellFlash`
+  (`ChangedCellFlashOptions`) marks the cells a live patch changed — `mark`
+  takes the patch events — and returns a `ChangedCellFlash` with
+  `isFlashing`, `isRowFlashing` and `flashAttrs`, the `data-flash` attribute
+  for `[adaptAttrs]`; it lights nothing for a reader who prefers reduced
+  motion and drops what is lit when turned off. `injectMediaQuery` and
+  `injectPrefersReducedMotion` are the media queries they read, as signals
+  that are false on the server.
+- `@adapttable/angular/stream` binds a WebSocket or server-sent-events
+  endpoint to rows the host owns: `injectRowPatchStream`
+  (`RowPatchStreamOptions`, returning a `RowPatchStream` with `status` and
+  `error` signals and `close`) opens while its URL is set and `enabled`,
+  applies each frame's patches through `onPatch` — hand it
+  `(update) => rows.update(update)` — reopens when the URL changes, closes
+  when its injection context is destroyed, and reconnects as `reconnect`
+  says. The entry also carries `injectChangedCellFlash` and core's
+  `openRowPatchStream`, `parseRowPatchFrame`, `isStreamLive`,
+  `isStreamSettled` and the patch and socket types.
 
 `@adapttable/angular-unstyled` is the Angular table drawn with native HTML;
 it is private and not published. `AdaptDataTable` (`<adapt-data-table>`)

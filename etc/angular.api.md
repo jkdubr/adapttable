@@ -166,6 +166,7 @@ import { hasActiveHeaderFilter } from '@adapttable/core';
 import { headerFilterInsideSelector } from '@adapttable/core';
 import { HeaderSelectionState } from '@adapttable/core/binding';
 import { hideAllColumns } from '@adapttable/core/binding';
+import { HighlightedCell } from '@adapttable/core';
 import * as i0 from '@angular/core';
 import { IconDescriptor } from '@adapttable/core/binding';
 import { InjectionToken } from '@angular/core';
@@ -230,6 +231,7 @@ import { RowEditIcons } from '@adapttable/core/binding';
 import { RowEditingState } from '@adapttable/core';
 import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
+import { RowPatchEvent } from '@adapttable/core';
 import { RowPinState } from '@adapttable/core/binding';
 import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/core/binding';
 import { RowReorderHandleProps as RowReorderHandleProps_2 } from '@adapttable/core/binding';
@@ -578,7 +580,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "setExtra" | "setExtras" | "allFilteredRows" | "facets" | "extra">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "facets" | "extra" | "setExtra" | "setExtras">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -824,7 +826,7 @@ export class AdaptFilterTreeChrome<TRow> {
     readonly labels: InputSignal<TableLabels | undefined>;
     readonly registry: InputSignal<FilterTypeRegistry>;
     readonly slots: InputSignal<FilterTreeSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "setFilterTree" | "filterTree">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "filterTree" | "setFilterTree">>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterTreeChrome<any>, "adapt-filter-tree-chrome", never, {
         "defs": {
@@ -1526,6 +1528,22 @@ export interface CellSaveStateInjectOptions<TRow> {
     readonly onRollback?: (previous: TRow, columnKey: string) => void;
 }
 
+// @public
+export interface ChangedCellFlash {
+    readonly clear: () => void;
+    readonly flashAttrs: (rowId: string, columnKey: string) => Attrs;
+    readonly isFlashing: (rowId: string, columnKey: string) => boolean;
+    readonly isRowFlashing: (rowId: string) => boolean;
+    readonly mark: (events: readonly RowPatchEvent<unknown>[]) => void;
+}
+
+// @public
+export interface ChangedCellFlashOptions {
+    readonly durationMs?: MaybeSignalOptional<number>;
+    readonly enabled?: MaybeSignal<boolean>;
+    readonly injector?: Injector;
+}
+
 export { CHECKLIST_LIST_HEIGHT }
 
 export { ChecklistButtonProps }
@@ -2214,6 +2232,17 @@ export { HeaderSelectionState }
 
 export { hideAllColumns }
 
+// @public
+interface Highlight_2 {
+    readonly animated: Signal<boolean>;
+    readonly clear: () => void;
+    readonly flashCell: (cell: HighlightedCell) => void;
+    readonly flashRow: (rowId: string) => void;
+    readonly isCellHighlighted: (rowId: string, columnKey: string) => boolean;
+    readonly isRowHighlighted: (rowId: string) => boolean;
+}
+export { Highlight_2 as Highlight }
+
 export { IconDescriptor }
 
 // @public
@@ -2243,6 +2272,9 @@ export function injectCellEditing<TRow = unknown>(options?: CellEditingOptions<T
 
 // @public
 export function injectCellSaveState<TRow>(options?: CellSaveStateInjectOptions<TRow>): Signal<CellSaveState<TRow>>;
+
+// @public
+export function injectChangedCellFlash(options?: ChangedCellFlashOptions): ChangedCellFlash;
 
 // @public
 export function injectColumnDrag(injector?: Injector): ColumnDrag;
@@ -2296,6 +2328,9 @@ export function injectGroupingPanelState<TRow>(options: GroupingPanelStateOption
 export function injectGroupPaging(options?: GroupPagingOptions): Signal<GroupPagingState>;
 
 // @public
+export function injectHighlight(enabled: MaybeSignal<boolean>, injector?: Injector): Highlight_2;
+
+// @public
 export function injectIsMobile(options?: IsMobileOptions): Signal<boolean>;
 
 // @public
@@ -2309,6 +2344,12 @@ export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
 
 // @public
 export function injectMeasuredWindowScrollMargin(options: MeasuredWindowScrollMarginOptions): Signal<number>;
+
+// @public
+export function injectMediaQuery(query: string, injector?: Injector): Signal<boolean>;
+
+// @public
+export function injectPrefersReducedMotion(injector?: Injector): Signal<boolean>;
 
 // @public
 export function injectQuerySource<TRow, TParams extends TableQueryParams = TableQueryParams, TPage = PaginatedResponse<TRow>>(options: QuerySourceOptions<TRow, TParams, TPage>): Signal<TableSource<TRow>>;
@@ -2460,6 +2501,9 @@ export { QuerySupport }
 export function rangeFilterFor<TRow>(def: MaybeSignal<FilterDef<TRow>>, source: Signal<TableSource<TRow>>): Signal<RangeFieldWidget>;
 
 export { RangeOp }
+
+// @public
+export function readMaybe<T>(value: MaybeSignal<T>): T;
 
 export { readMultiDraft }
 

@@ -193,6 +193,8 @@ export {
 } from "./grouping/groupPaging";
 export { AdaptGroupToggleSpacer } from "./grouping/groupToggleSpacer";
 export { injectIsMobile, type IsMobileOptions } from "./hooks/isMobile";
+export { injectMediaQuery } from "./hooks/mediaQuery";
+export { injectPrefersReducedMotion } from "./hooks/prefersReducedMotion";
 export { AdaptIcon } from "./icon";
 export * from "./kitExports";
 export type { RuntimeGrouping } from "./layout/tableRuntime";
@@ -204,6 +206,12 @@ export {
   injectExportCsv,
   injectFullscreen,
 } from "./layout/toolbar";
+export {
+  type ChangedCellFlash,
+  type ChangedCellFlashOptions,
+  injectChangedCellFlash,
+} from "./rows/changedCellFlash";
+export { type Highlight, injectHighlight } from "./rows/highlight";
 export {
   injectRowReorder,
   type RowReorderState,
@@ -255,6 +263,7 @@ export {
   type FromStoreOptions,
   type MaybeSignal,
   type MaybeSignalOptional,
+  readMaybe,
 } from "./store";
 export {
   type ColumnLayoutUrlState,

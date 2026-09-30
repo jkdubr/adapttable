@@ -4,12 +4,12 @@
 import { MOBILE_BREAKPOINT_PX } from "@adapttable/core";
 import {
   assertInInjectionContext,
-  DestroyRef,
   inject,
   Injector,
   type Signal,
-  signal,
 } from "@angular/core";
+
+import { injectMediaQuery } from "./mediaQuery";
 
 /**
  * Options for {@link injectIsMobile}.
@@ -34,19 +34,9 @@ export interface IsMobileOptions {
  */
 export function injectIsMobile(options: IsMobileOptions = {}): Signal<boolean> {
   if (!options.injector) assertInInjectionContext(injectIsMobile);
-  const injector = options.injector ?? inject(Injector);
   const px = options.breakpoint ?? MOBILE_BREAKPOINT_PX;
-  if (typeof globalThis.matchMedia !== "function") {
-    return signal(false).asReadonly();
-  }
-  const query = globalThis.matchMedia(`(max-width: ${String(px)}px)`);
-  const matches = signal(query.matches);
-  const onChange = (event: MediaQueryListEvent): void => {
-    matches.set(event.matches);
-  };
-  query.addEventListener("change", onChange);
-  injector.get(DestroyRef).onDestroy(() => {
-    query.removeEventListener("change", onChange);
-  });
-  return matches.asReadonly();
+  return injectMediaQuery(
+    `(max-width: ${String(px)}px)`,
+    options.injector ?? inject(Injector)
+  );
 }
