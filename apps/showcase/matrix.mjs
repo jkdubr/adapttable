@@ -256,6 +256,46 @@ export const SHOWCASE_ADAPTERS = [
     },
     built: true,
   },
+  {
+    key: "unstyled",
+    framework: "angular",
+    label: "Unstyled",
+    blurb: "Native elements — your own CSS",
+    accentLight: "oklch(0.55 0.2 18)",
+    accentDark: "oklch(0.7 0.16 18)",
+    pkg: "@adapttable/angular-unstyled",
+    peer: "@angular/core",
+    install:
+      "pnpm add @adapttable/angular-unstyled @adapttable/angular @adapttable/core",
+    provider: "",
+    tagline:
+      "Native elements and no opinions — every style is yours, addressed by part name.",
+    surface:
+      "native HTML elements, each carrying a `data-adapttable-part` name your CSS selects",
+    landing: {
+      title: "Unstyled Angular data table examples — AdaptTable",
+      description:
+        "Explore an unstyled Angular data table: native elements you style yourself, with filtering, editing, grouping, virtualization and export. MIT licensed.",
+    },
+    landingIntro: [
+      "{tagline}",
+      "A framework-neutral @adapttable/core provides the data engine; {binding} connects it to {framework}. Add features through explicit imports. The visible controls are {surface}.",
+      "That is the whole trade: one model to learn, and a table that looks like the rest of your app because your own stylesheet draws it.",
+    ],
+    built: true,
+    indexable: false,
+    features: [
+      "filtering",
+      "selection",
+      "row-reordering",
+      "editing",
+      "grouping",
+      "export",
+      "scale",
+      "mobile-cards",
+      "saved-views",
+    ],
+  },
 ];
 
 /**
@@ -350,6 +390,42 @@ const FEATURE_DEMAND_ORDER = [
 const MATRIX_FEATURES_DEFINED = [
   {
     slug: "saved-views",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { filters } from "{pkg}/filters";
+import { savedViews } from "{pkg}/saved-views";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      urlKey="people"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [
+    filters([]),
+    savedViews({ storageKey: "people-views", urlKey: "people" }),
+  ];
+}`,
+    },
     label: "Saved views",
     h1: "Saved views in {kit}",
     title: "{kit} table saved views — AdaptTable",
@@ -409,7 +485,18 @@ export function People({ rows, columns }) {
       tailwind:
         "Every row is native markup carrying the map's classes — a gray-bordered button per name, an indigo ring on the rename input, and the save action in bg-indigo-600.",
     },
+    heads: {
+      unstyled: {
+        description:
+          "Save and restore {kit} {framework} table filters, sorting and column layouts as named views from the views menu.",
+        card: "Name an arrangement and restore it from the menu.",
+      },
+    },
     intros: {
+      unstyled: [
+        "A view is the table's state — search, sort, filters and the column layout — saved under a name.",
+        "Save one from the views menu and pick it again later to put the table back the way it was. The list lives in this browser's storage, or in any store you hand `savedViews`.",
+      ],
       shadcn: [
         "A view is everything the table can put in a URL — search, sort, filters, grouping, the column layout, density and the pivot — saved under a name.",
         "Readers pick one from the views menu; the panel beside the table renames, reorders, sets the default and deletes. A view someone else shared arrives read-only and says so on the row.",
@@ -543,6 +630,66 @@ export function People({ rows, columns }) {
   },
   {
     slug: "editing",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { cellNavigation } from "{pkg}/cell-navigation";
+import { editing } from "{pkg}/editing";
+
+const columns: ColumnDef<Person>[] = [
+  {
+    key: "name",
+    editable: true,
+    editor: "text",
+    validate: (value) => (String(value).trim() ? undefined : "Required"),
+  },
+  { key: "budget", editable: true, editor: "number" },
+  {
+    key: "status",
+    editable: true,
+    editor: { type: "select", options: ["Active", "Planned", "Blocked"] },
+  },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly save =
+    input.required<(row: Person, key: string, value: unknown) => void>();
+  readonly features = [
+    editing<Person>((row, key, value) => this.save()(row, key, value)),
+    cellNavigation(),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Try inline editing in a {kit} {framework} table with text, number, date and select editors. Your application validates and saves each change.",
+        card: "Native editors in the cell; every write goes through your handler.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Mark a column `editable`, compose `editing(onCellEdit)`, and double-click opens a native editor in the cell — text, number, date or select. Enter commits, Escape cancels.",
+        "The table never mutates your rows. It hands your handler the row, the column key and the new value, and a column's `validate` refuses a value before it reaches you: clear a name and try to commit it.",
+        "With `cellNavigation()` composed, the arrow keys move a visible focus from cell to cell.",
+      ],
+    },
     label: "Editing",
     h1: "Inline cell editing in {kit}",
     title: "{kit} editable data table — AdaptTable",
@@ -651,6 +798,48 @@ export function Org({ people, columns }) {
   },
   {
     slug: "mobile-cards",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", mobileLabel: "" },
+  { key: "team", mobileLabel: "Team" },
+  { key: "email", hideOnMobile: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "A {kit} {framework} data table that becomes cards on phones — automatic below the mobile breakpoint, with the same columns and state and a load-more button in place of the pager.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Below the mobile breakpoint every row becomes a card — same columns, same row content, same query state. This page forces the card layout inside a phone-width frame.",
+        "Per column, `mobileLabel` and `hideOnMobile` tune what a card shows, and on a phone the pager gives way to a button that loads the next rows. There is no second layout to build.",
+      ],
+    },
     label: "Mobile cards",
     h1: "Mobile cards in {kit}",
     title: "{kit} responsive table and mobile cards — AdaptTable",
@@ -698,6 +887,52 @@ export function People({ rows, columns }) {
   },
   {
     slug: "scale",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { virtualize } from "{pkg}/virtualize";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      paginationMode="infinite"
+      [maxHeight]="480"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [virtualize()];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Scroll a large {kit} {framework} table with row virtualization inside a scroll box. Sorting and filtering keep working on every row.",
+        card: "40,000 rows in a scroll box, only the visible ones rendered.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Compose `virtualize()` and the table renders the rows in view plus a small overscan, whatever the dataset's size — forty thousand rows on this page, a few dozen of them in the page at once.",
+        "The scroll box scrolls rather than the page, and sorting and filtering keep working on the whole dataset rather than on what is drawn. `virtualize({ virtualizeColumns: true })` does the same across, for column sets wider than the box.",
+      ],
+    },
     label: "Scale",
     h1: "Row and column virtualization in {kit}",
     title: "{kit} virtualized {framework} table — AdaptTable",
@@ -791,6 +1026,48 @@ export function People({ rows, columns, layout, onLayout }) {
   },
   {
     slug: "filtering",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { filters } from "{pkg}/filters";
+import { headerFilters } from "{pkg}/header-filters";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", filter: "text" },
+  { key: "team", filter: { type: "multiSelect", options: "auto" } },
+  { key: "budget", filter: "numberRange" },
+  { key: "hiredAt", filter: "dateRange" },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      urlKey="f"
+      filtersMode="popover"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [filters([]), headerFilters()];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Try {kit} {framework} table filters: text, ranges, multi-selects, a yes/no choice and an AND/OR tree, in a popover, a drawer or header funnels, shared through the URL.",
+        card: "Ranges, selects, an AND/OR tree and chips — all in the URL.",
+      },
+    },
     label: "Filtering",
     h1: "Filtering in {kit}",
     title: "{kit} table filtering — AdaptTable",
@@ -844,6 +1121,11 @@ export function People({ rows }) {
         "The backdrop, panel, popover and every filter input carry the map's classes with an indigo focus ring, and a checked option fills its label in indigo; the checklist and the AND/OR builder are not in the map, so they read as browser defaults.",
     },
     intros: {
+      unstyled: [
+        "Declare what a column filters by and the table builds the form: text with its operators, number and date ranges, multi-select checkboxes and a yes/no choice, each a native element.",
+        "Filters opens as an anchored popover or as a drawer, with an AND/OR tree at the top for what one row of inputs cannot say. Header funnels filter one column in place, and every active filter shows as a chip that removes itself.",
+        "Filter state lives in the versioned URL, so a filtered view is a link someone can send.",
+      ],
       shadcn: [
         "Declare what a column filters by and the table builds the control: text and number operators, date ranges with relative presets, and a checklist of the values actually present.",
         "For the cases one row of inputs cannot express there is an AND/OR tree, and every active filter shows as a chip that removes itself.",
@@ -859,6 +1141,53 @@ export function People({ rows }) {
   },
   {
     slug: "export",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { exportCsv } from "{pkg}/export";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [exportCsv()];
+}`,
+    },
+    heads: {
+      unstyled: {
+        label: "CSV export",
+        h1: "CSV export in {kit}",
+        title: "{kit} {framework} table export to CSV — AdaptTable",
+        description:
+          "Export a {kit} {framework} data table to CSV from one toolbar button — the rows as they are sorted and filtered on screen.",
+        card: "One toolbar button, a CSV of the table as it stands.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Compose `exportCsv()` and an export button joins the toolbar. It writes the page on screen as it stands — sorted, filtered and searched — to a CSV file the browser downloads.",
+        "A column's `exportValue` decides what the file gets, so a cell that shows a formatted date range exports the plain start date a spreadsheet sorts.",
+      ],
+    },
     label: "Export & print",
     h1: "Export and print in {kit}",
     title: "{kit} table export to CSV, Excel and PDF — AdaptTable",
@@ -914,6 +1243,55 @@ export function People({ source, columns, api }) {
   },
   {
     slug: "selection",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { bulkActions } from "{pkg}/bulk-actions";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [selectable]="true"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly archive = input.required<(ids: string[]) => void>();
+  readonly features = [
+    bulkActions([
+      { key: "archive", label: "Archive", onClick: (ids) => this.archive()(ids) },
+    ]),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Select {kit} {framework} table rows with native checkboxes and run bulk actions through your own handler. The selection is a set of row ids that survives paging.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Tick rows one at a time or take the whole page from the header box, then every matching row from the banner that offers it. The selection is a set of ids rather than a slice of what is rendered, so a row chosen on page one is still chosen while page two is on screen.",
+        "Bulk actions run against that set and report back through your own handler — the table never performs the write. This page writes what each action received under the table.",
+      ],
+    },
     label: "Selection",
     h1: "Row selection in {kit}",
     title: "{kit} table row selection — AdaptTable",
@@ -971,6 +1349,52 @@ export function People({ rows, columns, onArchive }) {
   },
   {
     slug: "grouping",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { groupingPanel } from "{pkg}/grouping-panel";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name" },
+  { key: "team" },
+  { key: "status" },
+  { key: "budget", aggregatable: { operations: ["sum", "avg"] } },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      urlKey="g"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly features = [groupingPanel(["team", "status"])];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Group rows in a {kit} {framework} data table by dragging headers or from a select, reorder levels by keyboard, fold each group and read its totals in the header.",
+        card: "Drag, select or keyboard grouping, with totals in the headers.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Compose `groupingPanel(groupBy)` and rows start nested by Team then Status. Drag a column header into the strip or add a level from its select, and reorder the levels by dragging a chip or with the arrow keys on its handle; every move is announced.",
+        "Each group header folds its rows and shows its row count and the totals its columns declare as `aggregatable` — Budget sums here, and the panel changes the operation. The grouping travels in the URL.",
+      ],
+    },
     label: "Grouping",
     h1: "Row grouping in {kit}",
     title: "{kit} table row grouping — AdaptTable",
@@ -1336,6 +1760,56 @@ export function People({ rows, columns }) {
   },
   {
     slug: "row-reordering",
+    snippets: {
+      angular: `import { Component, input, signal } from "@angular/core";
+import { applyRowReorder } from "@adapttable/core";
+import type { ColumnDef } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { rowReorder } from "{pkg}/row-reorder";
+
+const columns: ColumnDef<Person>[] = [
+  { key: "name", sortable: true },
+  { key: "team" },
+  { key: "budget", sortable: true },
+];
+
+@Component({
+  selector: "app-people",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="order() ?? rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class People {
+  readonly rows = input.required<readonly Person[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Person) => row.id;
+  readonly order = signal<readonly Person[] | null>(null);
+  readonly features = [
+    rowReorder<Person>((from, to) =>
+      this.order.set(applyRowReorder(this.order() ?? this.rows(), from, to))
+    ),
+  ];
+}`,
+    },
+    heads: {
+      unstyled: {
+        description:
+          "Move rows in a {kit} {framework} data table by pointer or keyboard, with every step announced, stable row identity and host-owned persistence.",
+        card: "Drag or keyboard moves, announced — the host writes.",
+      },
+    },
+    intros: {
+      unstyled: [
+        "Compose `rowReorder` from `{pkg}/row-reorder` and a grip appears on every row. Drag it, or press Space to lift a row, the arrows to move it and Space to drop it; a live region announces each step.",
+        "The table never mutates your array: `onRowReorder` asks the host with the row's old and new positions and the row itself, and the host writes. This page applies each move with core's `applyRowReorder` and says what it did.",
+      ],
+    },
     label: "Row reordering",
     h1: "Row reordering in {kit}",
     title: "{kit} row reordering — AdaptTable",

@@ -229,6 +229,20 @@ describe("the kit stylesheets every showcase page loads", () => {
     }
   });
 
+  it("loads the showcase chrome and no kit stylesheet on an Angular page", () => {
+    const angular = bootingPages().filter(
+      ({ page }) => page.framework === "angular"
+    );
+    assert.ok(angular.length > 0, "no Angular page boots a module");
+    for (const { module, source } of angular) {
+      const sheets = sideEffectImportsIn(source).filter((imported) =>
+        imported.endsWith(".css")
+      );
+      assert.deepEqual(sheets, [`.${CHROME_SHEET}`], module);
+      assert.equal(sideEffectImportsIn(source).includes(KIT_STYLES), false);
+    }
+  });
+
   it("carries every static kit stylesheet in that module", () => {
     const source = readFileSync(join(SHOWCASE, "src/kitStyles.ts"), "utf8");
     const imports = sideEffectImportsIn(source);
