@@ -70,7 +70,7 @@ describe("injectRowPinning", () => {
     ]);
     pinning()
       .actions.find((action) => action.key === UNPIN_ROW_ACTION_KEY)
-      ?.onClick({ id: "a" });
+      ?.onClick?.({ id: "a" });
     expect(pinning().sideOf("a")).toBeUndefined();
   });
 
