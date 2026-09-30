@@ -252,12 +252,17 @@ function BooleanControl<TRow>({
 function SelectControl<TRow>({
   def,
   source,
-}: Readonly<{ def: FilterDef<TRow>; source: TableSource<TRow> }>) {
+  labels,
+}: Readonly<{
+  def: FilterDef<TRow>;
+  source: TableSource<TRow>;
+  labels: Required<TableLabels>;
+}>) {
   const label = filterLabel(def);
   const { options, loading } = useFilterOptions(def);
   const data = loading
     ? [{ value: "", label: "…", disabled: true }]
-    : [{ value: "", label: "All" }, ...options];
+    : [{ value: "", label: labels.filterAll }, ...options];
   return (
     <Select
       size="sm"
@@ -370,7 +375,7 @@ function FilterControl<TRow>({
     case "boolean":
       return <BooleanControl def={def} source={source} labels={labels} />;
     case "select":
-      return <SelectControl def={def} source={source} />;
+      return <SelectControl def={def} source={source} labels={labels} />;
     case "multiSelect":
       return <MultiSelectControl def={def} source={source} />;
     case "checklist":

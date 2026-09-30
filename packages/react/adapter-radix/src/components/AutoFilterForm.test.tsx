@@ -508,3 +508,19 @@ describe("<AutoFilterForm> (Radix)", () => {
     expect(setExtras).toHaveBeenCalled();
   });
 });
+
+describe("<AutoFilterForm> select labels (Radix)", () => {
+  it("offers the no-restriction option in the host's language", () => {
+    renderForm(
+      [{ key: "status", type: "select", options: STATUS_OPTIONS }],
+      {},
+      { filterAll: "Tous" }
+    );
+    openSelect("Status");
+    expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual([
+      "Tous",
+      "Active",
+      "Inactive",
+    ]);
+  });
+});

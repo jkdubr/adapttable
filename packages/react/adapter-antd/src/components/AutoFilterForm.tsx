@@ -323,7 +323,7 @@ function FilterControl<TRow>({
           getPopupContainer={filterSelectPopupContainer}
           onChange={(next) => setExtra(def.key, next)}
           options={[
-            { value: "", label: "All" },
+            { value: "", label: labels.filterAll },
             ...options.map((option) => ({
               value: option.value,
               label: option.label,

@@ -535,3 +535,20 @@ describe("<AutoFilterForm> relative dates (Ant Design)", () => {
     expect(screen.getByRole("combobox", { name: "Relative" })).toBeVisible();
   });
 });
+
+describe("<AutoFilterForm> select labels (antd)", () => {
+  it("offers the no-restriction option in the host's language", () => {
+    render(
+      <AutoFilterForm
+        defs={[{ key: "city", type: "select" }]}
+        source={staticSource({})}
+        labels={{ ...defaultLabels, filterAll: "Tous" }}
+      />
+    );
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "City" }));
+    const visibleOptions = document.querySelectorAll(".ant-select-item-option");
+    expect([...visibleOptions].map((option) => option.textContent)).toEqual([
+      "Tous",
+    ]);
+  });
+});

@@ -197,7 +197,9 @@ abstract class OptionsField<TRow> implements OnInit {
         @if (options().loading) {
           <option value="" disabled>…</option>
         } @else {
-          <option value="" [selected]="value === ''">All</option>
+          <option value="" [selected]="value === ''">
+            {{ labels().filterAll }}
+          </option>
           @for (option of options().options; track option.value) {
             <option [value]="option.value" [selected]="option.value === value">
               {{ option.label }}
@@ -213,6 +215,8 @@ export class AdaptSelectFilterField<TRow> extends OptionsField<TRow> {
   readonly def = input.required<FilterDef<TRow>>();
   /** The source whose filter bag the field writes. */
   readonly source = input.required<TableSource<TRow>>();
+  /** Resolved labels: the option for every value. */
+  readonly labels = input.required<Required<TableLabels>>();
 
   protected readonly stack = FIELD_STACK;
   protected readonly caption = computed(() => filterLabel(this.def()));
@@ -463,7 +467,11 @@ export class AdaptRangeFilterField<TRow> {
           />
         }
         @case ("select") {
-          <adapt-select-filter-field [def]="def" [source]="source()" />
+          <adapt-select-filter-field
+            [def]="def"
+            [source]="source()"
+            [labels]="labels()"
+          />
         }
         @case ("multiSelect") {
           <adapt-multi-select-filter-field [def]="def" [source]="source()" />

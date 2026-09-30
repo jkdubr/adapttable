@@ -347,7 +347,7 @@ function AutoFilterField<TRow>({
               </option>
             ) : (
               <>
-                <option value="">All</option>
+                <option value="">{labels.filterAll}</option>
                 {options.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}

@@ -159,7 +159,11 @@ function BooleanFilter<TRow>({
   );
 }
 
-function SelectFilter<TRow>({ def, source }: Readonly<FieldProps<TRow>>) {
+function SelectFilter<TRow>({
+  def,
+  source,
+  labels,
+}: Readonly<LabeledFieldProps<TRow>>) {
   // The options source may be an array OR an async loader — never map it
   // directly. The hook resolves both (and reports loader progress).
   const { options, loading } = useFilterOptions(def);
@@ -175,7 +179,7 @@ function SelectFilter<TRow>({ def, source }: Readonly<FieldProps<TRow>>) {
         inputLabel: { shrink: true },
       }}
     >
-      <MenuItem value="">All</MenuItem>
+      <MenuItem value="">{labels.filterAll}</MenuItem>
       {loading && (
         <MenuItem value="" disabled>
           …
@@ -373,7 +377,7 @@ function FilterField<TRow>({
     case "boolean":
       return <BooleanFilter def={def} source={source} labels={labels} />;
     case "select":
-      return <SelectFilter def={def} source={source} />;
+      return <SelectFilter def={def} source={source} labels={labels} />;
     case "multiSelect":
       return <MultiSelectFilter def={def} source={source} />;
     case "checklist":

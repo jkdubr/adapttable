@@ -322,7 +322,7 @@ function AutoFilterField<TRow>({
       const selectOptions: SelectOption[] = loading
         ? [{ value: "", label: "…", disabled: true }]
         : [
-            { value: "", label: "All" },
+            { value: "", label: labels.filterAll },
             ...options.map((option) => ({
               value: option.value,
               label: option.label,

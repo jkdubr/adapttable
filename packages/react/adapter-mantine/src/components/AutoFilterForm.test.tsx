@@ -574,3 +574,22 @@ describe("<AutoFilterForm>", () => {
     expect(screen.getByPlaceholderText("Find…")).toBeVisible();
   });
 });
+
+describe("<AutoFilterForm> select labels (Mantine)", () => {
+  it("offers the no-restriction option in the host's language", () => {
+    const { source, setExtra } = makeSource({ status: "active" });
+    renderForm(
+      [
+        {
+          key: "status",
+          type: "select",
+          options: [{ value: "active", label: "Active" }],
+        },
+      ],
+      source,
+      { ...defaultLabels, filterAll: "Tous" }
+    );
+    pickSelect("Status", "Tous");
+    expect(setExtra).toHaveBeenCalledWith("status", "");
+  });
+});

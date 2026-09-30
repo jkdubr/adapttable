@@ -6130,6 +6130,7 @@ export interface TableLabels {
     exportStarted?: string;
     filterAddCondition?: string;
     filterAddGroup?: string;
+    filterAll?: string;
     filterColumn?: string;
     filterCombinatorAnd?: string;
     filterCombinatorOr?: string;

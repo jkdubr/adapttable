@@ -87,12 +87,14 @@ const DEFS: FilterDef<Person>[] = [
       [forceMobile]="false"
       [features]="features()"
       [filtersMode]="mode()"
+      [labels]="labels()"
     />
   `,
 })
 class Host {
   readonly features = input([filters(DEFS)]);
   readonly mode = input<FiltersMode>("popover");
+  readonly labels = input<{ filterAll?: string } | undefined>(undefined);
   readonly data = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = (row: Person) => row.id;
@@ -450,5 +452,31 @@ describe("the unstyled Angular filters", () => {
     await openFilters();
     await type(part("filter-input", field("Name")), "nobody");
     expect(part("empty")?.textContent).toContain("No results");
+  });
+});
+
+describe("filters select labels (unstyled Angular)", () => {
+  it("offers the no-restriction option in the host's language", async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentRef.setInput("labels", { filterAll: "Tous" });
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    document.body.append(element);
+    element
+      .querySelector<HTMLButtonElement>(
+        '[data-adapttable-part="filters-button"]'
+      )!
+      .click();
+    await fixture.whenStable();
+    const city = [
+      ...element.querySelectorAll<HTMLSelectElement>(
+        '[data-adapttable-part="filter-select"]'
+      ),
+    ][0]!;
+    expect(
+      [...city.options].map((option) => option.textContent.trim())
+    ).toEqual(["Tous", "Dubai", "Amman"]);
+    expect(city.value).toBe("");
   });
 });
