@@ -18,6 +18,7 @@ import {
 import { AdaptDataTable } from "@adapttable/angular-unstyled";
 import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
+import { collapsibleColumnGroups } from "@adapttable/angular-unstyled/column-groups";
 import { editing } from "@adapttable/angular-unstyled/editing";
 import { exportCsv } from "@adapttable/angular-unstyled/export";
 import { filters } from "@adapttable/angular-unstyled/filters";
@@ -51,6 +52,7 @@ import {
   demoOrders,
   fetchPeople,
   FILTER_DEFS,
+  groupedPeopleColumns,
   largePerson,
   makeLargeDirectory,
   PEOPLE,
@@ -716,6 +718,37 @@ class RowsBody {
   ];
 }
 
+/** Column groups: three header groups, each collapsing its own way. */
+@Component({
+  selector: "adapt-showcase-column-groups",
+  imports: [AdaptDataTable],
+  template: `
+    <div class="mx-demo">
+      <div class="hint-row">
+        <span class="hint">Each group header has its own ▼</span>
+        <span class="hint">Collapse one to see how it folds</span>
+      </div>
+      <div class="mx-demo__body">
+        <adapt-data-table
+          tableLabel="People"
+          [urlSync]="false"
+          [data]="rows"
+          [columns]="columns"
+          [rowKey]="rowKey"
+          [defaults]="{ limit: 10 }"
+          [features]="features"
+        />
+      </div>
+    </div>
+  `,
+})
+class ColumnGroupsBody {
+  readonly rows = PEOPLE;
+  readonly columns = groupedPeopleColumns();
+  readonly rowKey = rowKey;
+  readonly features: readonly AdaptTableFeature[] = [collapsibleColumnGroups()];
+}
+
 /** Feature slug to the demo that page shows. */
 export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
   filtering: FilteringBody,
@@ -730,4 +763,5 @@ export const FEATURE_BODIES: Readonly<Record<string, Type<unknown>>> = {
   tree: TreeBody,
   "nested-tables": NestedTablesBody,
   rows: RowsBody,
+  "column-groups": ColumnGroupsBody,
 };

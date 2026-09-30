@@ -6,7 +6,7 @@
  * pages and the mock API read too, so a row reads the same in either
  * framework.
  */
-import type { ColumnDef } from "@adapttable/angular";
+import type { ColumnDef, ColumnInput } from "@adapttable/angular";
 import { applyRowPatches, updateRow } from "@adapttable/core";
 
 import {
@@ -212,3 +212,32 @@ export function applyPersonEdit(
 /** A fresh copy of the people, for a page that edits or reorders them. */
 export const peopleRows = (): Person[] =>
   PEOPLE.map((person) => ({ ...person }));
+
+/**
+ * The people columns under three header groups, one per collapse mode:
+ * Assignment keeps its Team column, Delivery draws the budget in one cell,
+ * and Workload folds to a stub.
+ */
+export function groupedPeopleColumns(): ColumnInput<Person>[] {
+  const byKey = new Map(peopleColumns().map((column) => [column.key, column]));
+  const column = (key: string): ColumnDef<Person> => {
+    const found = byKey.get(key);
+    if (!found) throw new Error(`no people column "${key}"`);
+    return found;
+  };
+  return [
+    column("person"),
+    {
+      header: "Assignment",
+      collapsedKey: "team",
+      children: [column("team"), column("status")],
+    },
+    {
+      header: "Delivery",
+      align: "start",
+      collapsedRender: (row) => `${formatMoney(budget(row))} budget`,
+      children: [column("timeline"), column("budget")],
+    },
+    { header: "Workload", children: [column("load")] },
+  ];
+}

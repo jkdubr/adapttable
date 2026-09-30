@@ -297,6 +297,7 @@ export const SHOWCASE_ADAPTERS = [
       "tree",
       "nested-tables",
       "rows",
+      "column-groups",
     ],
   },
 ];
@@ -1508,6 +1509,63 @@ export function People({ rows, columns }) {
       "`collapsibleColumnGroups` arms the toggles. The headers and the chevrons are {kit}.",
     ],
     card: "Spanning headers that collapse to a stub, a kept child, or a custom cell.",
+    snippets: {
+      angular: `import { Component, input } from "@angular/core";
+import type { ColumnInput } from "@adapttable/angular";
+import { AdaptDataTable } from "{pkg}";
+import { collapsibleColumnGroups } from "{pkg}/column-groups";
+
+interface Member {
+  id: string;
+  name: string;
+  team: string;
+  status: string;
+  budget: number;
+}
+
+const columns: ColumnInput<Member>[] = [
+  { key: "name", header: "Name" },
+  {
+    header: "Assignment",
+    collapsedKey: "team",
+    children: [
+      { key: "team", header: "Team" },
+      { key: "status", header: "Status" },
+    ],
+  },
+  {
+    header: "Budget",
+    collapsedRender: (row) => \`$\${row.budget}\`,
+    children: [{ key: "budget", header: "Amount" }],
+  },
+];
+
+@Component({
+  selector: "app-members",
+  imports: [AdaptDataTable],
+  template: \`
+    <adapt-data-table
+      [data]="rows()"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [features]="features"
+    />
+  \`,
+})
+export class Members {
+  readonly rows = input.required<readonly Member[]>();
+  readonly columns = columns;
+  readonly rowKey = (row: Member) => row.id;
+  readonly features = [collapsibleColumnGroups()];
+}`,
+    },
+    intros: {
+      unstyled: [
+        "A parent with `children` is a column group: its caption spans its columns in a header row of its own. This table has three, open by default; collapse one to see how it folds.",
+        'Assignment is Team + Status with `collapsedKey: "team"`, so it keeps Team. Delivery is Timeline + Budget with `collapsedRender`, so it draws the budget in one cell. Workload has neither, so it folds to a narrow stub.',
+        "`collapsibleColumnGroups` arms the toggles. The group headers and their buttons are native elements.",
+      ],
+    },
     snippet: `import { DataTable, type ColumnInput } from "{pkg}";
 import { collapsibleColumnGroups } from "{pkg}/column-groups";
 
