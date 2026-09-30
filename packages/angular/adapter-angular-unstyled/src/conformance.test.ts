@@ -1,4 +1,8 @@
-import type { ColumnDef } from "@adapttable/angular";
+import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
+import { editing } from "@adapttable/angular-unstyled/editing";
+import { grouping } from "@adapttable/angular-unstyled/grouping";
+import { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
+import { virtualize } from "@adapttable/angular-unstyled/virtualize";
 import {
   type ConformanceDriver,
   type ConformanceRow,
@@ -17,8 +21,32 @@ function columnsFor(
     key: column.key,
     header: column.header,
     sortable: column.sortable,
+    editable: scenario.onCellEdit !== undefined,
     accessor: (row: ConformanceRow) => row[column.key],
   }));
+}
+
+/** The features a scenario asks for, drawn with this kit. */
+function featuresFor(scenario: ConformanceScenario): AdaptTableFeature[] {
+  const { onCellEdit, onRowReorder, groupBy } = scenario;
+  return [
+    ...(onCellEdit
+      ? [
+          editing<ConformanceRow>((row, key, value) => {
+            onCellEdit(row.id, key, value);
+          }),
+        ]
+      : []),
+    ...(onRowReorder
+      ? [
+          rowReorder<ConformanceRow>((from, to, row) => {
+            onRowReorder(from, to, row.id);
+          }),
+        ]
+      : []),
+    ...(groupBy ? [grouping(groupBy)] : []),
+    ...(scenario.virtualize ? [virtualize()] : []),
+  ];
 }
 
 const driver: ConformanceDriver = {
@@ -38,6 +66,11 @@ const driver: ConformanceDriver = {
     set("urlSync", false);
     set("selectable", scenario.selectable ?? false);
     set("cellNavigation", scenario.navigable ?? false);
+    set("features", featuresFor(scenario));
+    if (scenario.virtualize) {
+      set("paginationMode", "infinite");
+      set("maxHeight", 200);
+    }
     if (scenario.pageSize !== undefined) {
       set("defaults", { limit: scenario.pageSize });
     }
