@@ -68,7 +68,7 @@
  * plain attribute or as a binding to a string literal. Core's chrome is
  * per-framework too: `@adapttable/core` plus the binding the kit builds on.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -87,6 +87,17 @@ import {
   shellKits,
 } from "./kits.mjs";
 import { REPO_ROOT } from "./packages.mjs";
+
+/**
+ * The kit each private kit is measured against while it is built: every part
+ * the reference renders is a part the private kit still has to render.
+ * `--report` prints the difference; an entry leaves this map when its kit
+ * joins the contract.
+ */
+const REPORT_REFERENCES = {
+  "adapter-angular-unstyled": "adapter-unstyled",
+  "adapter-ng-zorro": "adapter-antd",
+};
 
 /**
  * Parts a kit genuinely cannot render, with the reason. An entry here is a
@@ -326,9 +337,30 @@ function namesIn(files, patterns) {
   return found;
 }
 
-/** Every file of a kit's `src` its framework's guards read. */
+/**
+ * The directories a kit's sources live in: `src`, and each secondary entry
+ * point beside it (an Angular kit's `editing/`, `grouping/`, …).
+ */
+function kitSourceDirs(kit, root) {
+  const dir = kitDir(kit, root);
+  const entries = readdirSync(dir)
+    .filter((entry) => {
+      const path = join(dir, entry);
+      return (
+        statSync(path).isDirectory() &&
+        existsSync(join(path, "ng-package.json"))
+      );
+    })
+    .sort()
+    .map((entry) => join(dir, entry));
+  // A placeholder kit with no sources yet renders nothing.
+  const src = join(dir, "src");
+  return existsSync(src) ? [src, ...entries] : entries;
+}
+
+/** Every file of a kit's sources its framework's guards read. */
 const kitFiles = (kit, root) =>
-  frameworkFiles(join(kitDir(kit, root), "src"), kit.framework);
+  kitSourceDirs(kit, root).flatMap((dir) => frameworkFiles(dir, kit.framework));
 
 /**
  * The part names one adapter emits, read from its framework's sources and
@@ -650,6 +682,49 @@ export function checkPartsParity({
   };
 }
 
+/**
+ * What each private kit still lacks against its reference: the parts the
+ * reference renders — its own and its framework's chrome — that the kit and
+ * its framework's chrome do not.
+ *
+ * @param {object} [options] everything the report reads, for fixtures
+ * @param {string} [options.root] repository root
+ * @param {readonly import("./kits.mjs").Kit[]} [options.kits] the kit registry
+ * @param {Record<string, string>} [options.references] private kit → reference kit
+ * @returns {{ kit: string, reference: string, missing: string[] }[]}
+ */
+export function partsGapReport({
+  root = REPO_ROOT,
+  kits = KITS,
+  references = REPORT_REFERENCES,
+} = {}) {
+  const byName = new Map(kits.map((kit) => [kit.name, kit]));
+  const pairs = kits
+    .filter((kit) => kit.role === "private" && byName.has(references[kit.name]))
+    .map((kit) => [kit, byName.get(references[kit.name])]);
+  const chrome = chromeByFramework(frameworksIn(pairs.flat()), root);
+  const rendered = (kit) =>
+    new Set([...partsOf(kit, root), ...chrome.get(kit.framework)]);
+  return pairs.map(([kit, reference]) => {
+    const has = rendered(kit);
+    return {
+      kit: kit.name,
+      reference: reference.name,
+      missing: [...rendered(reference)].filter((part) => !has.has(part)).sort(),
+    };
+  });
+}
+
+/** Print the gap report: one block per private kit, then exit 0. */
+function printReport() {
+  for (const { kit, reference, missing } of partsGapReport()) {
+    console.log(
+      `${kit} is missing ${missing.length} part(s) ${reference} renders:`
+    );
+    for (const part of missing) console.log(`  ${part}`);
+  }
+}
+
 function main() {
   const { failures, summary } = checkPartsParity();
   const [first] = failures;
@@ -662,4 +737,7 @@ function main() {
   console.log(summary);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  if (process.argv.includes("--report")) printReport();
+  else main();
+}
