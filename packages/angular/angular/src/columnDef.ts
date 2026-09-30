@@ -41,6 +41,17 @@ export interface HeaderContext<TRow> {
 }
 
 /**
+ * What a footer renderer receives: the column, and the summary row's value
+ * for it.
+ *
+ * @public
+ */
+export interface FooterContext<TRow> extends HeaderContext<TRow> {
+  /** The summary row's value for this column, or `undefined`. */
+  readonly value: unknown;
+}
+
+/**
  * A renderer: an `ng-template` or a standalone component. A component
  * receives the context's fields it declares as inputs.
  *
@@ -62,8 +73,8 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
   cell?: Renderer<CellContext<TRow>>;
   /** Renders the header content. Without one, it shows `header`. */
   headerCell?: Renderer<HeaderContext<TRow>>;
-  /** Renders the footer content. */
-  footer?: Renderer<HeaderContext<TRow>>;
+  /** Renders the footer content, handed the summary row's value. */
+  footer?: Renderer<FooterContext<TRow>>;
 }
 
 /**

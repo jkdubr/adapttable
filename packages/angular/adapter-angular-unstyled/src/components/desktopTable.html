@@ -96,6 +96,7 @@
           }
           @case ("row") {
             @let entry = slot.wiring;
+            @let summary = entry.summary === true;
             <tr
               [adaptAttrs]="entry.rowAttrs"
               [attr.data-dragging]="
@@ -123,30 +124,38 @@
             >
               @if (v.rowDetail) {
                 <td data-adapttable-part="expand-cell">
-                  <ng-container
-                    [adaptSlot]="expandToggleSlot"
-                    [adaptSlotProps]="v.expandToggles().get(entry.id)!"
-                    [adaptSlotTable]="v.table"
-                  />
+                  @if (!summary) {
+                    <ng-container
+                      [adaptSlot]="expandToggleSlot"
+                      [adaptSlotProps]="v.expandToggles().get(entry.id)!"
+                      [adaptSlotTable]="v.table"
+                    />
+                  }
                 </td>
               }
               @if (v.reorder; as reorder) {
                 <td data-adapttable-part="reorder-cell">
-                  <ng-container
-                    [adaptSlot]="reorderHandleSlot"
-                    [adaptSlotProps]="
-                      reorderHandleProps(reorder(), entry.row, entry.index)
-                    "
-                    [adaptSlotTable]="v.table"
-                  />
+                  @if (!summary) {
+                    <ng-container
+                      [adaptSlot]="reorderHandleSlot"
+                      [adaptSlotProps]="
+                        reorderHandleProps(reorder(), entry.row, entry.index)
+                      "
+                      [adaptSlotTable]="v.table"
+                    />
+                  }
                 </td>
               }
               @if (v.selection; as selection) {
                 <td data-adapttable-part="selection-cell">
-                  <input
-                    data-adapttable-part="checkbox"
-                    [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
-                  />
+                  @if (!summary) {
+                    <input
+                      data-adapttable-part="checkbox"
+                      [adaptAttrs]="
+                        selection.rowCheckboxAttrs(rowId(entry.row))
+                      "
+                    />
+                  }
                 </td>
               }
               @if (v.columnSpacers(); as spacers) {
@@ -166,7 +175,7 @@
                   "
                 >
                   <ng-template #cellContent>
-                    @if (v.editableCells; as editableCells) {
+                    @if (!summary && v.editableCells; as editableCells) {
                       <ng-container
                         [adaptSlot]="editableCellSlot"
                         [adaptSlotProps]="
@@ -198,7 +207,7 @@
               @if (v.columnSpacers(); as spacers) {
                 <adapt-column-spacer [width]="spacers.end" side="end" />
               }
-              @if (v.showActions()) {
+              @if (v.showActions() && !summary) {
                 <td data-adapttable-part="actions-cell">
                   @let actionsCell = v.actionsCells().get(rowId(entry.row))!;
                   @if (actionsCell.rowEdit; as rowEdit) {
@@ -221,7 +230,7 @@
               }
             </tr>
             @if (v.rowDetail; as detail) {
-              @if (detail().expansion.isExpanded(entry.id)) {
+              @if (!summary && detail().expansion.isExpanded(entry.id)) {
                 <tr
                   data-adapttable-part="detail-row"
                   [adaptAttrs]="entry.detailAttrs"
@@ -244,5 +253,36 @@
         }
       }
     </tbody>
+    @if (v.showSummary()) {
+      <tfoot data-adapttable-part="summary">
+        <tr data-adapttable-part="summary-row">
+          @if (v.rowDetail) {
+            <td data-adapttable-part="summary-cell"></td>
+          }
+          @if (v.reorder) {
+            <td data-adapttable-part="summary-cell"></td>
+          }
+          @if (v.selection) {
+            <td data-adapttable-part="summary-cell"></td>
+          }
+          @if (v.columnSpacers(); as spacers) {
+            <adapt-column-spacer [width]="spacers.start" side="start" />
+          }
+          @for (column of v.columns(); track column.key) {
+            <td
+              data-adapttable-part="summary-cell"
+              [adaptFooter]="column"
+              [adaptFooterValue]="v.summary()?.[column.key]"
+            ></td>
+          }
+          @if (v.columnSpacers(); as spacers) {
+            <adapt-column-spacer [width]="spacers.end" side="end" />
+          }
+          @if (v.showActions()) {
+            <td data-adapttable-part="summary-cell"></td>
+          }
+        </tr>
+      </tfoot>
+    }
   </table>
 </div>

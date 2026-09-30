@@ -15,16 +15,24 @@ export {
   rowActionsFor,
   type RowActionsOptions,
 } from "./actions/bulkActionRunner";
+export {
+  aggregate,
+  type AggregateOptions,
+  type AggregateSpec,
+  type SummaryRowFn,
+} from "./aggregate/aggregate";
 export { AdaptAttrs, type Attrs } from "./attrs";
 export {
   AdaptCell,
   AdaptCellTemplate,
+  AdaptFooter,
   AdaptHeader,
   type ResolvedRenderer,
 } from "./cell";
 export {
   type CellContext,
   type ColumnDef,
+  type FooterContext,
   type HeaderContext,
   type Renderer,
   resolveColumns,
@@ -172,6 +180,12 @@ export {
   type RowDetailOptions,
   type TableRowDetail,
 } from "./features/rowDetail";
+export {
+  injectTableRowPinning,
+  rowPinning,
+  type RowPinningFeatureOptions,
+  type TableRowPinningOptions,
+} from "./features/rowPinning";
 export { rowReorder } from "./features/rowReorder";
 export {
   injectTree,
@@ -258,6 +272,13 @@ export {
   type RowExpansionOptions,
   type RowExpansionState,
 } from "./rows/rowExpansion";
+export {
+  injectRowPinning,
+  type RowPinLabels,
+  type RowPinningOptions,
+  type RowPinningState,
+  type RowPinSide,
+} from "./rows/rowPinning";
 export {
   injectRowReorder,
   type RowReorderState,

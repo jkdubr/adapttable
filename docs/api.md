@@ -3165,6 +3165,17 @@ comes from a kit through a slot.
   `AdaptRowDetail` draws a row's detail: its nested table inside a region
   named for assistive technology, else the host's panel. Kits fill
   `EXPAND_TOGGLE`.
+- Row pinning: `rowPinning` (`RowPinningFeatureOptions`) lets rows be
+  pinned to the top or bottom from their actions menu; the table holds the
+  lists and keeps them in the URL unless the host passes `pinnedRowIds`, and
+  grouping or a tree refuses it. `injectTableRowPinning`
+  (`TableRowPinningOptions`) is its live state, and `injectRowPinning`
+  (`RowPinningOptions`, returning `RowPinningState`) the lists, which side a
+  row is on, `pin`, `unpin` and the pin entries for the actions menu.
+- Summaries: `aggregate` builds a `SummaryRowFn` from an `AggregateSpec` —
+  what a table's summary row and a grouping's subtotals take — and
+  `AdaptFooter` draws a column's footer cell, its `footer` renderer handed a
+  `FooterContext` with the summary value, or the value as text.
 - Cell navigation: `cellNavigation` (`CellNavigationOptions`) makes the
   table one tab stop whose cells the arrow keys move between, and tells
   `onRangeChange` the selected rectangle. `injectGridFocus(options)`
@@ -3269,7 +3280,12 @@ the zero-configuration set. Overlay helpers `menuPopover` / `MenuPopover`,
 `OVERLAY_Z` and `placeOverlayBelowTrigger` position kit menus, and
 `filtersMode` (`FiltersMode`) picks the anchored popover or the drawer.
 `searchable` draws the search box (on by default; a nested table turns it
-off). `paginationMode` arms infinite lists, and `maxHeight` caps the desktop body
+off). `summaryRow` adds a summary row under the body (a `summary` table
+footer, and a `summary-card` on phones). `rowPinning`
+(`@adapttable/angular-unstyled/row-pinning`, `RowPinningFeatureOptions`) keeps
+a pinned row above or below the scrolling rows, stuck there inside a scroll
+box, and `pinnedSummaryRows` (`/pinned-summary-rows`) draws host summary rows
+above and below without a data row's controls. `paginationMode` arms infinite lists, and `maxHeight` caps the desktop body
 or the phone card list, which then scrolls itself and is what a composed
 `virtualize` windows. `TableView` is what the table renders from once its
 inputs have arrived: its body as `BodySlot` entries in reading order, each

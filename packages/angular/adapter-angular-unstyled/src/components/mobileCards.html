@@ -25,6 +25,7 @@
       }
       @case ("row") {
         @let entry = slot.wiring;
+        @let summary = entry.summary === true;
         @let treeCard = treeCards().get(rowId(entry.row));
         <li
           style="display: block"
@@ -39,13 +40,13 @@
               [adaptSlotTable]="v.table"
             />
           }
-          @if (v.selection; as selection) {
+          @if (!summary && v.selection; as selection) {
             <input
               data-adapttable-part="checkbox"
               [adaptAttrs]="selection.rowCheckboxAttrs(rowId(entry.row))"
             />
           }
-          @if (v.rowDetail) {
+          @if (v.rowDetail && !summary) {
             <ng-container
               [adaptSlot]="expandToggleSlot"
               [adaptSlotProps]="v.expandToggles().get(entry.id)!"
@@ -58,7 +59,7 @@
                 <span data-adapttable-part="card-label">{{ label }}</span>
               }
               <span data-adapttable-part="card-value">
-                @if (v.editableCells; as editableCells) {
+                @if (!summary && v.editableCells; as editableCells) {
                   <ng-container
                     [adaptSlot]="editableCellSlot"
                     [adaptSlotProps]="
@@ -76,7 +77,7 @@
               </span>
             </div>
           }
-          @if (v.reorder; as reorder) {
+          @if (!summary && v.reorder; as reorder) {
             <ng-container
               [adaptSlot]="reorderButtonsSlot"
               [adaptSlotProps]="
@@ -85,7 +86,7 @@
               [adaptSlotTable]="v.table"
             />
           }
-          @if (v.showActions()) {
+          @if (v.showActions() && !summary) {
             <div data-adapttable-part="card-actions">
               @let actionsCell = v.actionsCells().get(rowId(entry.row))!;
               @if (actionsCell.rowEdit; as rowEdit) {
@@ -107,7 +108,7 @@
             </div>
           }
           @if (v.rowDetail; as detail) {
-            @if (detail().expansion.isExpanded(entry.id)) {
+            @if (!summary && detail().expansion.isExpanded(entry.id)) {
               <div data-adapttable-part="card-detail">
                 <adapt-row-detail
                   [row]="entry.row"
@@ -121,5 +122,21 @@
         </li>
       }
     }
+  }
+  @if (v.summary(); as summary) {
+    <li data-adapttable-part="summary-card" style="display: block">
+      @for (column of v.table.columns(); track column.key) {
+        @if (summary[column.key] != null) {
+          <div data-adapttable-part="card-row">
+            @if (caption(column); as label) {
+              <span data-adapttable-part="card-label">{{ label }}</span>
+            }
+            <span data-adapttable-part="card-value">{{
+              summary[column.key]
+            }}</span>
+          </div>
+        }
+      }
+    </li>
   }
 </ul>

@@ -89,6 +89,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-nested-table.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-nested-table.mjs"
     },
+    "./pinned-summary-rows": {
+      "types": "./dist/types/adapttable-angular-unstyled-pinned-summary-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-pinned-summary-rows.mjs"
+    },
     "./preset": {
       "types": "./dist/types/adapttable-angular-unstyled-preset.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-preset.mjs"
@@ -100,6 +104,10 @@
     "./row-detail": {
       "types": "./dist/types/adapttable-angular-unstyled-row-detail.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-row-detail.mjs"
+    },
+    "./row-pinning": {
+      "types": "./dist/types/adapttable-angular-unstyled-row-pinning.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-row-pinning.mjs"
     },
     "./row-reorder": {
       "types": "./dist/types/adapttable-angular-unstyled-row-reorder.d.ts",

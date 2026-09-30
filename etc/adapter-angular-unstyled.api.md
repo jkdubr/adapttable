@@ -86,6 +86,7 @@ import { SavedViewsSlotProps } from '@adapttable/angular';
 import { SavedViewsState } from '@adapttable/angular';
 import { SelectionState } from '@adapttable/angular';
 import { Signal } from '@angular/core';
+import { SummaryRowFn } from '@adapttable/angular';
 import { TableDensity } from '@adapttable/angular';
 import { TableGrouping } from '@adapttable/angular';
 import { TableLabels } from '@adapttable/angular';
@@ -275,6 +276,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
     readonly selectionChange: OutputEmitterRef<string[]>;
     readonly source: InputSignal<TableSource<TRow> | Signal<TableSource<TRow>> | undefined>;
+    readonly summaryRow: InputSignal<SummaryRowFn<TRow> | undefined>;
     readonly supports: InputSignal<QuerySupport | undefined>;
     readonly tableLabel: InputSignal<string | undefined>;
     // @internal
@@ -383,6 +385,11 @@ export class AdaptDataTable<TRow> implements OnInit {
         };
         "searchable": {
             "alias": "searchable";
+            "required": false;
+            "isSignal": true;
+        };
+        "summaryRow": {
+            "alias": "summaryRow";
             "required": false;
             "isSignal": true;
         };
@@ -742,7 +749,7 @@ export class AdaptGroupHeaderCard {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
@@ -825,7 +832,7 @@ export class AdaptGroupHeaderRow {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {
@@ -1145,6 +1152,8 @@ export interface TableView<TRow> {
     readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
     readonly selection: RowSelection | undefined;
     readonly showActions: Signal<boolean>;
+    readonly showSummary: Signal<boolean>;
+    readonly summary: Signal<Partial<Record<string, unknown>> | undefined>;
     readonly table: DataTable<TRow>;
     readonly toolbarExtras: Signal<ToolbarExtrasSlotProps>;
     readonly tree: Signal<TableTree<TRow> | undefined> | undefined;

@@ -81,12 +81,18 @@ import {
   injectRowReorder,
   injectRowSelection,
   injectTableData,
+  injectTableRowPinning,
   injectTableVirtualization,
   injectTree,
   insertExtraRows,
   insertExtrasBeforeRows,
   type NestedTableParent,
   type PaginationMode,
+  partitionPinnedRows,
+  pinnedRowPart,
+  type PinnedRows,
+  pinnedRowSticky,
+  pinnedSummaryPart,
   type QueryAggregate,
   type QuerySupport,
   resolveBodyVirtualization,
@@ -106,6 +112,7 @@ import {
   type SavedViewsControllerOptions,
   type SavedViewsSlotProps,
   type SelectionState,
+  type SummaryRowFn,
   type TableDensity,
   type TableGrouping,
   type TableLabels,
@@ -122,6 +129,7 @@ import {
   urlAdapterFor,
   virtualizeIgnoredOnPage,
   windowGroupedEntries,
+  withRowPinActions,
 } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -451,6 +459,8 @@ function bodyWindowFor<TRow>(options: {
   readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
   readonly tree: Signal<TableTree<TRow> | undefined> | undefined;
   readonly expandable: boolean;
+  /** The rows that scroll — every row but the pinned ones. */
+  readonly scrollRows: Signal<readonly TRow[]>;
   readonly featureOptions: Readonly<Record<string, unknown>>;
   readonly rowKey: (row: TRow) => string;
   readonly maxHeight: number | string | undefined;
@@ -463,6 +473,7 @@ function bodyWindowFor<TRow>(options: {
     grouping,
     tree,
     expandable,
+    scrollRows,
     featureOptions,
     rowKey,
     maxHeight,
@@ -495,7 +506,7 @@ function bodyWindowFor<TRow>(options: {
     return computed(() => ({
       virtualization: {
         enabled: false,
-        rows: source().rows.map((row, index) => ({
+        rows: scrollRows().map((row, index) => ({
           row,
           index,
           key: rowKey(row),
@@ -512,7 +523,7 @@ function bodyWindowFor<TRow>(options: {
     estimateCardSize: numberOption(featureOptions.estimateCardSize),
   };
   const estimateSize = computed(() =>
-    estimateBodyItemSize(bodyChrome(), sizes, source().rows)
+    estimateBodyItemSize(bodyChrome(), sizes, scrollRows())
   );
   const overscan = numberOption(featureOptions.virtualOverscan);
   const hostMargin = numberOption(featureOptions.virtualScrollMargin);
@@ -531,7 +542,7 @@ function bodyWindowFor<TRow>(options: {
   };
   const kind = computed(() => bodyWindowKind(true, bodyChrome()));
   const flat = injectTableVirtualization<TRow>({
-    rows: computed(() => source().rows),
+    rows: scrollRows,
     rowKey,
     enabled: computed(() => kind() === "flat"),
     expandable,
@@ -622,6 +633,10 @@ export interface TableView<TRow> {
   readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
   /** What this table hands the tables nested under its rows. */
   readonly detailParent: Signal<NestedTableParent>;
+  /** The summary row's value per column, when `summaryRow` is given. */
+  readonly summary: Signal<Partial<Record<string, unknown>> | undefined>;
+  /** Whether the summary row draws: a `summaryRow`, or a column footer. */
+  readonly showSummary: Signal<boolean>;
   /**
    * Cell editing bundle, when an editing feature is composed — state, channel,
    * validation, save tracking and lifecycle observers for the gate.
@@ -741,6 +756,12 @@ export class AdaptDataTable<TRow> implements OnInit {
    * second search box inside a row reads as chrome rather than as a feature.
    */
   readonly searchable = input(true);
+  /**
+   * One value per column for a summary row under the body — `aggregate`
+   * builds one. A column's `footer` renders its value; without either, no
+   * summary row is drawn.
+   */
+  readonly summaryRow = input<SummaryRowFn<TRow>>();
   /** Keep the view state in the URL. Read once, when the table starts. */
   readonly urlSync = input(true);
   /** Namespace for this table's URL params. Read once. */
@@ -1076,7 +1097,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       onRenameColumn: this.onColumnRename()
         ? table.layout().setName
         : undefined,
-      hasRowActions: rowActions().hasRowActions,
+      hasRowActions: mergedActions().hasRowActions,
     }));
     const grouping = injectGrouping<TRow>({
       table,
@@ -1087,6 +1108,40 @@ export class AdaptDataTable<TRow> implements OnInit {
     groupingRef.set(grouping);
     const tree = injectTree<TRow>({ table, source, features, injector });
     const rowDetail = injectRowDetail<TRow>({ features, injector });
+    // Pinning refuses a grouped table or a tree: a nested list is not a flat
+    // pin stack.
+    const pinning = injectTableRowPinning<TRow>({
+      features,
+      getRowId: (row) => this.rowKey()(row),
+      labels: table.labels,
+      blocked: computed(
+        () => grouping?.() !== undefined || tree?.() !== undefined
+      ),
+      urlAdapter,
+      urlSync: this.urlSync(),
+      urlKey: this.urlKey(),
+      injector,
+    });
+    const pinnedRows = computed(() => {
+      const pins = pinning?.();
+      return pins
+        ? partitionPinnedRows(table.source().rows, pins.state, (row) =>
+            this.rowKey()(row)
+          )
+        : undefined;
+    });
+    const summaryRows = featureOptions.pinnedRows as
+      PinnedRows<TRow> | undefined;
+    // The pin entries ride the actions column beside the host's actions.
+    const mergedActions = computed(() =>
+      withRowPinActions({
+        rowActions: rowActions().rowActions,
+        hasRowActions: rowActions().hasRowActions,
+        pinning: pinning?.() !== undefined,
+        pins: pinning?.()?.actions ?? [],
+        actionsHidden: table.layout().isHidden(ACTIONS_COLUMN_KEY),
+      })
+    );
     const groupingPanel = injectGroupingPanelState({
       table,
       source: viewSource,
@@ -1125,6 +1180,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       grouping,
       tree,
       expandable: rowDetail !== undefined,
+      scrollRows: computed(() => pinnedRows()?.scroll ?? table.source().rows),
       featureOptions,
       rowKey: (row) => this.rowKey()(row),
       maxHeight: this.maxHeight(),
@@ -1137,7 +1193,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     });
     const virtualization = computed(() => bodyWindow().virtualization);
     const rowKey = computed(() => this.rowKey());
-    const rowActionList = computed(() => rowActions().rowActions);
+    const rowActionList = computed(() => mergedActions().rowActions);
     const columnWindow = injectColumnWindow<TRow>({
       columns: table.columns,
       enabled: featureOptions.virtualizeColumns === true,
@@ -1172,6 +1228,8 @@ export class AdaptDataTable<TRow> implements OnInit {
         grouping: entries === undefined ? undefined : { entries },
         renderRowDetail: rowDetail?.(),
         expansion: rowDetail?.().expansion,
+        pinnedTopRows: pinnedRows()?.top ?? [],
+        pinnedBottomRows: pinnedRows()?.bottom ?? [],
       });
     });
     const showActions = computed(() => renderModel().showActions);
@@ -1189,14 +1247,46 @@ export class AdaptDataTable<TRow> implements OnInit {
     ): Attrs => (ref === undefined ? attrs : { ...attrs, ref });
     const measured = (attrs: Attrs): Attrs =>
       withRef(attrs, virtualization().measureElement);
+    // A pinned row keeps its place above or below the scrolling rows, stuck
+    // there inside a scroll box; a host summary row is marked and named, with
+    // none of a data row's interactions. A pinned card is an ordinary card.
+    const pinSticky = this.maxHeight() != null;
+    const pinnedAttrs = (
+      attrs: Attrs,
+      args: DesktopRowWiringArgs<TRow>,
+      card: boolean
+    ): Attrs => {
+      const side = args.rowPinSide;
+      if (side === undefined) return attrs;
+      const summary = args.summary === true;
+      if (card && !summary) return attrs;
+      const style = attrs.style;
+      return {
+        ...attrs,
+        "data-adapttable-part": summary
+          ? pinnedSummaryPart(side)
+          : pinnedRowPart(side),
+        "data-row-pin": side,
+        "aria-selected": summary ? undefined : attrs["aria-selected"],
+        "aria-label": summary
+          ? table.labels().pinnedSummaryRow
+          : attrs["aria-label"],
+        style: card
+          ? style
+          : {
+              ...(typeof style === "object" && style !== null ? style : {}),
+              ...pinnedRowSticky(side, pinSticky, 0),
+            },
+      };
+    };
     const body = computed((): readonly BodySlot<TRow>[] => {
       const window = bodyWindow();
       const entries = window.groupingEntries;
       return desktopBodySlots<TRow, BodyRow<TRow>>({
-        pinnedTopRows: [],
-        pinnedBottomRows: [],
-        pinnedSummaryTop: [],
-        pinnedSummaryBottom: [],
+        pinnedTopRows: pinnedRows()?.top ?? [],
+        pinnedBottomRows: pinnedRows()?.bottom ?? [],
+        pinnedSummaryTop: summaryRows?.top ?? [],
+        pinnedSummaryBottom: summaryRows?.bottom ?? [],
         extraRows: undefined,
         extraFill: () => undefined,
         insertExtraRows,
@@ -1217,21 +1307,27 @@ export class AdaptDataTable<TRow> implements OnInit {
           return {
             ...args,
             rowAttrs: withRef(
-              grid
-                ? grid.rowAttrs(args.row, args.index)
-                : table.rowAttrs(args.row, args.index),
+              pinnedAttrs(
+                grid && args.summary !== true
+                  ? grid.rowAttrs(args.row, args.index)
+                  : table.rowAttrs(args.row, args.index),
+                args,
+                false
+              ),
               desktopRowMeasureRef(
-                undefined,
+                args.rowPinSide,
                 window.measureRowPair,
                 args.index,
                 window.measureElement
               )
             ),
-            cardAttrs: measured(table.cardAttrs(args.row, args.index)),
+            cardAttrs: (args.measure ? measured : (attrs: Attrs) => attrs)(
+              pinnedAttrs(table.cardAttrs(args.row, args.index), args, true)
+            ),
             detailAttrs: withRef(
               {},
               desktopDetailMeasureRef(
-                undefined,
+                args.rowPinSide,
                 window.measureRowPair,
                 args.index
               )
@@ -1273,6 +1369,15 @@ export class AdaptDataTable<TRow> implements OnInit {
       }
       return toggles;
     });
+    const summaryRow = this.summaryRow();
+    const summary = computed(() =>
+      summaryRow === undefined ? undefined : summaryRow(table.source().rows)
+    );
+    const showSummary = computed(
+      () =>
+        summaryRow !== undefined ||
+        table.columns().some((column) => column.footer !== undefined)
+    );
     const detailParent = computed((): NestedTableParent => ({
       density: density(),
       labels: labels(),
@@ -1305,6 +1410,8 @@ export class AdaptDataTable<TRow> implements OnInit {
       rowDetail,
       expandToggles,
       detailParent,
+      summary,
+      showSummary,
       editing,
       editableCells,
       showActions,

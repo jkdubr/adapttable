@@ -100,6 +100,12 @@ export {
   windowGroupedEntries,
 } from "@adapttable/core";
 export { treeCardStyle } from "@adapttable/core";
+export {
+  orderedCardEntries,
+  partitionPinnedRows,
+  withRowPinActions,
+} from "@adapttable/core";
+export { pinnedSummaryPart } from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,
@@ -233,3 +239,5 @@ export {
   desktopRowMeasureRef,
   expandChevronIcon,
 } from "@adapttable/core/binding";
+export { pinnedRowSticky } from "@adapttable/core/binding";
+export { pinnedRowPart } from "@adapttable/core/binding";

@@ -19,6 +19,7 @@ import {
 import {
   type CellContext,
   type ColumnDef,
+  type FooterContext,
   type HeaderContext,
   primitiveText,
   type Renderer,
@@ -187,4 +188,52 @@ export class AdaptHeader<TRow> {
   protected readonly renderer = computed(() =>
     resolveRenderer(this.column().headerCell, this.context())
   );
+}
+
+/**
+ * Renders a footer cell's content into the element it sits on:
+ * `<td [adaptFooter]="column" [adaptFooterValue]="summary[column.key]">`.
+ * The column's `footer` when it has one, the summary value otherwise.
+ *
+ * @public
+ */
+@Component({
+  selector: "[adaptFooter]",
+  imports: [NgTemplateOutlet, NgComponentOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `@let content = renderer();
+    @if (content?.template; as template) {
+      <ng-container
+        [ngTemplateOutlet]="template"
+        [ngTemplateOutletContext]="context()"
+      />
+    } @else if (content?.component; as component) {
+      <ng-container
+        [ngComponentOutlet]="component"
+        [ngComponentOutletInputs]="content?.inputs"
+      />
+    } @else {
+      {{ text() }}
+    }`,
+})
+export class AdaptFooter<TRow> {
+  /** The column. */
+  readonly column = input.required<ColumnDef<TRow>>({ alias: "adaptFooter" });
+  /** The summary row's value for the column. */
+  readonly value = input<unknown>(undefined, { alias: "adaptFooterValue" });
+
+  /** What the renderer receives. */
+  protected readonly context = computed<FooterContext<TRow>>(() => ({
+    $implicit: this.column(),
+    column: this.column(),
+    value: this.value(),
+  }));
+
+  /** The column's footer renderer, resolved. */
+  protected readonly renderer = computed(() =>
+    resolveRenderer(this.column().footer, this.context())
+  );
+
+  /** The value as text when the column has no footer renderer. */
+  protected readonly text = computed(() => primitiveText(this.value()) ?? "");
 }

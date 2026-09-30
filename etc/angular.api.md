@@ -8,6 +8,8 @@ import { ACTIONS_COLUMN_KEY } from '@adapttable/core';
 import { ACTIVE_FILTER_CHIPS } from '@adapttable/core/binding';
 import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
+import { AggregateOptions } from '@adapttable/core';
+import { AggregateSpec } from '@adapttable/core';
 import { BATCH_EDIT_BAR } from '@adapttable/core/binding';
 import { BatchEditBarModel } from '@adapttable/core';
 import { BatchEditBarProps } from '@adapttable/core/binding';
@@ -201,14 +203,19 @@ import { NestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { offersAllMatching } from '@adapttable/core';
+import { orderedCardEntries } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
 import { PaginationInfo } from '@adapttable/core';
 import { PaginationMode } from '@adapttable/core';
 import { PaginationSlot } from '@adapttable/core';
+import { partitionPinnedRows } from '@adapttable/core';
 import { PIN_ICON } from '@adapttable/core/binding';
 import { pinActionLabel } from '@adapttable/core';
+import { pinnedRowPart } from '@adapttable/core/binding';
 import { PinnedRows } from '@adapttable/core';
+import { pinnedRowSticky } from '@adapttable/core/binding';
+import { pinnedSummaryPart } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
 import { PinSide } from '@adapttable/core';
 import { QueryAggregate } from '@adapttable/core';
@@ -250,7 +257,11 @@ import { RowHeight } from '@adapttable/core';
 import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
 import { RowPatchEvent } from '@adapttable/core';
+import { RowPinLabels } from '@adapttable/core';
+import { RowPinningState } from '@adapttable/core/binding';
+import { RowPinSide } from '@adapttable/core';
 import { RowPinState } from '@adapttable/core/binding';
+import { RowPinState as RowPinState_2 } from '@adapttable/core';
 import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/core/binding';
 import { RowReorderHandleProps as RowReorderHandleProps_2 } from '@adapttable/core/binding';
 import { RowReorderHandler } from '@adapttable/core';
@@ -280,6 +291,7 @@ import { SortDirection } from '@adapttable/core';
 import { splitRelativeToken } from '@adapttable/core';
 import { stopCellEditKeyboard } from '@adapttable/core';
 import { stopEditKeys } from '@adapttable/core';
+import { SummaryRowFn } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableLabels as TableLabels_2 } from '@adapttable/core/binding';
@@ -315,6 +327,7 @@ import { VirtualTableRow } from '@adapttable/core';
 import { visibleRowActions } from '@adapttable/core';
 import { watchOverlayDismiss } from '@adapttable/core';
 import { windowGroupedEntries } from '@adapttable/core';
+import { withRowPinActions } from '@adapttable/core';
 
 export { ACTIONS_COLUMN_KEY }
 
@@ -610,7 +623,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "facets" | "extra" | "setExtra" | "setExtras">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "facets" | "setExtra" | "setExtras" | "extra">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -892,6 +905,30 @@ export class AdaptFilterTreeChrome<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterTreeChrome<any>, never>;
+}
+
+// @public
+export class AdaptFooter<TRow> {
+    readonly column: InputSignal<ColumnDef<TRow>>;
+    protected readonly context: Signal<FooterContext<TRow>>;
+    protected readonly renderer: Signal<ResolvedRenderer<FooterContext<TRow>> | null>;
+    protected readonly text: Signal<string>;
+    readonly value: InputSignal<unknown>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFooter<any>, "[adaptFooter]", never, {
+        "column": {
+            "alias": "adaptFooter";
+            "required": true;
+            "isSignal": true;
+        };
+        "value": {
+            "alias": "adaptFooterValue";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFooter<any>, never>;
 }
 
 // @public
@@ -1584,6 +1621,13 @@ export class AdaptTreeToggleChrome {
 }
 
 // @public
+export function aggregate<TRow>(spec: AggregateSpec, options?: AggregateOptions<TRow>): SummaryRowFn<TRow>;
+
+export { AggregateOptions }
+
+export { AggregateSpec }
+
+// @public
 export type AngularFilterTreeDisclosureProps = FilterTreeDisclosureProps<TemplateRef<unknown>>;
 
 // @public
@@ -1777,7 +1821,7 @@ export { COLUMN_MENU }
 // @public
 export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
     cell?: Renderer<CellContext<TRow>>;
-    footer?: Renderer<HeaderContext<TRow>>;
+    footer?: Renderer<FooterContext<TRow>>;
     header?: string;
     headerCell?: Renderer<HeaderContext<TRow>>;
 }
@@ -2290,6 +2334,11 @@ export function fitColumns(): AdaptTableFeature;
 export { focusEditorOnMount }
 
 // @public
+export interface FooterContext<TRow> extends HeaderContext<TRow> {
+    readonly value: unknown;
+}
+
+// @public
 export function fromStore<T>(store: ExternalStore<T>, options?: FromStoreOptions): Signal<T>;
 
 // @public
@@ -2638,6 +2687,9 @@ export function injectRowExpansion(options?: RowExpansionOptions): Signal<RowExp
 export function injectRowPairMeasurer(options: RowPairMeasurerOptions): RowPairMeasurer;
 
 // @public
+export function injectRowPinning<TRow>(options: RowPinningOptions<TRow>): Signal<RowPinningState<TRow>>;
+
+// @public
 export function injectRowPinningUrlState(options?: UrlSliceOptions): RowPinningUrlState;
 
 // @public
@@ -2654,6 +2706,9 @@ export function injectServerData<TRow>(options: ServerDataOptions<TRow>): Signal
 
 // @public
 export function injectTableData<TRow>(options: TableDataOptions<TRow>): TableDataResult<TRow>;
+
+// @public
+export function injectTableRowPinning<TRow>(options: TableRowPinningOptions<TRow>): Signal<RowPinningState<TRow> | undefined> | undefined;
 
 // @public
 export function injectTableUrlState(options?: TableUrlStateOptions): TableUrlState;
@@ -2771,6 +2826,8 @@ export { nextPinSide }
 
 export { offersAllMatching }
 
+export { orderedCardEntries }
+
 export { PaginatedResponse }
 
 export { PaginationInfo }
@@ -2779,11 +2836,19 @@ export { PaginationMode }
 
 export { PaginationSlot }
 
+export { partitionPinnedRows }
+
 export { PIN_ICON }
 
 export { pinActionLabel }
 
+export { pinnedRowPart }
+
 export { PinnedRows }
+
+export { pinnedRowSticky }
+
+export { pinnedSummaryPart }
 
 // @public
 export function pinnedSummaryRows<TRow>(pinnedRows: PinnedRows<TRow>): AdaptTableFeature;
@@ -2998,11 +3063,36 @@ export interface RowPairMeasurerOptions {
     readonly virtualizer: () => ResizableVirtualizer | undefined;
 }
 
+export { RowPinLabels }
+
+// @public
+export function rowPinning(options?: RowPinningFeatureOptions): AdaptTableFeature;
+
+// @public
+export interface RowPinningFeatureOptions {
+    readonly onPinnedRowIdsChange?: (next: RowPinState_2) => void;
+    readonly pinnedRowIds?: RowPinState_2;
+}
+
+// @public
+export interface RowPinningOptions<TRow> {
+    readonly enabled: MaybeSignal<boolean>;
+    readonly getRowId: (row: TRow) => string;
+    readonly injector?: Injector;
+    readonly labels: MaybeSignal<RowPinLabels>;
+    readonly onPinnedRowIdsChange?: (next: RowPinState_2) => void;
+    readonly pinnedRowIds?: MaybeSignalOptional<RowPinState_2>;
+}
+
+export { RowPinningState }
+
 // @public
 export interface RowPinningUrlState {
     readonly onPinnedRowIdsChange: (pinned: RowPinState) => void;
     readonly pinnedRowIds: Signal<RowPinState>;
 }
+
+export { RowPinSide }
 
 export { RowPinState }
 
@@ -3176,6 +3266,8 @@ export { stopCellEditKeyboard }
 
 export { stopEditKeys }
 
+export { SummaryRowFn }
+
 // @public
 export interface TableDataOptions<TRow> extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey"> {
     readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
@@ -3256,6 +3348,18 @@ export interface TableRowDetail<TRow> {
     readonly expansion: RowExpansionState;
     readonly nested: NestedTableFor<TRow> | undefined;
     readonly render: Renderer<RowDetailContext<TRow>> | undefined;
+}
+
+// @public
+export interface TableRowPinningOptions<TRow> {
+    readonly blocked: Signal<boolean>;
+    readonly features: readonly AdaptTableFeature[];
+    readonly getRowId: (row: TRow) => string;
+    readonly injector?: Injector;
+    readonly labels: Signal<Required<TableLabels>>;
+    readonly urlAdapter?: UrlStateAdapter;
+    readonly urlKey?: string;
+    readonly urlSync?: boolean;
 }
 
 export { TableSource }
@@ -3400,6 +3504,8 @@ export { visibleRowActions }
 export { watchOverlayDismiss }
 
 export { windowGroupedEntries }
+
+export { withRowPinActions }
 
 // (No @packageDocumentation comment for this package)
 
