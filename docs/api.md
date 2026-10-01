@@ -3176,6 +3176,14 @@ comes from a kit through a slot.
   the header, the tabs and the body; `SidePanelSlots` names the kit's
   frame, tab and close control. `AdaptSidePanelLayout` is the row the
   panel sits in beside the table.
+- Status bar: `statusBar()` is the strip under the table — rows showing,
+  rows selected, and notices for a feature that cannot run.
+  `AdaptStatusBarChrome` lays it out; `StatusBarSlots` names the kit's bar
+  and the selection figures. `selectionStats()` arms the aggregates, and
+  `selectionStatsOf` counts them. `AdaptSelectionStatsChrome` formats the
+  figures; `SelectionStatsSlots` names the kit's strip. `SelectionStats` is
+  the count, sum, average, min and max. `AdaptGridFocusAnnouncer` speaks
+  the focused cell; `GridFocusAnnouncement` is the focus it reads.
 - Grouping: `grouping` (with `GroupingExtras`) groups rows under collapsible
   headers, with per-group subtotals, optional footers and paged groups.
   `injectGrouping` (`GroupingOptions`) is its live model, a `TableGrouping`
@@ -3371,7 +3379,8 @@ the card), `virtualize`, `cellNavigation`, `findInTable` (`AdaptFindBar`,
 `AdaptCommandPaletteButton`), `contextMenu` (`AdaptContextMenuLive`,
 `AdaptContextMenuSurface`, `AdaptContextMenuItem`,
 `AdaptContextMenuSeparator`), `sidePanel` (`AdaptSidePanelLive`,
-`AdaptSidePanelFrame`, `AdaptSidePanelTab`, `AdaptSidePanelClose`),
+`AdaptSidePanelFrame`, `AdaptSidePanelTab`, `AdaptSidePanelClose`), `statusBar` (`AdaptStatusBarLive`,
+`AdaptStatusBar`, `AdaptSelectionStatsBar`), `selectionStats`,
 `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,

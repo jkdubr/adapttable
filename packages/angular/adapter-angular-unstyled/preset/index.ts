@@ -14,9 +14,8 @@
  * whole architecture exists to avoid. Pass the option and the feature joins.
  *
  * Members that the React kits ship but this kit has not drawn yet
- * (`findInTable`, `fitColumns`, `multiSort`, `resizableColumns`,
- * `statusBar`) are omitted until their secondary entries land — the list
- * stays honest about what works.
+ * (`findInTable`, `fitColumns`, `multiSort`, `resizableColumns`) are omitted
+ * until their secondary entries land — the list stays honest about what works.
  */
 import type {
   AdaptTableFeature,
@@ -33,6 +32,7 @@ import { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
 import { grouping } from "@adapttable/angular-unstyled/grouping";
 import { headerFilters } from "@adapttable/angular-unstyled/header-filters";
 import { savedViews } from "@adapttable/angular-unstyled/saved-views";
+import { statusBar } from "@adapttable/angular-unstyled/status-bar";
 
 /**
  * Options for configured members of the standard preset.
@@ -64,6 +64,7 @@ export function standardPreset<TRow>(
     exportCsv(),
     fullscreen(),
     headerFilters(),
+    statusBar(),
     ...(options.grouping === undefined ? [] : [grouping(options.grouping)]),
     ...(options.bulkActions === undefined
       ? []

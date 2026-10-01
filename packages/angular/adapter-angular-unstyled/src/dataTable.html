@@ -265,11 +265,15 @@
         [adaptSlotTable]="v.table"
       />
     }
+    @if (statusBarProps(); as props) {
+      <ng-container
+        [adaptSlot]="statusBarSlot"
+        [adaptSlotProps]="props"
+        [adaptSlotTable]="v.table"
+      />
+    }
     @if (v.grid; as grid) {
-      <output
-        [adaptLiveRegion]="grid.announcement()"
-        part="grid-announcer"
-      ></output>
+      <adapt-grid-focus-announcer [focus]="grid" />
     }
   </div>
 }

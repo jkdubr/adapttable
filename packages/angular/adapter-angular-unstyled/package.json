@@ -161,9 +161,17 @@
       "types": "./dist/types/adapttable-angular-unstyled-saved-views.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-saved-views.mjs"
     },
+    "./selection-stats": {
+      "types": "./dist/types/adapttable-angular-unstyled-selection-stats.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-selection-stats.mjs"
+    },
     "./side-panel": {
       "types": "./dist/types/adapttable-angular-unstyled-side-panel.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-side-panel.mjs"
+    },
+    "./status-bar": {
+      "types": "./dist/types/adapttable-angular-unstyled-status-bar.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-status-bar.mjs"
     },
     "./tree": {
       "types": "./dist/types/adapttable-angular-unstyled-tree.d.ts",

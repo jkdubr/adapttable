@@ -42,6 +42,7 @@ import { ChecklistWindow } from '@adapttable/core';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { chromeColumnPlan } from '@adapttable/core/binding';
+import { chromeFeatureNotices } from '@adapttable/core/binding';
 import { chromeRenderModel } from '@adapttable/core/binding';
 import { COLUMN_GROUP_TOGGLE } from '@adapttable/core/binding';
 import { COLUMN_MENU } from '@adapttable/core/binding';
@@ -132,6 +133,8 @@ import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
 import { FeatureHostState } from '@adapttable/core';
 import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core/binding';
+import { FeatureNotice } from '@adapttable/core/binding';
+import { FeatureNotice as FeatureNotice_2 } from '@adapttable/core';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
@@ -332,6 +335,9 @@ import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsSlotProps } from '@adapttable/core/binding';
 import { SEARCH_ICON } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
+import { SelectionStatPart } from '@adapttable/core';
+import { SelectionStats } from '@adapttable/core';
+import { SelectionStatsOptions } from '@adapttable/core';
 import { Shortcut } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
 import { showSimpleFilterFields } from '@adapttable/core';
@@ -345,6 +351,8 @@ import { SortableValue } from '@adapttable/core';
 import { SortByOption } from '@adapttable/core';
 import { SortDirection } from '@adapttable/core';
 import { splitRelativeToken } from '@adapttable/core';
+import { STATUS_BAR } from '@adapttable/core/binding';
+import { StatusBarItem } from '@adapttable/core';
 import { stopCellEditKeyboard } from '@adapttable/core';
 import { stopEditKeys } from '@adapttable/core';
 import { SummaryRowFn } from '@adapttable/core';
@@ -1463,6 +1471,21 @@ export class AdaptFooter<TRow> {
 }
 
 // @public
+export class AdaptGridFocusAnnouncer {
+    readonly focus: InputSignal<GridFocusAnnouncement>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGridFocusAnnouncer, "adapt-grid-focus-announcer", never, {
+        "focus": {
+            "alias": "focus";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptGridFocusAnnouncer, never>;
+}
+
+// @public
 export class AdaptGroupingPanelChrome<TRow> {
     readonly columns: InputSignal<readonly ColumnDef<TRow>[]>;
     readonly dir: InputSignal<Direction | undefined>;
@@ -1987,6 +2010,49 @@ export class AdaptRowReorderHandleChrome<TRow> {
 }
 
 // @public
+export class AdaptSelectionStatsChrome {
+    readonly className: InputSignal<string | undefined>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    readonly locale: InputSignal<string | undefined>;
+    readonly slots: InputSignal<SelectionStatsSlots>;
+    protected readonly statProps: Signal<    {
+    readonly parts: readonly SelectionStatPart[];
+    readonly className?: string;
+    } | undefined>;
+    readonly stats: InputSignal<SelectionStats | null>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSelectionStatsChrome, "adapt-selection-stats-chrome", never, {
+        "stats": {
+            "alias": "stats";
+            "required": false;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "locale": {
+            "alias": "locale";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSelectionStatsChrome, never>;
+}
+
+// @public
 export class AdaptSidePanelChrome {
     readonly className: InputSignal<string | undefined>;
     protected readonly closeProps: Signal<    {
@@ -2129,6 +2195,94 @@ export class AdaptSlot<TProps> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSlot<any>, never>;
+}
+
+// @public
+export class AdaptStatusBarChrome {
+    protected readonly barProps: Signal<    {
+    readonly items: readonly StatusBarItem[];
+    readonly stats?: TemplateRef<unknown>;
+    readonly className?: string;
+    }>;
+    readonly className: InputSignal<string | undefined>;
+    readonly enabled: InputSignal<boolean>;
+    protected readonly items: Signal<StatusBarItem[]>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    readonly limit: InputSignal<number | undefined>;
+    readonly locale: InputSignal<string | undefined>;
+    readonly notices: InputSignal<readonly FeatureNotice_2[] | undefined>;
+    readonly page: InputSignal<number | undefined>;
+    readonly selected: InputSignal<number>;
+    protected readonly showBar: Signal<boolean>;
+    readonly shown: InputSignal<number>;
+    readonly slots: InputSignal<StatusBarSlots>;
+    readonly stats: InputSignal<SelectionStats | null>;
+    readonly total: InputSignal<number | undefined>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptStatusBarChrome, "adapt-status-bar-chrome", never, {
+        "enabled": {
+            "alias": "enabled";
+            "required": true;
+            "isSignal": true;
+        };
+        "shown": {
+            "alias": "shown";
+            "required": true;
+            "isSignal": true;
+        };
+        "page": {
+            "alias": "page";
+            "required": false;
+            "isSignal": true;
+        };
+        "limit": {
+            "alias": "limit";
+            "required": false;
+            "isSignal": true;
+        };
+        "total": {
+            "alias": "total";
+            "required": false;
+            "isSignal": true;
+        };
+        "selected": {
+            "alias": "selected";
+            "required": true;
+            "isSignal": true;
+        };
+        "stats": {
+            "alias": "stats";
+            "required": false;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "locale": {
+            "alias": "locale";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "notices": {
+            "alias": "notices";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptStatusBarChrome, never>;
 }
 
 // @public
@@ -2489,6 +2643,8 @@ export { ChromeBodyRegion }
 export { ChromeBodySlot }
 
 export { chromeColumnPlan }
+
+export { chromeFeatureNotices }
 
 export { chromeRenderModel }
 
@@ -3016,6 +3172,8 @@ export { FacetMap }
 // @public
 export function feature(id: string, patch?: FeaturePatch, setup?: AdaptTableFeature["setup"]): AdaptTableFeature;
 
+export { FeatureNotice }
+
 // @public
 export function featureOptionsOf(features: readonly AdaptTableFeature[]): Readonly<Record<string, unknown>>;
 
@@ -3239,6 +3397,12 @@ export interface GridFocus<TRow> {
     readonly selectRange: (range: CellRange | null) => void;
     readonly tableAttrs: () => Attrs;
     readonly toggleColumn: (col: number) => void;
+}
+
+// @public
+export interface GridFocusAnnouncement {
+    readonly announcement: Signal<string>;
+    readonly enabled: Signal<boolean>;
 }
 
 // @public
@@ -4170,6 +4334,21 @@ export { SEARCH_ICON }
 
 export { SelectionState }
 
+export { SelectionStats }
+
+// @public
+export function selectionStats(): AdaptTableFeature;
+
+// @public
+export function selectionStatsOf<TRow>(options: SelectionStatsOptions<TRow>): SelectionStats | null;
+
+export { SelectionStatsOptions }
+
+// @public
+export interface SelectionStatsSlots {
+    readonly Stats: Type<unknown>;
+}
+
 // @public
 export interface ServerDataOptions<TRow> extends Omit<TableUrlStateOptions, "injector"> {
     readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
@@ -4243,8 +4422,16 @@ export { SortDirection }
 
 export { splitRelativeToken }
 
+export { STATUS_BAR }
+
 // @public
 export function statusBar(): AdaptTableFeature;
+
+// @public
+export interface StatusBarSlots {
+    readonly Bar: Type<unknown>;
+    readonly stats: SelectionStatsSlots;
+}
 
 export { stopCellEditKeyboard }
 

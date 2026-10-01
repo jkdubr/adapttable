@@ -92,7 +92,13 @@ export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?
 export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeature;
 
 // @public
+export function selectionStats(): AdaptTableFeature;
+
+// @public
 export function sidePanel(options: SidePanelOptions): AdaptTableFeature;
+
+// @public
+export function statusBar(): AdaptTableFeature;
 
 // @public
 export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;

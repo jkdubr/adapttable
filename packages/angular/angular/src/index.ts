@@ -239,6 +239,12 @@ export {
 } from "./features/rowPinning";
 export { rowReorder } from "./features/rowReorder";
 export {
+  type SelectionStats,
+  selectionStats,
+  selectionStatsOf,
+  type SelectionStatsOptions,
+} from "./features/selectionStats";
+export {
   injectTree,
   type TableTree,
   tree,
@@ -299,6 +305,18 @@ export {
   type GridFocusOptions,
   injectGridFocus,
 } from "./focus/gridFocus";
+export {
+  AdaptGridFocusAnnouncer,
+  type GridFocusAnnouncement,
+} from "./focus/gridFocusAnnouncer";
+export {
+  AdaptSelectionStatsChrome,
+  type SelectionStatsSlots,
+} from "./focus/selectionStatsBar";
+export {
+  AdaptStatusBarChrome,
+  type StatusBarSlots,
+} from "./focus/statusBarChrome";
 export {
   type GroupCollapseOptions,
   type GroupCollapseState,

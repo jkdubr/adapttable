@@ -9,8 +9,8 @@ import {
   type ActiveFilterChip,
   AdaptAttrs,
   AdaptCellTemplate,
+  AdaptGridFocusAnnouncer,
   AdaptIcon,
-  AdaptLiveRegion,
   AdaptSlot,
   ADAPTTABLE_CONTEXT_MENU,
   ADAPTTABLE_FIND_STATE,
@@ -31,6 +31,7 @@ import {
   type CellSpanAppearance,
   cellSpanMark,
   type ChromeBodySlot,
+  chromeFeatureNotices,
   chromeRenderModel,
   COLUMN_MENU,
   type ColumnDef,
@@ -145,8 +146,10 @@ import {
   type SavedViewsSlotProps,
   SEARCH_ICON,
   type SelectionState,
+  selectionStatsOf,
   SIDE_PANEL,
   type SidePanelOptions,
+  STATUS_BAR,
   type SummaryRowFn,
   type TableContextMenuOptions,
   type TableDensity,
@@ -1016,7 +1019,7 @@ export interface TableView<TRow> {
     AdaptDesktopTable,
     AdaptIcon,
     AdaptErrorState,
-    AdaptLiveRegion,
+    AdaptGridFocusAnnouncer,
     AdaptMobileCards,
     AdaptPaginationFooter,
     AdaptSlot,
@@ -1203,6 +1206,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     viewChild<TemplateRef<unknown>>("featureSidePanel");
   /** The side-panel slot. @internal */
   protected readonly sidePanelSlot = SIDE_PANEL;
+  /** The status-bar slot. @internal */
+  protected readonly statusBarSlot = STATUS_BAR;
   /** The feature's panel options, read live so a controlled `open` updates. */
   private readonly liveSidePanel = computed(
     () =>
@@ -1238,6 +1243,12 @@ export class AdaptDataTable<TRow> implements OnInit {
       side: options.side ?? this.sidePanelSide(),
       labels: this.labels(),
     };
+  });
+  /** Props for the status strip, while a feature fills it. */
+  protected readonly statusBarProps = computed(() => {
+    const view = this.view();
+    if (!view?.table.hasSlot(STATUS_BAR)) return undefined;
+    return statusBarSlotProps(view, featureOptionsOf(this.features()));
   });
   /**
    * Whether the empty table is empty because nothing matched.
@@ -2027,4 +2038,63 @@ export class AdaptDataTable<TRow> implements OnInit {
       confirm,
     });
   }
+}
+
+/** Grouping keys from a feature patch, which may be one key or a list. */
+function groupByKeys(value: unknown): readonly string[] {
+  if (typeof value === "string") return [value];
+  if (!Array.isArray(value)) return [];
+  return value as readonly string[];
+}
+
+/** What the status strip shows for one table. */
+function statusBarSlotProps<TRow>(
+  view: TableView<TRow>,
+  options: Readonly<Record<string, unknown>>
+) {
+  const source = view.table.source();
+  const columns = view.table.columns();
+  const keys = groupByKeys(options.groupBy);
+  const labels = view.table.labels();
+  return {
+    enabled: options.statusBar === true,
+    shown: source.rows.length,
+    page: source.page,
+    limit: source.limit,
+    total: source.total,
+    selected: view.selection?.selectedCount() ?? 0,
+    stats:
+      options.selectionStats === true
+        ? selectionStatsOf({
+            enabled: true,
+            range: view.grid?.range() ?? null,
+            rows: source.rows,
+            columns,
+            firstRowIndex: view.table.windowStart(),
+          })
+        : null,
+    labels,
+    notices: chromeFeatureNotices({
+      options: {
+        virtualize: options.virtualize === true,
+        onCellEdit: options.onCellEdit,
+        rowEditing: options.rowEditing === true,
+        onRowEdit: options.onRowEdit,
+        batchEditing: options.batchEditing === true,
+        onBatchEdit: options.onBatchEdit,
+        exportCsv: options.exportCsv as
+          boolean | ExportCsvOptions<TRow> | undefined,
+        pinnedRowIds: options.pinnedRowIds,
+        onPinnedRowIdsChange: options.onPinnedRowIdsChange,
+      },
+      source,
+      groupByKeys: keys,
+      rowReorderRequested:
+        options.rowReorder != null && options.rowReorder !== false,
+      nestedArmed:
+        keys.length > 0 || options.tree != null || options.nestedTable != null,
+      hasEditableColumn: columns.some((column) => column.editable != null),
+      labels,
+    }),
+  };
 }

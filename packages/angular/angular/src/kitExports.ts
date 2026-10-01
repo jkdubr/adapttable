@@ -164,6 +164,7 @@ export type {
   RowReorderLabels,
   RowReorderMoveButtonProps,
 } from "@adapttable/core/binding";
+export type { FeatureNotice } from "@adapttable/core/binding";
 export {
   coreGrouping,
   coreGroupingPanel,
@@ -261,6 +262,7 @@ export {
 } from "@adapttable/core/binding";
 export { pinnedRowSticky } from "@adapttable/core/binding";
 export { pinnedRowPart } from "@adapttable/core/binding";
+export { chromeFeatureNotices, STATUS_BAR } from "@adapttable/core/binding";
 export {
   COLUMN_GROUP_TOGGLE,
   COLUMN_SELECT,
