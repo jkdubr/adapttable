@@ -307,13 +307,11 @@
                   data-adapttable-part="cell"
                   [adaptAttrs]="
                     spanned(
-                      v.grid
-                        ? v.grid.cellAttrs(
-                            column,
-                            entry.index,
-                            v.columnIndex().get(column.key)!
-                          )
-                        : v.table.cellAttrs(column),
+                      v.markedCellAttrs(
+                        column,
+                        entry.index,
+                        v.columnIndex().get(column.key)!
+                      ),
                       cell
                     )
                   "

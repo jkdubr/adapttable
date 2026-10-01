@@ -55,6 +55,7 @@ import { FilterOverlaySlotProps } from '@adapttable/angular';
 import { FiltersFormSlotProps } from '@adapttable/angular';
 import { FilterTreeSlots } from '@adapttable/angular';
 import { FilterTypeRegistry } from '@adapttable/angular';
+import { FindBarProps } from '@adapttable/angular';
 import { GridFocus } from '@adapttable/angular';
 import { GroupAggregateOps } from '@adapttable/core';
 import { GroupHeaderCardSlotProps } from '@adapttable/angular';
@@ -358,6 +359,8 @@ export class AdaptDataTable<TRow> implements OnInit {
         header: FeatureSlotKey<FilterHeaderControlProps<never>>;
     };
     readonly filtersMode: InputSignal<FiltersMode>;
+    // @internal
+    protected readonly findBarSlot: FeatureSlotKey<FindBarProps>;
     readonly forceMobile: InputSignal<boolean | undefined>;
     // @internal
     protected readonly groupingPanelSlot: FeatureSlotKey<GroupingPanelSlotProps<unknown>>;
@@ -1420,6 +1423,7 @@ export interface TableView<TRow> {
     readonly editing: Signal<EditableCellEditing<TRow>> | undefined;
     readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
     readonly filters: FiltersView | undefined;
+    readonly findBar: Signal<FindBarProps> | undefined;
     readonly grid: GridFocus<TRow> | undefined;
     readonly groupHeaders: Signal<{
         readonly rows: ReadonlyMap<string, GroupHeaderRowSlotProps<never>>;
@@ -1427,6 +1431,7 @@ export interface TableView<TRow> {
     }>;
     readonly grouping: Signal<TableGrouping<TRow> | undefined> | undefined;
     readonly groupingPanel: Signal<GroupingPanelSlotProps<ColumnDef<TRow>>> | undefined;
+    readonly markedCellAttrs: (column: ColumnDef<TRow>, index: number, col: number) => Attrs;
     readonly reorder: Signal<RowReorderState<TRow>> | undefined;
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;

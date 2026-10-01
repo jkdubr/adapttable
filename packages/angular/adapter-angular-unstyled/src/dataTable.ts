@@ -12,6 +12,7 @@ import {
   AdaptIcon,
   AdaptLiveRegion,
   AdaptSlot,
+  ADAPTTABLE_FIND_STATE,
   type AdaptTableFeature,
   AdaptTableStatusAnnouncer,
   type AssemblyFns,
@@ -61,6 +62,10 @@ import {
   FILTERS_FORM,
   FILTERS_ICON,
   type FilterTypeSpec,
+  FIND_BAR,
+  type FindBarProps,
+  type FindInTableState,
+  findMarkAttrs,
   flattenColumns,
   type GetCellSpan,
   type GridFocus,
@@ -78,6 +83,11 @@ import {
   injectDensity,
   injectEditValidation,
   injectExportCsv,
+  injectFindFocus,
+  injectFindInTable,
+  injectFindScroll,
+  injectFindShortcut,
+  injectFindWindowScroll,
   injectFullscreen,
   injectGridFocus,
   injectGrouping,
@@ -91,7 +101,7 @@ import {
   injectRowSelection,
   injectTableData,
   injectTableRowPinning,
-  injectTableVirtualization,
+  injectTableVirtualizer,
   injectTree,
   insertExtraRows,
   insertExtrasBeforeRows,
@@ -470,6 +480,105 @@ function numberOption(value: unknown): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
+/** The live find state, when the feature is composed. */
+function findStateFor<TRow>(options: {
+  readonly enabled: boolean;
+  readonly table: DataTable<TRow>;
+  readonly urlAdapter: ReturnType<typeof urlAdapterFor>;
+  readonly urlSync: boolean;
+  readonly urlKey: string | undefined;
+  readonly injector: Injector;
+}): Signal<FindInTableState> | undefined {
+  if (!options.enabled) return undefined;
+  const { table } = options;
+  return injectFindInTable<TRow>({
+    rows: computed(() => table.source().rows),
+    columns: table.columns,
+    firstRowIndex: computed(() => table.windowStart()),
+    urlAdapter: options.urlAdapter,
+    urlSync: options.urlSync,
+    urlKey: options.urlKey,
+    injector: options.injector,
+  });
+}
+
+/** Shortcut, scroll and grid focus for a composed find bar. */
+function wireFindChrome<TRow>(options: {
+  readonly find: Signal<FindInTableState> | undefined;
+  readonly grid: GridFocus<TRow> | undefined;
+  readonly root: () => HTMLElement | null;
+  readonly injector: Injector;
+}): void {
+  const { find, grid, injector } = options;
+  if (!find) return;
+  const current = computed(() => find().current);
+  injectFindShortcut({
+    root: options.root,
+    openBar: computed(() => find().openBar),
+    injector,
+  });
+  injectFindScroll({
+    root: options.root,
+    current,
+    enabled: computed(() => grid === undefined),
+    injector,
+  });
+  if (!grid) return;
+  injectFindFocus({
+    find,
+    focusCell: grid.focusCell,
+    selectRange: grid.selectRange,
+    enabled: grid.enabled,
+    injector,
+  });
+}
+
+/** Ask a flat virtual window to render the current match. */
+function scrollFindWindow<TRow>(options: {
+  readonly find: Signal<FindInTableState> | undefined;
+  readonly rows: Signal<readonly TRow[]>;
+  readonly firstRowIndex: Signal<number>;
+  readonly scrollToIndex: () => ((index: number) => void) | undefined;
+  readonly injector: Injector;
+}): void {
+  const { find } = options;
+  if (!find) return;
+  injectFindWindowScroll({
+    current: computed(() => find().current),
+    rows: options.rows,
+    firstRowIndex: options.firstRowIndex,
+    scrollToIndex: options.scrollToIndex,
+    injector: options.injector,
+  });
+}
+
+/** The find bar's slot props, while find is composed. */
+function findBarFor(
+  find: Signal<FindInTableState> | undefined,
+  labels: Signal<TableLabels>
+): Signal<FindBarProps> | undefined {
+  if (!find) return undefined;
+  return computed(() => ({ find: find(), labels: labels() }));
+}
+
+/** Cell attributes, with find marks when the grid is not painting them. */
+function cellAttrsWithFind<TRow>(
+  table: DataTable<TRow>,
+  grid: GridFocus<TRow> | undefined,
+  find: Signal<FindInTableState> | undefined
+): (column: ColumnDef<TRow>, index: number, col: number) => Attrs {
+  return (column, index, col) => {
+    if (grid) return grid.cellAttrs(column, index, col);
+    const base = table.cellAttrs(column);
+    const state = find?.();
+    if (!state?.open) return base;
+    return findMarkAttrs(base, state, {
+      row: table.windowStart() + index,
+      col,
+    });
+  };
+}
+
 /**
  * The window the body draws: the flat rows (or a keyed window's spacers)
  * and, while grouping renders, the grouped entries in view.
@@ -477,6 +586,11 @@ function numberOption(value: unknown): number | undefined {
 interface BodyWindow<TRow> {
   /** The row window — every row when virtualization is off. */
   readonly virtualization: TableVirtualization<TRow>;
+  /**
+   * Scroll the flat virtual window to a loaded-row index. Absent when the
+   * body is not a flat virtual list.
+   */
+  readonly scrollToRowIndex?: (index: number) => void;
   /** The grouped entries in the window, while grouping renders. */
   readonly groupingEntries: readonly GroupedFlatEntry<TRow>[] | undefined;
   /** The tree entries in the window, while the rows are a tree. */
@@ -549,6 +663,7 @@ function bodyWindowFor<TRow>(options: {
         paddingTop: 0,
         paddingBottom: 0,
       },
+      scrollToRowIndex: undefined,
       groupingEntries: groupEntries(),
       treeEntries: treeEntries(),
     }));
@@ -577,7 +692,7 @@ function bodyWindowFor<TRow>(options: {
     table.loadMore();
   };
   const kind = computed(() => bodyWindowKind(true, bodyChrome()));
-  const flat = injectTableVirtualization<TRow>({
+  const flat = injectTableVirtualizer<TRow>({
     rows: scrollRows,
     rowKey,
     enabled: computed(() => kind() === "flat"),
@@ -608,7 +723,8 @@ function bodyWindowFor<TRow>(options: {
     const nodes = treeEntries();
     const window = keyed();
     return {
-      virtualization: resolveBodyVirtualization(window, flat()),
+      virtualization: resolveBodyVirtualization(window, flat.virtualization()),
+      scrollToRowIndex: kind() === "flat" ? flat.scrollToIndex : undefined,
       groupingEntries:
         entries === undefined
           ? undefined
@@ -633,6 +749,17 @@ export interface TableView<TRow> {
   readonly selection: RowSelection | undefined;
   /** Cell navigation, when it is on. */
   readonly grid: GridFocus<TRow> | undefined;
+  /** The find bar's props, when `findInTable()` is composed. */
+  readonly findBar: Signal<FindBarProps> | undefined;
+  /**
+   * A cell's attributes, with find's match marks when the grid is not
+   * painting them itself.
+   */
+  readonly markedCellAttrs: (
+    column: ColumnDef<TRow>,
+    index: number,
+    col: number
+  ) => Attrs;
   /** Whether the Columns menu is composed. */
   readonly columnMenu: boolean;
   /** The Columns menu's props. */
@@ -744,6 +871,12 @@ export interface TableView<TRow> {
   ],
   templateUrl: "./dataTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: ADAPTTABLE_FIND_STATE,
+      useFactory: () => signal<FindInTableState | null>(null),
+    },
+  ],
 })
 export class AdaptDataTable<TRow> implements OnInit {
   /**
@@ -926,6 +1059,8 @@ export class AdaptDataTable<TRow> implements OnInit {
   protected readonly batchEditBarSlot = BATCH_EDIT_BAR;
   /** The grouping strip's slot. @internal */
   protected readonly groupingPanelSlot = GROUPING_PANEL;
+  /** The find bar's slot. @internal */
+  protected readonly findBarSlot = FIND_BAR;
   /** The row-reorder announcer slot. @internal */
   protected readonly reorderAnnouncerSlot = ROW_REORDER_ANNOUNCER;
   /** The Filters button's glyph. @internal */
@@ -1088,11 +1223,20 @@ export class AdaptDataTable<TRow> implements OnInit {
             labels: table.labels(),
           }))
         : undefined;
+    const find = findStateFor({
+      enabled: featureOptions.findInTable === true,
+      table,
+      urlAdapter,
+      urlSync: this.urlSync(),
+      urlKey: this.urlKey(),
+      injector,
+    });
     const grid =
       this.cellNavigation() || featureOptions.cellNavigation === true
-        ? injectGridFocus({ table, enabled: true, injector })
+        ? injectGridFocus({ table, enabled: true, find, injector })
         : undefined;
     const root = (): HTMLElement | null => this.root()?.nativeElement ?? null;
+    wireFindChrome({ find, grid, root, injector });
     const densityState =
       featureOptions.densityChooser === true
         ? injectDensity({
@@ -1271,6 +1415,13 @@ export class AdaptDataTable<TRow> implements OnInit {
           ? this.mobileCards()?.scrollElement()
           : this.desktopTable()?.scrollElement()) ?? null,
       root: () => this.root()?.nativeElement ?? null,
+      injector,
+    });
+    scrollFindWindow({
+      find,
+      rows: computed(() => table.source().rows),
+      firstRowIndex: computed(() => table.windowStart()),
+      scrollToIndex: () => bodyWindow().scrollToRowIndex,
       injector,
     });
     const virtualization = computed(() => bodyWindow().virtualization);
@@ -1547,10 +1698,14 @@ export class AdaptDataTable<TRow> implements OnInit {
       leadingCells: computed(() => renderModel().leadingCells),
       showActions,
     });
+    const findBar = findBarFor(find, table.labels);
+    const markedCellAttrs = cellAttrsWithFind(table, grid, find);
     this.view.set({
       table,
       selection,
       grid,
+      findBar,
+      markedCellAttrs,
       columnMenu: table.featureOptions.enableColumnMenu === true,
       columnMenuProps,
       filters,

@@ -35,6 +35,7 @@ import {
 import type { Attrs } from "../attrs";
 import type { ColumnDef } from "../columnDef";
 import type { DataTable } from "../dataTable";
+import type { FindInTableState } from "../find/findInTable";
 import { onBrowser } from "../hooks/platform";
 import { fromStore, type MaybeSignal, readMaybe } from "../store";
 
@@ -56,6 +57,11 @@ export interface GridFocusOptions<TRow> {
    * `cellNavigation()` carries.
    */
   readonly onRangeChange?: (range: CellRange | null) => void;
+  /**
+   * The live find state, when the table composed `findInTable()`. The grid
+   * marks those cells and Ctrl/Cmd+F opens the bar.
+   */
+  readonly find?: Signal<FindInTableState>;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }
@@ -77,6 +83,8 @@ export interface GridFocus<TRow> {
   readonly announcement: Signal<string>;
   /** Move focus to a cell. */
   readonly focusCell: (cell: GridCell) => void;
+  /** Select a rectangle, or clear it. Find uses a single cell. */
+  readonly selectRange: (range: CellRange | null) => void;
   /** Whether a whole column is the selection. */
   readonly isColumnSelected: (col: number) => boolean;
   /** Select a whole column, or clear the selection when it already is. */
@@ -124,6 +132,11 @@ export function injectGridFocus<TRow>(
     dir: table.dir(),
     labels: table.labels(),
     onActivate: options.onActivate,
+    onFind: options.find
+      ? () => {
+          options.find?.().openBar?.();
+        }
+      : undefined,
   }));
   const controller = createGridFocusController(untracked(configuration));
   effect(
@@ -185,6 +198,7 @@ export function injectGridFocus<TRow>(
   ): Attrs => {
     const cell = { row: table.windowStart() + index, col };
     const { active, range, fillPreview } = snapshot();
+    const find = options.find?.();
     const grid = gridCellAttributes(
       {
         enabled: enabled(),
@@ -193,6 +207,8 @@ export function injectGridFocus<TRow>(
         firstRowIndex: table.windowStart(),
         range,
         fillPreview,
+        matchKeys: find?.open === true ? find.matchKeys : undefined,
+        currentMatch: find?.current ?? null,
       },
       cell
     );
@@ -219,6 +235,7 @@ export function injectGridFocus<TRow>(
     range: computed(() => (enabled() ? snapshot().range : null)),
     announcement: computed(() => (enabled() ? snapshot().announcement : "")),
     focusCell: controller.focusCell,
+    selectRange: controller.selectRange,
     isColumnSelected: (col) =>
       isGridColumnSelected(
         {

@@ -175,6 +175,7 @@ export {
   statusBar,
   undoRedoButtons,
 } from "./features/factories";
+export { findInTable } from "./features/findInTable";
 export {
   grouping,
   type GroupingExtras,
@@ -235,6 +236,16 @@ export {
   type FilterTreeSlots,
 } from "./filters/filterTreeChrome";
 export { injectHeaderFilterOverlay } from "./filters/headerFilterOverlay";
+export { AdaptFindBarChrome, type FindBarSlots } from "./find/findBar";
+export { type FindInTableOptions, injectFindInTable } from "./find/findInTable";
+export {
+  findMarkAttrs,
+  injectFindFocus,
+  injectFindScroll,
+  injectFindShortcut,
+  injectFindWindowScroll,
+} from "./find/findMarks";
+export { ADAPTTABLE_FIND_STATE } from "./find/findState";
 export {
   AdaptColumnSelectCheckboxChrome,
   type ColumnSelectCheckboxProps,

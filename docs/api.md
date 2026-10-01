@@ -3136,6 +3136,17 @@ comes from a kit through a slot.
   `AngularFilterTreeDisclosureProps`) and `AdaptChecklistChrome` are the
   nested AND/OR builder and the checklist filter, structure only; the kit
   hands its controls in `slots`.
+- Find: `findInTable()` (over `coreFindInTable`) turns the bar on.
+  `injectFindInTable` (`FindInTableOptions`) is the live `FindInTableState`:
+  the query, the walk and `openBar`. `AdaptFindBarChrome` lays out the bar
+  (`FIND_BAR`); `FindBarSlots` names the kit's search and buttons
+  (`FindSearchProps`, `FindButtonProps`, `FindButtonKind`, `FindBarProps`).
+  `findMarkAttrs` paints `data-cell-match` when no grid does.
+  `injectFindShortcut` opens the bar on Ctrl/Cmd+F inside the table,
+  `injectFindScroll` brings the current hit into view, `injectFindFocus`
+  moves grid focus onto it, and `injectFindWindowScroll` asks a virtual
+  window to render that row. `ADAPTTABLE_FIND_STATE` is the token a toolbar
+  button reads.
 - Grouping: `grouping` (with `GroupingExtras`) groups rows under collapsible
   headers, with per-group subtotals, optional footers and paged groups.
   `injectGrouping` (`GroupingOptions`) is its live model, a `TableGrouping`
@@ -3326,7 +3337,8 @@ as a spanning group row), `columnSelectionCheckbox` (`/column-selection`;
 chevron), `rowDetail` and `nestedTable` (`@adapttable/angular-unstyled/row-detail`
 and `/nested-table`; `AdaptExpandToggle` fills `EXPAND_TOGGLE` in each row's
 leading cell and on each card, and the panel opens beneath the row or inside
-the card), `virtualize`, `cellNavigation`, `rowReorder`,
+the card), `virtualize`, `cellNavigation`, `findInTable` (`AdaptFindBar`,
+`AdaptFindToolbarButton`), `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,
 `AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`

@@ -71,6 +71,7 @@ import { coreColumnMenu } from '@adapttable/core/binding';
 import { coreDensityChooser } from '@adapttable/core/binding';
 import { coreExportCsv } from '@adapttable/core/binding';
 import { coreFilters } from '@adapttable/core/binding';
+import { coreFindInTable } from '@adapttable/core/binding';
 import { coreFullscreen } from '@adapttable/core/binding';
 import { coreGrouping } from '@adapttable/core/binding';
 import { coreGroupingPanel } from '@adapttable/core/binding';
@@ -158,6 +159,12 @@ import { FilterTypeRegistry } from '@adapttable/core';
 import { FilterTypeSpec } from '@adapttable/core';
 import { FilterValue } from '@adapttable/core';
 import { filterWidgetKind } from '@adapttable/core';
+import { FIND_BAR } from '@adapttable/core/binding';
+import { FindBarProps } from '@adapttable/core/binding';
+import { FindButtonKind } from '@adapttable/core/binding';
+import { FindButtonProps } from '@adapttable/core/binding';
+import { FindInTableState } from '@adapttable/core/binding';
+import { FindSearchProps } from '@adapttable/core/binding';
 import { focusEditorOnMount } from '@adapttable/core';
 import { FullscreenState } from '@adapttable/core/binding';
 import { GetCellSpan } from '@adapttable/core';
@@ -659,7 +666,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "facets" | "setExtra" | "setExtras" | "extra">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -1234,6 +1241,44 @@ export class AdaptFilterTreeChrome<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterTreeChrome<any>, never>;
+}
+
+// @public
+export class AdaptFindBarChrome {
+    readonly className: InputSignal<string | undefined>;
+    protected readonly closeProps: Signal<FindButtonProps>;
+    protected readonly count: Signal<string>;
+    readonly find: InputSignal<FindInTableState>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    protected readonly nextProps: Signal<FindButtonProps>;
+    protected readonly previousProps: Signal<FindButtonProps>;
+    protected readonly searchProps: Signal<FindSearchProps<KeyboardEvent>>;
+    readonly slots: InputSignal<FindBarSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFindBarChrome, "adapt-find-bar-chrome", never, {
+        "find": {
+            "alias": "find";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFindBarChrome, never>;
 }
 
 // @public
@@ -1816,6 +1861,9 @@ export class AdaptSlot<TProps> {
 export const ADAPTTABLE_FEATURES: InjectionToken<readonly AdaptTableFeature[]>;
 
 // @public
+export const ADAPTTABLE_FIND_STATE: InjectionToken<WritableSignal<FindInTableState | null>>;
+
+// @public
 export const ADAPTTABLE_SLOT_TABLE: InjectionToken<SlotTable>;
 
 // @public
@@ -2355,6 +2403,8 @@ export { coreExportCsv }
 
 export { coreFilters }
 
+export { coreFindInTable }
+
 export { coreFullscreen }
 
 export { coreGrouping }
@@ -2754,6 +2804,42 @@ export { FilterValue }
 
 export { filterWidgetKind }
 
+export { FIND_BAR }
+
+export { FindBarProps }
+
+// @public
+export interface FindBarSlots {
+    readonly Button: Type<unknown>;
+    readonly Search: Type<unknown>;
+}
+
+export { FindButtonKind }
+
+export { FindButtonProps }
+
+// @public
+export function findInTable(): AdaptTableFeature;
+
+// @public
+export interface FindInTableOptions<TRow> {
+    readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+    readonly enabled?: MaybeSignal<boolean>;
+    readonly firstRowIndex?: Signal<number>;
+    readonly injector?: Injector;
+    readonly rows: Signal<readonly TRow[]>;
+    readonly urlAdapter?: UrlStateAdapter;
+    readonly urlKey?: string;
+    readonly urlSync?: boolean;
+}
+
+export { FindInTableState }
+
+// @public
+export function findMarkAttrs(base: Attrs, find: Pick<FindInTableState, "matchKeys" | "current">, cell: GridCell): Attrs;
+
+export { FindSearchProps }
+
 // @public
 export function fitColumns(): AdaptTableFeature;
 
@@ -2815,6 +2901,7 @@ export interface GridFocus<TRow> {
     readonly isColumnSelected: (col: number) => boolean;
     readonly range: Signal<CellRange | null>;
     readonly rowAttrs: (row: TRow, index: number) => Attrs;
+    readonly selectRange: (range: CellRange | null) => void;
     readonly tableAttrs: () => Attrs;
     readonly toggleColumn: (col: number) => void;
 }
@@ -2822,6 +2909,7 @@ export interface GridFocus<TRow> {
 // @public
 export interface GridFocusOptions<TRow> {
     readonly enabled: MaybeSignal<boolean>;
+    readonly find?: Signal<FindInTableState>;
     readonly injector?: Injector;
     readonly onActivate?: (cell: GridCell) => void;
     readonly onRangeChange?: (range: CellRange | null) => void;
@@ -3066,6 +3154,42 @@ export function injectEditValidation<TRow>(options?: EditValidationInjectOptions
 
 // @public
 export function injectExportCsv<TRow>(options: ExportCsvHandlerOptions<TRow>): Signal<ExportHandlerState>;
+
+// @public
+export function injectFindFocus(options: {
+    readonly find: Signal<FindInTableState>;
+    readonly focusCell: (cell: GridCell) => void;
+    readonly selectRange: (range: CellRange | null) => void;
+    readonly enabled: Signal<boolean>;
+    readonly injector?: Injector;
+}): void;
+
+// @public
+export function injectFindInTable<TRow>(options: FindInTableOptions<TRow>): Signal<FindInTableState>;
+
+// @public
+export function injectFindScroll(options: {
+    readonly root: () => HTMLElement | null;
+    readonly current: Signal<GridCell | null>;
+    readonly enabled: Signal<boolean>;
+    readonly injector?: Injector;
+}): void;
+
+// @public
+export function injectFindShortcut(options: {
+    readonly root: () => HTMLElement | null;
+    readonly openBar: Signal<(() => void) | undefined>;
+    readonly injector?: Injector;
+}): void;
+
+// @public
+export function injectFindWindowScroll<TRow>(options: {
+    readonly current: Signal<GridCell | null>;
+    readonly rows: Signal<readonly TRow[]>;
+    readonly firstRowIndex: Signal<number>;
+    readonly scrollToIndex: () => ((index: number) => void) | undefined;
+    readonly injector?: Injector;
+}): void;
 
 // @public
 export function injectFrontendData<TRow>(options: FrontendDataOptions<TRow>): Signal<TableSource<TRow>>;

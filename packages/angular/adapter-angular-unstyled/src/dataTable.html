@@ -7,6 +7,13 @@
     [attr.data-refreshing]="v.table.isRefreshing() ? '' : null"
     [attr.aria-busy]="v.table.isRefreshing() ? true : null"
   >
+    @if (v.findBar; as findBar) {
+      <ng-container
+        [adaptSlot]="findBarSlot"
+        [adaptSlotProps]="findBar()"
+        [adaptSlotTable]="v.table"
+      />
+    }
     <div data-adapttable-part="toolbar">
       @if (searchable()) {
         <div data-adapttable-part="search-field">

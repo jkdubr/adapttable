@@ -65,6 +65,7 @@ export default defineConfig({
         "density/**/*.ts",
         "editing/**/*.ts",
         "export/**/*.ts",
+        "find-in-table/**/*.ts",
         "filters/**/*.ts",
         "fit-columns/**/*.ts",
         "fullscreen/**/*.ts",

@@ -46,6 +46,11 @@ export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): Ada
 export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
 
 // @public
+export function findInTable(options?: {
+    readonly button?: boolean;
+}): AdaptTableFeature;
+
+// @public
 export function fullscreen(): AdaptTableFeature;
 
 // @public

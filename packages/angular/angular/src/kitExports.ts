@@ -114,6 +114,13 @@ export type {
   IconDescriptor,
 } from "@adapttable/core/binding";
 export type {
+  FindBarProps,
+  FindButtonKind,
+  FindButtonProps,
+  FindInTableState,
+  FindSearchProps,
+} from "@adapttable/core/binding";
+export type {
   ActiveFilterChipsSlotProps,
   ChecklistButtonProps,
   ChecklistCheckboxProps,
@@ -194,7 +201,9 @@ export {
 export {
   coreDensityChooser,
   coreExportCsv,
+  coreFindInTable,
   coreFullscreen,
+  FIND_BAR,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
 export { coreSavedViews, SAVED_VIEWS } from "@adapttable/core/binding";
