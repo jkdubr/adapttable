@@ -66,8 +66,15 @@ import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
 import { COMMAND_PALETTE_LIVE } from '@adapttable/core/binding';
 import { ConfirmHandler } from '@adapttable/core';
+import { CONTEXT_MENU_LIVE } from '@adapttable/core/binding';
+import { ContextMenuActions } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
+import { ContextMenuPoint } from '@adapttable/core';
+import { ContextMenuRegionHandlers } from '@adapttable/core';
+import { ContextMenuState } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
+import { ContextMenuTriggerHandlers } from '@adapttable/core';
+import { copyContextMenuSelection } from '@adapttable/core';
 import { coreBulkActions } from '@adapttable/core/binding';
 import { coreColumnMenu } from '@adapttable/core/binding';
 import { coreDensityChooser } from '@adapttable/core/binding';
@@ -926,6 +933,63 @@ export class AdaptCommandPaletteChrome {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptCommandPaletteChrome, never>;
+}
+
+// @public
+export class AdaptContextMenuChrome {
+    readonly at: InputSignal<ContextMenuPoint | null>;
+    readonly className: InputSignal<string | undefined>;
+    readonly items: InputSignal<readonly ContextMenuItem[]>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    readonly onClose: InputSignal<() => void>;
+    readonly slots: InputSignal<ContextMenuSlots>;
+    protected readonly surfaceProps: Signal<    {
+    at: ContextMenuPoint;
+    anchorRef: {
+    current: HTMLElement | null;
+    };
+    label: string;
+    onClose: () => void;
+    className: string | undefined;
+    rows: readonly ContextMenuRow[];
+    Item: Type<unknown>;
+    Separator: Type<unknown>;
+    }>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptContextMenuChrome, "adapt-context-menu-chrome", never, {
+        "items": {
+            "alias": "items";
+            "required": true;
+            "isSignal": true;
+        };
+        "at": {
+            "alias": "at";
+            "required": true;
+            "isSignal": true;
+        };
+        "onClose": {
+            "alias": "onClose";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptContextMenuChrome, never>;
 }
 
 // @public
@@ -1949,6 +2013,9 @@ export class AdaptSlot<TProps> {
 }
 
 // @public
+export const ADAPTTABLE_CONTEXT_MENU: InjectionToken<WritableSignal<ContextMenuRegionHandlers | null>>;
+
+// @public
 export const ADAPTTABLE_FEATURES: InjectionToken<readonly AdaptTableFeature[]>;
 
 // @public
@@ -2494,8 +2561,17 @@ export function commitBooleanDraft(ctrl: EditableCellEditorCtrl, checked: boolea
 
 export { ConfirmHandler }
 
+export { CONTEXT_MENU_LIVE }
+
 // @public
 export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): AdaptTableFeature;
+
+// @public
+export interface ContextMenuController<TRow> {
+    readonly close: () => void;
+    readonly open: ContextMenuState<TRow> | null;
+    readonly triggerProps: (target: ContextMenuTarget<TRow>) => ContextMenuTriggerHandlers;
+}
 
 export { ContextMenuItem }
 
@@ -2504,7 +2580,24 @@ export interface ContextMenuOptions<TRow> {
     readonly items?: (target: ContextMenuTarget<TRow>) => readonly ContextMenuItem[];
 }
 
+export { ContextMenuRegionHandlers }
+
+// @public
+export interface ContextMenuRow {
+    readonly item: ContextMenuItem;
+    readonly onSelect: () => void;
+}
+
+// @public
+export interface ContextMenuSlots {
+    readonly Item: Type<unknown>;
+    readonly Separator: Type<unknown>;
+    readonly Surface: Type<unknown>;
+}
+
 export { ContextMenuTarget }
+
+export { copyContextMenuSelection }
 
 export { coreBulkActions }
 
@@ -3015,7 +3108,9 @@ export { GridCell }
 export interface GridFocus<TRow> {
     readonly active: Signal<GridCell | null>;
     readonly announcement: Signal<string>;
+    readonly cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
     readonly cellAttrs: (column: ColumnDef<TRow>, index: number, col: number) => Attrs;
+    readonly copyCells: (cell?: GridCell, cut?: boolean) => void;
     readonly enabled: Signal<boolean>;
     readonly focusCell: (cell: GridCell) => void;
     readonly headerCellAttrs: (column: ColumnDef<TRow>, col: number) => Attrs;
@@ -3033,6 +3128,7 @@ export interface GridFocusOptions<TRow> {
     readonly find?: Signal<FindInTableState>;
     readonly injector?: Injector;
     readonly onActivate?: (cell: GridCell) => void;
+    readonly onCut?: (range: CellRange) => void;
     readonly onRangeChange?: (range: CellRange | null) => void;
     readonly table: DataTable<TRow>;
 }
@@ -3265,6 +3361,9 @@ export function injectColumnWindow<TRow>(options: ColumnWindowOptions<TRow>): Si
 export function injectCommandPalette(options: Signal<CommandPaletteInjectOptions>, injector?: Injector): Signal<TableCommandPalette>;
 
 // @public
+export function injectContextMenu<TRow>(enabled: Signal<boolean>, injector?: Injector): Signal<ContextMenuController<TRow>>;
+
+// @public
 export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTable<TRow>;
 
 // @public
@@ -3420,6 +3519,9 @@ export function injectServerData<TRow>(options: ServerDataOptions<TRow>): Signal
 
 // @public
 export function injectShortcuts(options: Signal<UseShortcutsOptions>, injector?: Injector): void;
+
+// @public
+export function injectTableContextMenu<TRow>(options: Signal<TableContextMenuOptions<TRow>>, injector?: Injector): Signal<TableContextMenu>;
 
 // @public
 export function injectTableData<TRow>(options: TableDataOptions<TRow>): TableDataResult<TRow>;
@@ -4022,6 +4124,29 @@ export interface TableCommandPalette {
     readonly commands: readonly Command[];
     readonly open: boolean;
     readonly show: () => void;
+}
+
+// @public
+export interface TableContextMenu {
+    readonly at: ContextMenuPoint | null;
+    readonly close: () => void;
+    readonly items: readonly ContextMenuItem[];
+    readonly region: ContextMenuRegionHandlers;
+}
+
+// @public
+export interface TableContextMenuOptions<TRow> {
+    readonly actions: ContextMenuActions<TRow>;
+    readonly columns: readonly ColumnMetadata<TRow>[];
+    readonly contextMenu?: boolean | ContextMenuOptions<TRow>;
+    readonly featureHost?: FeatureHostState;
+    readonly gridNavigation?: boolean;
+    readonly isPinned?: (columnKey: string) => boolean;
+    readonly labels: TableLabels;
+    readonly rowFor: (rowId: string) => TRow | undefined;
+    readonly rowPins?: readonly RowAction<TRow>[];
+    readonly sortBy?: string;
+    readonly sortDir?: "asc" | "desc";
 }
 
 // @public

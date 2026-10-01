@@ -12,6 +12,7 @@ import {
   AdaptIcon,
   AdaptLiveRegion,
   AdaptSlot,
+  ADAPTTABLE_CONTEXT_MENU,
   ADAPTTABLE_FIND_STATE,
   ADAPTTABLE_PALETTE_OPEN,
   type AdaptTableFeature,
@@ -26,6 +27,7 @@ import {
   type BulkAction,
   type BulkBarSlotProps,
   type CellEditHandler,
+  type CellRange,
   type CellSpanAppearance,
   cellSpanMark,
   type ChromeBodySlot,
@@ -38,6 +40,10 @@ import {
   COMMAND_PALETTE_LIVE,
   type CommandPaletteInjectOptions,
   type ConfirmHandler,
+  CONTEXT_MENU_LIVE,
+  type ContextMenuRegionHandlers,
+  type ContextMenuTarget,
+  copyContextMenuSelection,
   type DataTable,
   defaultConfirm,
   desktopBodySlots,
@@ -140,6 +146,7 @@ import {
   SEARCH_ICON,
   type SelectionState,
   type SummaryRowFn,
+  type TableContextMenuOptions,
   type TableDensity,
   type TableGrouping,
   type TableLabels,
@@ -557,6 +564,106 @@ function scrollFindWindow<TRow>(options: {
   });
 }
 
+/** Copy or cut the cell the menu was opened on, once cell navigation is on. */
+function menuCopy<TRow>(
+  grid: GridFocus<TRow> | undefined,
+  target: ContextMenuTarget<TRow>,
+  cut?: boolean
+): void {
+  if (!grid) return;
+  copyContextMenuSelection(
+    { range: grid.range(), cellAt: grid.cellAt, copyCells: grid.copyCells },
+    target,
+    cut
+  );
+}
+
+/** The menu slot's props, including the handlers the built-in entries call. */
+function mountedContextMenu<TRow>(input: {
+  readonly contextMenu: TableContextMenuOptions<TRow>["contextMenu"];
+  readonly table: DataTable<TRow>;
+  readonly pinning:
+    | Signal<{ readonly actions: readonly RowAction<TRow>[] } | undefined>
+    | undefined;
+  readonly grid: GridFocus<TRow> | undefined;
+  readonly filters: FiltersView | undefined;
+  readonly rowKey: (row: TRow) => string;
+  readonly onCellCut: Signal<((range: CellRange) => void) | undefined>;
+}): Signal<
+  TableContextMenuOptions<TRow> & {
+    readonly children: (regionProps: Record<string, unknown>) => undefined;
+  }
+> {
+  const { table, grid, filters } = input;
+  const options = contextMenuOptionsFor({
+    contextMenu: input.contextMenu,
+    columns: table.columns,
+    labels: table.labels,
+    rowFor: (rowId) =>
+      table.source().rows.find((row) => input.rowKey(row) === rowId),
+    sortBy: table.sortBy,
+    sortDir: table.sortDir,
+    isPinned: (columnKey) =>
+      table.layout().state.pinned[columnKey] !== undefined,
+    rowPins: computed(() => input.pinning?.()?.actions ?? []),
+    featureHost: table.featureHost,
+    gridNavigation: grid !== undefined,
+    onSort: (columnKey, direction) => {
+      table.source().setSort(columnKey, direction);
+    },
+    onHide: (columnKey) => {
+      table.layout().toggleVisible(columnKey);
+    },
+    onFilter: filters ? () => filters.show() : undefined,
+    onCopy: (target) => menuCopy(grid, target),
+    cut: computed(() => grid !== undefined && input.onCellCut() !== undefined),
+    onCut: (target) => menuCopy(grid, target, true),
+  });
+  // The slot type requires `children` for the React root wrapper. Angular
+  // binds the region handlers on the table root instead.
+  return computed(() => ({ ...options(), children: () => undefined }));
+}
+
+/** Props for the context-menu slot, whether or not a feature fills it. */
+function contextMenuOptionsFor<TRow>(options: {
+  readonly contextMenu: TableContextMenuOptions<TRow>["contextMenu"];
+  readonly columns: Signal<readonly ColumnDef<TRow>[]>;
+  readonly labels: Signal<TableLabels>;
+  readonly rowFor: (rowId: string) => TRow | undefined;
+  readonly sortBy: Signal<string | undefined>;
+  readonly sortDir: Signal<"asc" | "desc" | undefined>;
+  readonly isPinned: (columnKey: string) => boolean;
+  readonly rowPins: Signal<readonly RowAction<TRow>[]>;
+  readonly featureHost: TableContextMenuOptions<TRow>["featureHost"];
+  readonly gridNavigation: boolean;
+  readonly onSort: (columnKey: string, direction: "asc" | "desc") => void;
+  readonly onHide: (columnKey: string) => void;
+  readonly onFilter: (() => void) | undefined;
+  readonly onCopy: (target: ContextMenuTarget<TRow>) => void;
+  readonly cut: Signal<boolean>;
+  readonly onCut: (target: ContextMenuTarget<TRow>) => void;
+}): Signal<TableContextMenuOptions<TRow>> {
+  return computed(() => ({
+    contextMenu: options.contextMenu,
+    columns: options.columns(),
+    labels: options.labels(),
+    rowFor: options.rowFor,
+    actions: {
+      onCopy: options.onCopy,
+      onCut: options.cut() ? options.onCut : undefined,
+      onSort: options.onSort,
+      onHide: options.onHide,
+      onFilter: options.onFilter,
+    },
+    sortBy: options.sortBy(),
+    sortDir: options.sortDir(),
+    isPinned: options.isPinned,
+    rowPins: options.rowPins(),
+    featureHost: options.featureHost,
+    gridNavigation: options.gridNavigation,
+  }));
+}
+
 /** Props for the command-palette slot, whether or not a feature fills it. */
 function commandPalettePropsFor(options: {
   readonly commandPalette: CommandPaletteInjectOptions["commandPalette"];
@@ -791,6 +898,12 @@ export interface TableView<TRow> {
   readonly findBar: Signal<FindBarProps> | undefined;
   /** Props for the command-palette slot. Empty when the feature is absent. */
   readonly commandPalette: Signal<CommandPaletteInjectOptions>;
+  /** Props for the context-menu slot. Empty when the feature is absent. */
+  readonly contextMenu: Signal<
+    TableContextMenuOptions<TRow> & {
+      readonly children: (regionProps: Record<string, unknown>) => undefined;
+    }
+  >;
   /**
    * A cell's attributes, with find's match marks when the grid is not
    * painting them itself.
@@ -920,6 +1033,10 @@ export interface TableView<TRow> {
       provide: ADAPTTABLE_PALETTE_OPEN,
       useFactory: () => signal<PaletteOpenState | null>(null),
     },
+    {
+      provide: ADAPTTABLE_CONTEXT_MENU,
+      useFactory: () => signal<ContextMenuRegionHandlers | null>(null),
+    },
   ],
 })
 export class AdaptDataTable<TRow> implements OnInit {
@@ -1024,6 +1141,11 @@ export class AdaptDataTable<TRow> implements OnInit {
    */
   readonly cellNavigation = input(false);
   /**
+   * Told a range after Cut has reached the clipboard — the context menu and
+   * Ctrl/Cmd+X. Read on each cut.
+   */
+  readonly onCellCut = input<(range: CellRange) => void>();
+  /**
    * The features this table composes, such as `columnMenu()`. Read once,
    * when the table starts.
    */
@@ -1107,6 +1229,9 @@ export class AdaptDataTable<TRow> implements OnInit {
   protected readonly findBarSlot = FIND_BAR;
   /** The command palette slot. @internal */
   protected readonly commandPaletteSlot = COMMAND_PALETTE_LIVE;
+  /** The context menu slot. @internal */
+  protected readonly contextMenuSlot = CONTEXT_MENU_LIVE;
+  private readonly contextMenuRegion = inject(ADAPTTABLE_CONTEXT_MENU);
   /** The row-reorder announcer slot. @internal */
   protected readonly reorderAnnouncerSlot = ROW_REORDER_ANNOUNCER;
   /** The Filters button's glyph. @internal */
@@ -1129,6 +1254,41 @@ export class AdaptDataTable<TRow> implements OnInit {
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
 
   /** Start the table from the inputs it reads once. */
+  /** Ctrl/Cmd+X and the menu's Cut, after the clipboard write succeeds. */
+  private cutSelection(range: CellRange): void {
+    this.onCellCut()?.(range);
+  }
+
+  /** A right-click inside the table. */
+  protected onMenuContext(event: MouseEvent): void {
+    this.contextMenuRegion()?.onContextMenu(event);
+  }
+
+  /** Shift+F10 or the menu key inside the table. */
+  protected onMenuKey(event: KeyboardEvent): void {
+    this.contextMenuRegion()?.onKeyDown(event);
+  }
+
+  /** A touch press inside the table. */
+  protected onMenuPointerDown(event: PointerEvent): void {
+    this.contextMenuRegion()?.onPointerDown(event);
+  }
+
+  /** A finger moving inside the table. */
+  protected onMenuPointerMove(event: PointerEvent): void {
+    this.contextMenuRegion()?.onPointerMove(event);
+  }
+
+  /** The finger lifted. */
+  protected onMenuPointerUp(): void {
+    this.contextMenuRegion()?.onPointerUp();
+  }
+
+  /** The browser took the pointer. */
+  protected onMenuPointerCancel(): void {
+    this.contextMenuRegion()?.onPointerCancel();
+  }
+
   /** The phone sort select: a column, or none. */
   protected sortBy(event: Event): void {
     const table = this.view();
@@ -1281,7 +1441,15 @@ export class AdaptDataTable<TRow> implements OnInit {
     });
     const grid =
       this.cellNavigation() || featureOptions.cellNavigation === true
-        ? injectGridFocus({ table, enabled: true, find, injector })
+        ? injectGridFocus({
+            table,
+            enabled: true,
+            find,
+            onCut: (range) => {
+              this.cutSelection(range);
+            },
+            injector,
+          })
         : undefined;
     const root = (): HTMLElement | null => this.root()?.nativeElement ?? null;
     wireFindChrome({ find, grid, root, injector });
@@ -1757,6 +1925,16 @@ export class AdaptDataTable<TRow> implements OnInit {
       exportCsv: exporter,
       filterCount: computed(() => filtersRef.current?.count() ?? 0),
     });
+    const contextMenu = mountedContextMenu({
+      contextMenu:
+        featureOptions.contextMenu as TableContextMenuOptions<TRow>["contextMenu"],
+      table,
+      pinning,
+      grid,
+      filters,
+      rowKey: (row) => this.rowKey()(row),
+      onCellCut: this.onCellCut,
+    });
     const markedCellAttrs = cellAttrsWithFind(table, grid, find);
     this.view.set({
       table,
@@ -1764,6 +1942,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       grid,
       findBar,
       commandPalette,
+      contextMenu,
       markedCellAttrs,
       columnMenu: table.featureOptions.enableColumnMenu === true,
       columnMenuProps,

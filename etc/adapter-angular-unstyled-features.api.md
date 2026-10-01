@@ -10,6 +10,7 @@ import { BulkAction } from '@adapttable/angular';
 import { CellEditHandler } from '@adapttable/angular';
 import { CellNavigationOptions } from '@adapttable/angular';
 import { CommandPaletteOptions } from '@adapttable/angular';
+import { ContextMenuOptions } from '@adapttable/angular';
 import { ExportCsvOptions } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
 import { GroupingExtras } from '@adapttable/angular';
@@ -36,6 +37,9 @@ export function columnMenu(): AdaptTableFeature;
 
 // @public
 export function commandPalette(options?: boolean | CommandPaletteOptions): AdaptTableFeature;
+
+// @public
+export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>): AdaptTableFeature;
 
 // @public
 export function densityChooser(): AdaptTableFeature;

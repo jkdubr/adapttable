@@ -42,6 +42,8 @@ export interface FiltersView {
   readonly pointerDown: () => void;
   /** The button's click. */
   readonly click: () => void;
+  /** Open the panel. A context-menu Filter uses this. */
+  readonly show: () => void;
   /** The form's props. */
   readonly form: Signal<FiltersFormSlotProps<never>>;
   /** The popover's or the drawer's props. */
@@ -99,6 +101,9 @@ export function filtersViewFor<TRow>(
     },
     click: () => {
       if (toggle.click(open())) open.update((value) => !value);
+    },
+    show: () => {
+      open.set(true);
     },
     form: computed(() => ({
       defs: runtime().defs as never,

@@ -6,10 +6,21 @@
     [attr.data-density]="v.density()"
     [attr.data-refreshing]="v.table.isRefreshing() ? '' : null"
     [attr.aria-busy]="v.table.isRefreshing() ? true : null"
+    (contextmenu)="onMenuContext($event)"
+    (keydown)="onMenuKey($event)"
+    (pointerdown)="onMenuPointerDown($event)"
+    (pointermove)="onMenuPointerMove($event)"
+    (pointerup)="onMenuPointerUp()"
+    (pointercancel)="onMenuPointerCancel()"
   >
     <ng-container
       [adaptSlot]="commandPaletteSlot"
       [adaptSlotProps]="v.commandPalette()"
+      [adaptSlotTable]="v.table"
+    />
+    <ng-container
+      [adaptSlot]="contextMenuSlot"
+      [adaptSlotProps]="v.contextMenu()"
       [adaptSlotTable]="v.table"
     />
     @if (v.findBar; as findBar) {

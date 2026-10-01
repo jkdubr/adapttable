@@ -201,6 +201,7 @@ export {
 } from "@adapttable/core/binding";
 export {
   COMMAND_PALETTE_LIVE,
+  CONTEXT_MENU_LIVE,
   coreDensityChooser,
   coreExportCsv,
   coreFindInTable,

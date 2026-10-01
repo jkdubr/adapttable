@@ -15,6 +15,7 @@ import { BatchEditBarProps } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionRunnerState } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
+import { CellRange } from '@adapttable/angular';
 import { CellSpanAppearance } from '@adapttable/angular';
 import { ChecklistSlots } from '@adapttable/angular';
 import { ChromeBodySlot } from '@adapttable/angular';
@@ -100,6 +101,7 @@ import { SavedViewsState } from '@adapttable/angular';
 import { SelectionState } from '@adapttable/angular';
 import { Signal } from '@angular/core';
 import { SummaryRowFn } from '@adapttable/angular';
+import { TableContextMenuOptions } from '@adapttable/angular';
 import { TableDensity } from '@adapttable/angular';
 import { TableGrouping } from '@adapttable/angular';
 import { TableLabels } from '@adapttable/angular';
@@ -337,6 +339,11 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly commandPaletteSlot: FeatureSlotKey<unknown>;
     readonly confirm: InputSignal<ConfirmHandler | undefined>;
+    // @internal
+    protected readonly contextMenuSlot: FeatureSlotKey<    {
+    container?: HTMLElement | null;
+    children: (regionProps: Record<string, unknown>) => unknown;
+    }>;
     readonly data: InputSignal<readonly TRow[] | undefined>;
     readonly defaultColumnLayout: InputSignal<Partial<ColumnLayoutState> | undefined>;
     readonly defaults: InputSignal<(Partial<TableQueryParams> & {
@@ -377,7 +384,14 @@ export class AdaptDataTable<TRow> implements OnInit {
     ngOnInit(): void;
     // @internal
     protected readonly noResults: Signal<boolean>;
+    readonly onCellCut: InputSignal<((range: CellRange) => void) | undefined>;
     readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
+    protected onMenuContext(event: MouseEvent): void;
+    protected onMenuKey(event: KeyboardEvent): void;
+    protected onMenuPointerCancel(): void;
+    protected onMenuPointerDown(event: PointerEvent): void;
+    protected onMenuPointerMove(event: PointerEvent): void;
+    protected onMenuPointerUp(): void;
     readonly onQueryChange: InputSignal<TableQueryHandler | undefined>;
     readonly paginationMode: InputSignal<PaginationMode | undefined>;
     // @internal
@@ -565,6 +579,11 @@ export class AdaptDataTable<TRow> implements OnInit {
         };
         "cellNavigation": {
             "alias": "cellNavigation";
+            "required": false;
+            "isSignal": true;
+        };
+        "onCellCut": {
+            "alias": "onCellCut";
             "required": false;
             "isSignal": true;
         };
@@ -1375,6 +1394,7 @@ export interface FiltersView {
     readonly open: Signal<boolean>;
     readonly overlay: Signal<FilterOverlaySlotProps<TemplateRef<unknown>>>;
     readonly pointerDown: () => void;
+    readonly show: () => void;
 }
 
 // @public
@@ -1423,6 +1443,9 @@ export interface TableView<TRow> {
     } | undefined>;
     readonly commandPalette: Signal<CommandPaletteInjectOptions>;
     readonly confirm: ConfirmHandler;
+    readonly contextMenu: Signal<TableContextMenuOptions<TRow> & {
+        readonly children: (regionProps: Record<string, unknown>) => undefined;
+    }>;
     readonly density: Signal<TableDensity>;
     readonly detailParent: Signal<NestedTableParent>;
     readonly editableCells: Signal<ReadonlyMap<string, EditableCellSlotProps<never>>> | undefined;

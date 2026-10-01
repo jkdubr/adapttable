@@ -3159,6 +3159,16 @@ comes from a kit through a slot.
   `OPEN_PALETTE_COMMAND` is the chord that opens it.
   `ADAPTTABLE_PALETTE_OPEN` publishes a `PaletteOpenState` a toolbar button
   reads.
+- Context menu: `contextMenu()` arms right-click, Shift+F10, the menu key
+  and a touch long press. `injectContextMenu` (`ContextMenuController`) is
+  one target's open state. `injectTableContextMenu`
+  (`TableContextMenuOptions`) is the table's `TableContextMenu`: the region
+  handlers, the entries, where it opened and `close`.
+  `AdaptContextMenuChrome` lays out the anchor; `ContextMenuSlots` names the
+  kit's surface, entry and divider, and `ContextMenuRow` is one entry that
+  closes the menu before it runs. `ADAPTTABLE_CONTEXT_MENU` publishes the
+  `ContextMenuRegionHandlers` the table binds. `copyContextMenuSelection`
+  copies or cuts the cell the menu was opened on when cell navigation is on.
 - Grouping: `grouping` (with `GroupingExtras`) groups rows under collapsible
   headers, with per-group subtotals, optional footers and paged groups.
   `injectGrouping` (`GroupingOptions`) is its live model, a `TableGrouping`
@@ -3351,7 +3361,9 @@ and `/nested-table`; `AdaptExpandToggle` fills `EXPAND_TOGGLE` in each row's
 leading cell and on each card, and the panel opens beneath the row or inside
 the card), `virtualize`, `cellNavigation`, `findInTable` (`AdaptFindBar`,
 `AdaptFindToolbarButton`), `commandPalette` (`AdaptCommandPaletteLive`,
-`AdaptCommandPaletteButton`), `rowReorder`,
+`AdaptCommandPaletteButton`), `contextMenu` (`AdaptContextMenuLive`,
+`AdaptContextMenuSurface`, `AdaptContextMenuItem`,
+`AdaptContextMenuSeparator`), `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,
 `AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`

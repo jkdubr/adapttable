@@ -27,6 +27,21 @@ export {
   type CommandPaletteSlots,
 } from "./actions/commandPaletteChrome";
 export {
+  ADAPTTABLE_CONTEXT_MENU,
+  type ContextMenuController,
+  type ContextMenuRegionHandlers,
+  copyContextMenuSelection,
+  injectContextMenu,
+  injectTableContextMenu,
+  type TableContextMenu,
+  type TableContextMenuOptions,
+} from "./actions/contextMenu";
+export {
+  AdaptContextMenuChrome,
+  type ContextMenuRow,
+  type ContextMenuSlots,
+} from "./actions/contextMenuChrome";
+export {
   ADAPTTABLE_PALETTE_OPEN,
   type PaletteOpenState,
 } from "./actions/paletteState";

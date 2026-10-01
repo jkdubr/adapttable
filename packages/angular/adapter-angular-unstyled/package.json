@@ -65,6 +65,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-command-palette.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-command-palette.mjs"
     },
+    "./context-menu": {
+      "types": "./dist/types/adapttable-angular-unstyled-context-menu.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-context-menu.mjs"
+    },
     "./density": {
       "types": "./dist/types/adapttable-angular-unstyled-density.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-density.mjs"

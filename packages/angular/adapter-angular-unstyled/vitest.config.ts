@@ -63,6 +63,7 @@ export default defineConfig({
         "column-menu/**/*.ts",
         "column-selection/**/*.ts",
         "command-palette/**/*.ts",
+        "context-menu/**/*.ts",
         "density/**/*.ts",
         "editing/**/*.ts",
         "export/**/*.ts",

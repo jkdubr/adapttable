@@ -62,6 +62,11 @@ export interface GridFocusOptions<TRow> {
    * marks those cells and Ctrl/Cmd+F opens the bar.
    */
   readonly find?: Signal<FindInTableState>;
+  /**
+   * Told a range after a cut has reached the clipboard. A context-menu Cut
+   * and Ctrl/Cmd+X both use it.
+   */
+  readonly onCut?: (range: CellRange) => void;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }
@@ -104,6 +109,10 @@ export interface GridFocus<TRow> {
     index: number,
     col: number
   ) => Attrs;
+  /** Copy the selection, or one cell. A cut also tells {@link GridFocusOptions.onCut}. */
+  readonly copyCells: (cell?: GridCell, cut?: boolean) => void;
+  /** The grid address of a rendered cell, for a menu opened on it. */
+  readonly cellAt: (rowId: string, columnKey: string) => GridCell | undefined;
 }
 
 /**
@@ -137,6 +146,7 @@ export function injectGridFocus<TRow>(
           options.find?.().openBar?.();
         }
       : undefined,
+    onCut: options.onCut,
   }));
   const controller = createGridFocusController(untracked(configuration));
   effect(
@@ -278,5 +288,7 @@ export function injectGridFocus<TRow>(
       ),
     }),
     cellAttrs,
+    copyCells: controller.copyCells,
+    cellAt: controller.cellAt,
   };
 }
