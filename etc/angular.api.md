@@ -134,7 +134,13 @@ import { FilterDef } from '@adapttable/core';
 import { filterDefForColumn } from '@adapttable/core';
 import { FilterEngine } from '@adapttable/core';
 import { FilterFormSource } from '@adapttable/core';
+import { FilterHeaderClassNames } from '@adapttable/core/binding';
 import { FilterHeaderControlProps } from '@adapttable/core/binding';
+import { FilterHeaderMultiProps } from '@adapttable/core/binding';
+import { FilterHeaderOption } from '@adapttable/core/binding';
+import { FilterHeaderRangeProps } from '@adapttable/core/binding';
+import { FilterHeaderSearchProps } from '@adapttable/core/binding';
+import { FilterHeaderSelectProps } from '@adapttable/core/binding';
 import { filterLabel } from '@adapttable/core';
 import { filterOpLabel } from '@adapttable/core';
 import { FilterOption } from '@adapttable/core';
@@ -193,7 +199,9 @@ import { groupRowParts } from '@adapttable/core/binding';
 import { groupSelectionState } from '@adapttable/core';
 import { GroupSort } from '@adapttable/core';
 import { hasActiveHeaderFilter } from '@adapttable/core';
+import { HeaderFilterCellKind } from '@adapttable/core';
 import { headerFilterInsideSelector } from '@adapttable/core';
+import { HeaderFilterOpenHost } from '@adapttable/core';
 import { HeaderGroupCell } from '@adapttable/core/binding';
 import { HeaderSelectionState } from '@adapttable/core/binding';
 import { hideAllColumns } from '@adapttable/core/binding';
@@ -228,6 +236,7 @@ import { NestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { offersAllMatching } from '@adapttable/core';
+import { OnInit } from '@angular/core';
 import { orderedCardEntries } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
@@ -650,7 +659,7 @@ export class AdaptChecklistChrome<TRow> {
     };
     protected read(): void;
     readonly slots: InputSignal<ChecklistSlots>;
-    readonly source: InputSignal<Pick<TableSource<TRow>, "allFilteredRows" | "facets" | "setExtra" | "setExtras" | "extra">>;
+    readonly source: InputSignal<Pick<TableSource<TRow>, "extra" | "setExtra" | "setExtras" | "allFilteredRows" | "facets">>;
     // (undocumented)
     protected readonly windowedListStyle: {
         "max-height": null;
@@ -992,6 +1001,194 @@ export class AdaptExtraRowContent {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptExtraRowContent, never>;
+}
+
+// @public
+export class AdaptFilterHeaderChrome<TRow> {
+    protected cellClass(): string | undefined;
+    readonly cellStyle: InputSignal<((column: {
+    readonly key: string;
+    }) => Readonly<Record<string, string>> | undefined) | undefined>;
+    readonly classNames: InputSignal<FilterHeaderClassNames | undefined>;
+    readonly columns: InputSignal<readonly {
+    readonly key: string;
+    }[]>;
+    readonly columnSpacers: InputSignal<    {
+    readonly start: number;
+    readonly end: number;
+    } | undefined>;
+    protected defFor(key: string): FilterDef<TRow> | undefined;
+    readonly defs: InputSignal<readonly FilterDef<TRow>[]>;
+    readonly enabled: InputSignal<boolean>;
+    readonly expandable: InputSignal<boolean>;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    protected padClass(extra: string | undefined): string | undefined;
+    readonly padStyle: InputSignal<Readonly<Record<string, string>> | undefined>;
+    protected pinned(key: string): "start" | "end" | undefined;
+    readonly pinSide: InputSignal<((key: string) => "start" | "end" | undefined) | undefined>;
+    readonly registry: InputSignal<FilterTypeRegistry | undefined>;
+    protected rowClass(): string | undefined;
+    readonly selection: InputSignal<boolean>;
+    readonly showActions: InputSignal<boolean>;
+    protected readonly shown: Signal<boolean>;
+    readonly showReorder: InputSignal<boolean>;
+    readonly slots: InputSignal<FilterHeaderSlots>;
+    readonly source: InputSignal<FilterFormSource<TRow>>;
+    readonly stickyAttr: InputSignal<true | undefined>;
+    protected styled(column: {
+        readonly key: string;
+    }): Readonly<Record<string, string>> | undefined;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterHeaderChrome<any>, "adapt-filter-header-chrome", never, {
+        "enabled": {
+            "alias": "enabled";
+            "required": false;
+            "isSignal": true;
+        };
+        "columns": {
+            "alias": "columns";
+            "required": true;
+            "isSignal": true;
+        };
+        "defs": {
+            "alias": "defs";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "registry": {
+            "alias": "registry";
+            "required": false;
+            "isSignal": true;
+        };
+        "expandable": {
+            "alias": "expandable";
+            "required": false;
+            "isSignal": true;
+        };
+        "showReorder": {
+            "alias": "showReorder";
+            "required": false;
+            "isSignal": true;
+        };
+        "selection": {
+            "alias": "selection";
+            "required": false;
+            "isSignal": true;
+        };
+        "showActions": {
+            "alias": "showActions";
+            "required": false;
+            "isSignal": true;
+        };
+        "columnSpacers": {
+            "alias": "columnSpacers";
+            "required": false;
+            "isSignal": true;
+        };
+        "cellStyle": {
+            "alias": "cellStyle";
+            "required": false;
+            "isSignal": true;
+        };
+        "pinSide": {
+            "alias": "pinSide";
+            "required": false;
+            "isSignal": true;
+        };
+        "padStyle": {
+            "alias": "padStyle";
+            "required": false;
+            "isSignal": true;
+        };
+        "stickyAttr": {
+            "alias": "stickyAttr";
+            "required": false;
+            "isSignal": true;
+        };
+        "classNames": {
+            "alias": "classNames";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterHeaderChrome<any>, never>;
+}
+
+// @public
+export class AdaptFilterHeaderControlChrome<TRow> implements OnInit {
+    protected readonly booleanProps: Signal<FilterHeaderSelectProps>;
+    protected readonly caption: Signal<string | null>;
+    readonly className: InputSignal<string | undefined>;
+    readonly def: InputSignal<FilterDef<TRow>>;
+    protected readonly kind: Signal<HeaderFilterCellKind | undefined>;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    readonly menuClassName: InputSignal<string | undefined>;
+    protected readonly multiProps: Signal<FilterHeaderMultiProps>;
+    ngOnInit(): void;
+    protected readonly options: WritableSignal<readonly FilterOption[]>;
+    protected readonly rangeLower: Signal<FilterHeaderRangeProps>;
+    protected readonly rangeUpper: Signal<FilterHeaderRangeProps | null>;
+    readonly registry: InputSignal<FilterTypeRegistry | undefined>;
+    protected readonly selectProps: Signal<FilterHeaderSelectProps>;
+    readonly slots: InputSignal<FilterHeaderSlots>;
+    readonly source: InputSignal<FilterFormSource<TRow>>;
+    protected readonly textProps: Signal<FilterHeaderSearchProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFilterHeaderControlChrome<any>, "adapt-filter-header-control-chrome", never, {
+        "def": {
+            "alias": "def";
+            "required": true;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "menuClassName": {
+            "alias": "menuClassName";
+            "required": false;
+            "isSignal": true;
+        };
+        "registry": {
+            "alias": "registry";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFilterHeaderControlChrome<any>, never>;
 }
 
 // @public
@@ -2473,7 +2670,27 @@ export { filterDefForColumn }
 
 export { FilterFormSource }
 
+export { FilterHeaderClassNames }
+
 export { FilterHeaderControlProps }
+
+export { FilterHeaderMultiProps }
+
+export { FilterHeaderOption }
+
+export { FilterHeaderRangeProps }
+
+export { FilterHeaderSearchProps }
+
+export { FilterHeaderSelectProps }
+
+// @public
+export interface FilterHeaderSlots {
+    readonly Multi: Type<unknown>;
+    readonly Range: Type<unknown>;
+    readonly Search: Type<unknown>;
+    readonly Select: Type<unknown>;
+}
 
 export { filterLabel }
 
@@ -2873,6 +3090,25 @@ export function injectGroupingPanelState<TRow>(options: GroupingPanelStateOption
 
 // @public
 export function injectGroupPaging(options?: GroupPagingOptions): Signal<GroupPagingState>;
+
+// @public
+export function injectHeaderFilterOverlay<TRow>(props: {
+    readonly def: MaybeSignal<FilterDef<TRow>>;
+    readonly source: MaybeSignal<FilterFormSource<TRow>>;
+    readonly closeOnSelect?: MaybeSignal<boolean>;
+    readonly registry?: MaybeSignal<FilterTypeRegistry>;
+}, options?: {
+    readonly nestedSelector?: MaybeSignal<string>;
+    readonly pointerDismiss?: MaybeSignal<boolean>;
+    readonly host?: MaybeSignal<HeaderFilterOpenHost | null>;
+    readonly injector?: Injector;
+}): {
+    readonly open: Signal<boolean>;
+    readonly setOpen: (open: boolean) => void;
+    readonly source: Signal<FilterFormSource<TRow>>;
+    readonly sessionId: string;
+    readonly resetKey: Signal<number>;
+};
 
 // @public
 export function injectHighlight(enabled: MaybeSignal<boolean>, injector?: Injector): Highlight_2;

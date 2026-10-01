@@ -214,6 +214,11 @@ export {
   type ChecklistSlots,
 } from "./filters/checklistChrome";
 export {
+  AdaptFilterHeaderChrome,
+  AdaptFilterHeaderControlChrome,
+  type FilterHeaderSlots,
+} from "./filters/filterHeaderRow";
+export {
   booleanFilterFor,
   filterChipsFor,
   filterOptionsFor,
@@ -229,6 +234,7 @@ export {
   type AngularFilterTreeDisclosureProps,
   type FilterTreeSlots,
 } from "./filters/filterTreeChrome";
+export { injectHeaderFilterOverlay } from "./filters/headerFilterOverlay";
 export {
   AdaptColumnSelectCheckboxChrome,
   type ColumnSelectCheckboxProps,

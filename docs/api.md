@@ -3125,7 +3125,14 @@ comes from a kit through a slot.
   keys; `filterChipsFor` the active chips and their count;
   `filterOptionsFor` a definition's choices as a `FilterOptionsState`; and
   `textFilterFor`, `rangeFilterFor` and `booleanFilterFor` the per-field
-  widgets a kit's form draws. `AdaptFilterTreeChrome` (with
+  widgets a kit's form draws. `AdaptFilterHeaderChrome` and
+  `AdaptFilterHeaderControlChrome` are the compact header-filter row.
+  `FilterHeaderSlots` names the kit's search, select, range and multi
+  controls (`FilterHeaderSearchProps`, `FilterHeaderSelectProps`,
+  `FilterHeaderRangeProps`, `FilterHeaderMultiProps`, `FilterHeaderOption`);
+  `FilterHeaderClassNames` are the row's class hooks. `injectHeaderFilterOverlay`
+  keeps one column's overlay open, dismisses it on an outside press, and can
+  close it after a finished write. `AdaptFilterTreeChrome` (with
   `AngularFilterTreeDisclosureProps`) and `AdaptChecklistChrome` are the
   nested AND/OR builder and the checklist filter, structure only; the kit
   hands its controls in `slots`.
@@ -3300,7 +3307,8 @@ factories from secondary entries, each drawing the kit's own native
 controls — `columnMenu` (`AdaptColumnMenu`), `AdaptColumnHeaderRename`
 (the inline header rename form), `filters` (`AdaptFiltersForm`,
 `AdaptFilterDrawer`, `AdaptFilterPopover`, `AdaptFilterChips`,
-`AdaptAutoFilterForm`), `headerFilters`, `bulkActions` (`AdaptBulkBar`),
+`AdaptAutoFilterForm`), `headerFilters`, `AdaptFilterHeaderRow`,
+`AdaptFilterHeaderControl`, `bulkActions` (`AdaptBulkBar`),
 `rowActions` (`RowActionsFeatureOptions`), `densityChooser`
 (`AdaptDensityButton`), `fullscreen` (`AdaptFullscreenButton`), `exportCsv`
 (`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`), `grouping`

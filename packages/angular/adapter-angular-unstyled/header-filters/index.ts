@@ -11,7 +11,13 @@ import {
   slotRender,
 } from "@adapttable/angular";
 
+import {
+  AdaptFilterHeaderControl,
+  AdaptFilterHeaderRow,
+} from "./filterHeaderRow";
 import { AdaptHeaderFilterTrigger } from "./headerFilterTrigger";
+
+export { AdaptFilterHeaderControl, AdaptFilterHeaderRow };
 
 /**
  * A filter funnel on every filterable column's header, opening that
