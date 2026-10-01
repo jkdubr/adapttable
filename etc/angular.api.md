@@ -59,6 +59,7 @@ import { ColumnMenuRow } from '@adapttable/core';
 import { columnMenuRows } from '@adapttable/core';
 import { ColumnMenuSlotProps } from '@adapttable/core/binding';
 import { ColumnMetadata } from '@adapttable/core';
+import { ColumnResizeHandleProps } from '@adapttable/core';
 import { ColumnSelectCheckboxChromeProps } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
@@ -1962,6 +1963,7 @@ export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
     cell?: Renderer<CellContext<TRow>>;
     footer?: Renderer<FooterContext<TRow>>;
     header?: string;
+    headerActions?: string;
     headerCell?: Renderer<HeaderContext<TRow>>;
 }
 
@@ -2061,6 +2063,8 @@ export interface ColumnRenameEditorState {
     readonly submit: () => boolean;
 }
 
+export { ColumnResizeHandleProps }
+
 export { ColumnSelectCheckboxChromeProps }
 
 export { ColumnSelectCheckboxProps }
@@ -2158,6 +2162,7 @@ export interface DataTable<TRow> {
     readonly autoSizeColumns: (root: Element | null) => void;
     readonly bodyRegion: Signal<ChromeBodyRegion>;
     readonly canLoadMore: Signal<boolean>;
+    readonly canRenameColumns: boolean;
     readonly cardAttrs: (row: TRow, index: number) => Attrs;
     readonly cellAttrs: (column: ColumnDef<TRow>) => Attrs;
     readonly cellValue: (column: ColumnDef<TRow>, row: TRow) => unknown;
@@ -2802,6 +2807,9 @@ export function injectColumnLayoutUrlState(options?: ColumnLayoutUrlStateOptions
 
 // @public
 export function injectColumnRenameEditor(options: ColumnRenameEditorOptions): ColumnRenameEditorState;
+
+// @public
+export function injectColumnResize(key: string, setWidth: (key: string, width: number) => void, label: string): ColumnResizeHandleProps;
 
 // @public
 export function injectColumnWindow<TRow>(options: ColumnWindowOptions<TRow>): Signal<ColumnWindow<TRow>>;

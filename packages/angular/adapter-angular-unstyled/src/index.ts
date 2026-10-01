@@ -14,6 +14,7 @@ export {
   AdaptColumnGroupButton,
   AdaptColumnGroupToggle,
 } from "./components/columnGroupToggle";
+export { AdaptColumnHeaderRename } from "./components/columnHeaderRename";
 export { AdaptColumnMenu } from "./components/columnMenu";
 export {
   AdaptColumnSelectBox,

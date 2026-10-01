@@ -28,6 +28,7 @@ import { ColumnLayoutState } from '@adapttable/angular';
 import { ColumnMenuRow } from '@adapttable/angular';
 import { ColumnMenuSlotProps } from '@adapttable/angular';
 import { ColumnModel } from '@adapttable/core';
+import { ColumnRenameEditorState } from '@adapttable/angular';
 import { ColumnSelectCheckboxChromeProps } from '@adapttable/angular';
 import { ColumnSelectCheckboxProps } from '@adapttable/angular';
 import { ColumnSelectSlots } from '@adapttable/angular';
@@ -213,6 +214,42 @@ export class AdaptColumnGroupToggle {
 }
 
 // @public
+export class AdaptColumnHeaderRename {
+    readonly columnKey: InputSignal<string>;
+    protected readonly editor: ColumnRenameEditorState;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    readonly name: InputSignal<string>;
+    readonly onRename: InputSignal<(key: string, name: string) => void>;
+    protected readonly renameLabel: Signal<string>;
+    protected save(event: Event): void;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptColumnHeaderRename, "adapt-column-header-rename", never, {
+        "columnKey": {
+            "alias": "columnKey";
+            "required": true;
+            "isSignal": true;
+        };
+        "name": {
+            "alias": "name";
+            "required": true;
+            "isSignal": true;
+        };
+        "onRename": {
+            "alias": "onRename";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, ["*"], true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnHeaderRename, never>;
+}
+
+// @public
 export class AdaptColumnMenu {
     // (undocumented)
     protected readonly actionsKey = "actions";
@@ -330,6 +367,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly mobileCards: Signal<AdaptMobileCards<any> | undefined>;
     readonly mode: InputSignal<"frontend" | "server" | undefined>;
+    // (undocumented)
     ngOnInit(): void;
     // @internal
     protected readonly noResults: Signal<boolean>;
@@ -349,6 +387,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly selectable: InputSignal<boolean>;
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
     readonly selectionChange: OutputEmitterRef<string[]>;
+    protected sortBy(event: Event): void;
     readonly source: InputSignal<TableSource<TRow> | Signal<TableSource<TRow>> | undefined>;
     readonly summaryRow: InputSignal<SummaryRowFn<TRow> | undefined>;
     readonly supports: InputSignal<QuerySupport | undefined>;
@@ -578,6 +617,10 @@ export class AdaptDensityButton {
 // @internal
 export class AdaptDesktopTable<TRow> {
     protected readonly columnGroupToggleSlot: FeatureSlotKey<ColumnGroupToggleProps>;
+    protected columnName(column: {
+        key: string;
+        header?: unknown;
+    }): string;
     protected readonly columnSelects: Signal<Map<string, ColumnSelectCheckboxChromeProps>>;
     protected readonly columnSelectSlot: FeatureSlotKey<ColumnSelectCheckboxChromeProps>;
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
@@ -605,11 +648,17 @@ export class AdaptDesktopTable<TRow> {
     protected readonly groupHeaderRowSlot: FeatureSlotKey<GroupHeaderRowSlotProps<never, unknown, ColumnModel<never>>>;
     protected readonly groupLabelAttrs: Attrs;
     protected readonly headerCells: Signal<Map<string, Readonly<Record<string, unknown>>>>;
+    // (undocumented)
     protected readonly headerPlan: Signal<HtmlGroupedHeaderCell[][] | null>;
     readonly maxHeight: InputSignal<string | number | undefined>;
     protected readonly noAttrs: Attrs;
+    protected readonly renameColumn: (key: string, name: string) => void;
     protected reorderHandleProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderHandleProps_2<never>;
     protected readonly reorderHandleSlot: FeatureSlotKey<RowReorderHandleProps<never, unknown>>;
+    protected resizeHandle(column: {
+        key: string;
+        header?: unknown;
+    }): Attrs | undefined;
     protected readonly rowEditActionsSlot: FeatureSlotKey<RowEditActionsProps<never>>;
     // (undocumented)
     protected rowId(row: TRow): string;
@@ -617,6 +666,9 @@ export class AdaptDesktopTable<TRow> {
     protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
     protected scrollBoxStyle(): Record<string, string> | null;
     scrollElement(): HTMLElement | null;
+    protected sortIndex(column: {
+        key: string;
+    }): number | undefined;
     protected spanned(attrs: Attrs, cell: BodyCellView<TRow>): Attrs;
     protected treeCellProps(entry: BodyRow<TRow>, columnKey: string, children: TemplateRef<unknown>): TreeCellProps<never> | undefined;
     protected readonly treeCellSlot: FeatureSlotKey<TreeCellProps<never, unknown>>;
@@ -848,7 +900,7 @@ export class AdaptGroupHeaderCard {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
@@ -931,7 +983,7 @@ export class AdaptGroupHeaderRow {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {

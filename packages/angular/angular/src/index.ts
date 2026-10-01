@@ -57,6 +57,10 @@ export {
   injectColumnDrag,
   injectColumnRenameEditor,
 } from "./columns/columnMenu";
+export {
+  type ColumnResizeHandleProps,
+  injectColumnResize,
+} from "./columns/columnResize";
 export { AdaptControl } from "./control";
 export {
   type DataTable,

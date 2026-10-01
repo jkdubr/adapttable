@@ -52,20 +52,42 @@
           [adaptAttrs]="headerCells().get(column.key)!"
           [attr.rowspan]="rowSpan > 1 ? rowSpan : null"
         >
-          @if (column.sortable) {
-            <button
-              data-adapttable-part="sort-button"
-              [adaptAttrs]="v.table.sortButtonAttrs(column)"
+          @if (v.table.canRenameColumns && column.renameable) {
+            <adapt-column-header-rename
+              [columnKey]="column.key"
+              [name]="columnName(column)"
+              [onRename]="renameColumn"
+              [labels]="v.table.labels()"
             >
-              <span [adaptHeader]="column"></span>
-              @if (v.table.sortBy() === column.key) {
-                <span aria-hidden="true">{{
-                  v.table.sortDir() === "desc" ? "▼" : "▲"
-                }}</span>
-              }
-            </button>
+              <ng-container *ngTemplateOutlet="caption" />
+            </adapt-column-header-rename>
           } @else {
-            <span [adaptHeader]="column"></span>
+            <ng-container *ngTemplateOutlet="caption" />
+          }
+          <ng-template #caption>
+            @if (column.sortable) {
+              <button
+                data-adapttable-part="sort-button"
+                [adaptAttrs]="v.table.sortButtonAttrs(column)"
+              >
+                <span [adaptHeader]="column"></span>
+                @if (sortIndex(column); as index) {
+                  <span data-adapttable-part="sort-index">{{ index }}</span>
+                }
+                @if (v.table.sortBy() === column.key) {
+                  <span aria-hidden="true">{{
+                    v.table.sortDir() === "desc" ? "▼" : "▲"
+                  }}</span>
+                }
+              </button>
+            } @else {
+              <span [adaptHeader]="column"></span>
+            }
+          </ng-template>
+          @if (column.headerActions) {
+            <span data-adapttable-part="header-actions">{{
+              column.headerActions
+            }}</span>
           }
           @if (columnSelects().get(column.key); as select) {
             <ng-container
@@ -73,6 +95,12 @@
               [adaptSlotProps]="select"
               [adaptSlotTable]="v.table"
             />
+          }
+          @if (resizeHandle(column); as handle) {
+            <span
+              data-adapttable-part="resize-handle"
+              [adaptAttrs]="handle"
+            ></span>
           }
           @if (v.filters?.header) {
             @if (v.filters.headerProps().get(column.key); as hp) {

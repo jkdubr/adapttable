@@ -3111,6 +3111,12 @@ comes from a kit through a slot.
   and names with their setters. `injectColumnDrag` returns a `ColumnDrag`
   (row and grip attributes that reorder a Columns menu by drag or keyboard),
   and `injectColumnRenameEditor` the inline column-name editor.
+  `injectColumnResize` (`ColumnResizeHandleProps`) is the header's resize
+  handle: pointer drag, arrow keys and a double-click that sizes to content.
+  `@adapttable/angular-unstyled/resizable-columns`, `/multi-sort` and
+  `/fit-columns` turn those on; the desktop header draws `resize-handle`,
+  `sort-index` and `header-actions`, `AdaptColumnHeaderRename` the
+  `header-rename-*` parts, and a phone draws `sort-select`.
 - Filters: `filterRuntimeFor` (`FilterRuntimeOptions`) derives a
   `TableFilters` runtime from the definitions — the predicates and the URL
   keys; `filterChipsFor` the active chips and their count;
@@ -3277,7 +3283,8 @@ with the `data-adapttable-part` names every kit shares. `AdaptDesktopTable`
 and `AdaptMobileCards` are the desktop body and phone card list;
 `AdaptPaginationFooter` is the pager. Its `features` input composes
 factories from secondary entries, each drawing the kit's own native
-controls — `columnMenu` (`AdaptColumnMenu`), `filters` (`AdaptFiltersForm`,
+controls — `columnMenu` (`AdaptColumnMenu`), `AdaptColumnHeaderRename`
+(the inline header rename form), `filters` (`AdaptFiltersForm`,
 `AdaptFilterDrawer`, `AdaptFilterPopover`, `AdaptFilterChips`,
 `AdaptAutoFilterForm`), `headerFilters`, `bulkActions` (`AdaptBulkBar`),
 `rowActions` (`RowActionsFeatureOptions`), `densityChooser`

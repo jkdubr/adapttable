@@ -85,6 +85,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-filters.mjs"
     },
+    "./fit-columns": {
+      "types": "./dist/types/adapttable-angular-unstyled-fit-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-fit-columns.mjs"
+    },
     "./fullscreen": {
       "types": "./dist/types/adapttable-angular-unstyled-fullscreen.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-fullscreen.mjs"
@@ -101,6 +105,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-header-filters.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-header-filters.mjs"
     },
+    "./multi-sort": {
+      "types": "./dist/types/adapttable-angular-unstyled-multi-sort.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-multi-sort.mjs"
+    },
     "./nested-table": {
       "types": "./dist/types/adapttable-angular-unstyled-nested-table.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-nested-table.mjs"
@@ -112,6 +120,10 @@
     "./preset": {
       "types": "./dist/types/adapttable-angular-unstyled-preset.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-preset.mjs"
+    },
+    "./resizable-columns": {
+      "types": "./dist/types/adapttable-angular-unstyled-resizable-columns.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-resizable-columns.mjs"
     },
     "./row-actions": {
       "types": "./dist/types/adapttable-angular-unstyled-row-actions.d.ts",

@@ -21,6 +21,16 @@ test("draws every row as a card with its column labels", async ({ page }) => {
   await expect(rows.nth(1)).toHaveText(/Team\s*Core/);
 });
 
+test("sorts the cards from the phone sort select", async ({ page }) => {
+  await page.goto(PAGE);
+  const select = part(page, "sort-select");
+  await expect(select).toBeVisible();
+  await expect(select.locator("option")).toHaveCount(6);
+  await expect(select).toHaveValue("");
+  await select.selectOption("load");
+  await expect(select).toHaveValue("load");
+});
+
 test("loads the next rows as the list reaches its end", async ({ page }) => {
   await page.goto(PAGE);
   await expect(part(page, "pager")).toHaveCount(0);

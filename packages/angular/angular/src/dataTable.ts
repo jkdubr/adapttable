@@ -174,6 +174,10 @@ export interface DataTable<TRow> {
    * columns, and every change a column menu makes.
    */
   readonly layout: Signal<ColumnLayout<TRow>>;
+  /**
+   * Whether a header can rename its column: the host passed `onColumnRename`.
+   */
+  readonly canRenameColumns: boolean;
   /** Whether the mobile layout's columns show. */
   readonly isMobile: Signal<boolean>;
   /** Labels: English defaults with the overrides merged. */
@@ -369,7 +373,9 @@ export function injectDataTable<TRow>(
   const flexShares = computed(() =>
     columnFlexShares({
       columns: columns(),
-      fitColumns: readMaybe(options.fitColumns ?? false),
+      fitColumns:
+        readMaybe(options.fitColumns ?? false) ||
+        featureOptions.fitColumns === true,
       widths: widths(),
     })
   );
@@ -452,6 +458,7 @@ export function injectDataTable<TRow>(
       )
     ),
     layout,
+    canRenameColumns: options.onColumnRename !== undefined,
     isMobile,
     labels,
     dir,
@@ -550,7 +557,8 @@ export function injectDataTable<TRow>(
       sortButtonAttributes(column, {
         sortLevels: source().sortLevels,
         sortByLabel: labels().sortBy,
-        multiSort: options.multiSort,
+        multiSort:
+          options.multiSort === true || featureOptions.multiSort === true,
         toggleSort,
         toggleSortLevel: (key) => {
           source().toggleSortLevel(key);

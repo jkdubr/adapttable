@@ -40,6 +40,8 @@ const EVENTS: Readonly<Record<string, string>> = {
   onMouseDown: "mousedown",
   onMouseEnter: "mouseenter",
   onMouseUp: "mouseup",
+  onPointerDown: "pointerdown",
+  onDoubleClick: "dblclick",
 };
 
 /**

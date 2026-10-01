@@ -926,6 +926,19 @@ export class AdaptDataTable<TRow> implements OnInit {
   private readonly root = viewChild<ElementRef<HTMLElement>>("root");
 
   /** Start the table from the inputs it reads once. */
+  /** The phone sort select: a column, or none. */
+  protected sortBy(event: Event): void {
+    const table = this.view();
+    if (table === undefined) return;
+    const value = (event.target as HTMLSelectElement).value;
+    table.table
+      .source()
+      .setSort(
+        value === "" ? undefined : value,
+        table.table.sortDir() ?? "asc"
+      );
+  }
+
   ngOnInit(): void {
     const injector = this.injector;
     const labels = computed((): TableLabels | undefined => {

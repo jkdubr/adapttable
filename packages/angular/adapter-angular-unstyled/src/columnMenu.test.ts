@@ -297,7 +297,7 @@ describe("the unstyled Angular Columns menu", () => {
       "Nation"
     );
     expect(headers()).toEqual(["name", "country", "population"]);
-    expect(parts("header-cell")[1]?.textContent?.trim()).toBe("Nation");
+    expect(parts("header-cell")[1]?.textContent).toContain("Nation");
   });
 
   it("cancels a rename with Escape or its button", async () => {

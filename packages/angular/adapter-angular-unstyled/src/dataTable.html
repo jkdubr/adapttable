@@ -14,6 +14,22 @@
           />
         </div>
       }
+      @if (v.table.isMobile() && v.table.sortByOptions().length > 0) {
+        <label>
+          {{ v.table.labels().sortBy }}
+          <select
+            data-adapttable-part="sort-select"
+            [attr.aria-label]="v.table.labels().sortBy"
+            [value]="v.table.sortBy() ?? ''"
+            (change)="sortBy($event)"
+          >
+            <option value="">—</option>
+            @for (option of v.table.sortByOptions(); track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+      }
       @if (v.filters; as f) {
         <ng-template #filtersTrigger>
           <button
