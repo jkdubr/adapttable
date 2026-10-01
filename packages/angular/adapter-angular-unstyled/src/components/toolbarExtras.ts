@@ -4,7 +4,10 @@
  * neither its handler nor its button.
  */
 import {
-  AdaptLiveRegion,
+  AdaptExportAnnouncer,
+  AdaptExportProgressChrome,
+  type ExportProgressSlots,
+  type ExportProgressSurfaceSlotProps,
   type ToolbarExtrasSlotProps,
 } from "@adapttable/angular";
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
@@ -63,10 +66,92 @@ export class AdaptFullscreenButton {
   readonly props = input.required<ToolbarExtrasSlotProps>();
 }
 
+/** The server-export progress surface. @internal */
+@Component({
+  selector: "adapt-export-progress-surface",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @let p = props();
+    <section
+      [attr.aria-label]="p.heading"
+      data-adapttable-part="export-progress-surface"
+      style="position: fixed; z-index: 20; inset-inline-end: 16px; bottom: 16px; width: 320px; max-width: calc(100vw - 32px); padding: 16px; border: 1px solid currentColor; border-radius: 8px; background: Canvas; color: CanvasText"
+    >
+      <div style="display: flex; align-items: center; gap: 8px">
+        <strong style="flex: 1">{{ p.heading }}</strong>
+        @if (p.dismiss; as dismiss) {
+          <button
+            type="button"
+            data-adapttable-part="export-progress-dismiss"
+            (click)="dismiss.onAction()"
+          >
+            {{ dismiss.label }}
+          </button>
+        }
+      </div>
+      @if (p.status === "busy") {
+        <progress
+          data-adapttable-part="export-progress-bar"
+          max="100"
+          [attr.value]="p.progress ?? null"
+          [attr.aria-label]="p.progressLabel"
+          style="display: block; width: 100%; margin-block: 12px"
+        ></progress>
+      }
+      @if (p.message) {
+        <p data-adapttable-part="export-progress-message">{{ p.message }}</p>
+      }
+      @if (p.error) {
+        <p data-adapttable-part="export-progress-message">{{ p.error }}</p>
+      }
+      <div
+        data-adapttable-part="export-progress-actions"
+        style="display: flex; justify-content: flex-end; gap: 8px"
+      >
+        @if (p.cancel; as cancel) {
+          <button
+            type="button"
+            data-adapttable-part="export-progress-cancel"
+            (click)="cancel.onAction()"
+          >
+            {{ cancel.label }}
+          </button>
+        }
+        @if (p.retry; as retry) {
+          <button
+            type="button"
+            data-adapttable-part="export-progress-retry"
+            (click)="retry.onAction()"
+          >
+            {{ retry.label }}
+          </button>
+        }
+        @if (p.download; as download) {
+          <a
+            [href]="download.url"
+            download
+            data-adapttable-part="export-progress-download"
+          >
+            {{ download.label }}
+          </a>
+        }
+      </div>
+    </section>
+  `,
+})
+export class AdaptExportProgressSurface {
+  /** The view from the progress chrome. */
+  readonly props = input.required<ExportProgressSurfaceSlotProps>();
+}
+
+const EXPORT_SLOTS: ExportProgressSlots = {
+  Surface: AdaptExportProgressSurface,
+};
+
 /** Exports the current view, and says how it went. @internal */
 @Component({
   selector: "adapt-export-button",
-  imports: [AdaptLiveRegion],
+  imports: [AdaptExportAnnouncer, AdaptExportProgressChrome],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
   template: `
@@ -86,14 +171,42 @@ export class AdaptFullscreenButton {
         }
         {{ p.exportLabel }}
       </button>
-      <output
-        [adaptLiveRegion]="p.exportAnnouncement ?? ''"
-        part="export-announcer"
-      ></output>
+      <adapt-export-progress-chrome
+        [progress]="p.exportProgressState ?? null"
+        [labels]="p.labels"
+        [slots]="slots"
+      />
+      <adapt-export-announcer [announcement]="p.exportAnnouncement ?? ''" />
     }
   `,
 })
 export class AdaptExportButton {
+  /** The slot's props. */
+  readonly props = input.required<ToolbarExtrasSlotProps>();
+
+  /** The progress surface. */
+  protected readonly slots = EXPORT_SLOTS;
+}
+
+/** Prints the table. @internal */
+@Component({
+  selector: "adapt-print-button",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    @let p = props();
+    @if (p.onPrint; as print) {
+      <button
+        type="button"
+        data-adapttable-part="print-button"
+        (click)="print()"
+      >
+        {{ p.printLabel }}
+      </button>
+    }
+  `,
+})
+export class AdaptPrintButton {
   /** The slot's props. */
   readonly props = input.required<ToolbarExtrasSlotProps>();
 }

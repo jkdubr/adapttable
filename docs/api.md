@@ -3184,6 +3184,12 @@ comes from a kit through a slot.
   figures; `SelectionStatsSlots` names the kit's strip. `SelectionStats` is
   the count, sum, average, min and max. `AdaptGridFocusAnnouncer` speaks
   the focused cell; `GridFocusAnnouncement` is the focus it reads.
+- Export and print: `injectExportHandler` runs one export — CSV, XLSX or PDF —
+  and `injectExportCsv` is that run for a CSV file. `exportXlsx()` and
+  `exportPdf()` arm the workbook and PDF writers. `AdaptExportProgressChrome`
+  lays out a server export's progress; `ExportProgressSlots` names the kit's
+  surface. `AdaptExportAnnouncer` says how the file ended. `print(onPrint, true)`
+  adds the toolbar's print button.
 - Grouping: `grouping` (with `GroupingExtras`) groups rows under collapsible
   headers, with per-group subtotals, optional footers and paged groups.
   `injectGrouping` (`GroupingOptions`) is its live model, a `TableGrouping`
@@ -3381,6 +3387,7 @@ the card), `virtualize`, `cellNavigation`, `findInTable` (`AdaptFindBar`,
 `AdaptContextMenuSeparator`), `sidePanel` (`AdaptSidePanelLive`,
 `AdaptSidePanelFrame`, `AdaptSidePanelTab`, `AdaptSidePanelClose`), `statusBar` (`AdaptStatusBarLive`,
 `AdaptStatusBar`, `AdaptSelectionStatsBar`), `selectionStats`,
+`exportXlsx`, `exportPdf`, `print` (`AdaptPrintButton`),
 `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,

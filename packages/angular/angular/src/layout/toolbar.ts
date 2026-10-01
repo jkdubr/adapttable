@@ -2,32 +2,12 @@
  * The toolbar's optional controls, as signals: row density kept in the URL,
  * the fullscreen toggle, and CSV export — each over core's model.
  */
-import {
-  type ColumnMetadata,
-  createExportController,
-  densitySlice,
-  exportButtonLabel,
-  type ExportCsvOptions,
-  type ExportRunHandler,
-  makeExportCsvHandler,
-  resolveExportAnnouncement,
-  resolveExportCsv,
-  resolveExportDisabledReason,
-  resolveExportProgressState,
-  type TableDensity,
-  type TableLabels,
-  type TableSource,
-} from "@adapttable/core";
-import {
-  type ExportHandlerState,
-  type FeatureHostState,
-  type FullscreenState,
-} from "@adapttable/core/binding";
+import { densitySlice, type TableDensity } from "@adapttable/core";
+import type { FullscreenState } from "@adapttable/core/binding";
 import { DOCUMENT } from "@angular/common";
 import {
   assertInInjectionContext,
   computed,
-  DestroyRef,
   effect,
   inject,
   Injector,
@@ -36,7 +16,6 @@ import {
 } from "@angular/core";
 
 import { onBrowser } from "../hooks/platform";
-import { fromStore } from "../store";
 import type { TableUrlStateOptions } from "../url/tableUrlState";
 import { injectUrlSlice } from "../url/urlSlice";
 
@@ -145,89 +124,10 @@ export function injectFullscreen(
   });
 }
 
-/**
- * Options for {@link injectExportCsv}.
- *
- * @public
- */
-export interface ExportCsvHandlerOptions<TRow> {
-  /** The export configuration, from `exportCsv(...)`. */
-  readonly exportCsv: boolean | ExportCsvOptions<TRow>;
-  /** The table's source. */
-  readonly source: Signal<TableSource<TRow>>;
-  /** The columns the export writes, in order. */
-  readonly columns: Signal<readonly ColumnMetadata<TRow>[]>;
-  /** Resolved labels. */
-  readonly labels: Signal<Required<TableLabels>>;
-  /** The table's feature host, for writers features register. */
-  readonly featureHost?: FeatureHostState;
-  /** The injector to run in. Omit inside an injection context. */
-  readonly injector?: Injector;
-}
-
-/**
- * CSV export of the table's view: the button's handler, whether it is busy,
- * what it announces and its label.
- *
- * @param options - See {@link ExportCsvHandlerOptions}.
- * @returns The state a toolbar's Export button reads.
- *
- * @public
- */
-export function injectExportCsv<TRow>(
-  options: ExportCsvHandlerOptions<TRow>
-): Signal<ExportHandlerState> {
-  if (!options.injector) assertInInjectionContext(injectExportCsv);
-  const injector = options.injector ?? inject(Injector);
-  const resolved = resolveExportCsv(options.exportCsv, options.featureHost);
-  const format = resolved?.writer?.extension ?? "csv";
-  const serverBuilt =
-    resolved?.scope === "all" && resolved.onExportAll !== undefined;
-  // Built at click time, so the export writes the rows and columns on
-  // screen then.
-  const handler: ExportRunHandler = (controls) =>
-    makeExportCsvHandler(
-      options.exportCsv,
-      options.source(),
-      options.columns(),
-      undefined,
-      options.featureHost
-    )?.(controls);
-  const controller = createExportController({
-    handler: resolved ? handler : undefined,
-    pageOnly: false,
-    serverBuilt,
-  });
-  injector.get(DestroyRef).onDestroy(controller.connect());
-  const snapshot = fromStore(controller, { injector });
-  return computed(() => {
-    const { status, progress, message, error, downloadUrl, run } = snapshot();
-    const labels = options.labels();
-    return {
-      onExportCsv: resolved ? controller.start : undefined,
-      exportBusy: status === "busy",
-      exportStatus: status,
-      exportAnnouncement: resolveExportAnnouncement({
-        status,
-        run,
-        labels,
-        progress,
-        serverBuilt,
-      }),
-      exportProgressState: resolveExportProgressState({
-        serverBuilt,
-        status,
-        progress,
-        message,
-        error,
-        downloadUrl,
-        cancel: controller.cancel,
-        retry: controller.start,
-        dismiss: controller.dismiss,
-      }),
-      exportLabel: exportButtonLabel(labels, format),
-      exportDisabled: false,
-      exportDisabledReason: resolveExportDisabledReason(labels, false),
-    };
-  });
-}
+export {
+  type ExportCsvHandlerOptions,
+  exportPdf,
+  exportXlsx,
+  injectExportCsv,
+  injectExportHandler,
+} from "../export/exportHandler";

@@ -122,6 +122,9 @@ import { expandChevronIcon } from '@adapttable/core/binding';
 import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
+import { ExportProgressState } from '@adapttable/core';
+import { ExportProgressSurfaceSlotProps } from '@adapttable/core/binding';
+import { ExportProgressView } from '@adapttable/core';
 import { EXTRA_OVER_SPAN_ROW_STYLE } from '@adapttable/core/binding';
 import { EXTRA_OVER_SPAN_STYLE } from '@adapttable/core/binding';
 import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
@@ -273,6 +276,7 @@ import { pinnedRowSticky } from '@adapttable/core/binding';
 import { pinnedSummaryPart } from '@adapttable/core';
 import { PinOffset } from '@adapttable/core';
 import { PinSide } from '@adapttable/core';
+import { printToolbarProps } from '@adapttable/core/binding';
 import { QueryAggregate } from '@adapttable/core';
 import { QueryFilterGroup } from '@adapttable/core';
 import { QuerySupport } from '@adapttable/core';
@@ -1154,6 +1158,49 @@ export class AdaptEditableCellGate<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptEditableCellGate<any>, never>;
+}
+
+// @public
+export class AdaptExportAnnouncer {
+    readonly announcement: InputSignal<string>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptExportAnnouncer, "adapt-export-announcer", never, {
+        "announcement": {
+            "alias": "announcement";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptExportAnnouncer, never>;
+}
+
+// @public
+export class AdaptExportProgressChrome {
+    readonly labels: InputSignal<TableLabels>;
+    readonly progress: InputSignal<ExportProgressState | null>;
+    readonly slots: InputSignal<ExportProgressSlots>;
+    protected readonly view: Signal<ExportProgressView | undefined>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptExportProgressChrome, "adapt-export-progress-chrome", never, {
+        "progress": {
+            "alias": "progress";
+            "required": false;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptExportProgressChrome, never>;
 }
 
 // @public
@@ -3142,6 +3189,19 @@ export { ExportCsvOptions }
 export { ExportHandlerState }
 
 // @public
+export function exportPdf<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
+// @public
+export interface ExportProgressSlots {
+    readonly Surface: Type<unknown>;
+}
+
+export { ExportProgressSurfaceSlotProps }
+
+// @public
+export function exportXlsx<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
+// @public
 export function extendFeature(base: AdaptTableFeature, renders: readonly FeatureRender<never, SlotComponent>[]): AdaptTableFeature;
 
 // @public
@@ -3662,6 +3722,9 @@ export function injectEditValidation<TRow>(options?: EditValidationInjectOptions
 export function injectExportCsv<TRow>(options: ExportCsvHandlerOptions<TRow>): Signal<ExportHandlerState>;
 
 // @public
+export function injectExportHandler<TRow>(options: ExportCsvHandlerOptions<TRow>): Signal<ExportHandlerState>;
+
+// @public
 export function injectFindFocus(options: {
     readonly find: Signal<FindInTableState>;
     readonly focusCell: (cell: GridCell) => void;
@@ -3989,6 +4052,8 @@ export { PinSide }
 // @public
 function print_2(onPrint: () => void, printButton?: boolean): AdaptTableFeature;
 export { print_2 as print }
+
+export { printToolbarProps }
 
 // @public
 export function provideAdaptTableFeatures(...features: readonly AdaptTableFeature[]): EnvironmentProviders;

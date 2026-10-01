@@ -49,6 +49,7 @@ export {
   AdaptDensityButton,
   AdaptExportButton,
   AdaptFullscreenButton,
+  AdaptPrintButton,
 } from "./components/toolbarExtras";
 export {
   AdaptTreeButton,

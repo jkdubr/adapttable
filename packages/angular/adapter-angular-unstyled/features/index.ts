@@ -12,13 +12,18 @@ export { commandPalette } from "@adapttable/angular-unstyled/command-palette";
 export { contextMenu } from "@adapttable/angular-unstyled/context-menu";
 export { densityChooser } from "@adapttable/angular-unstyled/density";
 export { editing, rowEditing } from "@adapttable/angular-unstyled/editing";
-export { exportCsv } from "@adapttable/angular-unstyled/export";
+export {
+  exportCsv,
+  exportPdf,
+  exportXlsx,
+} from "@adapttable/angular-unstyled/export";
 export { filters } from "@adapttable/angular-unstyled/filters";
 export { findInTable } from "@adapttable/angular-unstyled/find-in-table";
 export { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
 export { grouping } from "@adapttable/angular-unstyled/grouping";
 export { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
 export { headerFilters } from "@adapttable/angular-unstyled/header-filters";
+export { print } from "@adapttable/angular-unstyled/print";
 export {
   rowActions,
   type RowActionsFeatureOptions,

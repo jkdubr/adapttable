@@ -52,6 +52,12 @@ export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): AdaptTableFeature;
 
 // @public
+export function exportPdf<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
+// @public
+export function exportXlsx<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
+// @public
 export function filters<TRow>(defs?: readonly FilterDef<TRow>[]): AdaptTableFeature;
 
 // @public
@@ -70,6 +76,10 @@ export function groupingPanel<TRow = unknown>(groupBy?: string | readonly string
 
 // @public
 export function headerFilters(): AdaptTableFeature;
+
+// @public
+function print_2(onPrint: () => void, printButton?: boolean): AdaptTableFeature;
+export { print_2 as print }
 
 // @public
 export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], options?: RowActionsFeatureOptions<TRow>): AdaptTableFeature;

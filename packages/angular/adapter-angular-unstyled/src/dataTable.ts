@@ -123,6 +123,7 @@ import {
   type PinnedRows,
   pinnedRowSticky,
   pinnedSummaryPart,
+  printToolbarProps,
   type QueryAggregate,
   type QuerySupport,
   resolveBodyVirtualization,
@@ -1562,6 +1563,11 @@ export class AdaptDataTable<TRow> implements OnInit {
         : undefined,
       isFullscreen: fullscreen?.().active,
       ...exporter?.(),
+      ...printToolbarProps(
+        featureOptions.printButton === true,
+        featureOptions.onPrint as (() => void) | undefined,
+        table.labels()
+      ),
       labels: table.labels(),
     }));
     const columnMenuProps = computed((): ColumnMenuSlotProps<never> => ({

@@ -164,6 +164,11 @@ export {
   type EditValidationInjectOptions,
   injectEditValidation,
 } from "./editing/validation";
+export { AdaptExportAnnouncer } from "./export/exportAnnouncer";
+export {
+  AdaptExportProgressChrome,
+  type ExportProgressSlots,
+} from "./export/exportProgressChrome";
 export {
   ADAPTTABLE_FEATURES,
   type AdaptTableFeature,
@@ -359,8 +364,11 @@ export {
   type DensityOptions,
   type DensityState,
   type ExportCsvHandlerOptions,
+  exportPdf,
+  exportXlsx,
   injectDensity,
   injectExportCsv,
+  injectExportHandler,
   injectFullscreen,
 } from "./layout/toolbar";
 export {

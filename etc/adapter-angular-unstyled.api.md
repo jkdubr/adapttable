@@ -48,6 +48,7 @@ import { editorInputType } from '@adapttable/angular';
 import { editorValidationProps } from '@adapttable/angular';
 import { ElementRef } from '@angular/core';
 import { ExpandToggleSlotProps } from '@adapttable/angular';
+import { ExportProgressSlots } from '@adapttable/angular';
 import { ExtraFilters } from '@adapttable/angular';
 import { FacetCounts } from '@adapttable/core';
 import { FeatureNotice } from '@adapttable/core';
@@ -841,6 +842,7 @@ export class AdaptExpandToggle {
 // @internal
 export class AdaptExportButton {
     readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    protected readonly slots: ExportProgressSlots;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptExportButton, "adapt-export-button", never, {
         "props": {
@@ -1236,6 +1238,21 @@ export class AdaptPaginationFooter<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPaginationFooter<any>, never>;
+}
+
+// @internal
+export class AdaptPrintButton {
+    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPrintButton, "adapt-print-button", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPrintButton, never>;
 }
 
 // @internal

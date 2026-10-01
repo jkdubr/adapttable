@@ -10,6 +10,12 @@ import { ExportCsvOptions } from '@adapttable/angular';
 // @public
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): AdaptTableFeature;
 
+// @public
+export function exportPdf<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
+// @public
+export function exportXlsx<TRow>(options?: boolean | Omit<ExportCsvOptions<TRow>, "writer">): AdaptTableFeature;
+
 // (No @packageDocumentation comment for this package)
 
 ```

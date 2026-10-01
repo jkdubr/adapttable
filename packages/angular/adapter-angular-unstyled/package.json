@@ -133,6 +133,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-preset.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-preset.mjs"
     },
+    "./print": {
+      "types": "./dist/types/adapttable-angular-unstyled-print.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-print.mjs"
+    },
     "./resizable-columns": {
       "types": "./dist/types/adapttable-angular-unstyled-resizable-columns.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-resizable-columns.mjs"

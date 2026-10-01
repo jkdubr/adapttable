@@ -1,7 +1,12 @@
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
 import { densityChooser } from "@adapttable/angular-unstyled/density";
-import { exportCsv } from "@adapttable/angular-unstyled/export";
+import {
+  exportCsv,
+  exportPdf,
+  exportXlsx,
+} from "@adapttable/angular-unstyled/export";
 import { fullscreen } from "@adapttable/angular-unstyled/fullscreen";
+import { print } from "@adapttable/angular-unstyled/print";
 import { rowActions } from "@adapttable/angular-unstyled/row-actions";
 import { savedViews } from "@adapttable/angular-unstyled/saved-views";
 import { Component, input } from "@angular/core";
@@ -170,6 +175,33 @@ describe("the unstyled Angular toolbar controls", () => {
     await settle();
     expect(part("views-panel")).toBeNull();
     expect(document.activeElement).toBe(part("views-button"));
+  });
+
+  it("exports a workbook and a pdf, and prints from the toolbar", async () => {
+    expect(exportXlsx(false)).toBeTruthy();
+    expect(exportXlsx({ filename: "cities.xlsx" })).toBeTruthy();
+    expect(exportPdf(false)).toBeTruthy();
+    expect(print(() => undefined)).toBeTruthy();
+
+    const printed: string[] = [];
+    const workbook = await mount([exportXlsx()]);
+    expect(workbook.part("export-csv-button")?.textContent).toContain("XLSX");
+    workbook.fixture.destroy();
+
+    const pdf = await mount([exportPdf()]);
+    expect(pdf.part("export-csv-button")?.textContent).toContain("PDF");
+    pdf.fixture.destroy();
+
+    const { part, settle } = await mount([
+      print(() => {
+        printed.push("print");
+      }, true),
+    ]);
+    const button = part<HTMLButtonElement>("print-button");
+    expect(button?.textContent?.trim()).toBe("Print");
+    button!.click();
+    await settle();
+    expect(printed).toEqual(["print"]);
   });
 
   it("exports with the defaults, beside an empty actions list", async () => {
