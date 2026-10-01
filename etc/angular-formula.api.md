@@ -4,7 +4,97 @@
 
 ```ts
 
-// @internal
-export const __angularFormulaReserved: true;
+import { ColumnMetadata } from '@adapttable/core';
+import { ExtraFilters } from '@adapttable/core';
+import { URL_SLICE_WRITE_DEBOUNCE_MS as FORMULA_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
+import { FormulaColumnSpec } from '@adapttable/core';
+import { FormulaColumnsResult } from '@adapttable/core';
+import { Injector } from '@angular/core';
+import { Signal } from '@angular/core';
+import { TableQueryParams } from '@adapttable/core';
+import { TemplateRef } from '@angular/core';
+import { Type } from '@angular/core';
+import { UrlStateAdapter } from '@adapttable/core';
+
+// @public
+export interface AngularFormulaColumnsResult<TRow> extends Omit<FormulaColumnsResult<TRow>, "columns"> {
+    columns: readonly ColumnDef<TRow>[];
+}
+
+// @public
+export function buildFormulaColumns<TRow extends object>(specs: readonly FormulaColumnSpec[]): AngularFormulaColumnsResult<TRow>;
+
+// @public
+export interface CellContext<TRow> {
+    readonly $implicit: TRow;
+    readonly column: ColumnDef<TRow>;
+    readonly row: TRow;
+    readonly rowIndex: number;
+    readonly value: unknown;
+}
+
+// @public
+export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+    cell?: Renderer<CellContext<TRow>>;
+    footer?: Renderer<FooterContext<TRow>>;
+    header?: string;
+    headerActions?: string;
+    headerCell?: Renderer<HeaderContext<TRow>>;
+}
+
+// @public
+export interface FooterContext<TRow> extends HeaderContext<TRow> {
+    readonly value: unknown;
+}
+
+export { FORMULA_URL_WRITE_DEBOUNCE_MS }
+
+export { FormulaColumnSpec }
+
+// @public
+export interface FormulaUrlState {
+    readonly formulas: Signal<readonly FormulaColumnSpec[]>;
+    readonly onFormulasChange: (next: readonly FormulaColumnSpec[]) => void;
+}
+
+// @public
+export interface FormulaUrlStateOptions extends UrlSliceOptions {
+    readonly defaultFormulas?: MaybeSignalOptional<readonly FormulaColumnSpec[]>;
+}
+
+// @public
+export interface HeaderContext<TRow> {
+    readonly $implicit: ColumnDef<TRow>;
+    readonly column: ColumnDef<TRow>;
+}
+
+// @public
+export function injectFormulaUrlState(options?: FormulaUrlStateOptions): FormulaUrlState;
+
+// @public
+export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
+
+// @public
+export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
+
+// @public
+export interface TableUrlStateOptions {
+    readonly arrayExtraKeys?: MaybeSignalOptional<readonly string[]>;
+    readonly defaults?: MaybeSignalOptional<Partial<TableQueryParams> & {
+        extra?: ExtraFilters;
+    }>;
+    readonly injector?: Injector;
+    readonly numberExtraKeys?: MaybeSignalOptional<readonly string[]>;
+    readonly urlAdapter?: UrlStateAdapter;
+    readonly urlKey?: string;
+    readonly urlSync?: boolean;
+}
+
+// @public
+export interface UrlSliceOptions extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "urlKey"> {
+    readonly injector?: Injector;
+}
+
+// (No @packageDocumentation comment for this package)
 
 ```

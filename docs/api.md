@@ -3246,9 +3246,17 @@ comes from a kit through a slot.
   read-only signal that ends with its injector (`FromStoreOptions`).
   `MaybeSignal` and `MaybeSignalOptional` are the option types that take a
   value or a signal of one, and `readMaybe` reads either. The secondary
-  entries `./formula`, `./pivot` and `./sparkline` are reserved and export no
-  public API; each carries one internal marker (`__angularFormulaReserved`,
-  `__angularPivotReserved`, `__angularSparklineReserved`).
+  entry `./pivot` is reserved and exports no public API; it carries one
+  internal marker (`__angularPivotReserved`). `./sparkline` exports
+  `AdaptSparkline`, `sparklineColumn` (`SparklineProps`,
+  `SparklineColumnSpec`, `SparklineKind`), `finiteSparklineValues`,
+  `sparklineSummary` and `sparklineExportValue`: a cell draws a bar, line or
+  area from the series, and sort and export read the numbers.
+  `./formula` exports `buildFormulaColumns`
+  (`AngularFormulaColumnsResult`, `FormulaColumnSpec`) and
+  `injectFormulaUrlState` (`FormulaUrlState`, `FormulaUrlStateOptions`,
+  `FORMULA_URL_WRITE_DEBOUNCE_MS`), so a typed column is a `ColumnDef` and
+  survives in the URL.
 - `injectHighlight(enabled)` marks a row (`flashRow`) or a cell
   (`flashCell`) for a moment over core's highlight store and returns a
   `Highlight`: `isRowHighlighted` and `isCellHighlighted`, tracked where they

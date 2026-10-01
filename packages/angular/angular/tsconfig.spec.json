@@ -6,5 +6,5 @@
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["src", "router", "stream"]
+  "include": ["src", "router", "stream", "formula", "sparkline"]
 }

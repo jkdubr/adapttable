@@ -1,14 +1,37 @@
 /**
- * `@adapttable/angular/sparkline` — reserved secondary entry. Filled when the
- * matching feature lands; kept empty so the package layout matches React.
+ * Sparkline chart columns — `@adapttable/angular/sparkline`.
+ *
+ * A separate entry point, so a table that never draws a chart never
+ * downloads one. Import it onto a column; do not, and none of this
+ * code reaches the bundle.
+ *
+ * ```ts
+ * import { sparklineColumn } from "@adapttable/angular/sparkline";
+ *
+ * sparklineColumn({
+ *   key: "load",
+ *   header: "Load",
+ *   values: (row) => row.history,
+ *   kind: "area",
+ * })
+ * ```
  *
  * @packageDocumentation
  */
-
-/**
- * Build-time marker so ng-packagr emits a declaration file. Not part of the
- * public surface.
- *
- * @internal
- */
-export const __angularSparklineReserved = true as const;
+export {
+  AdaptSparkline,
+  finiteSparklineValues,
+  sparklineColumn,
+  type SparklineColumnSpec,
+  sparklineExportValue,
+  type SparklineKind,
+  type SparklineProps,
+  sparklineSummary,
+} from "./sparkline";
+export type {
+  CellContext,
+  ColumnDef,
+  FooterContext,
+  HeaderContext,
+  Renderer,
+} from "@adapttable/angular";
