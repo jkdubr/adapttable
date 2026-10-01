@@ -7,6 +7,11 @@
     [attr.data-refreshing]="v.table.isRefreshing() ? '' : null"
     [attr.aria-busy]="v.table.isRefreshing() ? true : null"
   >
+    <ng-container
+      [adaptSlot]="commandPaletteSlot"
+      [adaptSlotProps]="v.commandPalette()"
+      [adaptSlotTable]="v.table"
+    />
     @if (v.findBar; as findBar) {
       <ng-container
         [adaptSlot]="findBarSlot"

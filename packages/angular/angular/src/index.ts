@@ -17,6 +17,25 @@ export {
   type RowActionsOptions,
 } from "./actions/bulkActionRunner";
 export {
+  type CommandPaletteInjectOptions,
+  injectCommandPalette,
+  OPEN_PALETTE_COMMAND,
+  type TableCommandPalette,
+} from "./actions/commandPalette";
+export {
+  AdaptCommandPaletteChrome,
+  type CommandPaletteSlots,
+} from "./actions/commandPaletteChrome";
+export {
+  ADAPTTABLE_PALETTE_OPEN,
+  type PaletteOpenState,
+} from "./actions/paletteState";
+export {
+  DEFAULT_SHORTCUTS,
+  injectShortcuts,
+  type UseShortcutsOptions,
+} from "./actions/shortcuts";
+export {
   aggregate,
   type AggregateOptions,
   type AggregateSpec,

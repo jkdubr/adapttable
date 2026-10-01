@@ -64,6 +64,7 @@ import { ColumnResizeHandleProps } from '@adapttable/core';
 import { ColumnSelectCheckboxChromeProps } from '@adapttable/core/binding';
 import { ColumnSelectCheckboxProps } from '@adapttable/core/binding';
 import { Command } from '@adapttable/core';
+import { COMMAND_PALETTE_LIVE } from '@adapttable/core/binding';
 import { ConfirmHandler } from '@adapttable/core';
 import { ContextMenuItem } from '@adapttable/core';
 import { ContextMenuTarget } from '@adapttable/core';
@@ -79,6 +80,7 @@ import { coreGroupingPanel } from '@adapttable/core/binding';
 import { coreHeaderFilters } from '@adapttable/core/binding';
 import { coreRowActions } from '@adapttable/core/binding';
 import { coreSavedViews } from '@adapttable/core/binding';
+import { DEFAULT_SHORTCUTS } from '@adapttable/core';
 import { defaultConfirm } from '@adapttable/core';
 import { defaultFilterRegistry } from '@adapttable/core';
 import { desktopBodySlots } from '@adapttable/core/binding';
@@ -121,8 +123,8 @@ import { ExtraRow } from '@adapttable/core';
 import { eyeIcon } from '@adapttable/core/binding';
 import { FacetMap } from '@adapttable/core';
 import { FeatureApplyInput } from '@adapttable/core/binding';
-import { FeatureHostState } from '@adapttable/core/binding';
-import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core';
+import { FeatureHostState } from '@adapttable/core';
+import { FeatureHostState as FeatureHostState_2 } from '@adapttable/core/binding';
 import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
@@ -245,6 +247,7 @@ import { NestedTableParent } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
 import { offersAllMatching } from '@adapttable/core';
 import { OnInit } from '@angular/core';
+import { OPEN_PALETTE_COMMAND } from '@adapttable/core';
 import { orderedCardEntries } from '@adapttable/core';
 import { PageSelector } from '@adapttable/core';
 import { PaginatedResponse } from '@adapttable/core';
@@ -336,6 +339,7 @@ import { splitRelativeToken } from '@adapttable/core';
 import { stopCellEditKeyboard } from '@adapttable/core';
 import { stopEditKeys } from '@adapttable/core';
 import { SummaryRowFn } from '@adapttable/core';
+import { TableCommandOptions } from '@adapttable/core';
 import { TableDensity } from '@adapttable/core';
 import { TableLabels } from '@adapttable/core';
 import { TableLabels as TableLabels_2 } from '@adapttable/core/binding';
@@ -843,6 +847,85 @@ export class AdaptColumnSpacer {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptColumnSpacer, never>;
+}
+
+// @public
+export class AdaptCommandPaletteChrome {
+    constructor();
+    readonly className: InputSignal<string | undefined>;
+    readonly commands: InputSignal<readonly ContextMenuItem[]>;
+    protected readonly dialogLabel: Signal<string>;
+    protected readonly emptyProps: Signal<    {
+    message: string;
+    }>;
+    protected readonly inputProps: Signal<    {
+    inputProps: {
+    value: string;
+    onChange: (next: string) => void;
+    onKeyDown: (event: KeyboardEvent) => void;
+    ref: (element: HTMLInputElement | null) => void;
+    role: "combobox";
+    "aria-expanded": true;
+    "aria-controls": string;
+    "aria-activedescendant": string | undefined;
+    "aria-label": string;
+    placeholder: string;
+    "data-adapttable-part": "command-input";
+    };
+    }>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    readonly listId: string;
+    readonly onClose: InputSignal<() => void>;
+    readonly open: InputSignal<boolean>;
+    protected readonly rows: Signal<    {
+    command: ContextMenuItem;
+    active: boolean;
+    itemProps: {
+    id: string;
+    role: "option";
+    "aria-selected": boolean;
+    "aria-disabled": boolean | undefined;
+    "data-adapttable-part": "command-item";
+    onClick: () => void;
+    onMouseEnter: () => void;
+    };
+    }[]>;
+    readonly slots: InputSignal<CommandPaletteSlots>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptCommandPaletteChrome, "adapt-command-palette-chrome", never, {
+        "commands": {
+            "alias": "commands";
+            "required": true;
+            "isSignal": true;
+        };
+        "open": {
+            "alias": "open";
+            "required": true;
+            "isSignal": true;
+        };
+        "onClose": {
+            "alias": "onClose";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptCommandPaletteChrome, never>;
 }
 
 // @public
@@ -1872,6 +1955,9 @@ export const ADAPTTABLE_FEATURES: InjectionToken<readonly AdaptTableFeature[]>;
 export const ADAPTTABLE_FIND_STATE: InjectionToken<WritableSignal<FindInTableState | null>>;
 
 // @public
+export const ADAPTTABLE_PALETTE_OPEN: InjectionToken<WritableSignal<PaletteOpenState | null>>;
+
+// @public
 export const ADAPTTABLE_SLOT_TABLE: InjectionToken<SlotTable>;
 
 // @public
@@ -2073,7 +2159,7 @@ export function batchEditing<TRow>(onBatchEdit: BatchEditHandler<TRow>, extras?:
 export interface BatchEditingInjectOptions<TRow> {
     readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
     readonly enabled?: MaybeSignal<boolean>;
-    readonly featureHost?: FeatureHostState_2;
+    readonly featureHost?: FeatureHostState;
     readonly injector?: Injector;
     readonly onBatchEdit?: BatchEditHandler<TRow>;
     readonly onEditCancel?: EditEventHandler<TRow>;
@@ -2375,8 +2461,17 @@ export interface ColumnWindowOptions<TRow> {
 
 export { Command }
 
+export { COMMAND_PALETTE_LIVE }
+
 // @public
 export function commandPalette(options?: boolean | CommandPaletteOptions): AdaptTableFeature;
+
+// @public
+export interface CommandPaletteInjectOptions extends TableCommandOptions {
+    readonly commandPalette?: boolean | CommandPaletteOptions;
+    readonly featureHost?: FeatureHostState;
+    readonly labels: TableLabels;
+}
 
 // @public
 export interface CommandPaletteOptions {
@@ -2385,6 +2480,13 @@ export interface CommandPaletteOptions {
     readonly onOpenChange?: (open: boolean) => void;
     readonly open?: boolean;
     readonly shortcuts?: readonly Shortcut[];
+}
+
+// @public
+export interface CommandPaletteSlots {
+    readonly Empty: Type<unknown>;
+    readonly Input: Type<unknown>;
+    readonly Item: Type<unknown>;
 }
 
 // @public
@@ -2449,7 +2551,7 @@ export interface DataTable<TRow> {
         readonly retry?: () => void;
         readonly retrying: boolean;
     } | undefined>;
-    readonly featureHost: FeatureHostState;
+    readonly featureHost: FeatureHostState_2;
     readonly featureOptions: Readonly<Record<string, unknown>>;
     readonly hasSlot: (slot: {
         readonly id: string;
@@ -2512,6 +2614,8 @@ export interface DataTableOptions<TRow> extends ColumnLayoutOptions {
     readonly source: Signal<TableSource<TRow>>;
     readonly tableLabel?: MaybeSignalOptional<string>;
 }
+
+export { DEFAULT_SHORTCUTS }
 
 export { defaultConfirm }
 
@@ -2659,7 +2763,7 @@ export { ExpandToggleSlotProps }
 export interface ExportCsvHandlerOptions<TRow> {
     readonly columns: Signal<readonly ColumnMetadata<TRow>[]>;
     readonly exportCsv: boolean | ExportCsvOptions<TRow>;
-    readonly featureHost?: FeatureHostState;
+    readonly featureHost?: FeatureHostState_2;
     readonly injector?: Injector;
     readonly labels: Signal<Required<TableLabels>>;
     readonly source: Signal<TableSource<TRow>>;
@@ -2780,7 +2884,7 @@ export interface FilterRuntimeOptions<TRow> {
     readonly columns: MaybeSignal<readonly ColumnMetadata<TRow>[]>;
     readonly data: MaybeSignal<readonly TRow[]>;
     readonly defs: readonly FilterDef<TRow>[] | undefined;
-    readonly featureHost?: Signal<FeatureHostState | undefined>;
+    readonly featureHost?: Signal<FeatureHostState_2 | undefined>;
     readonly filterTypes?: readonly FilterTypeSpec[];
     readonly locale?: Signal<string | undefined>;
 }
@@ -3158,6 +3262,9 @@ export function injectColumnResize(key: string, setWidth: (key: string, width: n
 export function injectColumnWindow<TRow>(options: ColumnWindowOptions<TRow>): Signal<ColumnWindow<TRow>>;
 
 // @public
+export function injectCommandPalette(options: Signal<CommandPaletteInjectOptions>, injector?: Injector): Signal<TableCommandPalette>;
+
+// @public
 export function injectDataTable<TRow>(options: DataTableOptions<TRow>): DataTable<TRow>;
 
 // @public
@@ -3312,6 +3419,9 @@ export function injectSavedViews(options: SavedViewsOptions): SavedViewsState;
 export function injectServerData<TRow>(options: ServerDataOptions<TRow>): Signal<TableSource<TRow>>;
 
 // @public
+export function injectShortcuts(options: Signal<UseShortcutsOptions>, injector?: Injector): void;
+
+// @public
 export function injectTableData<TRow>(options: TableDataOptions<TRow>): TableDataResult<TRow>;
 
 // @public
@@ -3452,6 +3562,8 @@ export { nextPinSide }
 
 export { offersAllMatching }
 
+export { OPEN_PALETTE_COMMAND }
+
 export { orderedCardEntries }
 
 export { PaginatedResponse }
@@ -3461,6 +3573,12 @@ export { PaginationInfo }
 export { PaginationMode }
 
 export { PaginationSlot }
+
+// @public
+export interface PaletteOpenState {
+    readonly open: boolean;
+    readonly setOpen: (open: boolean) => void;
+}
 
 export { partitionPinnedRows }
 
@@ -3654,7 +3772,7 @@ export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Recor
 export interface RowEditingInjectOptions<TRow> {
     readonly columns: MaybeSignal<readonly EditableColumnLike<TRow>[]>;
     readonly enabled?: MaybeSignal<boolean>;
-    readonly featureHost?: FeatureHostState_2;
+    readonly featureHost?: FeatureHostState;
     readonly injector?: Injector;
     readonly onEditCancel?: EditEventHandler<TRow>;
     readonly onEditCommit?: EditEventHandler<TRow>;
@@ -3881,7 +3999,7 @@ export { slotRender }
 
 // @public
 export interface SlotTable {
-    readonly featureHost: FeatureHostState;
+    readonly featureHost: FeatureHostState_2;
     readonly slotFills: SlotFills;
 }
 
@@ -3899,6 +4017,14 @@ export { stopEditKeys }
 export { SummaryRowFn }
 
 // @public
+export interface TableCommandPalette {
+    readonly close: () => void;
+    readonly commands: readonly Command[];
+    readonly open: boolean;
+    readonly show: () => void;
+}
+
+// @public
 export interface TableDataOptions<TRow> extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "defaults" | "urlKey"> {
     readonly aggregates?: MaybeSignalOptional<readonly QueryAggregate[]>;
     readonly columns: MaybeSignal<readonly ColumnDef<TRow>[]>;
@@ -3907,7 +4033,7 @@ export interface TableDataOptions<TRow> extends Pick<TableUrlStateOptions, "urlA
     readonly error?: MaybeSignalOptional<Error | null>;
     readonly facetKeys?: MaybeSignalOptional<readonly string[]>;
     readonly facets?: MaybeSignalOptional<FacetMap>;
-    readonly featureHost?: Signal<FeatureHostState | undefined>;
+    readonly featureHost?: Signal<FeatureHostState_2 | undefined>;
     readonly filterFn?: (row: TRow, extra: ExtraFilters) => boolean;
     readonly filters?: readonly FilterDef<TRow>[];
     readonly filterTypes?: readonly FilterTypeSpec[];
@@ -4118,6 +4244,14 @@ export interface UrlSliceOptions extends Pick<TableUrlStateOptions, "urlAdapter"
 }
 
 export { UrlStateAdapter }
+
+// @public
+export interface UseShortcutsOptions {
+    readonly enabled: boolean;
+    readonly onCommand: (command: string) => void;
+    readonly shortcuts?: readonly Shortcut[];
+    readonly target?: () => EventTarget | null;
+}
 
 // @public
 export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;

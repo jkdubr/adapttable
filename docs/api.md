@@ -3150,6 +3150,15 @@ comes from a kit through a slot.
   moves grid focus onto it, and `injectFindWindowScroll` asks a virtual
   window to render that row. `ADAPTTABLE_FIND_STATE` is the token a toolbar
   button reads.
+- Command palette: `commandPalette()` lists every wired action.
+  `injectCommandPalette` (`CommandPaletteInjectOptions`) is the live
+  `TableCommandPalette`: whether it is open, `close`, `show` and the
+  commands. `AdaptCommandPaletteChrome` lays out the dialog;
+  `CommandPaletteSlots` names the kit's input, rows and empty line.
+  `injectShortcuts` (`UseShortcutsOptions`) binds `DEFAULT_SHORTCUTS`, and
+  `OPEN_PALETTE_COMMAND` is the chord that opens it.
+  `ADAPTTABLE_PALETTE_OPEN` publishes a `PaletteOpenState` a toolbar button
+  reads.
 - Grouping: `grouping` (with `GroupingExtras`) groups rows under collapsible
   headers, with per-group subtotals, optional footers and paged groups.
   `injectGrouping` (`GroupingOptions`) is its live model, a `TableGrouping`
@@ -3341,7 +3350,8 @@ chevron), `rowDetail` and `nestedTable` (`@adapttable/angular-unstyled/row-detai
 and `/nested-table`; `AdaptExpandToggle` fills `EXPAND_TOGGLE` in each row's
 leading cell and on each card, and the panel opens beneath the row or inside
 the card), `virtualize`, `cellNavigation`, `findInTable` (`AdaptFindBar`,
-`AdaptFindToolbarButton`), `rowReorder`,
+`AdaptFindToolbarButton`), `commandPalette` (`AdaptCommandPaletteLive`,
+`AdaptCommandPaletteButton`), `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,
 `AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`

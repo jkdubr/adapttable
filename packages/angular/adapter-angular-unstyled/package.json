@@ -61,6 +61,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-column-selection.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-column-selection.mjs"
     },
+    "./command-palette": {
+      "types": "./dist/types/adapttable-angular-unstyled-command-palette.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-command-palette.mjs"
+    },
     "./density": {
       "types": "./dist/types/adapttable-angular-unstyled-density.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-density.mjs"

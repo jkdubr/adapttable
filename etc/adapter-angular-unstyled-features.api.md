@@ -9,6 +9,7 @@ import { BatchEditHandler } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/angular';
 import { CellEditHandler } from '@adapttable/angular';
 import { CellNavigationOptions } from '@adapttable/angular';
+import { CommandPaletteOptions } from '@adapttable/angular';
 import { ExportCsvOptions } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
 import { GroupingExtras } from '@adapttable/angular';
@@ -32,6 +33,9 @@ export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeatu
 
 // @public
 export function columnMenu(): AdaptTableFeature;
+
+// @public
+export function commandPalette(options?: boolean | CommandPaletteOptions): AdaptTableFeature;
 
 // @public
 export function densityChooser(): AdaptTableFeature;

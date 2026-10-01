@@ -13,6 +13,7 @@ import {
   AdaptLiveRegion,
   AdaptSlot,
   ADAPTTABLE_FIND_STATE,
+  ADAPTTABLE_PALETTE_OPEN,
   type AdaptTableFeature,
   AdaptTableStatusAnnouncer,
   type AssemblyFns,
@@ -34,6 +35,8 @@ import {
   type ColumnInput,
   type ColumnLayoutState,
   type ColumnMenuSlotProps,
+  COMMAND_PALETTE_LIVE,
+  type CommandPaletteInjectOptions,
   type ConfirmHandler,
   type DataTable,
   defaultConfirm,
@@ -107,6 +110,7 @@ import {
   insertExtrasBeforeRows,
   type NestedTableParent,
   type PaginationMode,
+  type PaletteOpenState,
   partitionPinnedRows,
   pinnedRowPart,
   type PinnedRows,
@@ -553,6 +557,39 @@ function scrollFindWindow<TRow>(options: {
   });
 }
 
+/** Props for the command-palette slot, whether or not a feature fills it. */
+function commandPalettePropsFor(options: {
+  readonly commandPalette: CommandPaletteInjectOptions["commandPalette"];
+  readonly onPrint: CommandPaletteInjectOptions["onPrint"];
+  readonly labels: Signal<TableLabels>;
+  readonly clearFilters: () => void;
+  readonly featureHost: CommandPaletteInjectOptions["featureHost"];
+  readonly exportCsv:
+    | Signal<
+        | {
+            readonly onExportCsv?: () => void;
+            readonly exportLabel?: string;
+          }
+        | undefined
+      >
+    | undefined;
+  readonly filterCount: Signal<number>;
+}): Signal<CommandPaletteInjectOptions> {
+  return computed(() => {
+    const exported = options.exportCsv?.();
+    return {
+      commandPalette: options.commandPalette,
+      labels: options.labels(),
+      onPrint: options.onPrint,
+      onExport: exported?.onExportCsv,
+      exportLabel: exported?.exportLabel,
+      onClearFilters: options.clearFilters,
+      hasFilters: options.filterCount() > 0,
+      featureHost: options.featureHost,
+    };
+  });
+}
+
 /** The find bar's slot props, while find is composed. */
 function findBarFor(
   find: Signal<FindInTableState> | undefined,
@@ -752,6 +789,8 @@ export interface TableView<TRow> {
   readonly grid: GridFocus<TRow> | undefined;
   /** The find bar's props, when `findInTable()` is composed. */
   readonly findBar: Signal<FindBarProps> | undefined;
+  /** Props for the command-palette slot. Empty when the feature is absent. */
+  readonly commandPalette: Signal<CommandPaletteInjectOptions>;
   /**
    * A cell's attributes, with find's match marks when the grid is not
    * painting them itself.
@@ -876,6 +915,10 @@ export interface TableView<TRow> {
     {
       provide: ADAPTTABLE_FIND_STATE,
       useFactory: () => signal<FindInTableState | null>(null),
+    },
+    {
+      provide: ADAPTTABLE_PALETTE_OPEN,
+      useFactory: () => signal<PaletteOpenState | null>(null),
     },
   ],
 })
@@ -1062,6 +1105,8 @@ export class AdaptDataTable<TRow> implements OnInit {
   protected readonly groupingPanelSlot = GROUPING_PANEL;
   /** The find bar's slot. @internal */
   protected readonly findBarSlot = FIND_BAR;
+  /** The command palette slot. @internal */
+  protected readonly commandPaletteSlot = COMMAND_PALETTE_LIVE;
   /** The row-reorder announcer slot. @internal */
   protected readonly reorderAnnouncerSlot = ROW_REORDER_ANNOUNCER;
   /** The Filters button's glyph. @internal */
@@ -1702,12 +1747,23 @@ export class AdaptDataTable<TRow> implements OnInit {
       showActions,
     });
     const findBar = findBarFor(find, table.labels);
+    const commandPalette = commandPalettePropsFor({
+      commandPalette:
+        featureOptions.commandPalette as CommandPaletteInjectOptions["commandPalette"],
+      onPrint: featureOptions.onPrint as (() => void) | undefined,
+      labels: table.labels,
+      clearFilters: table.clearFilters,
+      featureHost: table.featureHost,
+      exportCsv: exporter,
+      filterCount: computed(() => filtersRef.current?.count() ?? 0),
+    });
     const markedCellAttrs = cellAttrsWithFind(table, grid, find);
     this.view.set({
       table,
       selection,
       grid,
       findBar,
+      commandPalette,
       markedCellAttrs,
       columnMenu: table.featureOptions.enableColumnMenu === true,
       columnMenuProps,

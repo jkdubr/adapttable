@@ -200,6 +200,7 @@ export {
   coreRowActions,
 } from "@adapttable/core/binding";
 export {
+  COMMAND_PALETTE_LIVE,
   coreDensityChooser,
   coreExportCsv,
   coreFindInTable,

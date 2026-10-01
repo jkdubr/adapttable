@@ -32,6 +32,7 @@ import { ColumnRenameEditorState } from '@adapttable/angular';
 import { ColumnSelectCheckboxChromeProps } from '@adapttable/angular';
 import { ColumnSelectCheckboxProps } from '@adapttable/angular';
 import { ColumnSelectSlots } from '@adapttable/angular';
+import { CommandPaletteInjectOptions } from '@adapttable/angular';
 import { ConfirmHandler } from '@adapttable/angular';
 import { CssProperties } from '@adapttable/core';
 import { DataTable } from '@adapttable/angular';
@@ -333,6 +334,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly columnMenuSlot: FeatureSlotKey<ColumnMenuSlotProps<never>>;
     readonly columns: InputSignal<readonly ColumnInput<TRow>[]>;
+    // @internal
+    protected readonly commandPaletteSlot: FeatureSlotKey<unknown>;
     readonly confirm: InputSignal<ConfirmHandler | undefined>;
     readonly data: InputSignal<readonly TRow[] | undefined>;
     readonly defaultColumnLayout: InputSignal<Partial<ColumnLayoutState> | undefined>;
@@ -1418,6 +1421,7 @@ export interface TableView<TRow> {
         start: number;
         end: number;
     } | undefined>;
+    readonly commandPalette: Signal<CommandPaletteInjectOptions>;
     readonly confirm: ConfirmHandler;
     readonly density: Signal<TableDensity>;
     readonly detailParent: Signal<NestedTableParent>;

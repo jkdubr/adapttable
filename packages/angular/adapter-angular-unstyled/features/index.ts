@@ -8,6 +8,7 @@ export { batchEditing } from "@adapttable/angular-unstyled/batch-editing";
 export { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 export { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
 export { columnMenu } from "@adapttable/angular-unstyled/column-menu";
+export { commandPalette } from "@adapttable/angular-unstyled/command-palette";
 export { densityChooser } from "@adapttable/angular-unstyled/density";
 export { editing, rowEditing } from "@adapttable/angular-unstyled/editing";
 export { exportCsv } from "@adapttable/angular-unstyled/export";
