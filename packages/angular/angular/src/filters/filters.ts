@@ -8,46 +8,32 @@
  */
 import {
   type ActiveFilterChip,
-  activeFilterChips,
   type BooleanFieldWidget,
   booleanFilterWidget,
-  chipValuesOf,
   type ColumnMetadata,
-  devWarn,
   type ExtraFilters,
   FILTER_ENGINE_IMPL,
   type FilterDef,
-  type FilterOption,
   type FilterRuntime,
-  filterTreeChipLabel,
   type FilterTypeSpec,
-  type FilterValue,
   initialRangeFilterOp,
   initialTextFilterOp,
-  mergeFilterChips,
   type QueryFilterGroup,
   type RangeFieldWidget,
   rangeFilterWidget,
   type RangeOp,
-  removeFilterTreeNode,
   type TableLabels,
   type TableSource,
   type TextFieldWidget,
   textFilterWidget,
   type TextOp,
-  walkFilterTreeConditions,
 } from "@adapttable/core";
 import type { FeatureHostState } from "@adapttable/core/binding";
-import {
-  computed,
-  DestroyRef,
-  type Injector,
-  type Signal,
-  signal,
-  untracked,
-} from "@angular/core";
+import { computed, type Signal, signal, untracked } from "@angular/core";
 
 import { type MaybeSignal, readMaybe } from "../store";
+import { activeFilterChipsFor } from "./activeFilterChips";
+import { filterOptionsFor, type FilterOptionsState } from "./filterOptions";
 
 /**
  * Options for {@link filterRuntimeFor}.
@@ -154,34 +140,7 @@ export function filterChipsFor<TRow>(
   readonly chips: readonly ActiveFilterChip[];
   readonly count: number;
 }> {
-  return computed(() => {
-    const current = source();
-    const { filterLabels, defs, registry } = runtime();
-    const bag = activeFilterChips({
-      values: chipValuesOf(current.extra, filterLabels),
-      labels: filterLabels,
-      onChange: (key: string, next: FilterValue) => {
-        current.setExtra(key, next ?? "");
-      },
-    });
-    const tree = current.filterTree;
-    const setTree = current.setFilterTree;
-    const treeChips: ActiveFilterChip[] =
-      tree && setTree
-        ? walkFilterTreeConditions(tree).map(({ condition, path }) => ({
-            key: `ft:${path.join(".")}:${condition.key}:${condition.op}`,
-            label: filterTreeChipLabel(condition, defs, labels(), registry),
-            onRemove: () => {
-              setTree(removeFilterTreeNode(tree, path));
-            },
-          }))
-        : [];
-    const chips = mergeFilterChips(
-      mergeFilterChips(bag, treeChips),
-      readMaybe(extraChips)
-    );
-    return { chips, count: chips.length };
-  });
+  return activeFilterChipsFor(source, runtime, labels, extraChips);
 }
 
 /**
@@ -190,61 +149,8 @@ export function filterChipsFor<TRow>(
  *
  * @public
  */
-export interface FilterOptionsState {
-  /** The choices. */
-  readonly options: readonly FilterOption[];
-  /** Whether a loader is still running. */
-  readonly loading: boolean;
-}
-
-const NO_OPTIONS: readonly FilterOption[] = [];
-
-/**
- * A definition's choices as a signal, loading them when they come from a
- * loader.
- *
- * @param def - The definition.
- * @param injector - Ends a load in flight when the caller is destroyed.
- * @returns The choices and whether they are loading.
- *
- * @public
- */
-export function filterOptionsFor<TRow>(
-  def: Pick<FilterDef<TRow>, "key" | "options">,
-  injector: Injector
-): Signal<FilterOptionsState> {
-  const source = def.options;
-  if (Array.isArray(source)) {
-    return signal({ options: source, loading: false }).asReadonly();
-  }
-  if (typeof source !== "function") {
-    if (source === "auto") {
-      devWarn(
-        `filter "${def.key}" uses options: "auto" on a tier with no full dataset — provide an options array or loader.`
-      );
-    }
-    return signal({ options: NO_OPTIONS, loading: false }).asReadonly();
-  }
-  const state = signal<FilterOptionsState>({
-    options: NO_OPTIONS,
-    loading: true,
-  });
-  let alive = true;
-  injector.get(DestroyRef).onDestroy(() => {
-    alive = false;
-  });
-  source().then(
-    (options) => {
-      if (alive) state.set({ options, loading: false });
-    },
-    () => {
-      if (!alive) return;
-      devWarn(`async options for filter "${def.key}" failed to load.`);
-      state.set({ options: NO_OPTIONS, loading: false });
-    }
-  );
-  return state.asReadonly();
-}
+export type { FilterOptionsState };
+export { filterOptionsFor };
 
 /**
  * A text filter's field: its operator, kept while the value is empty, and

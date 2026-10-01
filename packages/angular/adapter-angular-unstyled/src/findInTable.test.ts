@@ -70,6 +70,7 @@ describe("find in table (unstyled Angular)", () => {
 
   it("opens from the toolbar button, marks the hit and walks it", async () => {
     const fixture = await mount();
+    expect(part("search-icon")).not.toBeNull();
     expect(part("find-bar")).toBeNull();
     part("find-button")!.click();
     fixture.detectChanges();

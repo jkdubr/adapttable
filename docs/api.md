@@ -3120,12 +3120,15 @@ comes from a kit through a slot.
   `/fit-columns` turn those on; the desktop header draws `resize-handle`,
   `sort-index` and `header-actions`, `AdaptColumnHeaderRename` the
   `header-rename-*` parts, and a phone draws `sort-select`.
-- Filters: `filterRuntimeFor` (`FilterRuntimeOptions`) derives a
+- Filters: `filterTypes()` registers custom filter types.
+  `filterRuntimeFor` (`FilterRuntimeOptions`) derives a
   `TableFilters` runtime from the definitions — the predicates and the URL
-  keys; `filterChipsFor` the active chips and their count;
+  keys; `filterChipsFor` and `activeFilterChipsFor` the active chips and
+  their count, `filterTreeChips` one chip per tree condition;
   `filterOptionsFor` a definition's choices as a `FilterOptionsState`; and
   `textFilterFor`, `rangeFilterFor` and `booleanFilterFor` the per-field
-  widgets a kit's form draws. `AdaptFilterHeaderChrome` and
+  widgets a kit's form draws. `checklistSlice` and `nextChecklistViewport`
+  window a long checklist. `AdaptFilterHeaderChrome` and
   `AdaptFilterHeaderControlChrome` are the compact header-filter row.
   `FilterHeaderSlots` names the kit's search, select, range and multi
   controls (`FilterHeaderSearchProps`, `FilterHeaderSelectProps`,

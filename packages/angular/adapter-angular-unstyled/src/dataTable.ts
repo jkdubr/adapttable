@@ -133,6 +133,7 @@ import {
   SAVED_VIEWS,
   type SavedViewsControllerOptions,
   type SavedViewsSlotProps,
+  SEARCH_ICON,
   type SelectionState,
   type SummaryRowFn,
   type TableDensity,
@@ -1065,6 +1066,8 @@ export class AdaptDataTable<TRow> implements OnInit {
   protected readonly reorderAnnouncerSlot = ROW_REORDER_ANNOUNCER;
   /** The Filters button's glyph. @internal */
   protected readonly filtersIcon = FILTERS_ICON;
+  /** The search box's glyph. @internal */
+  protected readonly searchIcon = SEARCH_ICON;
   /**
    * The desktop body, when rendered — owns the scroll box virtualization
    * tracks.

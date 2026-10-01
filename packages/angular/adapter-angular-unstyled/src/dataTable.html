@@ -17,6 +17,9 @@
     <div data-adapttable-part="toolbar">
       @if (searchable()) {
         <div data-adapttable-part="search-field">
+          <span data-adapttable-part="search-icon" style="display: inline-flex">
+            <svg [adaptIcon]="searchIcon"></svg>
+          </span>
           <input
             data-adapttable-part="search"
             [adaptAttrs]="v.table.searchInputAttrs()"

@@ -175,6 +175,7 @@ export {
   statusBar,
   undoRedoButtons,
 } from "./features/factories";
+export { filterTypes } from "./features/filters";
 export { findInTable } from "./features/findInTable";
 export {
   grouping,
@@ -210,10 +211,15 @@ export {
   type TreeOptions,
 } from "./features/tree";
 export { virtualize, type VirtualizeOptions } from "./features/virtualize";
+export { activeFilterChipsFor } from "./filters/activeFilterChips";
 export {
   AdaptChecklistChrome,
   type ChecklistSlots,
 } from "./filters/checklistChrome";
+export {
+  checklistSlice,
+  nextChecklistViewport,
+} from "./filters/checklistWindow";
 export {
   AdaptFilterHeaderChrome,
   AdaptFilterHeaderControlChrome,
@@ -230,6 +236,7 @@ export {
   type TableFilters,
   textFilterFor,
 } from "./filters/filters";
+export { filterTreeChips } from "./filters/filterTreeChips";
 export {
   AdaptFilterTreeChrome,
   type AngularFilterTreeDisclosureProps,

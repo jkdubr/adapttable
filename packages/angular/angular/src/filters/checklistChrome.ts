@@ -11,7 +11,6 @@ import {
   CHECKLIST_VIRTUALIZE_AT,
   checklistActions,
   checklistItems,
-  checklistWindow,
   type FilterDef,
   filterLabel,
   listFilterValues,
@@ -37,6 +36,7 @@ import {
 } from "@angular/core";
 
 import { AdaptControl } from "../control";
+import { checklistSlice, nextChecklistViewport } from "./checklistWindow";
 
 /**
  * The kit's controls for the checklist. Each is a standalone component with
@@ -183,9 +183,7 @@ export class AdaptChecklistChrome<TRow> {
     const visible = searchChecklistItems(items, this.query());
     const virtualize = visible.length >= CHECKLIST_VIRTUALIZE_AT;
     const { scrollTop, width } = this.viewport();
-    const window = virtualize
-      ? checklistWindow(visible.length, scrollTop, width)
-      : { start: 0, end: visible.length, padTop: 0, padBottom: 0 };
+    const window = checklistSlice(visible.length, virtualize, scrollTop, width);
     const selected = listFilterValues(raw);
     const actions = checklistActions(def, source, visible);
     const search: ChecklistSearchProps = {
@@ -246,12 +244,10 @@ export class AdaptChecklistChrome<TRow> {
 
   /** Read the list's scroll position and width. */
   protected read(): void {
-    const node = this.list()?.nativeElement;
-    if (!node) return;
-    const next = { scrollTop: node.scrollTop, width: node.clientWidth };
-    const current = this.viewport();
-    if (current.scrollTop !== next.scrollTop || current.width !== next.width) {
-      this.viewport.set(next);
-    }
+    const next = nextChecklistViewport(
+      this.viewport(),
+      this.list()?.nativeElement
+    );
+    if (next !== this.viewport()) this.viewport.set(next);
   }
 }

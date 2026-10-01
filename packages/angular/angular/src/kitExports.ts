@@ -192,6 +192,7 @@ export {
   FILTERS_FORM,
   FILTERS_ICON,
   FilterTriggerToggleState,
+  SEARCH_ICON,
 } from "@adapttable/core/binding";
 export {
   BULK_BAR,

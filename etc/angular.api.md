@@ -38,6 +38,7 @@ import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
 import { ChecklistButtonProps } from '@adapttable/core/binding';
 import { ChecklistCheckboxProps } from '@adapttable/core/binding';
 import { ChecklistSearchProps } from '@adapttable/core/binding';
+import { ChecklistWindow } from '@adapttable/core';
 import { ChromeBodyRegion } from '@adapttable/core/binding';
 import { ChromeBodySlot } from '@adapttable/core/binding';
 import { chromeColumnPlan } from '@adapttable/core/binding';
@@ -319,6 +320,7 @@ import { SAVED_VIEWS } from '@adapttable/core/binding';
 import { SavedView } from '@adapttable/core';
 import { SavedViewsControllerOptions } from '@adapttable/core';
 import { SavedViewsSlotProps } from '@adapttable/core/binding';
+import { SEARCH_ICON } from '@adapttable/core/binding';
 import { SelectionState } from '@adapttable/core/binding';
 import { Shortcut } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
@@ -377,6 +379,12 @@ export { ACTIONS_COLUMN_KEY }
 export { ACTIVE_FILTER_CHIPS }
 
 export { ActiveFilterChip }
+
+// @public
+export function activeFilterChipsFor<TRow>(source: Signal<TableSource<TRow>>, runtime: Signal<FilterRuntime<TRow>>, labels: Signal<Required<TableLabels>>, extraChips?: MaybeSignal<readonly ActiveFilterChip[]>): Signal<{
+    readonly chips: readonly ActiveFilterChip[];
+    readonly count: number;
+}>;
 
 export { ActiveFilterChipsSlotProps }
 
@@ -2195,6 +2203,9 @@ export { ChecklistCheckboxProps }
 export { ChecklistSearchProps }
 
 // @public
+export function checklistSlice(count: number, virtualize: boolean, scrollTop: number, width: number): ChecklistWindow;
+
+// @public
 export interface ChecklistSlots {
     readonly Button: Type<unknown>;
     readonly Checkbox: Type<unknown>;
@@ -2782,6 +2793,9 @@ export { FiltersFormSlotProps }
 
 export { FilterTreeButtonProps }
 
+// @public
+export function filterTreeChips<TRow>(tree: QueryFilterGroup | undefined, setTree: ((tree: QueryFilterGroup | undefined) => void) | undefined, defs: readonly FilterDef<TRow>[], labels: Required<TableLabels>, registry: FilterTypeRegistry | undefined): readonly ActiveFilterChip[];
+
 export { FilterTreeInputProps }
 
 export { FilterTreeSelectProps }
@@ -2797,6 +2811,9 @@ export interface FilterTreeSlots {
 export { FilterTriggerToggleState }
 
 export { FilterTypeRegistry }
+
+// @public
+export function filterTypes(specs: readonly FilterTypeSpec[]): AdaptTableFeature;
 
 export { FilterTypeSpec }
 
@@ -3422,6 +3439,15 @@ export type NestedTableFor<TRow> = (row: TRow) => NestedTable<TRow> | undefined;
 
 export { NestedTableParent }
 
+// @public
+export function nextChecklistViewport(current: {
+    readonly scrollTop: number;
+    readonly width: number;
+}, node: HTMLElement | undefined): {
+    readonly scrollTop: number;
+    readonly width: number;
+};
+
 export { nextPinSide }
 
 export { offersAllMatching }
@@ -3800,6 +3826,8 @@ export interface SavedViewsState extends Omit<UseSavedViewsResult, "views" | "de
     readonly defaultView: Signal<SavedView | undefined>;
     readonly views: Signal<readonly SavedView[]>;
 }
+
+export { SEARCH_ICON }
 
 export { SelectionState }
 

@@ -386,6 +386,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
     readonly searchable: InputSignal<boolean>;
+    // @internal
+    protected readonly searchIcon: IconDescriptor;
     readonly searchPlaceholder: InputSignal<string | undefined>;
     readonly selectable: InputSignal<boolean>;
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
