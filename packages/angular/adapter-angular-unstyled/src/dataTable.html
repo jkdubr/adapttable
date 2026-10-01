@@ -4,6 +4,8 @@
     data-adapttable-part="root"
     [attr.dir]="v.table.dir()"
     [attr.data-density]="v.density()"
+    [attr.data-refreshing]="v.table.isRefreshing() ? '' : null"
+    [attr.aria-busy]="v.table.isRefreshing() ? true : null"
   >
     <div data-adapttable-part="toolbar">
       @if (searchable()) {
@@ -133,45 +135,66 @@
       />
     }
 
-    @switch (v.table.bodyRegion()) {
-      @case ("skeleton") {
-        <div
-          data-adapttable-part="loading"
-          role="status"
-          [attr.aria-label]="v.table.labels().loading"
-        ></div>
-      }
-      @case ("empty") {
-        <output data-adapttable-part="empty">
-          {{
-            noResults() ? v.table.labels().noResults : v.table.labels().noData
-          }}
-          @if (noResults()) {
-            <button
-              type="button"
-              data-adapttable-part="empty-clear"
-              (click)="v.table.clearFilters()"
-            >
-              {{ v.table.labels().clearAll }}
-            </button>
-          }
-        </output>
-      }
-      @case ("mobile") {
-        <adapt-mobile-cards
-          [view]="v"
-          [rowKey]="rowKey()"
-          [maxHeight]="maxHeight()"
-        />
-      }
-      @case ("desktop") {
-        <adapt-desktop-table
-          [view]="v"
-          [rowKey]="rowKey()"
-          [maxHeight]="maxHeight()"
-        />
-      }
+    @if (v.table.isRefreshing()) {
+      <progress
+        [attr.aria-label]="v.table.labels().loading"
+        data-adapttable-part="refresh-indicator"
+      ></progress>
     }
+
+    <adapt-table-region [panel]="sidePanel()" [side]="sidePanelSide()">
+      @if (v.table.errorState(); as failure) {
+        <adapt-error-state
+          [error]="failure.error"
+          [labels]="v.table.labels()"
+          [retry]="failure.retry"
+        />
+      } @else {
+        @switch (v.table.bodyRegion()) {
+          @case ("skeleton") {
+            <adapt-table-skeleton
+              [rows]="skeletonRows() ?? v.table.source().limit"
+              [columns]="v.table.columns().length"
+              [variant]="v.table.isMobile() ? 'cards' : 'table'"
+              [labels]="v.table.labels()"
+              [hasActions]="v.showActions()"
+            />
+          }
+          @case ("empty") {
+            <output data-adapttable-part="empty">
+              {{
+                noResults()
+                  ? v.table.labels().noResults
+                  : v.table.labels().noData
+              }}
+              @if (noResults()) {
+                <button
+                  type="button"
+                  data-adapttable-part="empty-clear"
+                  (click)="v.table.clearFilters()"
+                >
+                  {{ v.table.labels().clearAll }}
+                </button>
+              }
+            </output>
+          }
+          @case ("mobile") {
+            <adapt-mobile-cards
+              [view]="v"
+              [rowKey]="rowKey()"
+              [maxHeight]="maxHeight()"
+            />
+          }
+          @case ("desktop") {
+            <adapt-desktop-table
+              [view]="v"
+              [rowKey]="rowKey()"
+              [maxHeight]="maxHeight()"
+            />
+          }
+        }
+      }
+    </adapt-table-region>
 
     @if (v.table.canLoadMore()) {
       <div
@@ -191,10 +214,15 @@
       <adapt-pagination-footer [view]="v" />
     }
 
-    <div
-      [adaptLiveRegion]="v.table.statusAnnouncement()"
-      part="table-status-announcer"
-    ></div>
+    @if (tableFooter(); as footer) {
+      <div data-adapttable-part="table-footer">
+        <ng-container [ngTemplateOutlet]="footer" />
+      </div>
+    }
+
+    <adapt-table-status-announcer
+      [announcement]="v.table.statusAnnouncement()"
+    />
     @if (v.reorder; as reorder) {
       <ng-container
         [adaptSlot]="reorderAnnouncerSlot"

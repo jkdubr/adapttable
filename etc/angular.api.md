@@ -1632,6 +1632,21 @@ export interface AdaptTableFeature extends FeatureSetup<unknown, SidePanelEntry>
 }
 
 // @public
+export class AdaptTableStatusAnnouncer {
+    readonly announcement: InputSignal<string>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTableStatusAnnouncer, "adapt-table-status-announcer", never, {
+        "announcement": {
+            "alias": "announcement";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTableStatusAnnouncer, never>;
+}
+
+// @public
 export class AdaptTreeCellChrome {
     readonly className: InputSignal<string | undefined>;
     readonly columnKey: InputSignal<string>;
@@ -2171,6 +2186,11 @@ export interface DataTable<TRow> {
     readonly columns: Signal<readonly ColumnDef<TRow>[]>;
     readonly dir: Signal<Direction>;
     readonly emptyVariant: Signal<"noData" | "noResults">;
+    readonly errorState: Signal<{
+        readonly error: Error;
+        readonly retry?: () => void;
+        readonly retrying: boolean;
+    } | undefined>;
     readonly featureHost: FeatureHostState;
     readonly featureOptions: Readonly<Record<string, unknown>>;
     readonly hasSlot: (slot: {
@@ -2181,6 +2201,7 @@ export interface DataTable<TRow> {
     readonly headerRowAttrs: () => Attrs;
     readonly isEmpty: Signal<boolean>;
     readonly isMobile: Signal<boolean>;
+    readonly isRefreshing: Signal<boolean>;
     readonly labels: Signal<Required<TableLabels>>;
     readonly layout: Signal<ColumnLayout<TRow>>;
     readonly loadMore: () => void;

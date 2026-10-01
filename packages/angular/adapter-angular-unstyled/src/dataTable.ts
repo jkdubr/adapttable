@@ -13,6 +13,7 @@ import {
   AdaptLiveRegion,
   AdaptSlot,
   type AdaptTableFeature,
+  AdaptTableStatusAnnouncer,
   type AssemblyFns,
   type Attrs,
   BATCH_EDIT_BAR,
@@ -147,6 +148,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
   contentChildren,
   type ElementRef,
   inject,
@@ -161,8 +163,11 @@ import {
 } from "@angular/core";
 
 import { AdaptDesktopTable } from "./components/desktopTable";
+import { AdaptErrorState } from "./components/errorState";
 import { AdaptMobileCards } from "./components/mobileCards";
 import { AdaptPaginationFooter } from "./components/paginationFooter";
+import { AdaptTableRegion } from "./components/tableRegion";
+import { AdaptTableSkeleton } from "./components/tableSkeleton";
 import {
   type FiltersMode,
   type FiltersView,
@@ -728,10 +733,14 @@ export interface TableView<TRow> {
     AdaptAttrs,
     AdaptDesktopTable,
     AdaptIcon,
+    AdaptErrorState,
     AdaptLiveRegion,
     AdaptMobileCards,
     AdaptPaginationFooter,
     AdaptSlot,
+    AdaptTableRegion,
+    AdaptTableSkeleton,
+    AdaptTableStatusAnnouncer,
   ],
   templateUrl: "./dataTable.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -820,6 +829,13 @@ export class AdaptDataTable<TRow> implements OnInit {
    * composed {@link virtualize} tracks the box instead of the page.
    */
   readonly maxHeight = input<number | string>();
+  /**
+   * How many placeholder rows the first-load skeleton draws. Absent, the
+   * page size.
+   */
+  readonly skeletonRows = input<number>();
+  /** Which edge a projected side panel sits on. */
+  readonly sidePanelSide = input<"start" | "end">("end");
   /** Offer a checkbox on every row. Read once. */
   readonly selectable = input(false);
   /** The selected row ids, to control the selection. */
@@ -877,6 +893,10 @@ export class AdaptDataTable<TRow> implements OnInit {
    * @internal
    */
   protected readonly view = signal<TableView<TRow> | undefined>(undefined);
+  /** A host template rendered under the pager. */
+  readonly tableFooter = contentChild<TemplateRef<unknown>>("tableFooter");
+  /** A host template rendered beside the body. */
+  readonly sidePanel = contentChild<TemplateRef<unknown>>("sidePanel");
   /**
    * Whether the empty table is empty because nothing matched.
    *

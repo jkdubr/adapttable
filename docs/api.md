@@ -3057,6 +3057,9 @@ comes from a kit through a slot.
   table (`<ng-template adaptCellTemplate="status" let-row>`), `AdaptAttrs`
   applies an `Attrs` record to an element, and `AdaptLiveRegion` makes an
   element a polite, visually hidden live region that speaks its text.
+  `AdaptTableStatusAnnouncer` is that region for the table's own row changes:
+  present from the first paint, polite and atomic, and without `role="status"`
+  so the empty state and the other announcers can still be the status.
 - Features: `provideAdaptTableFeatures(...features)` composes features
   through dependency injection into the `ADAPTTABLE_FEATURES`
   multi-provider; an `AdaptTableFeature` has any of `apply` (configuration it
@@ -3289,7 +3292,10 @@ the tier chosen by `injectTableData` and `mode` — and renders search, sorting,
 paging, the phone card layout, row selection and keyboard cell navigation
 with the `data-adapttable-part` names every kit shares. `AdaptDesktopTable`
 and `AdaptMobileCards` are the desktop body and phone card list;
-`AdaptPaginationFooter` is the pager. Its `features` input composes
+`AdaptPaginationFooter` is the pager. `AdaptTableSkeleton` is the first-load
+placeholder (table or cards), `AdaptErrorState` is a failed load with its
+retry, and `AdaptTableRegion` sits a projected side panel beside the body.
+A `#tableFooter` template renders under the pager. `AdaptDataTable`'s `features` input composes
 factories from secondary entries, each drawing the kit's own native
 controls — `columnMenu` (`AdaptColumnMenu`), `AdaptColumnHeaderRename`
 (the inline header rename form), `filters` (`AdaptFiltersForm`,

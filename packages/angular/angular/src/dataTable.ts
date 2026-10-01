@@ -22,13 +22,12 @@ import {
   PIN_Z,
   pinnedCellStyle,
   resolveLabels,
-  resolveTableStatus,
   SEARCH_DEBOUNCE_MS,
   type SortByOption,
   type SortDirection,
+  tableErrorState,
   type TableLabels,
   type TableSource,
-  type TableStatusSignature,
   visibleColumns,
 } from "@adapttable/core";
 import {
@@ -38,6 +37,7 @@ import {
   type ChromeBodyRegion,
   chromeBodyRegion,
   chromeEmptyVariant,
+  chromeIsRefreshing,
   chromeShowFooter,
   clearChromeFilters,
   type CssProperties,
@@ -50,7 +50,6 @@ import {
   rowAttributes,
   searchInputAttributes,
   sortButtonAttributes,
-  sortedColumnName,
   sourceWindowStart,
   tableAttributes,
 } from "@adapttable/core/binding";
@@ -63,9 +62,9 @@ import {
   type Signal,
   signal,
   type TemplateRef,
-  untracked,
 } from "@angular/core";
 
+import { trackTableStatus } from "./a11y/tableStatusAnnouncer";
 import type { Attrs } from "./attrs";
 import type { AdaptCellTemplate } from "./cell";
 import {
@@ -225,6 +224,22 @@ export interface DataTable<TRow> {
    * region that is present from the first paint.
    */
   readonly statusAnnouncement: Signal<string>;
+  /**
+   * The failure to show in place of the rows, or absent when the load
+   * succeeded. Retry is offered only when the source can ask again.
+   */
+  readonly errorState: Signal<
+    | {
+        readonly error: Error;
+        readonly retry?: () => void;
+        readonly retrying: boolean;
+      }
+    | undefined
+  >;
+  /**
+   * A background refresh: fetching, while the rows already on screen stay.
+   */
+  readonly isRefreshing: Signal<boolean>;
   /** The features composed on this table. */
   readonly featureHost: FeatureHostState;
   /**
@@ -497,6 +512,8 @@ export function injectDataTable<TRow>(
     canLoadMore,
     windowStart,
     statusAnnouncement,
+    errorState: computed(() => tableErrorState(source())),
+    isRefreshing: computed(() => chromeIsRefreshing(source())),
     featureHost: featureHostFor(injector, options.features),
     featureOptions,
     slotFills,
@@ -610,67 +627,6 @@ export function injectDataTable<TRow>(
         searchInput.setValue
       ),
   };
-}
-
-/**
- * What the table announces after its rows settle. Only a move in the sort,
- * the count or the visible range can change the sentence, so a view-state
- * change that moves none of them leaves the region alone.
- */
-function trackTableStatus<TRow>(
-  source: Signal<TableSource<TRow>>,
-  labels: Signal<Required<TableLabels>>,
-  columns: Signal<readonly ColumnDef<TRow>[]>,
-  injector: Injector
-): Signal<string> {
-  const inputs = computed(
-    () => {
-      const current = source();
-      return {
-        total: current.total,
-        shown: current.rows.length,
-        page: current.page,
-        limit: current.limit,
-        paged: current.paginationMode === "paged",
-        sortBy: current.sortBy,
-        sortDir: current.sortDir,
-      };
-    },
-    {
-      equal: (a, b) =>
-        a.total === b.total &&
-        a.shown === b.shown &&
-        a.page === b.page &&
-        a.limit === b.limit &&
-        a.paged === b.paged &&
-        a.sortBy === b.sortBy &&
-        a.sortDir === b.sortDir,
-    }
-  );
-  const announcement = signal("");
-  let previous: TableStatusSignature | undefined;
-  effect(
-    () => {
-      const current = inputs();
-      untracked(() => {
-        const next = resolveTableStatus(
-          {
-            ...current,
-            labels: labels(),
-            sortColumnName: sortedColumnName(columns(), current.sortBy),
-          },
-          previous
-        );
-        previous = next.signature;
-        // Written every time, the empty result included: silence has to
-        // clear the region, or a message repeated after a quiet settle never
-        // changes the text and is never spoken.
-        announcement.set(next.announcement);
-      });
-    },
-    { injector }
-  );
-  return announcement.asReadonly();
 }
 
 /**

@@ -387,10 +387,14 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly selectable: InputSignal<boolean>;
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
     readonly selectionChange: OutputEmitterRef<string[]>;
+    readonly sidePanel: Signal<TemplateRef<unknown> | undefined>;
+    readonly sidePanelSide: InputSignal<"start" | "end">;
+    readonly skeletonRows: InputSignal<number | undefined>;
     protected sortBy(event: Event): void;
     readonly source: InputSignal<TableSource<TRow> | Signal<TableSource<TRow>> | undefined>;
     readonly summaryRow: InputSignal<SummaryRowFn<TRow> | undefined>;
     readonly supports: InputSignal<QuerySupport | undefined>;
+    readonly tableFooter: Signal<TemplateRef<unknown> | undefined>;
     readonly tableLabel: InputSignal<string | undefined>;
     // @internal
     protected readonly toolbarExtrasSlot: FeatureSlotKey<ToolbarExtrasSlotProps>;
@@ -531,6 +535,16 @@ export class AdaptDataTable<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
+        "skeletonRows": {
+            "alias": "skeletonRows";
+            "required": false;
+            "isSignal": true;
+        };
+        "sidePanelSide": {
+            "alias": "sidePanelSide";
+            "required": false;
+            "isSignal": true;
+        };
         "selectable": {
             "alias": "selectable";
             "required": false;
@@ -594,7 +608,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     }, {
         "selectionChange": "selectionChange";
         "columnLayoutChange": "columnLayoutChange";
-    }, ["cellTemplates"], never, true, never>;
+    }, ["cellTemplates", "tableFooter", "sidePanel"], never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptDataTable<any>, never>;
 }
@@ -720,6 +734,33 @@ export class AdaptEditableCell<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptEditableCell<any>, never>;
+}
+
+// @public
+export class AdaptErrorState {
+    readonly error: InputSignal<Error>;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    readonly retry: InputSignal<(() => void) | undefined>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptErrorState, "adapt-error-state", never, {
+        "error": {
+            "alias": "error";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "retry": {
+            "alias": "retry";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptErrorState, never>;
 }
 
 // @public
@@ -1172,6 +1213,74 @@ export class AdaptSavedViewsMenu implements OnInit {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSavedViewsMenu, never>;
+}
+
+// @public
+export class AdaptTableRegion {
+    readonly panel: InputSignal<TemplateRef<unknown> | undefined>;
+    readonly side: InputSignal<"start" | "end">;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTableRegion, "adapt-table-region", never, {
+        "panel": {
+            "alias": "panel";
+            "required": false;
+            "isSignal": true;
+        };
+        "side": {
+            "alias": "side";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, ["*"], true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTableRegion, never>;
+}
+
+// @public
+export class AdaptTableSkeleton {
+    // @internal
+    protected readonly cardColumns: Signal<number[]>;
+    // @internal
+    protected readonly columnKeys: Signal<number[]>;
+    readonly columns: InputSignal<number>;
+    readonly hasActions: InputSignal<boolean>;
+    readonly labels: InputSignal<Required<TableLabels>>;
+    // @internal
+    protected lineWidth(column: number): string;
+    // @internal
+    protected readonly rowKeys: Signal<number[]>;
+    readonly rows: InputSignal<number>;
+    readonly variant: InputSignal<"table" | "cards">;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptTableSkeleton, "adapt-table-skeleton", never, {
+        "rows": {
+            "alias": "rows";
+            "required": true;
+            "isSignal": true;
+        };
+        "columns": {
+            "alias": "columns";
+            "required": true;
+            "isSignal": true;
+        };
+        "variant": {
+            "alias": "variant";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": true;
+            "isSignal": true;
+        };
+        "hasActions": {
+            "alias": "hasActions";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTableSkeleton, never>;
 }
 
 // @public

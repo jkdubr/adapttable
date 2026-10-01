@@ -25,6 +25,7 @@ export {
   AdaptEditableCell,
   AdaptNativeCellEditor,
 } from "./components/editableCell";
+export { AdaptErrorState } from "./components/errorState";
 export { AdaptExpandToggle } from "./components/expandToggle";
 export { AdaptFilterDrawer, AdaptFiltersForm } from "./components/filterPanel";
 export { AdaptFilterPopover } from "./components/filterPopover";
@@ -42,6 +43,8 @@ export {
 } from "./components/overlayPlacement";
 export { AdaptPaginationFooter } from "./components/paginationFooter";
 export { AdaptSavedViewsMenu } from "./components/savedViewsMenu";
+export { AdaptTableRegion } from "./components/tableRegion";
+export { AdaptTableSkeleton } from "./components/tableSkeleton";
 export {
   AdaptDensityButton,
   AdaptExportButton,

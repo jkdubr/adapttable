@@ -5896,6 +5896,7 @@
       "AdaptRowReorderHandleChrome",
       "AdaptSlot",
       "AdaptTableFeature",
+      "AdaptTableStatusAnnouncer",
       "AdaptTreeCellChrome",
       "AdaptTreeToggleChrome",
       "AngularFilterTreeDisclosureProps",

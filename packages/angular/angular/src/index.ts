@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 export { AdaptLiveRegion } from "./a11y/liveRegion";
+export { AdaptTableStatusAnnouncer } from "./a11y/tableStatusAnnouncer";
 export {
   type BulkActionRunnerOptions,
   type BulkActionRunnerState,
