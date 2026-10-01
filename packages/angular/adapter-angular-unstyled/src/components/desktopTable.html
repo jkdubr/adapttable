@@ -177,6 +177,25 @@
               ></td>
             </tr>
           }
+          @case ("extra") {
+            @let parts = extraParts[slot.extraKind];
+            @let separator = slot.extraKind === "separator";
+            <tr
+              [attr.data-adapttable-part]="parts.row"
+              [adaptAttrs]="{ style: extraRowStyle }"
+            >
+              <td
+                [attr.data-adapttable-part]="parts.cell"
+                [attr.colspan]="slot.colSpan"
+                [attr.role]="separator ? 'separator' : null"
+                [attr.aria-label]="
+                  separator ? v.table.labels().rowSeparator : null
+                "
+                [adaptAttrs]="{ style: extraCellStyle(slot.fillStyle) }"
+                [adaptExtraRowContent]="slot.render"
+              ></td>
+            </tr>
+          }
           @case ("group") {
             <ng-container
               [adaptSlot]="groupHeaderRowSlot"
@@ -251,17 +270,24 @@
               @if (v.columnSpacers(); as spacers) {
                 <adapt-column-spacer [width]="spacers.start" side="start" />
               }
-              @for (column of v.columns(); track column.key) {
+              @for (
+                cell of v.bodyCells().get(entry.id);
+                track cell.column.key
+              ) {
+                @let column = cell.column;
                 <td
                   data-adapttable-part="cell"
                   [adaptAttrs]="
-                    v.grid
-                      ? v.grid.cellAttrs(
-                          column,
-                          entry.index,
-                          v.columnIndex().get(column.key)!
-                        )
-                      : v.table.cellAttrs(column)
+                    spanned(
+                      v.grid
+                        ? v.grid.cellAttrs(
+                            column,
+                            entry.index,
+                            v.columnIndex().get(column.key)!
+                          )
+                        : v.table.cellAttrs(column),
+                      cell
+                    )
                   "
                 >
                   <ng-template #cellContent>

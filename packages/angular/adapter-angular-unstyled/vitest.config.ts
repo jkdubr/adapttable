@@ -52,6 +52,9 @@ export default defineConfig({
       provider: "istanbul",
       reporter: ["text", "lcov", "html"],
       include: [
+        "cell-span/**/*.ts",
+        "extra-rows/**/*.ts",
+        "row-appearance/**/*.ts",
         "src/**/*.ts",
         "batch-editing/**/*.ts",
         "bulk-actions/**/*.ts",

@@ -72,7 +72,13 @@ const parts = (name: string, root: ParentNode = document) => [
 ];
 const texts = (elements: HTMLElement[]) =>
   elements.map((element) => element.textContent.trim());
-const firstRowCells = () => texts(parts("cell", parts("row")[0]!));
+// The one element named `name`; a missing one fails the test.
+const only = (name: string, index = 0): HTMLElement => {
+  const element = parts(name)[index];
+  if (element === undefined) throw new Error(`no ${name} at ${index}`);
+  return element;
+};
+const firstRowCells = () => texts(parts("cell", only("row")));
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -91,7 +97,7 @@ describe("the unstyled table's column groups", () => {
     );
     expect(placeCell!.getAttribute("colspan")).toBe("2");
     expect(placeCell!.textContent.trim()).toBe("Place");
-    expect(texts(parts("header-cell", parts("header-row")[0]!))).toEqual([
+    expect(texts(parts("header-cell", only("header-row")))).toEqual([
       "City",
       "Country",
     ]);

@@ -15,6 +15,7 @@ import { BatchEditBarProps } from '@adapttable/angular';
 import { BulkAction } from '@adapttable/core';
 import { BulkActionRunnerState } from '@adapttable/angular';
 import { BulkBarSlotProps } from '@adapttable/angular';
+import { CellSpanAppearance } from '@adapttable/angular';
 import { ChecklistSlots } from '@adapttable/angular';
 import { ChromeBodySlot } from '@adapttable/angular';
 import { ColumnDef } from '@adapttable/angular';
@@ -31,6 +32,7 @@ import { ColumnSelectCheckboxChromeProps } from '@adapttable/angular';
 import { ColumnSelectCheckboxProps } from '@adapttable/angular';
 import { ColumnSelectSlots } from '@adapttable/angular';
 import { ConfirmHandler } from '@adapttable/angular';
+import { CssProperties } from '@adapttable/core';
 import { DataTable } from '@adapttable/angular';
 import { DesktopRowWiringArgs } from '@adapttable/angular';
 import { Direction } from '@adapttable/angular';
@@ -580,6 +582,18 @@ export class AdaptDesktopTable<TRow> {
     protected readonly columnSelectSlot: FeatureSlotKey<ColumnSelectCheckboxChromeProps>;
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
     protected readonly expandToggleSlot: FeatureSlotKey<ExpandToggleSlotProps>;
+    protected extraCellStyle(fill: unknown): Record<string, unknown>;
+    protected readonly extraParts: {
+        readonly separator: {
+            readonly row: "separator-row";
+            readonly cell: "separator-cell";
+        };
+        readonly fullWidth: {
+            readonly row: "full-width-row";
+            readonly cell: "full-width-cell";
+        };
+    };
+    protected readonly extraRowStyle: CssProperties;
     protected readonly filterSlots: {
         header: FeatureSlotKey<FilterHeaderControlProps<never>>;
     };
@@ -597,11 +611,13 @@ export class AdaptDesktopTable<TRow> {
     protected reorderHandleProps(reorder: RowReorderState<TRow>, row: TRow, localIndex: number): RowReorderHandleProps_2<never>;
     protected readonly reorderHandleSlot: FeatureSlotKey<RowReorderHandleProps<never, unknown>>;
     protected readonly rowEditActionsSlot: FeatureSlotKey<RowEditActionsProps<never>>;
+    // (undocumented)
     protected rowId(row: TRow): string;
     readonly rowKey: InputSignal<(row: TRow) => string>;
     protected readonly scrollBox: Signal<ElementRef<HTMLElement> | undefined>;
     protected scrollBoxStyle(): Record<string, string> | null;
     scrollElement(): HTMLElement | null;
+    protected spanned(attrs: Attrs, cell: BodyCellView<TRow>): Attrs;
     protected treeCellProps(entry: BodyRow<TRow>, columnKey: string, children: TemplateRef<unknown>): TreeCellProps<never> | undefined;
     protected readonly treeCellSlot: FeatureSlotKey<TreeCellProps<never, unknown>>;
     readonly view: InputSignal<TableView<TRow>>;
@@ -967,6 +983,16 @@ export class AdaptMobileCards<TRow> {
     protected caption(column: ColumnDef<TRow>): string | undefined;
     protected readonly editableCellSlot: FeatureSlotKey<EditableCellSlotProps<never, unknown, ColumnModel<never>, unknown>>;
     protected readonly expandToggleSlot: FeatureSlotKey<ExpandToggleSlotProps>;
+    protected readonly extraParts: {
+        readonly separator: {
+            readonly row: "separator-row";
+            readonly cell: "separator-cell";
+        };
+        readonly fullWidth: {
+            readonly row: "full-width-row";
+            readonly cell: "full-width-cell";
+        };
+    };
     protected readonly groupHeaderCardSlot: FeatureSlotKey<GroupHeaderCardSlotProps<never, unknown, ColumnModel<never>>>;
     protected readonly listStyle: Signal<    {
     maxHeight: string;
@@ -1146,6 +1172,15 @@ export class AdaptTreeToggle {
 }
 
 // @public
+export interface BodyCellView<TRow> {
+    readonly colSpan: number;
+    readonly column: ColumnDef<TRow>;
+    readonly columnIndex: number;
+    readonly mark: string | undefined;
+    readonly rowSpan: number;
+}
+
+// @public
 export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
     readonly cardAttrs: Attrs;
     readonly detailAttrs: Attrs;
@@ -1204,8 +1239,10 @@ export interface TableView<TRow> {
     readonly actionsCells: Signal<ReadonlyMap<string, RowActionsCell<TRow>>>;
     readonly batchBar: Signal<BatchEditBarProps<TRow> | undefined> | undefined;
     readonly body: Signal<readonly BodySlot<TRow>[]>;
+    readonly bodyCells: Signal<ReadonlyMap<string, readonly BodyCellView<TRow>[]>>;
     readonly bodyColSpan: Signal<number>;
     readonly bulkBar: Signal<BulkBarSlotProps<SelectionState>> | undefined;
+    readonly cellSpanAppearance: CellSpanAppearance | undefined;
     readonly columnIndex: Signal<ReadonlyMap<string, number>>;
     readonly columnMenu: boolean;
     readonly columnMenuProps: Signal<ColumnMenuSlotProps<never>>;

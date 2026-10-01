@@ -51,6 +51,16 @@ test("keeps a top pin in view while the rest scroll", async ({ page }) => {
     .toBe(Math.round(boxTop));
 });
 
+test("writes a team that runs down the page as one cell", async ({ page }) => {
+  await page.goto(PAGE);
+  const merged = demo(page).locator(
+    'tbody [data-adapttable-part="cell"][data-cell-span]'
+  );
+  await expect(merged.first()).toBeVisible();
+  const span = Number(await merged.first().getAttribute("rowspan"));
+  expect(span).toBeGreaterThan(1);
+});
+
 test("pins to the bottom, and unpins", async ({ page }) => {
   await page.goto(PAGE);
   await choose(page, "2", "Pin to bottom");

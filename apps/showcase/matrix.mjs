@@ -1736,10 +1736,28 @@ export function People({ rows, columns, setRows }) {
       angular: `import { Component, input } from "@angular/core";
 import type { ColumnDef } from "@adapttable/angular";
 import { AdaptDataTable } from "{pkg}";
+import { cellSpan } from "{pkg}/cell-span";
 import { rowActions } from "{pkg}/row-actions";
 import { rowPinning } from "{pkg}/row-pinning";
 
 const columns: ColumnDef<Person>[] = [{ key: "name" }, { key: "team" }];
+
+function spanTeam({
+  column,
+  sectionRows,
+  sectionRowIndex,
+}: {
+  column: { key: string };
+  sectionRows: readonly Person[];
+  sectionRowIndex: number;
+}) {
+  if (column.key !== "team") return undefined;
+  const team = sectionRows[sectionRowIndex]?.team;
+  if (sectionRows[sectionRowIndex - 1]?.team === team) return undefined;
+  let rowSpan = 1;
+  while (sectionRows[sectionRowIndex + rowSpan]?.team === team) rowSpan += 1;
+  return rowSpan > 1 ? { rowSpan } : undefined;
+}
 
 @Component({
   selector: "app-people",
@@ -1759,23 +1777,24 @@ export class People {
   readonly rowKey = (row: Person) => row.id;
   readonly features = [
     rowPinning(),
+    cellSpan(spanTeam),
     rowActions<Person>([], { layout: "menu" }),
   ];
 }`,
     },
     heads: {
       unstyled: {
-        title: "{kit} table row pinning — AdaptTable",
+        title: "{kit} table row pinning and cell spanning — AdaptTable",
         description:
-          "Try {kit} {framework} table row pinning: keep rows at the top or bottom of a scroll box from each row's menu, kept in the URL.",
-        card: "Pin rows to the top or bottom from a 3-dot menu.",
+          "Try {kit} {framework} table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once.",
+        card: "Pin rows from a 3-dot menu, and merge a team that runs down the page.",
       },
     },
     intros: {
       unstyled: [
-        "A row is more than a record. Pin it to the top or the bottom from its 3-dot menu, and it stays put while the rest of the rows scroll beneath it.",
-        '`rowPinning()` and a `"menu"` row-actions layout are what this page turns on. The table holds the pinned rows and keeps them in the URL, so a reload or a shared link keeps them where they were; pass `pinnedRowIds` to hold them yourself.',
-        "Grouping and trees refuse pinning: a nested list is not a flat pin stack.",
+        "A row is more than a record. Pin it to the top or the bottom from its 3-dot menu, and merge a team that runs down consecutive rows so the name is written once.",
+        '`rowPinning()`, `cellSpan()` and a `"menu"` row-actions layout are what this page turns on. The table holds the pinned rows and keeps them in the URL, so a reload or a shared link keeps them where they were; pass `pinnedRowIds` to hold them yourself.',
+        "Grouping and trees refuse pinning: a nested list is not a flat pin stack. The pin keeps a team merge together — the person moves, the team stays one cell.",
       ],
     },
     snippet: `import { DataTable } from "{pkg}";

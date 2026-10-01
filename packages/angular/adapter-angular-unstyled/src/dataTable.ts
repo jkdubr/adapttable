@@ -13,6 +13,7 @@ import {
   AdaptLiveRegion,
   AdaptSlot,
   type AdaptTableFeature,
+  type AssemblyFns,
   type Attrs,
   BATCH_EDIT_BAR,
   type BatchEditBarProps,
@@ -22,6 +23,8 @@ import {
   type BulkAction,
   type BulkBarSlotProps,
   type CellEditHandler,
+  type CellSpanAppearance,
+  cellSpanMark,
   type ChromeBodySlot,
   chromeRenderModel,
   COLUMN_MENU,
@@ -45,6 +48,8 @@ import {
   type ExpandToggleSlotProps,
   type ExportCsvOptions,
   type ExtraFilters,
+  extraHostFillStyle,
+  type ExtraRow,
   type FacetMap,
   featureOptionsOf,
   FILTER_DRAWER,
@@ -56,6 +61,7 @@ import {
   FILTERS_ICON,
   type FilterTypeSpec,
   flattenColumns,
+  type GetCellSpan,
   type GridFocus,
   type GroupedFlatEntry,
   groupedViewSource,
@@ -100,6 +106,7 @@ import {
   resolveBodyVirtualization,
   resolveEditingArming,
   resolveRowEditTrigger,
+  resolveRowStyle,
   ROW_REORDER_ANNOUNCER,
   type RowAction,
   rowActionsFor,
@@ -108,8 +115,10 @@ import {
   rowEditConflict,
   type RowEditHandler,
   type RowEditIcons,
+  type RowHeight,
   type RowReorderState,
   type RowSelection,
+  type RowStyle,
   SAVED_VIEWS,
   type SavedViewsControllerOptions,
   type SavedViewsSlotProps,
@@ -278,6 +287,25 @@ export interface BodyRow<TRow> extends DesktopRowWiringArgs<TRow> {
    * and its open detail count as one virtual item.
    */
   readonly detailAttrs: Attrs;
+}
+
+/**
+ * One drawn body cell: its column, where focus addresses it, and how far it
+ * spans.
+ *
+ * @public
+ */
+export interface BodyCellView<TRow> {
+  /** The column. */
+  readonly column: ColumnDef<TRow>;
+  /** Its index among the visible columns — what focus addresses. */
+  readonly columnIndex: number;
+  /** Columns the cell covers. */
+  readonly colSpan: number;
+  /** Rows the cell covers. */
+  readonly rowSpan: number;
+  /** `data-cell-span`, e.g. `"1x2"`, on a merged cell. */
+  readonly mark: string | undefined;
 }
 
 /**
@@ -523,6 +551,7 @@ function bodyWindowFor<TRow>(options: {
   const sizes = {
     estimateRowSize: numberOption(featureOptions.estimateRowSize),
     estimateCardSize: numberOption(featureOptions.estimateCardSize),
+    rowHeight: featureOptions.rowHeight as RowHeight<TRow> | undefined,
   };
   const estimateSize = computed(() =>
     estimateBodyItemSize(bodyChrome(), sizes, scrollRows())
@@ -635,6 +664,12 @@ export interface TableView<TRow> {
   readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
   /** Each window row's expand toggle props, keyed by row id. */
   readonly expandToggles: Signal<ReadonlyMap<string, ExpandToggleSlotProps>>;
+  /** Each drawn row's cells, spans applied, keyed by row id. */
+  readonly bodyCells: Signal<
+    ReadonlyMap<string, readonly BodyCellView<TRow>[]>
+  >;
+  /** How a merged cell looks: `"merged"` (default) or `"plain"`. */
+  readonly cellSpanAppearance: CellSpanAppearance | undefined;
   /** What this table hands the tables nested under its rows. */
   readonly detailParent: Signal<NestedTableParent>;
   /** The summary row's value per column, when `summaryRow` is given. */
@@ -1136,6 +1171,16 @@ export class AdaptDataTable<TRow> implements OnInit {
     });
     const summaryRows = featureOptions.pinnedRows as
       PinnedRows<TRow> | undefined;
+    const extraRows = featureOptions.extraRows as
+      readonly ExtraRow[] | undefined;
+    const getCellSpan = featureOptions.getCellSpan as
+      GetCellSpan<TRow> | undefined;
+    const assembly = featureOptions.assembly as
+      Partial<AssemblyFns<TRow>> | undefined;
+    const rowClassName = featureOptions.rowClassName as
+      ((row: TRow, index: number) => string | undefined) | undefined;
+    const rowStyle = featureOptions.rowStyle as RowStyle<TRow> | undefined;
+    const rowHeight = featureOptions.rowHeight as RowHeight<TRow> | undefined;
     // The pin entries ride the actions column beside the host's actions.
     const mergedActions = computed(() =>
       withRowPinActions({
@@ -1234,7 +1279,44 @@ export class AdaptDataTable<TRow> implements OnInit {
         expansion: rowDetail?.().expansion,
         pinnedTopRows: pinnedRows()?.top ?? [],
         pinnedBottomRows: pinnedRows()?.bottom ?? [],
+        pinnedSummaryTop: summaryRows?.top ?? [],
+        pinnedSummaryBottom: summaryRows?.bottom ?? [],
+        tree:
+          window.treeEntries === undefined
+            ? undefined
+            : { entries: window.treeEntries },
+        getCellSpan,
+        extraRows,
+        assembly,
       });
+    });
+    // Each drawn row's cells, as core's span pass left them: a cell another
+    // one covers is absent, and a merged cell carries its extent.
+    const bodyCells = computed(() => {
+      const byKey = new Map(
+        renderModel().columns.map((column) => [column.key, column])
+      );
+      const cells = new Map<string, readonly BodyCellView<TRow>[]>();
+      for (const [rowId, rowCells] of renderModel().cellsByRow) {
+        cells.set(
+          rowId,
+          rowCells.flatMap((cell) => {
+            const column = byKey.get(cell.column.key);
+            return column === undefined
+              ? []
+              : [
+                  {
+                    column,
+                    columnIndex: cell.columnIndex,
+                    colSpan: cell.colSpan,
+                    rowSpan: cell.rowSpan,
+                    mark: cellSpanMark(cell.colSpan, cell.rowSpan),
+                  },
+                ];
+          })
+        );
+      }
+      return cells;
     });
     const showActions = computed(() => renderModel().showActions);
     const bodyColSpan = computed(() => renderModel().columnSpan);
@@ -1283,6 +1365,29 @@ export class AdaptDataTable<TRow> implements OnInit {
             },
       };
     };
+    // The host's class, style and height for a row or its card.
+    const appearance = (
+      attrs: Attrs,
+      args: DesktopRowWiringArgs<TRow>
+    ): Attrs => {
+      const className = rowClassName?.(args.row, args.sourceIndex);
+      const style = resolveRowStyle(
+        rowStyle,
+        rowHeight,
+        args.row,
+        args.sourceIndex
+      );
+      if (className === undefined && style === undefined) return attrs;
+      const base = attrs.style;
+      return {
+        ...attrs,
+        class: className,
+        style: {
+          ...(typeof base === "object" && base !== null ? base : {}),
+          ...style,
+        },
+      };
+    };
     const body = computed((): readonly BodySlot<TRow>[] => {
       const window = bodyWindow();
       const entries = window.groupingEntries;
@@ -1291,8 +1396,15 @@ export class AdaptDataTable<TRow> implements OnInit {
         pinnedBottomRows: pinnedRows()?.bottom ?? [],
         pinnedSummaryTop: summaryRows?.top ?? [],
         pinnedSummaryBottom: summaryRows?.bottom ?? [],
-        extraRows: undefined,
-        extraFill: () => undefined,
+        extraRows,
+        extraFill: (key) =>
+          extraHostFillStyle(
+            key,
+            extraRows,
+            table.source().rows,
+            rowKey(),
+            rowStyle
+          ),
         insertExtraRows,
         insertExtrasBeforeRows,
         paddingTop: window.virtualization.paddingTop,
@@ -1312,9 +1424,12 @@ export class AdaptDataTable<TRow> implements OnInit {
             ...args,
             rowAttrs: withRef(
               pinnedAttrs(
-                grid && args.summary !== true
-                  ? grid.rowAttrs(args.row, args.index)
-                  : table.rowAttrs(args.row, args.index),
+                appearance(
+                  grid && args.summary !== true
+                    ? grid.rowAttrs(args.row, args.index)
+                    : table.rowAttrs(args.row, args.index),
+                  args
+                ),
                 args,
                 false
               ),
@@ -1326,7 +1441,11 @@ export class AdaptDataTable<TRow> implements OnInit {
               )
             ),
             cardAttrs: (args.measure ? measured : (attrs: Attrs) => attrs)(
-              pinnedAttrs(table.cardAttrs(args.row, args.index), args, true)
+              pinnedAttrs(
+                appearance(table.cardAttrs(args.row, args.index), args),
+                args,
+                true
+              )
             ),
             detailAttrs: withRef(
               {},
@@ -1414,6 +1533,9 @@ export class AdaptDataTable<TRow> implements OnInit {
       columnSelect:
         grid !== undefined && featureOptions.columnSelectionCheckbox === true,
       rowDetail,
+      bodyCells,
+      cellSpanAppearance: featureOptions.cellSpanAppearance as
+        CellSpanAppearance | undefined,
       expandToggles,
       detailParent,
       summary,

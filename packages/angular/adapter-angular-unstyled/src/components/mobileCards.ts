@@ -4,11 +4,13 @@
 import {
   AdaptAttrs,
   AdaptCell,
+  AdaptExtraRowContent,
   AdaptRowDetail,
   AdaptSlot,
   type ColumnDef,
   EDITABLE_CELL,
   EXPAND_TOGGLE,
+  EXTRA_ROW_PARTS,
   GROUP_HEADER_CARD,
   mobileCardListStyle,
   resolveMobileLabel,
@@ -42,7 +44,14 @@ import { AdaptRowActions } from "./rowActionButtons";
  */
 @Component({
   selector: "adapt-mobile-cards",
-  imports: [AdaptAttrs, AdaptCell, AdaptRowActions, AdaptRowDetail, AdaptSlot],
+  imports: [
+    AdaptAttrs,
+    AdaptCell,
+    AdaptExtraRowContent,
+    AdaptRowActions,
+    AdaptRowDetail,
+    AdaptSlot,
+  ],
   templateUrl: "./mobileCards.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: contents" },
@@ -61,6 +70,8 @@ export class AdaptMobileCards<TRow> {
   protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
   /** The group header slot. @internal */
   protected readonly groupHeaderCardSlot = GROUP_HEADER_CARD;
+  /** An extra row's parts. */
+  protected readonly extraParts = EXTRA_ROW_PARTS;
   /** The row-expansion toggle slot. @internal */
   protected readonly expandToggleSlot = EXPAND_TOGGLE;
   /** The tree disclosure slot. @internal */

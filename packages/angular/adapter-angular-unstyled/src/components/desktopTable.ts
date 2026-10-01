@@ -5,6 +5,7 @@ import {
   AdaptAttrs,
   AdaptCell,
   AdaptColumnSpacer,
+  AdaptExtraRowContent,
   AdaptFooter,
   AdaptHeader,
   AdaptRowDetail,
@@ -18,11 +19,18 @@ import {
   columnSelectLabel,
   EDITABLE_CELL,
   EXPAND_TOGGLE,
+  EXTRA_OVER_SPAN_ROW_STYLE,
+  EXTRA_OVER_SPAN_STYLE,
+  EXTRA_ROW_PARTS,
   FILTER_HEADER,
   GROUP_HEADER_ROW,
   groupedHeaderCellStyle,
   groupedHeaderLabelStyle,
   htmlGroupedHeaderPlan,
+  isCurrentMatchCell,
+  isMatchedCell,
+  isSelectedCell,
+  mergedCellStyle,
   ROW_EDIT_ACTIONS,
   ROW_REORDER_HANDLE,
   type RowReorderHandleProps,
@@ -42,7 +50,7 @@ import {
   viewChild,
 } from "@angular/core";
 
-import type { BodyRow, TableView } from "../dataTable";
+import type { BodyCellView, BodyRow, TableView } from "../dataTable";
 import { AdaptRowActions } from "./rowActionButtons";
 
 /**
@@ -60,6 +68,7 @@ import { AdaptRowActions } from "./rowActionButtons";
     AdaptAttrs,
     AdaptCell,
     AdaptColumnSpacer,
+    AdaptExtraRowContent,
     AdaptFooter,
     AdaptHeader,
     AdaptRowActions,
@@ -98,6 +107,10 @@ export class AdaptDesktopTable<TRow> {
   protected readonly columnGroupToggleSlot = COLUMN_GROUP_TOGGLE;
   /** An empty attribute record. @internal */
   protected readonly noAttrs: Attrs = {};
+  /** An extra row's parts. */
+  protected readonly extraParts = EXTRA_ROW_PARTS;
+  /** An extra row rides above a merged cell that reaches under it. */
+  protected readonly extraRowStyle = EXTRA_OVER_SPAN_ROW_STYLE;
   /** A group header's caption line. @internal */
   protected readonly groupLabelAttrs: Attrs = {
     style: groupedHeaderLabelStyle(),
@@ -243,6 +256,42 @@ export class AdaptDesktopTable<TRow> {
    *
    * @internal
    */
+  /** An extra row's cell paint, over the host row's fill when it has one. */
+  protected extraCellStyle(fill: unknown): Record<string, unknown> {
+    return typeof fill === "object" && fill !== null
+      ? { ...EXTRA_OVER_SPAN_STYLE, ...fill }
+      : EXTRA_OVER_SPAN_STYLE;
+  }
+
+  /**
+   * A body cell's attributes with its span: `colspan` and `rowspan`, the
+   * `data-cell-span` mark, and the merged paint — without the wash on a
+   * selected or found cell, so that paint shows through.
+   */
+  protected spanned(attrs: Attrs, cell: BodyCellView<TRow>): Attrs {
+    if (cell.mark === undefined) return attrs;
+    const painted =
+      isSelectedCell(attrs) ||
+      isMatchedCell(attrs) ||
+      isCurrentMatchCell(attrs);
+    const base = attrs.style;
+    return {
+      ...attrs,
+      colspan: cell.colSpan > 1 ? cell.colSpan : undefined,
+      rowspan: cell.rowSpan > 1 ? cell.rowSpan : undefined,
+      "data-cell-span": cell.mark,
+      style: {
+        ...(typeof base === "object" && base !== null ? base : {}),
+        ...mergedCellStyle(
+          cell.colSpan,
+          cell.rowSpan,
+          this.view().cellSpanAppearance,
+          painted ? "off" : "on"
+        ),
+      },
+    };
+  }
+
   protected rowId(row: TRow): string {
     return this.rowKey()(row);
   }

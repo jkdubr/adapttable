@@ -14,6 +14,21 @@
           [style.height.px]="slot.height"
         ></li>
       }
+      @case ("extra") {
+        @let parts = extraParts[slot.extraKind];
+        @let separator = slot.extraKind === "separator";
+        <li
+          style="display: block"
+          [attr.data-adapttable-part]="parts.row"
+          [attr.role]="separator ? 'separator' : null"
+          [attr.aria-label]="separator ? v.table.labels().rowSeparator : null"
+        >
+          <div
+            [attr.data-adapttable-part]="parts.cell"
+            [adaptExtraRowContent]="slot.render"
+          ></div>
+        </li>
+      }
       @case ("group") {
         <li style="display: block">
           <ng-container

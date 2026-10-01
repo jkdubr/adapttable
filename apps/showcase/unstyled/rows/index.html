@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
-    <meta name="description" content="Try Unstyled Angular table row pinning: keep rows at the top or bottom of a scroll box from each row's menu, kept in the URL." />
+    <meta name="description" content="Try Unstyled Angular table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once." />
     <link rel="canonical" href="https://adapttable.orwamahmoud.com/angular/demo/unstyled/rows/" />
     <meta name="robots" content="noindex, follow" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="AdaptTable" />
-    <meta property="og:title" content="Unstyled table row pinning — AdaptTable" />
-    <meta property="og:description" content="Try Unstyled Angular table row pinning: keep rows at the top or bottom of a scroll box from each row's menu, kept in the URL." />
+    <meta property="og:title" content="Unstyled table row pinning and cell spanning — AdaptTable" />
+    <meta property="og:description" content="Try Unstyled Angular table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once." />
     <meta property="og:url" content="https://adapttable.orwamahmoud.com/angular/demo/unstyled/rows/" />
     <meta property="og:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Unstyled table row pinning — AdaptTable" />
-    <meta name="twitter:description" content="Try Unstyled Angular table row pinning: keep rows at the top or bottom of a scroll box from each row's menu, kept in the URL." />
+    <meta name="twitter:title" content="Unstyled table row pinning and cell spanning — AdaptTable" />
+    <meta name="twitter:description" content="Try Unstyled Angular table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once." />
     <meta name="twitter:image" content="https://adapttable.orwamahmoud.com/og.png" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Unstyled Angular table row pinning: keep rows at the top or bottom of a scroll box from each row's menu, kept in the URL.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/rows/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+      {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AdaptTable","description":"Try Unstyled Angular table row pinning and merged cells: keep rows at the top or bottom from each row's menu, and write a team that runs down the page once.","url":"https://adapttable.orwamahmoud.com/angular/demo/unstyled/rows/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","license":"https://opensource.org/license/mit","programmingLanguage":"TypeScript","codeRepository":"https://github.com/orwa-mahmoud/adapttable","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
     </script>
     <!-- Cloudflare Web Analytics — cookieless, no consent banner needed.
          Injected only off localhost, so a dev server files no session. -->
@@ -59,7 +59,7 @@
       media="print"
       onload="this.media = 'all'"
     />
-    <title>Unstyled table row pinning — AdaptTable</title>
+    <title>Unstyled table row pinning and cell spanning — AdaptTable</title>
     <script>
       try {
         if (localStorage.getItem("adapttable-demo-theme") === "dark")
@@ -162,17 +162,35 @@
       <main class="at-fallback">
         <p class="at-fallback__kicker">AdaptTable for Unstyled</p>
         <h1>Rows in Unstyled</h1>
-        <p>A row is more than a record. Pin it to the top or the bottom from its 3-dot menu, and it stays put while the rest of the rows scroll beneath it.</p>
-        <p><code>rowPinning()</code> and a <code>&quot;menu&quot;</code> row-actions layout are what this page turns on. The table holds the pinned rows and keeps them in the URL, so a reload or a shared link keeps them where they were; pass <code>pinnedRowIds</code> to hold them yourself.</p>
-        <p>Grouping and trees refuse pinning: a nested list is not a flat pin stack.</p>
+        <p>A row is more than a record. Pin it to the top or the bottom from its 3-dot menu, and merge a team that runs down consecutive rows so the name is written once.</p>
+        <p><code>rowPinning()</code>, <code>cellSpan()</code> and a <code>&quot;menu&quot;</code> row-actions layout are what this page turns on. The table holds the pinned rows and keeps them in the URL, so a reload or a shared link keeps them where they were; pass <code>pinnedRowIds</code> to hold them yourself.</p>
+        <p>Grouping and trees refuse pinning: a nested list is not a flat pin stack. The pin keeps a team merge together — the person moves, the team stays one cell.</p>
         <h2>The code</h2>
         <pre><code>import { Component, input } from &quot;@angular/core&quot;;
 import type { ColumnDef } from &quot;@adapttable/angular&quot;;
 import { AdaptDataTable } from &quot;@adapttable/angular-unstyled&quot;;
+import { cellSpan } from &quot;@adapttable/angular-unstyled/cell-span&quot;;
 import { rowActions } from &quot;@adapttable/angular-unstyled/row-actions&quot;;
 import { rowPinning } from &quot;@adapttable/angular-unstyled/row-pinning&quot;;
 
 const columns: ColumnDef&lt;Person&gt;[] = [{ key: &quot;name&quot; }, { key: &quot;team&quot; }];
+
+function spanTeam({
+  column,
+  sectionRows,
+  sectionRowIndex,
+}: {
+  column: { key: string };
+  sectionRows: readonly Person[];
+  sectionRowIndex: number;
+}) {
+  if (column.key !== &quot;team&quot;) return undefined;
+  const team = sectionRows[sectionRowIndex]?.team;
+  if (sectionRows[sectionRowIndex - 1]?.team === team) return undefined;
+  let rowSpan = 1;
+  while (sectionRows[sectionRowIndex + rowSpan]?.team === team) rowSpan += 1;
+  return rowSpan &gt; 1 ? { rowSpan } : undefined;
+}
 
 @Component({
   selector: &quot;app-people&quot;,
@@ -192,6 +210,7 @@ export class People {
   readonly rowKey = (row: Person) =&gt; row.id;
   readonly features = [
     rowPinning(),
+    cellSpan(spanTeam),
     rowActions&lt;Person&gt;([], { layout: &quot;menu&quot; }),
   ];
 }</code></pre>

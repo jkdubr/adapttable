@@ -17,6 +17,9 @@
     "strictInputAccessModifiers": true
   },
   "include": [
+    "cell-span",
+    "extra-rows",
+    "row-appearance",
     "src",
     "batch-editing",
     "bulk-actions",

@@ -10,6 +10,7 @@ import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
 import { AggregateOptions } from '@adapttable/core';
 import { AggregateSpec } from '@adapttable/core';
+import { AssemblyFns } from '@adapttable/core/binding';
 import { BATCH_EDIT_BAR } from '@adapttable/core/binding';
 import { BatchEditBarModel } from '@adapttable/core';
 import { BatchEditBarProps } from '@adapttable/core/binding';
@@ -32,6 +33,7 @@ import { CellEditor } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSaveState } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
+import { cellSpanMark } from '@adapttable/core/binding';
 import { CHECKLIST_LIST_HEIGHT } from '@adapttable/core';
 import { ChecklistButtonProps } from '@adapttable/core/binding';
 import { ChecklistCheckboxProps } from '@adapttable/core/binding';
@@ -107,8 +109,11 @@ import { expandChevronIcon } from '@adapttable/core/binding';
 import { ExpandToggleSlotProps } from '@adapttable/core/binding';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
+import { EXTRA_OVER_SPAN_ROW_STYLE } from '@adapttable/core/binding';
+import { EXTRA_OVER_SPAN_STYLE } from '@adapttable/core/binding';
 import { EXTRA_ROW_PARTS } from '@adapttable/core/binding';
 import { ExtraFilters } from '@adapttable/core';
+import { extraHostFillStyle } from '@adapttable/core/binding';
 import { ExtraRow } from '@adapttable/core';
 import { eyeIcon } from '@adapttable/core/binding';
 import { FacetMap } from '@adapttable/core';
@@ -202,16 +207,21 @@ import { InputSignal } from '@angular/core';
 import { insertExtraRows } from '@adapttable/core/binding';
 import { insertExtrasBeforeRows } from '@adapttable/core/binding';
 import { isBooleanEditor } from '@adapttable/core';
+import { isCurrentMatchCell } from '@adapttable/core/binding';
 import { isDraftChecked } from '@adapttable/core';
 import { isExtraEntry } from '@adapttable/core/binding';
 import { isFirstEditableColumn } from '@adapttable/core';
+import { isMatchedCell } from '@adapttable/core/binding';
 import { isMultiSelectEditor } from '@adapttable/core';
+import { isSelectedCell } from '@adapttable/core/binding';
 import { isSelectEditor } from '@adapttable/core';
 import { joinRelativeToken } from '@adapttable/core';
 import { KeyedVirtualization } from '@adapttable/core';
 import { LazyChildrenOptions } from '@adapttable/core';
 import { LazyChildrenState } from '@adapttable/core/binding';
 import { listFilterValues } from '@adapttable/core';
+import { MergedCellStyle } from '@adapttable/core/binding';
+import { mergedCellStyle } from '@adapttable/core/binding';
 import { mobileCardListStyle } from '@adapttable/core';
 import { NestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
@@ -249,6 +259,7 @@ import { resolveEditableCellDisplay } from '@adapttable/core';
 import { resolveEditingArming } from '@adapttable/core';
 import { resolveMobileLabel } from '@adapttable/core/binding';
 import { resolveRowEditTrigger } from '@adapttable/core';
+import { resolveRowStyle } from '@adapttable/core/binding';
 import { restoreFocusSoon } from '@adapttable/core';
 import { ROW_EDIT_ACTIONS } from '@adapttable/core/binding';
 import { ROW_REORDER_ANNOUNCER } from '@adapttable/core/binding';
@@ -961,6 +972,25 @@ export class AdaptEditableCellGate<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptEditableCellGate<any>, never>;
+}
+
+// @public
+export class AdaptExtraRowContent {
+    protected readonly component: Signal<Type<unknown> | null>;
+    protected readonly content: Signal<unknown>;
+    readonly render: InputSignal<(() => unknown) | undefined>;
+    protected readonly template: Signal<TemplateRef<any> | null>;
+    protected readonly text: Signal<string>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptExtraRowContent, "[adaptExtraRowContent]", never, {
+        "render": {
+            "alias": "adaptExtraRowContent";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptExtraRowContent, never>;
 }
 
 // @public
@@ -1748,6 +1778,8 @@ export interface AngularGroupingPanelAggregationItemProps {
 // @public
 export type AngularGroupingPanelSurfaceProps = GroupingPanelSurfaceProps<TemplateRef<unknown>, DragEvent>;
 
+export { AssemblyFns }
+
 // @public
 export type Attrs = Readonly<Record<string, unknown>>;
 
@@ -1874,6 +1906,8 @@ export interface CellSaveStateInjectOptions<TRow> {
 export function cellSpan<TRow>(getCellSpan: GetCellSpan<TRow>, cellSpanAppearance?: CellSpanAppearance): AdaptTableFeature;
 
 export { CellSpanAppearance }
+
+export { cellSpanMark }
 
 // @public
 export interface ChangedCellFlash {
@@ -2360,9 +2394,15 @@ export interface ExternalStore<T> {
     readonly subscribe: (listener: () => void) => () => void;
 }
 
+export { EXTRA_OVER_SPAN_ROW_STYLE }
+
+export { EXTRA_OVER_SPAN_STYLE }
+
 export { EXTRA_ROW_PARTS }
 
 export { ExtraFilters }
+
+export { extraHostFillStyle }
 
 export { ExtraRow }
 
@@ -2898,11 +2938,15 @@ export { insertExtrasBeforeRows }
 
 export { isBooleanEditor }
 
+export { isCurrentMatchCell }
+
 export { isDraftChecked }
 
 export { isExtraEntry }
 
 export { isFirstEditableColumn }
+
+export { isMatchedCell }
 
 // @public
 export interface IsMobileOptions {
@@ -2911,6 +2955,8 @@ export interface IsMobileOptions {
 }
 
 export { isMultiSelectEditor }
+
+export { isSelectedCell }
 
 export { isSelectEditor }
 
@@ -2951,6 +2997,10 @@ export interface MeasuredWindowScrollMarginOptions {
     readonly enabled: MaybeSignal<boolean>;
     readonly injector?: Injector;
 }
+
+export { MergedCellStyle }
+
+export { mergedCellStyle }
 
 export { mobileCardListStyle }
 
@@ -3100,6 +3150,8 @@ export { resolveEditingArming }
 export { resolveMobileLabel }
 
 export { resolveRowEditTrigger }
+
+export { resolveRowStyle }
 
 export { restoreFocusSoon }
 

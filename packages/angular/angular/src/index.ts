@@ -281,6 +281,7 @@ export {
   type ChangedCellFlashOptions,
   injectChangedCellFlash,
 } from "./rows/changedCellFlash";
+export { AdaptExtraRowContent } from "./rows/extraRowContent";
 export { type Highlight, injectHighlight } from "./rows/highlight";
 export {
   injectRowExpansion,

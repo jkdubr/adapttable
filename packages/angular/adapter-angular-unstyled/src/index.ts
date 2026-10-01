@@ -54,6 +54,7 @@ export {
 } from "./components/treeControls";
 export {
   AdaptDataTable,
+  type BodyCellView,
   type BodyRow,
   type BodySlot,
   type RowActionsCell,

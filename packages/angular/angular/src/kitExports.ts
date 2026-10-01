@@ -253,3 +253,16 @@ export {
   type HtmlGroupedHeaderCell,
   htmlGroupedHeaderPlan,
 } from "@adapttable/core/binding";
+export {
+  type AssemblyFns,
+  cellSpanMark,
+  EXTRA_OVER_SPAN_ROW_STYLE,
+  EXTRA_OVER_SPAN_STYLE,
+  extraHostFillStyle,
+  isCurrentMatchCell,
+  isMatchedCell,
+  isSelectedCell,
+  type MergedCellStyle,
+  mergedCellStyle,
+  resolveRowStyle,
+} from "@adapttable/core/binding";

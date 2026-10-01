@@ -3068,6 +3068,14 @@ comes from a kit through a slot.
 - Built-in feature factories write the same configuration as every other
   binding's, each over its core half: `cellSpan`, `extraRows`,
   `pinnedSummaryRows`, `rowAppearance` (`RowAppearanceOptions`),
+  `AdaptExtraRowContent` draws a full-width extra row's `render` — an
+  `ng-template`, a standalone component, or text. A spanned cell carries
+  `cellSpanMark` and `mergedCellStyle` (`MergedCellStyle`); `isMatchedCell`,
+  `isCurrentMatchCell` and `isSelectedCell` read the match and selection
+  marks. `EXTRA_OVER_SPAN_ROW_STYLE`, `EXTRA_OVER_SPAN_STYLE` and
+  `extraHostFillStyle` lift an extra row over a continuing span.
+  `resolveRowStyle` and `AssemblyFns` are the row-style and assembly helpers
+  the desktop body uses.
   `columnMenu`, `resizableColumns`, `collapsibleColumnGroups`, `multiSort`,
   `fitColumns`, `columnSelectionCheckbox`, `headerFilters`, `bulkActions`,
   `savedViews`, `print`, `statusBar`, `undoRedoButtons`, `dirtyIndicators`,
@@ -3293,7 +3301,12 @@ the card), `virtualize`, `cellNavigation`, `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,
 `AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`
-(`AdaptBatchEditBar` fills `BATCH_EDIT_BAR`) — each importable from its own
+(`AdaptBatchEditBar` fills `BATCH_EDIT_BAR`), `cellSpan`
+(`@adapttable/angular-unstyled/cell-span`; each drawn cell is a
+`BodyCellView`, and its `mark` is the `data-cell-span` attribute), `extraRows` (`/extra-rows`;
+separator and full-width rows on the desktop body and the phone cards) and
+`rowAppearance` (`/row-appearance`; a class, style and height on each row
+and card) — each importable from its own
 subpath (or from `@adapttable/angular-unstyled/features`). `standardPreset`
 (`@adapttable/angular-unstyled/preset`, `StandardPresetOptions`) assembles
 the zero-configuration set. Overlay helpers `menuPopover` / `MenuPopover`,

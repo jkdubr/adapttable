@@ -45,6 +45,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-cell-navigation.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-cell-navigation.mjs"
     },
+    "./cell-span": {
+      "types": "./dist/types/adapttable-angular-unstyled-cell-span.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-cell-span.mjs"
+    },
     "./column-groups": {
       "types": "./dist/types/adapttable-angular-unstyled-column-groups.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-column-groups.mjs"
@@ -68,6 +72,10 @@
     "./export": {
       "types": "./dist/types/adapttable-angular-unstyled-export.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-export.mjs"
+    },
+    "./extra-rows": {
+      "types": "./dist/types/adapttable-angular-unstyled-extra-rows.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-extra-rows.mjs"
     },
     "./features": {
       "types": "./dist/types/adapttable-angular-unstyled-features.d.ts",
@@ -108,6 +116,10 @@
     "./row-actions": {
       "types": "./dist/types/adapttable-angular-unstyled-row-actions.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-row-actions.mjs"
+    },
+    "./row-appearance": {
+      "types": "./dist/types/adapttable-angular-unstyled-row-appearance.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-row-appearance.mjs"
     },
     "./row-detail": {
       "types": "./dist/types/adapttable-angular-unstyled-row-detail.d.ts",

@@ -158,7 +158,8 @@ export function cellSpan<TRow>(
 }
 
 /**
- * Separator or full-width rows between the data rows.
+ * Separator or full-width rows between the data rows. A full-width row's
+ * `render` returns an `ng-template`, a standalone component, or text.
  *
  * @param rows - The rows and where each goes.
  * @returns The feature.
