@@ -25,4 +25,5 @@ export {
 } from "@adapttable/angular-unstyled/row-actions";
 export { rowReorder } from "@adapttable/angular-unstyled/row-reorder";
 export { savedViews } from "@adapttable/angular-unstyled/saved-views";
+export { sidePanel } from "@adapttable/angular-unstyled/side-panel";
 export { virtualize } from "@adapttable/angular-unstyled/virtualize";

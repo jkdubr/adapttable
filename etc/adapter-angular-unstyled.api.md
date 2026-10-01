@@ -99,6 +99,9 @@ import { SavedViewsControllerOptions } from '@adapttable/angular';
 import { SavedViewsSlotProps } from '@adapttable/angular';
 import { SavedViewsState } from '@adapttable/angular';
 import { SelectionState } from '@adapttable/angular';
+import { SidePanelChromeProps } from '@adapttable/core/binding';
+import { SidePanelEntry } from '@adapttable/core';
+import { SidePanelPanel } from '@adapttable/angular';
 import { Signal } from '@angular/core';
 import { SummaryRowFn } from '@adapttable/angular';
 import { TableContextMenuOptions } from '@adapttable/angular';
@@ -353,6 +356,8 @@ export class AdaptDataTable<TRow> implements OnInit {
     // @internal
     protected readonly desktopTable: Signal<AdaptDesktopTable<any> | undefined>;
     readonly dir: InputSignal<Direction>;
+    protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
+    protected readonly dockedSide: Signal<"start" | "end">;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
     readonly facetKeys: InputSignal<readonly string[] | undefined>;
@@ -410,7 +415,17 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly selectedIds: InputSignal<readonly string[] | undefined>;
     readonly selectionChange: OutputEmitterRef<string[]>;
     readonly sidePanel: Signal<TemplateRef<unknown> | undefined>;
+    protected readonly sidePanelProps: Signal<{
+        panels: readonly SidePanelPanel[];
+        openPanel: string;
+        onOpenPanel: (key: string) => void;
+        onClose: () => void;
+        side: "start" | "end";
+        labels: TableLabels | undefined;
+    } | undefined>;
     readonly sidePanelSide: InputSignal<"start" | "end">;
+    // @internal
+    protected readonly sidePanelSlot: FeatureSlotKey<Omit<SidePanelChromeProps<unknown, SidePanelEntry, KeyboardEvent>, "slots">>;
     readonly skeletonRows: InputSignal<number | undefined>;
     protected sortBy(event: Event): void;
     readonly source: InputSignal<TableSource<TRow> | Signal<TableSource<TRow>> | undefined>;

@@ -21,6 +21,7 @@ import { RowEditHandler } from '@adapttable/angular';
 import { RowReorderHandler } from '@adapttable/angular';
 import { RowReorderOptions } from '@adapttable/angular';
 import { SavedViewsControllerOptions } from '@adapttable/angular';
+import { SidePanelOptions } from '@adapttable/angular';
 import { VirtualizeOptions } from '@adapttable/angular';
 
 // @public
@@ -89,6 +90,9 @@ export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?
 
 // @public
 export function savedViews(options: SavedViewsControllerOptions): AdaptTableFeature;
+
+// @public
+export function sidePanel(options: SidePanelOptions): AdaptTableFeature;
 
 // @public
 export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;

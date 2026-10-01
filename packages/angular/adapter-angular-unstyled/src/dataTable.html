@@ -168,7 +168,16 @@
       ></progress>
     }
 
-    <adapt-table-region [panel]="sidePanel()" [side]="sidePanelSide()">
+    <ng-template #featureSidePanel>
+      @if (sidePanelProps(); as props) {
+        <ng-container
+          [adaptSlot]="sidePanelSlot"
+          [adaptSlotProps]="props"
+          [adaptSlotTable]="v.table"
+        />
+      }
+    </ng-template>
+    <adapt-table-region [panel]="dockedPanel()" [side]="dockedSide()">
       @if (v.table.errorState(); as failure) {
         <adapt-error-state
           [error]="failure.error"

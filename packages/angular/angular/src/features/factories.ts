@@ -43,6 +43,7 @@ import {
   type FeaturePatch,
   type SidePanelEntry,
 } from "@adapttable/core/binding";
+import type { TemplateRef } from "@angular/core";
 
 import type { AdaptTableFeature } from "../featureHost";
 
@@ -86,13 +87,25 @@ export interface ContextMenuOptions<TRow> {
 }
 
 /**
+ * One panel in {@link sidePanel}'s strip.
+ *
+ * @public
+ */
+export interface SidePanelPanel extends SidePanelEntry {
+  /** The tab's caption. Falls back to the key. */
+  readonly label?: string;
+  /** What the panel shows: a template, or plain text. */
+  readonly content?: TemplateRef<unknown> | string;
+}
+
+/**
  * Options for {@link sidePanel}.
  *
  * @public
  */
 export interface SidePanelOptions {
   /** The panels, in tab order. */
-  readonly panels: readonly SidePanelEntry[];
+  readonly panels: readonly SidePanelPanel[];
   /** Which panel is showing, or `null` when the panel is closed. */
   readonly open: string | null;
   /** Called with the panel to show, or `null` when it should close. */

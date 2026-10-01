@@ -1,11 +1,10 @@
 /**
  * The flex row a side panel sits in, beside the table's body.
  *
- * Absent a panel, the body is projected unchanged: the region exists only
- * while something is beside it, so a table with no panel does not grow a
- * layout wrapper.
+ * The row itself is {@link AdaptSidePanelLayout}. This keeps the selector
+ * the table already uses.
  */
-import { NgTemplateOutlet } from "@angular/common";
+import { AdaptSidePanelLayout } from "@adapttable/angular";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,27 +19,12 @@ import {
  */
 @Component({
   selector: "adapt-table-region",
-  imports: [NgTemplateOutlet],
+  imports: [AdaptSidePanelLayout],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ng-template #body><ng-content /></ng-template>
-    @if (panel(); as panel) {
-      <div
-        data-adapttable-part="table-region"
-        style="display: flex; gap: 12px; align-items: flex-start"
-        [style.flex-direction]="side() === 'start' ? 'row-reverse' : 'row'"
-      >
-        <div
-          data-adapttable-part="table-region-main"
-          style="flex: 1; min-width: 0"
-        >
-          <ng-container [ngTemplateOutlet]="body" />
-        </div>
-        <ng-container [ngTemplateOutlet]="panel" />
-      </div>
-    } @else {
-      <ng-container [ngTemplateOutlet]="body" />
-    }
+    <adapt-side-panel-layout [panel]="panel()" [side]="side()">
+      <ng-content />
+    </adapt-side-panel-layout>
   `,
 })
 export class AdaptTableRegion {

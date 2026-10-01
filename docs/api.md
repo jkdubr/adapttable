@@ -3169,6 +3169,13 @@ comes from a kit through a slot.
   closes the menu before it runs. `ADAPTTABLE_CONTEXT_MENU` publishes the
   `ContextMenuRegionHandlers` the table binds. `copyContextMenuSelection`
   copies or cuts the cell the menu was opened on when cell navigation is on.
+- Side panel: `sidePanel()` docks one or more panels beside the body.
+  `SidePanelOptions` is the strip, which panel is open and which edge it
+  sits on. `SidePanelPanel` is one panel: a key, an optional label and
+  optional content (a template or text). `AdaptSidePanelChrome` lays out
+  the header, the tabs and the body; `SidePanelSlots` names the kit's
+  frame, tab and close control. `AdaptSidePanelLayout` is the row the
+  panel sits in beside the table.
 - Grouping: `grouping` (with `GroupingExtras`) groups rows under collapsible
   headers, with per-group subtotals, optional footers and paged groups.
   `injectGrouping` (`GroupingOptions`) is its live model, a `TableGrouping`
@@ -3363,7 +3370,9 @@ the card), `virtualize`, `cellNavigation`, `findInTable` (`AdaptFindBar`,
 `AdaptFindToolbarButton`), `commandPalette` (`AdaptCommandPaletteLive`,
 `AdaptCommandPaletteButton`), `contextMenu` (`AdaptContextMenuLive`,
 `AdaptContextMenuSurface`, `AdaptContextMenuItem`,
-`AdaptContextMenuSeparator`), `rowReorder`,
+`AdaptContextMenuSeparator`), `sidePanel` (`AdaptSidePanelLive`,
+`AdaptSidePanelFrame`, `AdaptSidePanelTab`, `AdaptSidePanelClose`),
+`rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,
 `AdaptRowEditActions` fills `ROW_EDIT_ACTIONS`) and `batchEditing`

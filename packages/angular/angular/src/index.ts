@@ -206,6 +206,7 @@ export {
   savedViews,
   sidePanel,
   type SidePanelOptions,
+  type SidePanelPanel,
   statusBar,
   undoRedoButtons,
 } from "./features/factories";
@@ -330,6 +331,11 @@ export { injectMediaQuery } from "./hooks/mediaQuery";
 export { injectPrefersReducedMotion } from "./hooks/prefersReducedMotion";
 export { AdaptIcon } from "./icon";
 export * from "./kitExports";
+export {
+  AdaptSidePanelChrome,
+  AdaptSidePanelLayout,
+  type SidePanelSlots,
+} from "./layout/sidePanelChrome";
 export type { RuntimeGrouping } from "./layout/tableRuntime";
 export {
   type DensityOptions,

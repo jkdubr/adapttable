@@ -161,6 +161,10 @@
       "types": "./dist/types/adapttable-angular-unstyled-saved-views.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-saved-views.mjs"
     },
+    "./side-panel": {
+      "types": "./dist/types/adapttable-angular-unstyled-side-panel.d.ts",
+      "default": "./dist/fesm2022/adapttable-angular-unstyled-side-panel.mjs"
+    },
     "./tree": {
       "types": "./dist/types/adapttable-angular-unstyled-tree.d.ts",
       "default": "./dist/fesm2022/adapttable-angular-unstyled-tree.mjs"

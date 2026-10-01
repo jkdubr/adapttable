@@ -83,6 +83,7 @@ export default defineConfig({
         "row-pinning/**/*.ts",
         "row-reorder/**/*.ts",
         "saved-views/**/*.ts",
+        "side-panel/**/*.ts",
         "tree/**/*.ts",
         "virtualize/**/*.ts",
       ],

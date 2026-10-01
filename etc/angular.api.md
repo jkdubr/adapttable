@@ -335,7 +335,9 @@ import { SelectionState } from '@adapttable/core/binding';
 import { Shortcut } from '@adapttable/core';
 import { showAllColumns } from '@adapttable/core/binding';
 import { showSimpleFilterFields } from '@adapttable/core';
+import { SIDE_PANEL } from '@adapttable/core/binding';
 import { SidePanelEntry } from '@adapttable/core/binding';
+import { SidePanelModel } from '@adapttable/core';
 import { Signal } from '@angular/core';
 import { SlotFill } from '@adapttable/core/binding';
 import { slotRender } from '@adapttable/core/binding';
@@ -1982,6 +1984,123 @@ export class AdaptRowReorderHandleChrome<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowReorderHandleChrome<any>, never>;
+}
+
+// @public
+export class AdaptSidePanelChrome {
+    readonly className: InputSignal<string | undefined>;
+    protected readonly closeProps: Signal<    {
+    label: string;
+    onClose: () => void;
+    }>;
+    protected readonly contentTemplate: Signal<TemplateRef<unknown> | undefined>;
+    protected readonly contentText: Signal<string>;
+    protected readonly frameProps: Signal<    {
+    side: "start" | "end";
+    className: string | undefined;
+    header: TemplateRef<unknown> | undefined;
+    body: TemplateRef<unknown> | undefined;
+    }>;
+    readonly idPrefix: InputSignal<string | undefined>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    protected readonly model: Signal<SidePanelModel<    {
+    label: string;
+    content?: TemplateRef<unknown> | string;
+    key: string;
+    }> | null>;
+    protected onBodyKey(event: KeyboardEvent): void;
+    readonly onClose: InputSignal<() => void>;
+    readonly onOpenPanel: InputSignal<(key: string) => void>;
+    readonly openPanel: InputSignal<string>;
+    readonly panels: InputSignal<readonly SidePanelPanel[]>;
+    readonly side: InputSignal<"start" | "end" | undefined>;
+    readonly slots: InputSignal<SidePanelSlots>;
+    protected readonly tabProps: Signal<    {
+    readonly panel: SidePanelPanel;
+    readonly selected: boolean;
+    readonly buttonProps: {
+    readonly id: string;
+    readonly role: "tab";
+    readonly type: "button";
+    readonly tabIndex: number;
+    readonly "aria-selected": boolean;
+    readonly "aria-controls": string;
+    readonly "data-adapttable-part": "side-panel-tab";
+    readonly onClick: () => void;
+    readonly onKeyDown: (event: KeyboardEvent) => void;
+    };
+    }[]>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSidePanelChrome, "adapt-side-panel-chrome", never, {
+        "panels": {
+            "alias": "panels";
+            "required": true;
+            "isSignal": true;
+        };
+        "openPanel": {
+            "alias": "openPanel";
+            "required": true;
+            "isSignal": true;
+        };
+        "onOpenPanel": {
+            "alias": "onOpenPanel";
+            "required": true;
+            "isSignal": true;
+        };
+        "onClose": {
+            "alias": "onClose";
+            "required": true;
+            "isSignal": true;
+        };
+        "side": {
+            "alias": "side";
+            "required": false;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "idPrefix": {
+            "alias": "idPrefix";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSidePanelChrome, never>;
+}
+
+// @public
+export class AdaptSidePanelLayout {
+    readonly panel: InputSignal<TemplateRef<unknown> | undefined>;
+    readonly side: InputSignal<"start" | "end">;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSidePanelLayout, "adapt-side-panel-layout", never, {
+        "panel": {
+            "alias": "panel";
+            "required": false;
+            "isSignal": true;
+        };
+        "side": {
+            "alias": "side";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, ["*"], true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSidePanelLayout, never>;
 }
 
 // @public
@@ -4078,6 +4197,8 @@ export { showAllColumns }
 
 export { showSimpleFilterFields }
 
+export { SIDE_PANEL }
+
 // @public
 export function sidePanel(options: SidePanelOptions): AdaptTableFeature;
 
@@ -4087,8 +4208,21 @@ export { SidePanelEntry }
 export interface SidePanelOptions {
     readonly onOpenChange: (key: string | null) => void;
     readonly open: string | null;
-    readonly panels: readonly SidePanelEntry[];
+    readonly panels: readonly SidePanelPanel[];
     readonly side?: "start" | "end";
+}
+
+// @public
+export interface SidePanelPanel extends SidePanelEntry {
+    readonly content?: TemplateRef<unknown> | string;
+    readonly label?: string;
+}
+
+// @public
+export interface SidePanelSlots {
+    readonly Close: Type<unknown>;
+    readonly Frame: Type<unknown>;
+    readonly Tab: Type<unknown>;
 }
 
 // @public

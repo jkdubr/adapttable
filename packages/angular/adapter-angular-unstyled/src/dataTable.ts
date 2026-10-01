@@ -145,6 +145,8 @@ import {
   type SavedViewsSlotProps,
   SEARCH_ICON,
   type SelectionState,
+  SIDE_PANEL,
+  type SidePanelOptions,
   type SummaryRowFn,
   type TableContextMenuOptions,
   type TableDensity,
@@ -1196,6 +1198,47 @@ export class AdaptDataTable<TRow> implements OnInit {
   readonly tableFooter = contentChild<TemplateRef<unknown>>("tableFooter");
   /** A host template rendered beside the body. */
   readonly sidePanel = contentChild<TemplateRef<unknown>>("sidePanel");
+  /** The feature panel, stamped only while it is open. */
+  private readonly featureSidePanelTpl =
+    viewChild<TemplateRef<unknown>>("featureSidePanel");
+  /** The side-panel slot. @internal */
+  protected readonly sidePanelSlot = SIDE_PANEL;
+  /** The feature's panel options, read live so a controlled `open` updates. */
+  private readonly liveSidePanel = computed(
+    () =>
+      featureOptionsOf(this.features()).sidePanel as
+        SidePanelOptions | undefined
+  );
+  /** Which edge the docked panel sits on. */
+  protected readonly dockedSide = computed(
+    () => this.liveSidePanel()?.side ?? this.sidePanelSide()
+  );
+  /**
+   * The feature panel while it is open; otherwise the host's projected
+   * template.
+   */
+  protected readonly dockedPanel = computed(() => {
+    const options = this.liveSidePanel();
+    if (options?.open != null) return this.featureSidePanelTpl();
+    return this.sidePanel();
+  });
+  /** Props for the live panel, only while a feature panel is open. */
+  protected readonly sidePanelProps = computed(() => {
+    const options = this.liveSidePanel();
+    if (options?.open == null) return undefined;
+    return {
+      panels: options.panels,
+      openPanel: options.open,
+      onOpenPanel: (key: string) => {
+        options.onOpenChange(key);
+      },
+      onClose: () => {
+        options.onOpenChange(null);
+      },
+      side: options.side ?? this.sidePanelSide(),
+      labels: this.labels(),
+    };
+  });
   /**
    * Whether the empty table is empty because nothing matched.
    *

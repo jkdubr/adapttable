@@ -207,6 +207,7 @@ export {
   coreFindInTable,
   coreFullscreen,
   FIND_BAR,
+  SIDE_PANEL,
   TOOLBAR_EXTRAS,
 } from "@adapttable/core/binding";
 export { coreSavedViews, SAVED_VIEWS } from "@adapttable/core/binding";
