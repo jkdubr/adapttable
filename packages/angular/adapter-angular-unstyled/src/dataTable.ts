@@ -17,6 +17,7 @@ import {
   ADAPTTABLE_PALETTE_OPEN,
   type AdaptTableFeature,
   AdaptTableStatusAnnouncer,
+  asBatchGesture,
   type AssemblyFns,
   type Attrs,
   BATCH_EDIT_BAR,
@@ -56,6 +57,7 @@ import {
   type EditableCellEditing,
   type EditableCellSlotProps,
   type EditEventHandler,
+  type EditHistoryOptions,
   estimateBodyItemSize,
   type ExpandToggleSlotProps,
   type ExportCsvOptions,
@@ -107,9 +109,11 @@ import {
   injectMeasuredWindowScrollMargin,
   injectRowDetail,
   injectRowEditing,
+  injectRowMutations,
   injectRowReorder,
   injectRowSelection,
   injectTableData,
+  injectTableEditHistory,
   injectTableRowPinning,
   injectTableVirtualizer,
   injectTree,
@@ -132,13 +136,13 @@ import {
   resolveRowStyle,
   ROW_REORDER_ANNOUNCER,
   type RowAction,
-  rowActionsFor,
   type RowActionsLayout,
   type RowEditActionsProps,
   rowEditConflict,
   type RowEditHandler,
   type RowEditIcons,
   type RowHeight,
+  type RowMutationsState,
   type RowReorderState,
   type RowSelection,
   type RowStyle,
@@ -166,9 +170,11 @@ import {
   type ToolbarExtrasSlotProps,
   TREE_CELL,
   type TreeEntry,
+  undoRedoToolbarProps,
   urlAdapterFor,
   virtualizeIgnoredOnPage,
   windowGroupedEntries,
+  withRowMutationActions,
   withRowPinActions,
 } from "@adapttable/angular";
 import { NgTemplateOutlet } from "@angular/common";
@@ -201,6 +207,44 @@ import {
   type FiltersView,
   filtersViewFor,
 } from "./tableFilters";
+
+/** Read an opt-in history from the feature configuration. */
+function historyFor<TRow>(
+  featureOptions: Readonly<Record<string, unknown>>,
+  columns: Signal<readonly ColumnDef<TRow>[]>,
+  injector: Injector
+): ReturnType<typeof injectTableEditHistory<TRow>> | undefined {
+  if (
+    featureOptions.editHistory === undefined ||
+    featureOptions.editHistory === false
+  )
+    return undefined;
+  return injectTableEditHistory<TRow>(
+    computed(() => ({
+      editHistory: featureOptions.editHistory as boolean | EditHistoryOptions,
+      columns: columns(),
+      onCellEdit: featureOptions.onCellEdit as
+        CellEditHandler<TRow> | undefined,
+    })),
+    injector
+  );
+}
+
+/** Record inline and batch writes as their respective core gestures. */
+function editingOptionsFor<TRow>(
+  featureOptions: Readonly<Record<string, unknown>>,
+  history: ReturnType<typeof injectTableEditHistory<TRow>> | undefined
+): Readonly<Record<string, unknown>> {
+  if (!history) return featureOptions;
+  return {
+    ...featureOptions,
+    onCellEdit: history().onCellEdit,
+    onBatchEdit: asBatchGesture(
+      featureOptions.onBatchEdit as BatchEditHandler<TRow> | undefined,
+      history().history.record
+    ),
+  };
+}
 
 /**
  * The editing bundle for composed editing features, or absent.
@@ -931,6 +975,8 @@ export interface TableView<TRow> {
   readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
   /** A strip of buttons, or a menu. */
   readonly rowActionsLayout: RowActionsLayout | undefined;
+  /** Host-owned row additions and mutations. */
+  readonly rowMutations: Signal<RowMutationsState<TRow>>;
   /** Asks before an action that declares a `confirm`. */
   readonly confirm: ConfirmHandler;
   /** The row density the root states. */
@@ -1466,16 +1512,31 @@ export class AdaptDataTable<TRow> implements OnInit {
         : undefined;
     filtersRef.current = filters;
     const confirm = this.confirm() ?? defaultConfirm;
-    const rowActions = rowActionsFor<TRow>({
-      actions: featureOptions.rowActions as RowAction<TRow>[] | undefined,
-      onDuplicateRow: featureOptions.onDuplicateRow as
-        ((row: TRow) => void) | undefined,
-      onDeleteRow: featureOptions.onDeleteRow as
-        ((row: TRow) => void) | undefined,
-      confirmDeleteRow: featureOptions.confirmDeleteRow as boolean | undefined,
-      labels: table.labels,
-      hidden: computed(() => table.layout().isHidden(ACTIONS_COLUMN_KEY)),
-    });
+    const rowMutations = injectRowMutations<TRow>(
+      computed(() => ({
+        onAddRow: featureOptions.onAddRow as (() => unknown) | undefined,
+        onDuplicateRow: featureOptions.onDuplicateRow as
+          ((row: TRow) => unknown) | undefined,
+        onDeleteRow: featureOptions.onDeleteRow as
+          ((row: TRow) => unknown) | undefined,
+        confirmDeleteRow: featureOptions.confirmDeleteRow as
+          boolean | undefined,
+        labels: table.labels(),
+      })),
+      injector
+    );
+    const rowActions = computed(() =>
+      withRowMutationActions({
+        host: featureOptions.rowActions as RowAction<TRow>[] | undefined,
+        mutations: rowMutations().actions,
+        actionsHidden: table.layout().isHidden(ACTIONS_COLUMN_KEY),
+      })
+    );
+    const history = historyFor(
+      featureOptions,
+      computed(() => table.allColumns()),
+      injector
+    );
     const bulkBar =
       bulk && selection
         ? computed((): BulkBarSlotProps<SelectionState> => ({
@@ -1500,6 +1561,8 @@ export class AdaptDataTable<TRow> implements OnInit {
             table,
             enabled: true,
             find,
+            onUndo: history?.().history.undo,
+            onRedo: history?.().history.redo,
             onCut: (range) => {
               this.cutSelection(range);
             },
@@ -1563,6 +1626,13 @@ export class AdaptDataTable<TRow> implements OnInit {
         : undefined,
       isFullscreen: fullscreen?.().active,
       ...exporter?.(),
+      ...(history
+        ? undoRedoToolbarProps(
+            featureOptions.undoRedoButtons === true,
+            history().history,
+            table.labels()
+          )
+        : {}),
       ...printToolbarProps(
         featureOptions.printButton === true,
         featureOptions.onPrint as (() => void) | undefined,
@@ -1659,7 +1729,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       injector,
     });
     const editing = editingBundleFor<TRow>({
-      featureOptions,
+      featureOptions: editingOptionsFor(featureOptions, history),
       columns: computed(() => table.allColumns()),
       featureHost: table.featureHost,
       labels: table.labels,
@@ -2011,6 +2081,7 @@ export class AdaptDataTable<TRow> implements OnInit {
       rowActions: rowActionList,
       density,
       toolbarExtras,
+      rowMutations,
       savedViews,
       groupingPanel,
       reorder,

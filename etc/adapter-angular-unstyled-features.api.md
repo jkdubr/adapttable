@@ -11,6 +11,7 @@ import { CellEditHandler } from '@adapttable/angular';
 import { CellNavigationOptions } from '@adapttable/angular';
 import { CommandPaletteOptions } from '@adapttable/angular';
 import { ContextMenuOptions } from '@adapttable/angular';
+import { editHistory } from '@adapttable/angular';
 import { ExportCsvOptions } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
 import { GroupingExtras } from '@adapttable/angular';
@@ -44,6 +45,8 @@ export function contextMenu<TRow>(options?: boolean | ContextMenuOptions<TRow>):
 
 // @public
 export function densityChooser(): AdaptTableFeature;
+
+export { editHistory }
 
 // @public
 export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
@@ -88,6 +91,7 @@ export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], options?:
 export interface RowActionsFeatureOptions<TRow> {
     readonly confirmDeleteRow?: boolean;
     readonly layout?: RowActionsLayout;
+    readonly onAddRow?: () => unknown;
     readonly onDeleteRow?: (row: TRow) => void;
     readonly onDuplicateRow?: (row: TRow) => void;
 }
@@ -109,6 +113,9 @@ export function sidePanel(options: SidePanelOptions): AdaptTableFeature;
 
 // @public
 export function statusBar(): AdaptTableFeature;
+
+// @public
+export function undoRedoButtons(): AdaptTableFeature;
 
 // @public
 export function virtualize(options?: VirtualizeOptions): AdaptTableFeature;

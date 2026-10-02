@@ -129,6 +129,12 @@ export {
   stopEditKeys,
 } from "./editing/editableCellGate";
 export {
+  type EditHistoryHandle,
+  type EditHistoryOptions,
+  injectTableEditHistory,
+  type TableEditHistoryProps,
+} from "./editing/editHistory";
+export {
   type BatchEditHandler,
   type BatchEditingInjectOptions,
   type CellEditHandler,
@@ -181,6 +187,7 @@ export {
   cellNavigation,
   type CellNavigationOptions,
 } from "./features/cellNavigation";
+export { editHistory } from "./features/editHistory";
 export {
   batchEditing,
   dirtyIndicators,
@@ -383,6 +390,11 @@ export {
   type RowExpansionOptions,
   type RowExpansionState,
 } from "./rows/rowExpansion";
+export {
+  injectRowMutations,
+  type RowMutationHandlers,
+  type RowMutationsOptions,
+} from "./rows/rowMutations";
 export {
   injectRowPinning,
   type RowPinLabels,

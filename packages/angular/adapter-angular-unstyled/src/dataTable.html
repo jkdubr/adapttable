@@ -118,6 +118,15 @@
         [adaptSlotProps]="v.toolbarExtras()"
         [adaptSlotTable]="v.table"
       />
+      @if (v.rowMutations().canAdd) {
+        <button
+          type="button"
+          data-adapttable-part="add-row"
+          (click)="v.rowMutations().addRow()"
+        >
+          {{ v.table.labels().addRow }}
+        </button>
+      }
     </div>
 
     @if (v.filters; as f) {

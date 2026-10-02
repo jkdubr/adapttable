@@ -94,6 +94,7 @@ import { RowAction } from '@adapttable/angular';
 import { RowActionsLayout } from '@adapttable/angular';
 import { RowEditActionsProps } from '@adapttable/angular';
 import { RowGroupRef } from '@adapttable/core';
+import { RowMutationsState } from '@adapttable/angular';
 import { RowReorderButtonsProps } from '@adapttable/core/binding';
 import { RowReorderButtonsProps as RowReorderButtonsProps_2 } from '@adapttable/angular';
 import { RowReorderHandleProps } from '@adapttable/core/binding';
@@ -1545,6 +1546,21 @@ export class AdaptTreeToggle {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptTreeToggle, never>;
 }
 
+// @internal
+export class AdaptUndoRedoButtons {
+    readonly props: InputSignal<ToolbarExtrasSlotProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptUndoRedoButtons, "adapt-undo-redo-buttons", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptUndoRedoButtons, never>;
+}
+
 // @public
 export interface BodyCellView<TRow> {
     readonly colSpan: number;
@@ -1651,6 +1667,7 @@ export interface TableView<TRow> {
     readonly rowActions: Signal<RowAction<TRow>[] | undefined>;
     readonly rowActionsLayout: RowActionsLayout | undefined;
     readonly rowDetail: Signal<TableRowDetail<TRow>> | undefined;
+    readonly rowMutations: Signal<RowMutationsState<TRow>>;
     readonly savedViews: Signal<SavedViewsSlotProps<SavedViewsControllerOptions>> | undefined;
     readonly selection: RowSelection | undefined;
     readonly showActions: Signal<boolean>;

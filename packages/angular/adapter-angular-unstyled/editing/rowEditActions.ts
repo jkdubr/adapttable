@@ -6,6 +6,7 @@ import {
   AdaptRowEditActionsChrome,
   type IconDescriptor,
   type RowEditActionsProps,
+  type RowEditActionsSlots,
   type RowEditButtonProps,
 } from "@adapttable/angular";
 import {
@@ -122,5 +123,8 @@ class AdaptRowEditButton {
 export class AdaptRowEditActions<TRow> {
   /** Slot props from the table's row-edit-actions fill. */
   readonly props = input.required<RowEditActionsProps<TRow>>();
-  protected readonly slots = { Button: AdaptRowEditButton };
+  /** The required button slot, without exposing the private implementation. */
+  protected readonly slots: RowEditActionsSlots = {
+    Button: AdaptRowEditButton,
+  };
 }

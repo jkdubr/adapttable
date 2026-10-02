@@ -280,7 +280,7 @@ describe("the unstyled Angular filters", () => {
       ...(part("filter-tree-actions")?.querySelectorAll("button") ?? []),
     ][1]!.click();
     await settle();
-    expect(parts("filter-tree-group").length).toBe(2);
+    expect(parts("filter-tree-group")).toHaveLength(2);
     await type(
       part("filter-operator", part("filter-tree-group") ?? undefined),
       "or"
@@ -327,7 +327,7 @@ describe("the unstyled Angular filters", () => {
       headerFilters(),
     ]);
     const triggers = parts<HTMLDetailsElement>("filter-header-trigger");
-    expect(triggers.length).toBe(3);
+    expect(triggers).toHaveLength(3);
     const trigger = triggers[1];
     if (!trigger) throw new Error("trigger is not rendered");
     trigger.open = true;

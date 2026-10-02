@@ -11,7 +11,12 @@ export { columnMenu } from "@adapttable/angular-unstyled/column-menu";
 export { commandPalette } from "@adapttable/angular-unstyled/command-palette";
 export { contextMenu } from "@adapttable/angular-unstyled/context-menu";
 export { densityChooser } from "@adapttable/angular-unstyled/density";
-export { editing, rowEditing } from "@adapttable/angular-unstyled/editing";
+export {
+  editHistory,
+  editing,
+  rowEditing,
+  undoRedoButtons,
+} from "@adapttable/angular-unstyled/editing";
 export {
   exportCsv,
   exportPdf,

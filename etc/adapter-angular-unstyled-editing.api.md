@@ -6,21 +6,19 @@
 
 import { AdaptTableFeature } from '@adapttable/angular';
 import { CellEditHandler } from '@adapttable/angular';
+import { editHistory } from '@adapttable/angular';
+import { EditHistoryHandle } from '@adapttable/angular';
+import { EditHistoryOptions } from '@adapttable/angular';
 import * as i0 from '@angular/core';
-import { IconDescriptor } from '@adapttable/angular';
 import { InputSignal } from '@angular/core';
 import { RowEditActionsProps } from '@adapttable/angular';
-import { RowEditButtonProps } from '@adapttable/angular';
+import { RowEditActionsSlots } from '@adapttable/angular';
 import { RowEditHandler } from '@adapttable/angular';
-import { Signal } from '@angular/core';
 
 // @public
 export class AdaptRowEditActions<TRow> {
     readonly props: InputSignal<RowEditActionsProps<TRow>>;
-    // (undocumented)
-    protected readonly slots: {
-        Button: typeof AdaptRowEditButton;
-    };
+    protected readonly slots: RowEditActionsSlots;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptRowEditActions<any>, "adapt-row-edit-actions", never, {
         "props": {
@@ -33,37 +31,20 @@ export class AdaptRowEditActions<TRow> {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowEditActions<any>, never>;
 }
 
-// @public
-export class AdaptRowEditButton {
-    // (undocumented)
-    protected readonly content: Signal<    {
-    readonly kind: "glyph";
-    readonly glyph: IconDescriptor;
-    } | {
-    readonly kind: "host";
-    readonly icon: unknown;
-    } | {
-    readonly kind: "label";
-    }>;
-    // (undocumented)
-    readonly props: InputSignal<RowEditButtonProps>;
-    // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptRowEditButton, "adapt-row-edit-button", never, {
-        "props": {
-            "alias": "props";
-            "required": true;
-            "isSignal": true;
-        };
-    }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptRowEditButton, never>;
-}
+export { editHistory }
+
+export { EditHistoryHandle }
+
+export { EditHistoryOptions }
 
 // @public
 export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
 
 // @public
 export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+
+// @public
+export function undoRedoButtons(): AdaptTableFeature;
 
 // (No @packageDocumentation comment for this package)
 

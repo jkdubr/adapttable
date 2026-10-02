@@ -258,7 +258,7 @@ describe("the unstyled Angular row actions", () => {
 
   it("puts the actions on each phone card", async () => {
     const { parts } = await mount([rowActions(actions)], true);
-    expect(parts("card-actions").length).toBe(5);
+    expect(parts("card-actions")).toHaveLength(5);
   });
 
   it("lists the actions column in the Columns menu, and hides it", async () => {
@@ -283,4 +283,22 @@ describe("the unstyled Angular row actions", () => {
     await settle();
     expect(part("actions-header")).toBeNull();
   });
+});
+
+describe("host-owned additions", () => {
+  it.each([false, true])(
+    "adds rows from the toolbar with mobile=%s",
+    async (mobile) => {
+      const add = vi.fn();
+      const { part, settle } = await mount(
+        [rowActions([], { onAddRow: add })],
+        mobile
+      );
+      const button = part<HTMLButtonElement>("add-row")!;
+      expect(button.textContent?.trim()).toBe("Add row");
+      button.click();
+      await settle();
+      expect(add).toHaveBeenCalledOnce();
+    }
+  );
 });

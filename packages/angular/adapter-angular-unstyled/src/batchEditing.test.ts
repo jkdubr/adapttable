@@ -4,6 +4,11 @@
  */
 import type { AdaptTableFeature, ColumnDef } from "@adapttable/angular";
 import { batchEditing } from "@adapttable/angular-unstyled/batch-editing";
+import {
+  editHistory,
+  editing,
+  undoRedoButtons,
+} from "@adapttable/angular-unstyled/editing";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -91,9 +96,16 @@ class Host {
   readonly rowKey = (row: Task) => row.id;
 }
 
-async function mount(onBatchEdit = vi.fn(), mobile?: boolean) {
+async function mount(
+  onBatchEdit = vi.fn(),
+  mobile?: boolean,
+  extras: readonly AdaptTableFeature[] = []
+) {
   const fixture = TestBed.createComponent(Host);
-  fixture.componentRef.setInput("features", [batchEditing(onBatchEdit)]);
+  fixture.componentRef.setInput("features", [
+    batchEditing(onBatchEdit),
+    ...extras,
+  ]);
   fixture.componentRef.setInput("mobile", mobile);
   document.body.append(fixture.nativeElement as HTMLElement);
   fixture.autoDetectChanges();
@@ -181,4 +193,36 @@ describe("batch editing (unstyled Angular)", () => {
       { row: ROWS[1], rowId: "2", patch: { title: "Tested" } },
     ]);
   });
+});
+
+it("undoes a multi-row batch as one gesture through the original cell callback", async () => {
+  const onBatchEdit = vi.fn();
+  const onCellEdit = vi.fn();
+  const settle = await mount(onBatchEdit, false, [
+    editing<Task>(onCellEdit),
+    editHistory(),
+    undoRedoButtons(),
+  ]);
+  type(editors()[0]!, "Shipped");
+  type(editors()[3]!, "13");
+  await settle();
+  one("batch-edit-save").click();
+  await settle();
+  expect(onBatchEdit).toHaveBeenCalledExactlyOnceWith([
+    { row: ROWS[0], rowId: "1", patch: { title: "Shipped" } },
+    { row: ROWS[1], rowId: "2", patch: { points: 13 } },
+  ]);
+  one("undo-button").click();
+  await settle();
+  expect(onCellEdit.mock.calls).toEqual([
+    [ROWS[0], "title", "Ship"],
+    [ROWS[1], "points", 5],
+  ]);
+  expect((one("undo-button") as HTMLButtonElement).disabled).toBe(true);
+  one("redo-button").click();
+  await settle();
+  expect(onCellEdit.mock.calls.slice(2)).toEqual([
+    [ROWS[0], "title", "Shipped"],
+    [ROWS[1], "points", 13],
+  ]);
 });

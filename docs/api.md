@@ -3041,6 +3041,19 @@ comes from a kit through a slot.
   attributes for an infinite list, and `statusAnnouncement`, the sentence a
   sort or a page speaks. `injectIsMobile` (with `IsMobileOptions`) is the
   viewport breakpoint as a signal.
+- `injectRowMutations(options, injector?)` exposes host-owned add, duplicate and delete
+  actions as a signal. `RowMutationHandlers`, `RowMutationsOptions` and
+  `RowMutationsState` describe the callbacks, localized labels and result.
+  Deletion confirms by default. The native kit accepts these handlers through
+  `rowActions(actions, options)` and renders Add in its toolbar.
+- `editHistory(options)` enables undo and redo for inline and batch edits.
+  `EditHistoryOptions` sets depth and an `onChange` observer receiving an
+  `EditHistoryHandle`. `injectTableEditHistory` adapts `TableEditHistoryProps`
+  to an `EditHistoryState` and a recording inline commit channel. Replays go
+  through the original host callback. `undoRedoButtons()` from the native
+  kit's `/editing` entry renders `AdaptUndoRedoButtons`; grid navigation
+  forwards Ctrl/Cmd+Z and redo shortcuts. Kit plumbing includes
+  `asBatchGesture`, `undoRedoToolbarProps` and `withRowMutationActions`.
 - `injectRowSelection(options)` is row selection as signals, configured by
   `RowSelectionOptions` and returning `RowSelection`: the selected ids, the
   select-all tri-state, the toggles, and the attributes of the row and

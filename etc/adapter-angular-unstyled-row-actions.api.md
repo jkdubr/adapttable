@@ -15,6 +15,7 @@ export function rowActions<TRow>(actions?: readonly RowAction<TRow>[], options?:
 export interface RowActionsFeatureOptions<TRow> {
     readonly confirmDeleteRow?: boolean;
     readonly layout?: RowActionsLayout;
+    readonly onAddRow?: () => unknown;
     readonly onDeleteRow?: (row: TRow) => void;
     readonly onDuplicateRow?: (row: TRow) => void;
 }

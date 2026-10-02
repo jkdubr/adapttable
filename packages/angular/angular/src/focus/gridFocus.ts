@@ -67,6 +67,10 @@ export interface GridFocusOptions<TRow> {
    * and Ctrl/Cmd+X both use it.
    */
   readonly onCut?: (range: CellRange) => void;
+  /** Replay the last edit backwards through the host. */
+  readonly onUndo?: () => number;
+  /** Replay the last undone edit through the host. */
+  readonly onRedo?: () => number;
   /** The injector to run in. Omit to use the current injection context. */
   readonly injector?: Injector;
 }
@@ -147,6 +151,8 @@ export function injectGridFocus<TRow>(
         }
       : undefined,
     onCut: options.onCut,
+    onUndo: options.onUndo,
+    onRedo: options.onRedo,
   }));
   const controller = createGridFocusController(untracked(configuration));
   effect(

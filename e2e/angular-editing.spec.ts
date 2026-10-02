@@ -75,3 +75,29 @@ test("moves a visible focus between cells with the arrow keys", async ({
   await page.keyboard.press("ArrowDown");
   await expect(cell(page, 1, 1)).toBeFocused();
 });
+
+test("undoes and redoes an edit with toolbar controls and grid shortcuts", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+  await expect(part(page, "undo-button")).toBeDisabled();
+  await cell(page, 0, 0).dblclick();
+  await part(page, "edit-cell-editor").fill("Ada Updated");
+  await part(page, "edit-cell-editor").press("Enter");
+  await expect(cell(page, 0, 0)).toHaveText("Ada Updated");
+  await part(page, "undo-button").click();
+  await expect(cell(page, 0, 0)).toHaveText("Ada Lovelace");
+  await part(page, "redo-button").click();
+  await expect(cell(page, 0, 0)).toHaveText("Ada Updated");
+  await cell(page, 0, 0).focus();
+  await page.keyboard.press("Control+z");
+  await expect(cell(page, 0, 0)).toHaveText("Ada Lovelace");
+  await page.keyboard.press("Control+Shift+z");
+  await expect(cell(page, 0, 0)).toHaveText("Ada Updated");
+  await cell(page, 0, 0).dblclick();
+  const savedMessage = await log(page).textContent();
+  await part(page, "edit-cell-editor").press("Control+z");
+  await expect(log(page)).toHaveText(savedMessage!);
+  await part(page, "edit-cell-editor").press("Escape");
+  await expect(cell(page, 0, 0)).toHaveText("Ada Updated");
+});

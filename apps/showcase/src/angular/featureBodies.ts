@@ -20,7 +20,11 @@ import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
 import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
 import { cellSpan } from "@adapttable/angular-unstyled/cell-span";
 import { collapsibleColumnGroups } from "@adapttable/angular-unstyled/column-groups";
-import { editing } from "@adapttable/angular-unstyled/editing";
+import {
+  editHistory,
+  editing,
+  undoRedoButtons,
+} from "@adapttable/angular-unstyled/editing";
 import { exportCsv } from "@adapttable/angular-unstyled/export";
 import { filters } from "@adapttable/angular-unstyled/filters";
 import { groupingPanel } from "@adapttable/angular-unstyled/grouping-panel";
@@ -258,6 +262,8 @@ class EditingBody {
       this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
       this.log.set(`Saved ${key} for ${row.name}: ${String(value)}`);
     }),
+    editHistory(),
+    undoRedoButtons(),
     cellNavigation(),
   ];
 }
@@ -732,7 +738,7 @@ function teamSpan({
           tableLabel="People"
           urlKey="rows"
           [maxHeight]="420"
-          [data]="rows"
+          [data]="rows()"
           [columns]="columns"
           [rowKey]="rowKey"
           [defaults]="{ limit: 30 }"
@@ -743,13 +749,37 @@ function teamSpan({
   `,
 })
 class RowsBody {
-  readonly rows = orderPeopleByTeam(PEOPLE);
+  readonly rows = signal(orderPeopleByTeam(PEOPLE));
+  private nextId = Math.max(...PEOPLE.map((row) => Number(row.id)));
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
   readonly features: readonly AdaptTableFeature[] = [
     rowPinning(),
     cellSpan(teamSpan),
-    rowActions<Person>([], { layout: "menu" }),
+    rowActions<Person>([], {
+      layout: "menu",
+      onAddRow: () => {
+        this.rows.update((rows) => [
+          {
+            ...PEOPLE[0]!,
+            id: String(++this.nextId),
+            name: "New person",
+          },
+          ...rows,
+        ]);
+      },
+      onDuplicateRow: (row) => {
+        this.rows.update((rows) => [
+          { ...row, id: String(++this.nextId) },
+          ...rows,
+        ]);
+      },
+      onDeleteRow: (row) => {
+        this.rows.update((rows) =>
+          rows.filter((current) => current.id !== row.id)
+        );
+      },
+    }),
   ];
 }
 

@@ -13,8 +13,13 @@ import {
   type RowEditHandler,
   rowEditing as coreAngularRowEditing,
   slotRender,
+  TOOLBAR_EXTRAS,
+  undoRedoButtons as bindingUndoRedoButtons,
 } from "@adapttable/angular";
-import { AdaptEditableCell } from "@adapttable/angular-unstyled";
+import {
+  AdaptEditableCell,
+  AdaptUndoRedoButtons,
+} from "@adapttable/angular-unstyled";
 
 import { AdaptRowEditActions } from "./rowEditActions";
 
@@ -56,3 +61,17 @@ export function rowEditing<TRow>(
 }
 
 export { AdaptRowEditActions } from "./rowEditActions";
+
+/** Draw localized undo and redo controls when history is enabled. @public */
+export function undoRedoButtons(): AdaptTableFeature {
+  return extendFeature(bindingUndoRedoButtons(), [
+    slotRender(TOOLBAR_EXTRAS, () => AdaptUndoRedoButtons, {
+      orderAs: "undo-redo",
+    }),
+  ]);
+}
+export {
+  editHistory,
+  type EditHistoryHandle,
+  type EditHistoryOptions,
+} from "@adapttable/angular";

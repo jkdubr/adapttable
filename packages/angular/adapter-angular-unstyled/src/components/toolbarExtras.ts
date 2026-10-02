@@ -210,3 +210,37 @@ export class AdaptPrintButton {
   /** The slot's props. */
   readonly props = input.required<ToolbarExtrasSlotProps>();
 }
+
+/** Native controls for the table's edit history. @internal */
+@Component({
+  selector: "adapt-undo-redo-buttons",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    @let p = props();
+    @if (p.onUndo && p.onRedo) {
+      <button
+        type="button"
+        data-adapttable-part="undo-button"
+        [class]="p.classNames?.['undoButton']"
+        [disabled]="p.canUndo !== true"
+        (click)="p.onUndo()"
+      >
+        {{ p.undoLabel }}
+      </button>
+      <button
+        type="button"
+        data-adapttable-part="redo-button"
+        [class]="p.classNames?.['redoButton']"
+        [disabled]="p.canRedo !== true"
+        (click)="p.onRedo()"
+      >
+        {{ p.redoLabel }}
+      </button>
+    }
+  `,
+})
+export class AdaptUndoRedoButtons {
+  /** The current history controls and labels. */
+  readonly props = input.required<ToolbarExtrasSlotProps>();
+}

@@ -107,6 +107,11 @@ export {
   withRowPinActions,
 } from "@adapttable/core";
 export { pinnedSummaryPart } from "@adapttable/core";
+export {
+  asBatchGesture,
+  type EditHistoryState,
+  withRowMutationActions,
+} from "@adapttable/core";
 export type {
   ColumnMenuSlotProps,
   FeatureRender,
@@ -291,4 +296,8 @@ export {
   type MergedCellStyle,
   mergedCellStyle,
   resolveRowStyle,
+} from "@adapttable/core/binding";
+export {
+  type RowMutationsState,
+  undoRedoToolbarProps,
 } from "@adapttable/core/binding";

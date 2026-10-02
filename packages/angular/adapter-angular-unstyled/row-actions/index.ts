@@ -18,6 +18,8 @@ import {
 export interface RowActionsFeatureOptions<TRow> {
   /** A strip of buttons (the default), or a menu behind one button. */
   readonly layout?: RowActionsLayout;
+  /** Ask the host to create a row from the toolbar. */
+  readonly onAddRow?: () => unknown;
   /** Duplicate a row: adds a Duplicate action. */
   readonly onDuplicateRow?: (row: TRow) => void;
   /** Delete a row: adds a Delete action, confirmed unless told not to. */
@@ -40,6 +42,7 @@ export function rowActions<TRow>(
   options: RowActionsFeatureOptions<TRow> = {}
 ): AdaptTableFeature {
   const base = coreRowActions(actions, {
+    onAddRow: options.onAddRow,
     onDuplicateRow: options.onDuplicateRow,
     onDeleteRow: options.onDeleteRow,
     confirmDeleteRow: options.confirmDeleteRow,

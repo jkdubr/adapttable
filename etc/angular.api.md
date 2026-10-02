@@ -10,6 +10,7 @@ import { ActiveFilterChip } from '@adapttable/core';
 import { ActiveFilterChipsSlotProps } from '@adapttable/core/binding';
 import { AggregateOptions } from '@adapttable/core';
 import { AggregateSpec } from '@adapttable/core';
+import { asBatchGesture } from '@adapttable/core';
 import { AssemblyFns } from '@adapttable/core/binding';
 import { BATCH_EDIT_BAR } from '@adapttable/core/binding';
 import { BatchEditBarModel } from '@adapttable/core';
@@ -108,6 +109,7 @@ import { EditableColumnLike } from '@adapttable/core';
 import { EditConflictLabels } from '@adapttable/core';
 import { EditEvent } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
+import { EditHistoryState } from '@adapttable/core';
 import { EditingBundle } from '@adapttable/core';
 import { EditLifecycle } from '@adapttable/core';
 import { editorBusyProps } from '@adapttable/core';
@@ -315,6 +317,7 @@ import { RowEditingState } from '@adapttable/core';
 import { RowExpansionState } from '@adapttable/core/binding';
 import { RowHeight } from '@adapttable/core';
 import { RowMoveMenuSlotProps } from '@adapttable/core/binding';
+import { RowMutationsState } from '@adapttable/core/binding';
 import { RowPairMeasurer } from '@adapttable/core/binding';
 import { RowPatchEvent } from '@adapttable/core';
 import { RowPinLabels } from '@adapttable/core';
@@ -385,6 +388,7 @@ import { TreeExpansionState } from '@adapttable/core/binding';
 import { TreeToggleButtonProps } from '@adapttable/core/binding';
 import { TreeToggleProps } from '@adapttable/core/binding';
 import { Type } from '@angular/core';
+import { undoRedoToolbarProps } from '@adapttable/core/binding';
 import { unpinAllColumns } from '@adapttable/core/binding';
 import { UrlSliceSpec } from '@adapttable/core';
 import { UrlStateAdapter } from '@adapttable/core';
@@ -396,6 +400,7 @@ import { VirtualTableRow } from '@adapttable/core';
 import { visibleRowActions } from '@adapttable/core';
 import { watchOverlayDismiss } from '@adapttable/core';
 import { windowGroupedEntries } from '@adapttable/core';
+import { withRowMutationActions } from '@adapttable/core';
 import { withRowPinActions } from '@adapttable/core';
 import { WritableSignal } from '@angular/core';
 
@@ -2058,7 +2063,7 @@ export class AdaptRowReorderHandleChrome<TRow> {
 
 // @public
 export class AdaptSavedViewGlyph {
-    protected readonly fill: Signal<"currentColor" | "none">;
+    protected readonly fill: Signal<"none" | "currentColor">;
     readonly glyph: InputSignal<    {
     readonly paths: readonly string[];
     readonly filled: boolean;
@@ -2623,6 +2628,8 @@ export interface AngularGroupingPanelAggregationItemProps {
 
 // @public
 export type AngularGroupingPanelSurfaceProps = GroupingPanelSurfaceProps<TemplateRef<unknown>, DragEvent>;
+
+export { asBatchGesture }
 
 export { AssemblyFns }
 
@@ -3240,6 +3247,26 @@ export { EditEvent }
 export { EditEventHandler }
 
 // @public
+export function editHistory(options?: boolean | EditHistoryOptions): AdaptTableFeature;
+
+// @public
+export interface EditHistoryHandle {
+    readonly canRedo: boolean;
+    readonly canUndo: boolean;
+    readonly clear: () => void;
+    readonly redo: () => number;
+    readonly undo: () => number;
+}
+
+// @public
+export interface EditHistoryOptions {
+    readonly depth?: number;
+    readonly onChange?: (history: EditHistoryHandle) => void;
+}
+
+export { EditHistoryState }
+
+// @public
 export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
 
 export { EditingBundle }
@@ -3577,6 +3604,8 @@ export interface GridFocusOptions<TRow> {
     readonly onActivate?: (cell: GridCell) => void;
     readonly onCut?: (range: CellRange) => void;
     readonly onRangeChange?: (range: CellRange | null) => void;
+    readonly onRedo?: () => number;
+    readonly onUndo?: () => number;
     readonly table: DataTable<TRow>;
 }
 
@@ -3947,6 +3976,9 @@ export function injectRowEditing<TRow>(options: RowEditingInjectOptions<TRow>): 
 export function injectRowExpansion(options?: RowExpansionOptions): Signal<RowExpansionState>;
 
 // @public
+export function injectRowMutations<TRow>(options: MaybeSignal<RowMutationsOptions<TRow>>, injector?: Injector): Signal<RowMutationsState<TRow>>;
+
+// @public
 export function injectRowPairMeasurer(options: RowPairMeasurerOptions): RowPairMeasurer;
 
 // @public
@@ -3975,6 +4007,12 @@ export function injectTableContextMenu<TRow>(options: Signal<TableContextMenuOpt
 
 // @public
 export function injectTableData<TRow>(options: TableDataOptions<TRow>): TableDataResult<TRow>;
+
+// @public
+export function injectTableEditHistory<TRow>(options: MaybeSignal<TableEditHistoryProps<TRow>>, injector?: Injector): Signal<{
+    readonly history: EditHistoryState<TRow>;
+    readonly onCellEdit: TableEditHistoryProps<TRow>["onCellEdit"];
+}>;
 
 // @public
 export function injectTableRowPinning<TRow>(options: TableRowPinningOptions<TRow>): Signal<RowPinningState<TRow> | undefined> | undefined;
@@ -4354,6 +4392,21 @@ export function rowIsDirty<TRow>(editing: EditableCellEditing<TRow> | undefined,
 
 export { RowMoveMenuSlotProps }
 
+// @public
+export interface RowMutationHandlers<TRow> {
+    readonly confirmDeleteRow?: boolean;
+    readonly onAddRow?: () => unknown;
+    readonly onDeleteRow?: (row: TRow) => unknown;
+    readonly onDuplicateRow?: (row: TRow) => unknown;
+}
+
+// @public
+export interface RowMutationsOptions<TRow> extends RowMutationHandlers<TRow> {
+    readonly labels: Pick<Required<TableLabels>, "duplicateRow" | "deleteRow" | "deleteRowConfirm">;
+}
+
+export { RowMutationsState }
+
 export { RowPairMeasurer }
 
 // @public
@@ -4686,6 +4739,13 @@ export interface TableDataResult<TRow> {
 export { TableDensity }
 
 // @public
+export interface TableEditHistoryProps<TRow> {
+    readonly columns: readonly ColumnDef<TRow>[];
+    readonly editHistory?: boolean | EditHistoryOptions;
+    readonly onCellEdit?: (row: TRow, key: string, value: unknown) => unknown;
+}
+
+// @public
 export interface TableFilters<TRow> {
     readonly arrayExtraKeys: readonly string[];
     readonly filterFn: (row: TRow, extra: ExtraFilters) => boolean;
@@ -4849,6 +4909,8 @@ export interface TreeToggleSlots {
 // @public
 export function undoRedoButtons(): AdaptTableFeature;
 
+export { undoRedoToolbarProps }
+
 export { unpinAllColumns }
 
 // @public
@@ -4891,6 +4953,8 @@ export { visibleRowActions }
 export { watchOverlayDismiss }
 
 export { windowGroupedEntries }
+
+export { withRowMutationActions }
 
 export { withRowPinActions }
 

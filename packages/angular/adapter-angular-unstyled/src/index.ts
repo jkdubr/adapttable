@@ -53,6 +53,7 @@ export {
   AdaptExportButton,
   AdaptFullscreenButton,
   AdaptPrintButton,
+  AdaptUndoRedoButtons,
 } from "./components/toolbarExtras";
 export {
   AdaptTreeButton,

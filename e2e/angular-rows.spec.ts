@@ -75,3 +75,20 @@ test("pins to the bottom, and unpins", async ({ page }) => {
   await choose(page, "2", "Unpin row");
   await expect(row(page, "2")).toHaveAttribute("data-adapttable-part", "row");
 });
+
+test("asks the host to add, duplicate and confirm deletion", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+  await demo(page).locator('[data-adapttable-part="add-row"]').click();
+  await expect(row(page, "31")).toContainText("New person");
+  await choose(page, "31", "Duplicate row");
+  await expect(row(page, "32")).toContainText("New person");
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await choose(page, "31", "Delete row");
+  await expect(row(page, "31")).toContainText("New person");
+  page.once("dialog", (dialog) => dialog.accept());
+  await choose(page, "31", "Delete row");
+  await expect(row(page, "31")).toHaveCount(0);
+  await expect(row(page, "32")).toContainText("New person");
+});

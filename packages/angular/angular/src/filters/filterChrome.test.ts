@@ -257,7 +257,7 @@ describe("AdaptFilterTreeChrome", () => {
       '[data-adapttable-part="filter-tree-condition"]'
     );
     // An unknown key edits as the first definition.
-    expect(rows.length).toBe(6);
+    expect(rows).toHaveLength(6);
     const [text, range, yes, relative] = [...rows];
     typeInto(text?.querySelector("input") ?? undefined, "Q");
     await settle();
