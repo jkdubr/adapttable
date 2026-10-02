@@ -18,7 +18,7 @@
  * that wants a fold button renders it there. The indent, the part name and
  * the grand-total captions are structure.
  */
-import type { ColumnDef } from "@adapttable/angular";
+import type { CellContext, ColumnDef, Renderer } from "@adapttable/angular";
 import {
   PIVOT_ROW_COLUMN_KEY,
   PIVOT_ROW_INDENT,
@@ -59,7 +59,10 @@ export interface PivotTableModelOptions {
    */
   rowHeader?: string;
   /**
-   * One body line's row-header caption. Defaults to the line's own label.
+   * One body line's row-header content: text, an Angular template, or a
+   * standalone component. Templates and components receive the cell context
+   * (`row`, `value`, `column`, and `rowIndex`; templates also get `$implicit`).
+   * Defaults to the line's own label.
    * This is where a fold control's wording belongs: the line's `kind` says
    * whether it is foldable and its `key` is the collapse key.
    *
@@ -67,7 +70,7 @@ export interface PivotTableModelOptions {
    * nothing to fold on a total, and a renderer that assumed a label would
    * leave the footer blank.
    */
-  renderRowHeader?: (row: PivotRow) => string;
+  renderRowHeader?: (row: PivotRow) => string | Renderer<CellContext<PivotRow>>;
   /**
    * Pixels of indent per nesting level in the row-header column, so a nested
    * pivot reads as nested. Defaults to 16; `0` turns it off.

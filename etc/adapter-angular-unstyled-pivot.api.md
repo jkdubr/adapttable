@@ -5,6 +5,7 @@
 ```ts
 
 import { AdaptPivotPanelChrome } from '@adapttable/angular/pivot';
+import { AdaptPivotRowHeader } from '@adapttable/angular/pivot';
 import { EMPTY_PIVOT_CONFIG } from '@adapttable/angular/pivot';
 import * as i0 from '@angular/core';
 import { injectPivotUrlState } from '@adapttable/angular/pivot';
@@ -22,7 +23,6 @@ import { pivotTableModel as pivotTableModel_2 } from '@adapttable/angular/pivot'
 import { PivotTableModelOptions } from '@adapttable/angular/pivot';
 import { PivotUrlBinding } from '@adapttable/angular/pivot';
 import { PivotUrlStateOptions } from '@adapttable/angular/pivot';
-import { Signal } from '@angular/core';
 import { TableLabels } from '@adapttable/angular';
 
 // @public
@@ -67,34 +67,7 @@ export class AdaptPivotPanel {
 
 export { AdaptPivotPanelChrome }
 
-// @public
-export class AdaptPivotRowHeader {
-    readonly column: InputSignal<    {
-    meta?: Record<string, unknown>;
-    }>;
-    protected readonly pad: Signal<string | null>;
-    readonly row: InputSignal<    {
-    readonly kind: string;
-    readonly label: string;
-    readonly depth: number;
-    }>;
-    protected readonly text: Signal<string>;
-    // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPivotRowHeader, "adapt-pivot-row-header", never, {
-        "row": {
-            "alias": "row";
-            "required": true;
-            "isSignal": true;
-        };
-        "column": {
-            "alias": "column";
-            "required": true;
-            "isSignal": true;
-        };
-    }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPivotRowHeader, never>;
-}
+export { AdaptPivotRowHeader }
 
 export { EMPTY_PIVOT_CONFIG }
 

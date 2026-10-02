@@ -3211,6 +3211,10 @@ comes from a kit through a slot.
 - Pivot: `pivot` and `pivotTableModel` (`@adapttable/angular/pivot`) turn rows
   into table props — a row-header column, one column per leaf, and the grand
   total as `summaryRow`. `AdaptPivotRowHeader` draws that row header.
+  `PivotTableModelOptions.renderRowHeader` can return text, a template or a
+  standalone component receiving the cell context, including the pivot row's
+  key for fold controls. The unstyled kit uses the same renderer; exports and
+  grand-total captions remain text.
   `AdaptPivotPanelChrome` lays out the three zones; `PivotPanelSlots` names
   the kit's surface, zone, field, add control and aggregation chooser.
   `injectPivotUrlState` (`PivotUrlStateOptions`) keeps the configuration and

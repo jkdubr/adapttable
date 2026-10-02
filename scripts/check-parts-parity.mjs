@@ -68,7 +68,7 @@
  * plain attribute or as a binding to a string literal. Core's chrome is
  * per-framework too: `@adapttable/core` plus the binding the kit builds on.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -373,6 +373,22 @@ function chromeNamesIn(files) {
   return found;
 }
 
+/** Binding sources include Angular's explicitly configured secondary entries. */
+function bindingFiles(framework, root) {
+  const dir = bindingDir(framework, root);
+  if (!existsSync(dir)) return [];
+  const secondary = readdirSync(dir, { withFileTypes: true })
+    .filter(
+      (entry) =>
+        entry.isDirectory() &&
+        existsSync(join(dir, entry.name, "ng-package.json"))
+    )
+    .map((entry) => join(dir, entry.name));
+  return [join(dir, "src"), ...secondary].flatMap((source) =>
+    frameworkFiles(source, framework)
+  );
+}
+
 /**
  * The part names the shared chrome owns, per framework — `@adapttable/core`
  * and that framework's binding together, since the split put the engine in one
@@ -386,12 +402,7 @@ function chromeByFramework(frameworks, root) {
   return new Map(
     frameworks.map((framework) => [
       framework,
-      new Set([
-        ...core,
-        ...chromeNamesIn(
-          frameworkFiles(join(bindingDir(framework, root), "src"), framework)
-        ),
-      ]),
+      new Set([...core, ...chromeNamesIn(bindingFiles(framework, root))]),
     ])
   );
 }

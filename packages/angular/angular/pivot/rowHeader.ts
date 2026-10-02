@@ -5,7 +5,12 @@
  * a cell component only receives the row and the column. The grand-total
  * footer never uses this component — its caption stays the localized label.
  */
-import type { ColumnDef } from "@adapttable/angular";
+import {
+  AdaptCell,
+  type CellContext,
+  type ColumnDef,
+  type Renderer,
+} from "@adapttable/angular";
 import { type PivotRow, pivotRowIndentStyle } from "@adapttable/core";
 import {
   ChangeDetectionStrategy,
@@ -18,10 +23,12 @@ import {
 export function pivotRowCaptionOf(
   column: { meta?: Record<string, unknown> },
   row: PivotRow
-): string {
+): string | Renderer<CellContext<PivotRow>> {
   const caption = column.meta?.pivotCaption;
   return typeof caption === "function"
-    ? (caption as (line: PivotRow) => string)(row)
+    ? (caption as (line: PivotRow) => string | Renderer<CellContext<PivotRow>>)(
+        row
+      )
     : row.label;
 }
 
@@ -43,13 +50,25 @@ export function pivotRowPadOf(
  */
 @Component({
   selector: "adapt-pivot-row-header",
+  imports: [AdaptCell],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<span
-    data-adapttable-part="pivot-row-header"
-    [attr.data-pivot-kind]="row().kind"
-    [style.padding-inline-start]="pad()"
-    >{{ text() }}</span
-  >`,
+  template: `@if (contentColumn(); as content) {
+      <span
+        [adaptCell]="content"
+        [adaptCellRow]="row()"
+        [adaptCellIndex]="rowIndex()"
+        data-adapttable-part="pivot-row-header"
+        [attr.data-pivot-kind]="row().kind"
+        [style.padding-inline-start]="pad()"
+      ></span>
+    } @else {
+      <span
+        data-adapttable-part="pivot-row-header"
+        [attr.data-pivot-kind]="row().kind"
+        [style.padding-inline-start]="pad()"
+        >{{ caption() }}</span
+      >
+    }`,
 })
 export class AdaptPivotRowHeader {
   /** The pivot line. */
@@ -57,9 +76,22 @@ export class AdaptPivotRowHeader {
   /** The row-header column, carrying the caption and the indent. */
   readonly column = input.required<ColumnDef<PivotRow>>();
 
-  /** The line's caption. */
-  protected readonly text = computed(() =>
+  /** The row's position, forwarded to a custom renderer. */
+  readonly rowIndex = input(0);
+
+  /** Evaluate the host callback once for each row or column change. */
+  protected readonly caption = computed(() =>
     pivotRowCaptionOf(this.column(), this.row())
+  );
+
+  /** Reuse the binding's template/component renderer inside the part wrapper. */
+  protected readonly contentColumn = computed<ColumnDef<PivotRow> | null>(
+    () => {
+      const content = this.caption();
+      return typeof content === "string"
+        ? null
+        : { ...this.column(), cell: content };
+    }
   );
 
   /** Nesting, or nothing at the outermost line and when indent is off. */

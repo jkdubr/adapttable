@@ -77,10 +77,12 @@ export class AdaptPivotPanelChrome {
 
 // @public
 export class AdaptPivotRowHeader {
+    protected readonly caption: Signal<string | Renderer<CellContext<PivotRow>>>;
     readonly column: InputSignal<ColumnDef<PivotRow>>;
+    protected readonly contentColumn: Signal<ColumnDef<PivotRow> | null>;
     protected readonly pad: Signal<string | null>;
     readonly row: InputSignal<PivotRow>;
-    protected readonly text: Signal<string>;
+    readonly rowIndex: InputSignal<number>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPivotRowHeader, "adapt-pivot-row-header", never, {
         "row": {
@@ -91,6 +93,11 @@ export class AdaptPivotRowHeader {
         "column": {
             "alias": "column";
             "required": true;
+            "isSignal": true;
+        };
+        "rowIndex": {
+            "alias": "rowIndex";
+            "required": false;
             "isSignal": true;
         };
     }, {}, never, never, true, never>;
@@ -162,7 +169,7 @@ export interface PivotTableModelOptions {
     fields?: readonly PivotField[];
     indent?: number;
     labels?: TableLabels;
-    renderRowHeader?: (row: PivotRow) => string;
+    renderRowHeader?: (row: PivotRow) => string | Renderer<CellContext<PivotRow>>;
     rowHeader?: string;
 }
 

@@ -116,6 +116,31 @@ describe("partsGapReport", () => {
     assert.deepEqual(report(root)[0].missing, []);
   });
 
+  it("counts a part supplied by a binding's configured secondary entry", () => {
+    const root = fixtureRoot({
+      "adapter-plain": {
+        "src/pivot.tsx": '<span data-adapttable-part="pivot-row-header" />;\n',
+      },
+      "adapter-verdant": {
+        "src/pivot.ts":
+          'export { AdaptPivotRowHeader } from "@adapttable/angular/pivot";\n',
+      },
+    });
+    writePackage(root, "angular", "angular", {
+      "pivot/ng-package.json": "{}\n",
+      "pivot/rowHeader.ts":
+        'export const template = `<span data-adapttable-part="pivot-row-header"></span>`;\n',
+      "scratch/not-an-entry.ts":
+        'export const template = `<div data-adapttable-part="bulk-bar"></div>`;\n',
+      "node_modules/dependency/index.ts":
+        'export const template = `<div data-adapttable-part="bulk-bar"></div>`;\n',
+    });
+    assert.deepEqual(report(root)[0].missing, ["bulk-bar"]);
+
+    rmSync(join(root, "packages/angular/angular/pivot/ng-package.json"));
+    assert.deepEqual(report(root)[0].missing, ["bulk-bar", "pivot-row-header"]);
+  });
+
   it("lists a part the reference gets from its binding and the kit lacks", () => {
     const root = fixtureRoot();
     writePackage(root, "angular", "angular", { "src/row.ts": "export {};\n" });

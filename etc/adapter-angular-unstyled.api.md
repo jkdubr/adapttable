@@ -7,6 +7,7 @@
 import { ActiveFilterChip } from '@adapttable/angular';
 import { ActiveFilterChipsSlotProps } from '@adapttable/angular';
 import { AdaptCellTemplate } from '@adapttable/angular';
+import { AdaptPivotRowHeader } from '@adapttable/angular/pivot';
 import { AdaptTableFeature } from '@adapttable/angular';
 import { AfterViewInit } from '@angular/core';
 import { AggregateOperationId } from '@adapttable/core';
@@ -1007,7 +1008,7 @@ export class AdaptGroupHeaderCard {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
@@ -1090,7 +1091,7 @@ export class AdaptGroupHeaderRow {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {
@@ -1286,34 +1287,7 @@ export class AdaptPivotPanel {
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPivotPanel, never>;
 }
 
-// @public
-export class AdaptPivotRowHeader {
-    readonly column: InputSignal<    {
-    meta?: Record<string, unknown>;
-    }>;
-    protected readonly pad: Signal<string | null>;
-    readonly row: InputSignal<    {
-    readonly kind: string;
-    readonly label: string;
-    readonly depth: number;
-    }>;
-    protected readonly text: Signal<string>;
-    // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPivotRowHeader, "adapt-pivot-row-header", never, {
-        "row": {
-            "alias": "row";
-            "required": true;
-            "isSignal": true;
-        };
-        "column": {
-            "alias": "column";
-            "required": true;
-            "isSignal": true;
-        };
-    }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPivotRowHeader, never>;
-}
+export { AdaptPivotRowHeader }
 
 // @internal
 export class AdaptPrintButton {

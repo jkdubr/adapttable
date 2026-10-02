@@ -4,17 +4,52 @@
  * The columns have to carry the engine's header groups, the grand total has
  * to land in the footer exactly once, and the row header has to name its part.
  */
+import type { CellContext } from "@adapttable/angular";
 import {
   pivot,
   type PivotConfig,
   type PivotField,
   type PivotRow,
 } from "@adapttable/core";
+import {
+  Component,
+  input,
+  signal,
+  type TemplateRef,
+  viewChild,
+} from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
 import { PIVOT_ROW_COLUMN_KEY, pivotTableModel } from "./pivotTableModel";
 import { AdaptPivotRowHeader } from "./rowHeader";
+
+@Component({
+  template: `<ng-template #fold let-row let-value="value"
+    ><button type="button" (click)="folded.set(row.key)">
+      {{ value }}
+    </button></ng-template
+  >`,
+})
+class FoldTemplateHost {
+  readonly fold =
+    viewChild.required<TemplateRef<CellContext<PivotRow>>>("fold");
+  readonly folded = signal("");
+}
+
+@Component({
+  template: `<button
+    type="button"
+    (click)="folded.set(row().key)"
+    [attr.aria-expanded]="folded() !== row().key"
+  >
+    {{ row().label }}
+  </button>`,
+})
+class FoldComponent {
+  readonly row = input.required<PivotRow>();
+  readonly folded = signal("");
+}
 
 interface Sale {
   team: string;
@@ -157,6 +192,71 @@ describe("pivotTableModel", () => {
     expect(headerCell(model, alpha).textContent).toBe("Fold Alpha");
     expect(model.columns[0]?.formatValue?.(alpha)).toBe("Alpha");
     expect(model.summaryRow!([])[PIVOT_ROW_COLUMN_KEY]).toBe("Grand total");
+  });
+
+  it("renders a host template fold control with row context and keeps focus after folding", () => {
+    TestBed.resetTestingModule();
+    const host = TestBed.createComponent(FoldTemplateHost);
+    host.detectChanges();
+    const model = pivotTableModel(
+      pivot(SALES, { ...base, rows: ["region", "team"] }),
+      {
+        renderRowHeader: () => host.componentInstance.fold(),
+        labels: { pivotGrandTotal: "Eindtotaal" },
+      }
+    );
+    const row = model.rows.find((line) => line.depth === 1)!;
+    const fixture = TestBed.createComponent(AdaptPivotRowHeader);
+    fixture.componentRef.setInput("row", row);
+    fixture.componentRef.setInput("column", model.columns[0]);
+    fixture.detectChanges();
+    document.body.append(fixture.nativeElement as HTMLElement);
+    try {
+      const span = fixture.nativeElement.querySelector("span") as HTMLElement;
+      const button = span.querySelector("button")!;
+      expect(button?.textContent?.trim()).toBe(row.label);
+      button.focus();
+      button.click();
+      fixture.detectChanges();
+      expect(host.componentInstance.folded()).toBe(row.key);
+      expect(document.activeElement).toBe(button);
+      expect(span.getAttribute("data-adapttable-part")).toBe(
+        "pivot-row-header"
+      );
+      expect(span.style.paddingInlineStart).toBe("16px");
+      expect(model.columns[0]?.formatValue?.(row)).toBe(row.label);
+      expect(model.summaryRow!([])[PIVOT_ROW_COLUMN_KEY]).toBe("Eindtotaal");
+    } finally {
+      fixture.destroy();
+      host.destroy();
+    }
+  });
+
+  it("renders a component fold control with declared row inputs and updates its state", () => {
+    const model = pivotTableModel(pivot(SALES, base), {
+      renderRowHeader: () => FoldComponent,
+    });
+    const row = model.rows[0]!;
+    TestBed.resetTestingModule();
+    const fixture = TestBed.createComponent(AdaptPivotRowHeader);
+    fixture.componentRef.setInput("row", row);
+    fixture.componentRef.setInput("column", model.columns[0]);
+    fixture.detectChanges();
+    document.body.append(fixture.nativeElement as HTMLElement);
+    try {
+      const button = fixture.nativeElement.querySelector(
+        "button"
+      ) as HTMLButtonElement;
+      expect(button?.textContent?.trim()).toBe(row.label);
+      expect(button.getAttribute("aria-expanded")).toBe("true");
+      button.focus();
+      button.click();
+      fixture.detectChanges();
+      expect(button.getAttribute("aria-expanded")).toBe("false");
+      expect(document.activeElement).toBe(button);
+    } finally {
+      fixture.destroy();
+    }
   });
 
   it("reads every line as text, and names the corner", () => {
