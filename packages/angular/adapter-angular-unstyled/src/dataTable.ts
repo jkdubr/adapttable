@@ -29,6 +29,7 @@ import {
   type BulkBarSlotProps,
   type CellEditHandler,
   type CellRange,
+  type CellSaveStateInjectOptions,
   type CellSpanAppearance,
   cellSpanMark,
   type ChromeBodySlot,
@@ -290,7 +291,15 @@ function editingBundleFor<TRow>(options: {
       .applyEdit as EditValidationInjectOptions<TRow>["applyEdit"],
     injector: options.injector,
   });
-  const saving = injectCellSaveState<TRow>({ injector: options.injector });
+  const saving = injectCellSaveState<TRow>({
+    onRollback: options.featureOptions
+      .onEditRollback as CellSaveStateInjectOptions<TRow>["onRollback"],
+    formatError: options.featureOptions
+      .formatEditError as CellSaveStateInjectOptions<TRow>["formatError"],
+    onEditError: options.featureOptions.onEditError as
+      EditEventHandler<TRow> | undefined,
+    injector: options.injector,
+  });
   const rowEditIcons = options.featureOptions.rowEditIcons as
     RowEditIcons | undefined;
   const lifecycle = {
