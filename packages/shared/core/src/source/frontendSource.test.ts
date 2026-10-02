@@ -297,6 +297,67 @@ describe("createFrontendSource", () => {
     expect(getSearchText.mock.calls.map(([row]) => row.id)).toEqual(["d"]);
   });
 
+  it("refreshes every changed search value after two patches coalesce into one update", () => {
+    const getSearchText = vi.fn((row: Row) => row.name);
+    const source = createFrontendSource<Row>();
+    source.update(config({ getSearchText }), { ...VIEW, search: "a" });
+    source.commit();
+    getSearchText.mockClear();
+
+    const first = applyRowPatches<Row>(
+      ROWS,
+      [updateRow("a", { name: "Fresh Zoe" })],
+      (row) => row.id
+    );
+    const second = applyRowPatches<Row>(
+      first,
+      [updateRow("b", { name: "Fresh Bea" })],
+      (row) => row.id
+    );
+    const nextConfig = config({ getSearchText, data: second });
+    const frame = source.update(nextConfig, { ...VIEW, search: "fresh" });
+    expect(ids(frame.rows)).toEqual(["a", "b"]);
+    expect(frame.rows).toEqual([second[0], second[1]]);
+    expect(frame.allSearchedRows).toEqual([second[0], second[1]]);
+    expect(getSearchText.mock.calls.map(([row]) => row.id)).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
+    source.commit();
+
+    const zoe = source.update(nextConfig, { ...VIEW, search: "fresh zoe" });
+    expect(zoe.rows).toEqual([second[0]]);
+    const bea = source.update(nextConfig, { ...VIEW, search: "fresh bea" });
+    expect(bea.rows).toEqual([second[1]]);
+    const old = source.update(nextConfig, { ...VIEW, search: "alice" });
+    expect(old.rows).toEqual([]);
+    expect(ROWS[0]?.name).toBe("Alice");
+    expect(ROWS[1]?.name).toBe("Bob");
+  });
+
+  it("keeps immediate patch optimization after a no-op on the patched array", () => {
+    const filterFn = vi.fn((row: Row) => row.count > 0);
+    const source = createFrontendSource<Row>();
+    source.update(config({ filterFn }), VIEW);
+    source.commit();
+    filterFn.mockClear();
+    const changed = applyRowPatches<Row>(
+      ROWS,
+      [updateRow("a", { count: 9 })],
+      (row) => row.id
+    );
+    const noOp = applyRowPatches<Row>(
+      changed,
+      [updateRow("a", { count: 9 })],
+      (row) => row.id
+    );
+    const frame = source.update(config({ filterFn, data: noOp }), VIEW);
+    expect(frame.rows).toEqual(changed);
+    expect(frame.rows[1]).toBe(ROWS[1]);
+    expect(filterFn.mock.calls.map(([row]) => row.id)).toEqual(["a"]);
+  });
+
   it("publishes the staged view only on commit", () => {
     const source = createFrontendSource<Row>();
     source.update(config(), VIEW);

@@ -23,7 +23,11 @@ import {
   incrementalViewConfig,
   incrementalViewOf,
 } from "../rows/incremental";
-import { type RowPatchLog, rowPatchLog } from "../rows/patch";
+import {
+  type RowPatchLog,
+  rowPatchLog,
+  rowPatchLogStartsAt,
+} from "../rows/patch";
 import type { SortLevel } from "../sort/compare";
 import type {
   ExtraFilters,
@@ -347,8 +351,9 @@ export function createFrontendSource<TRow>(): FrontendSource<TRow> {
 
     if (config.data !== data) {
       const log = rowPatchLog(config.data);
-      if (log) forgetPatchedSearch(searchCache, log);
-      else searchCache.clear();
+      if (log && data && rowPatchLogStartsAt(log, data)) {
+        forgetPatchedSearch(searchCache, log);
+      } else searchCache.clear();
       table.stageCandidate({}, { data: config.data });
       data = config.data;
       stages += 1;

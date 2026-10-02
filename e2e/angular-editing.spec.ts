@@ -127,8 +127,11 @@ test("takes the incoming live value without saving the abandoned draft", async (
   await page.getByRole("button", { name: "Receive live name update" }).click();
   await expect(part(page, "edit-cell-conflict")).toBeVisible();
   await part(page, "edit-cell-take-theirs").click();
-  await expect(part(page, "edit-cell-editor")).toHaveCount(0);
   await expect(part(page, "edit-cell-conflict")).toHaveCount(0);
+  await expect(part(page, "edit-cell-editor")).toHaveValue("Ada Live");
+  await expect(log(page)).toHaveText("Received live name update: Ada Live");
+  await part(page, "edit-cell-editor").press("Escape");
+  await expect(part(page, "edit-cell-editor")).toHaveCount(0);
   await expect(cell(page, 0, 0)).toHaveText("Ada Live");
   await expect(log(page)).toHaveText("Received live name update: Ada Live");
 });

@@ -6,7 +6,8 @@ import {
   editing,
   undoRedoButtons,
 } from "@adapttable/angular-unstyled/editing";
-import { Component, input } from "@angular/core";
+import { applyRowPatches, updateRow } from "@adapttable/core";
+import { Component, input, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -149,5 +150,133 @@ describe("unstyled range editing", () => {
       "name",
       "Card value"
     );
+  });
+});
+
+/** A host using core patches, as realtime hosts do, with an aliased column. */
+@Component({
+  imports: [AdaptDataTable],
+  template: `<adapt-data-table
+    [data]="rows()"
+    [columns]="columns"
+    [rowKey]="rowKey"
+    [features]="features"
+    [urlSync]="false"
+    [defaults]="{ limit: 10, search: 'a' }"
+  />`,
+})
+class PatchedHost {
+  readonly rows = signal<readonly Row[]>([
+    { id: "1", name: "Ada Lovelace" },
+    { id: "2", name: "Alan Turing" },
+    { id: "3", name: "Grace Hopper" },
+  ]);
+  readonly rowKey = (row: Row) => row.id;
+  readonly columns: ColumnDef<Row>[] = [
+    {
+      key: "person",
+      header: "Name",
+      accessor: (row) => row.name,
+      sortValue: (row) => row.name,
+      editable: true,
+    },
+  ];
+  readonly saved = vi.fn((row: Row, key: string, value: unknown) => {
+    if (key !== "person") throw new Error(`Unexpected edit column: ${key}`);
+    this.rows.update((rows) =>
+      applyRowPatches(
+        rows,
+        [updateRow<Row>(row.id, { name: String(value) })],
+        this.rowKey
+      )
+    );
+  });
+  readonly features = [
+    editing<Row>(this.saved),
+    editHistory(),
+    undoRedoButtons(),
+    cellNavigation(),
+  ];
+}
+
+async function mountPatchedHost() {
+  const fixture = TestBed.createComponent(PatchedHost);
+  document.body.append(fixture.nativeElement as HTMLElement);
+  fixture.autoDetectChanges();
+  await fixture.whenStable();
+  return fixture;
+}
+
+const renderedNames = () => cells().map((cell) => cell.textContent?.trim());
+const initialNames = ["Ada Lovelace", "Alan Turing", "Grace Hopper"];
+
+describe("range edits with coalesced host row patches", () => {
+  it("renders both pasted rows and restores both with a single undo", async () => {
+    vi.stubGlobal("navigator", {
+      clipboard: {
+        readText: vi.fn().mockResolvedValue("Pasted Ada\nPasted Grace"),
+      },
+    });
+    const fixture = await mountPatchedHost();
+    cells()[0]!.focus();
+    cells()[0]!.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "v",
+        ctrlKey: true,
+        bubbles: true,
+      })
+    );
+    await vi.waitFor(() => {
+      expect(fixture.componentInstance.saved).toHaveBeenCalledTimes(2);
+    });
+    await fixture.whenStable();
+    expect(renderedNames()).toEqual([
+      "Pasted Ada",
+      "Pasted Grace",
+      "Grace Hopper",
+    ]);
+    expect(fixture.componentInstance.rows().map((row) => row.name)).toEqual(
+      renderedNames()
+    );
+    part<HTMLButtonElement>("undo-button")!.click();
+    await fixture.whenStable();
+    expect(renderedNames()).toEqual(initialNames);
+    expect(part<HTMLButtonElement>("undo-button")!.disabled).toBe(true);
+    part<HTMLButtonElement>("redo-button")!.click();
+    await fixture.whenStable();
+    expect(renderedNames()).toEqual([
+      "Pasted Ada",
+      "Pasted Grace",
+      "Grace Hopper",
+    ]);
+  });
+
+  it("renders both filled rows and restores both with a single undo", async () => {
+    const fixture = await mountPatchedHost();
+    cells()[0]!.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    window.dispatchEvent(new MouseEvent("mouseup"));
+    await fixture.whenStable();
+    part("fill-handle")!.dispatchEvent(
+      new MouseEvent("mousedown", {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    cells()[2]!.dispatchEvent(new MouseEvent("mouseenter"));
+    window.dispatchEvent(new MouseEvent("mouseup"));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.saved).toHaveBeenCalledTimes(2);
+    expect(renderedNames()).toEqual([
+      "Ada Lovelace",
+      "Ada Lovelace",
+      "Ada Lovelace",
+    ]);
+    expect(fixture.componentInstance.rows().map((row) => row.name)).toEqual(
+      renderedNames()
+    );
+    part<HTMLButtonElement>("undo-button")!.click();
+    await fixture.whenStable();
+    expect(renderedNames()).toEqual(initialNames);
+    expect(part<HTMLButtonElement>("undo-button")!.disabled).toBe(true);
   });
 });

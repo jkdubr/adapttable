@@ -1092,7 +1092,7 @@ export class AdaptGroupHeaderCard {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
@@ -1175,7 +1175,7 @@ export class AdaptGroupHeaderRow {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {
