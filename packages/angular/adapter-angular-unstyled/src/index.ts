@@ -27,6 +27,10 @@ export {
 } from "./components/editableCell";
 export { AdaptErrorState } from "./components/errorState";
 export { AdaptExpandToggle } from "./components/expandToggle";
+export {
+  AdaptFillHandle,
+  AdaptFillHandleControl,
+} from "./components/fillHandle";
 export { AdaptFilterDrawer, AdaptFiltersForm } from "./components/filterPanel";
 export { AdaptFilterPopover } from "./components/filterPopover";
 export {

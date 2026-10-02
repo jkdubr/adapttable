@@ -22,6 +22,7 @@ import {
   EXTRA_OVER_SPAN_ROW_STYLE,
   EXTRA_OVER_SPAN_STYLE,
   EXTRA_ROW_PARTS,
+  FILL_HANDLE,
   FILTER_HEADER,
   GROUP_HEADER_ROW,
   groupedHeaderCellStyle,
@@ -100,6 +101,8 @@ export class AdaptDesktopTable<TRow> {
   protected readonly reorderHandleSlot = ROW_REORDER_HANDLE;
   /** The editable-cell slot. @internal */
   protected readonly editableCellSlot = EDITABLE_CELL;
+  /** The kit-owned desktop range-fill handle. @internal */
+  protected readonly fillHandleSlot = FILL_HANDLE;
   /** The row-edit-actions slot. @internal */
   protected readonly rowEditActionsSlot = ROW_EDIT_ACTIONS;
   /** The group header slot. @internal */

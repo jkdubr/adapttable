@@ -328,6 +328,13 @@ export {
   type ColumnSelectSlots,
 } from "./focus/columnSelectCheckbox";
 export {
+  AdaptFillHandleChrome,
+  type FillHandleChromeProps,
+  type FillHandleFocus,
+  type FillHandleSlotProps,
+  type FillHandleSlots,
+} from "./focus/fillHandle";
+export {
   type GridFocus,
   type GridFocusOptions,
   injectGridFocus,

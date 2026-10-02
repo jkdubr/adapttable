@@ -9,6 +9,9 @@
  * Off, the attributes are the table's own and nothing listens.
  */
 import {
+  type CellEdit,
+  cellNavigationChannels,
+  type CellNavigationChannelsOptions,
   type CellRange,
   cellRangeKey,
   createGridFocusController,
@@ -16,6 +19,7 @@ import {
   gridCellAttributes,
   gridColumnHeaderAttributes,
   gridContainerAttributes,
+  gridFillHandleCell,
   type GridFocusControllerOptions,
   gridRowAttributes,
   isGridColumnSelected,
@@ -67,6 +71,10 @@ export interface GridFocusOptions<TRow> {
    * and Ctrl/Cmd+X both use it.
    */
   readonly onCut?: (range: CellRange) => void;
+  /** Original host callbacks, before any per-cell history wrapping. */
+  readonly host?: MaybeSignal<CellNavigationChannelsOptions<TRow>["host"]>;
+  /** Record an entire paste or fill as one history gesture. */
+  readonly recordEdits?: (edits: readonly CellEdit<TRow>[]) => void;
   /** Replay the last edit backwards through the host. */
   readonly onUndo?: () => number;
   /** Replay the last undone edit through the host. */
@@ -88,6 +96,14 @@ export interface GridFocus<TRow> {
   readonly active: Signal<GridCell | null>;
   /** The selected rectangle, or `null`. */
   readonly range: Signal<CellRange | null>;
+  /** Selection corner that can display the fill handle. */
+  readonly fillHandleCell: Signal<GridCell | null>;
+  /** The rectangle previewed while dragging the fill handle. */
+  readonly fillPreview: Signal<CellRange | null>;
+  /** Localized title for the fill handle. */
+  readonly fillHandleLabel: Signal<string>;
+  /** Start the core-owned fill gesture. */
+  readonly getFillHandleProps: () => Attrs;
   /** What the grid says as focus moves; render it in a live region. */
   readonly announcement: Signal<string>;
   /** Move focus to a cell. */
@@ -135,6 +151,21 @@ export function injectGridFocus<TRow>(
   const { table } = options;
   const enabled = computed(() => readMaybe(options.enabled));
 
+  const channels = computed(() =>
+    cellNavigationChannels<TRow>({
+      rows: table.rows(),
+      columns: table.columns(),
+      firstRowIndex: table.windowStart(),
+      pinOffset: table.layout().pinOffset,
+      host: options.host
+        ? readMaybe(options.host)
+        : (table.featureOptions as CellNavigationChannelsOptions<TRow>["host"]),
+      record: options.recordEdits ?? (() => undefined),
+      undo: options.onUndo ?? (() => 0),
+      redo: options.onRedo ?? (() => 0),
+    })
+  );
+
   const configuration = computed((): GridFocusControllerOptions<TRow> => ({
     enabled: enabled(),
     rowCount: table.source().total,
@@ -151,8 +182,7 @@ export function injectGridFocus<TRow>(
         }
       : undefined,
     onCut: options.onCut,
-    onUndo: options.onUndo,
-    onRedo: options.onRedo,
+    ...channels(),
   }));
   const controller = createGridFocusController(untracked(configuration));
   effect(
@@ -249,6 +279,16 @@ export function injectGridFocus<TRow>(
     enabled,
     active: computed(() => (enabled() ? snapshot().active : null)),
     range: computed(() => (enabled() ? snapshot().range : null)),
+    fillHandleCell: computed(() =>
+      gridFillHandleCell({
+        enabled: enabled(),
+        range: snapshot().range,
+        canFill: channels().onFill !== undefined,
+      })
+    ),
+    fillPreview: computed(() => (enabled() ? snapshot().fillPreview : null)),
+    fillHandleLabel: computed(() => table.labels().gridFillHandle),
+    getFillHandleProps: () => ({ onMouseDown: controller.pressFillHandle }),
     announcement: computed(() => (enabled() ? snapshot().announcement : "")),
     focusCell: controller.focusCell,
     selectRange: controller.selectRange,

@@ -28,6 +28,7 @@ import {
   type BulkAction,
   type BulkBarSlotProps,
   type CellEditHandler,
+  type CellNavigationChannelsOptions,
   type CellRange,
   type CellSaveStateInjectOptions,
   type CellSpanAppearance,
@@ -55,6 +56,7 @@ import {
   type DesktopRowWiringArgs,
   devWarn,
   type Direction,
+  editableCellController,
   type EditableCellEditing,
   type EditableCellSlotProps,
   type EditConflictHandler,
@@ -1597,6 +1599,41 @@ export class AdaptDataTable<TRow> implements OnInit {
             table,
             enabled: true,
             find,
+            onActivate: (cell) => {
+              const rows = table.rows();
+              const row = rows[cell.row - table.windowStart()];
+              const column = table.columns()[cell.col];
+              if (row === undefined || column === undefined) return;
+              const rowId = table.rowKey(row);
+              // Covered cells have no editor in the rendered body. Resolve
+              // the current row and column at the key press, then let core
+              // apply the same permission and editor gates as a pointer.
+              if (
+                !bodyCells()
+                  .get(rowId)
+                  ?.some((entry) => entry.column.key === column.key)
+              )
+                return;
+              editableCellController({
+                editing: editing?.(),
+                row,
+                column,
+                rowId,
+                rows,
+                columns: table.allColumns(),
+                rowKey: table.rowKey,
+              }).begin();
+            },
+            host: computed(
+              () =>
+                ({
+                  onCellEdit: featureOptions.onCellEdit,
+                  onCellPaste: featureOptions.onCellPaste,
+                  onCellFill: featureOptions.onCellFill,
+                  getCellSpan: featureOptions.getCellSpan,
+                }) as CellNavigationChannelsOptions<TRow>["host"]
+            ),
+            recordEdits: history?.().history.record,
             onUndo: history?.().history.undo,
             onRedo: history?.().history.redo,
             onCut: (range) => {

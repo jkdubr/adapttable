@@ -39,6 +39,7 @@ export type {
 } from "@adapttable/core";
 export type { SavedView, SavedViewsControllerOptions } from "@adapttable/core";
 export type { ColumnGroupRecord } from "@adapttable/core";
+export type { CellNavigationChannelsOptions } from "@adapttable/core";
 export {
   ACTIONS_COLUMN_KEY,
   columnMenuRows,
@@ -303,3 +304,4 @@ export {
   undoRedoToolbarProps,
 } from "@adapttable/core/binding";
 export { renderedRowsOf } from "@adapttable/core/binding";
+export { FILL_HANDLE } from "@adapttable/core/binding";

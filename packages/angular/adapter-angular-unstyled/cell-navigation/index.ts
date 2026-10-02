@@ -7,7 +7,11 @@ import {
   type AdaptTableFeature,
   cellNavigation as coreAngularCellNavigation,
   type CellNavigationOptions,
+  extendFeature,
+  FILL_HANDLE,
+  slotRender,
 } from "@adapttable/angular";
+import { AdaptFillHandle } from "@adapttable/angular-unstyled";
 
 /**
  * A keyboard grid with a focused cell. Compose it, or set the table's
@@ -20,5 +24,7 @@ import {
 export function cellNavigation(
   options: CellNavigationOptions = {}
 ): AdaptTableFeature {
-  return coreAngularCellNavigation(options);
+  return extendFeature(coreAngularCellNavigation(options), [
+    slotRender(FILL_HANDLE, () => AdaptFillHandle),
+  ]);
 }

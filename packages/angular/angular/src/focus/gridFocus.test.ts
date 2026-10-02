@@ -1,7 +1,10 @@
 /**
  * The keyboard grid reports the selected rectangle to the host.
  */
-import { createMemoryAdapter } from "@adapttable/core";
+import {
+  type CellNavigationChannelsOptions,
+  createMemoryAdapter,
+} from "@adapttable/core";
 import { Component, PLATFORM_ID, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,7 +16,7 @@ import type { AdaptTableFeature } from "../featureHost";
 import { cellNavigation } from "../features/cellNavigation";
 import { injectFrontendData } from "../source/frontendData";
 import { ADAPTTABLE_URL_ADAPTER } from "../url/tableUrlState";
-import { injectGridFocus } from "./gridFocus";
+import { type GridFocusOptions, injectGridFocus } from "./gridFocus";
 
 interface Pair {
   id: string;
@@ -27,10 +30,14 @@ const ROWS: Pair[] = [
 ];
 
 const COLUMNS: ColumnDef<Pair>[] = [
-  { key: "a", header: "A" },
-  { key: "b", header: "B" },
+  { key: "a", header: "A", editable: true },
+  { key: "b", header: "B", editable: true },
 ];
 
+let editHost: CellNavigationChannelsOptions<Pair>["host"] | undefined;
+let recordEdits: GridFocusOptions<Pair>["recordEdits"];
+let undo: GridFocusOptions<Pair>["onUndo"];
+let redo: GridFocusOptions<Pair>["onRedo"];
 let features: readonly AdaptTableFeature[] = [];
 let explicit: ((range: unknown) => void) | undefined;
 
@@ -68,6 +75,10 @@ class Host {
     table: this.table,
     enabled: true,
     onRangeChange: explicit,
+    host: editHost,
+    recordEdits,
+    onUndo: undo,
+    onRedo: redo,
   });
 }
 
@@ -93,6 +104,10 @@ async function selectDown(settle: () => Promise<unknown>) {
 }
 
 beforeEach(() => {
+  editHost = undefined;
+  recordEdits = undefined;
+  undo = undefined;
+  redo = undefined;
   features = [];
   explicit = undefined;
   TestBed.configureTestingModule({
@@ -103,6 +118,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.unstubAllGlobals();
   document.body.replaceChildren();
 });
 
@@ -159,5 +175,136 @@ describe("injectGridFocus on a server platform", () => {
     const listen = vi.spyOn(globalThis, "addEventListener");
     await mount();
     expect(listen).not.toHaveBeenCalledWith("mouseup", expect.any(Function));
+  });
+});
+
+describe("injectGridFocus range gestures", () => {
+  beforeEach(() => {
+    // jsdom has no viewport; focus restoration still exercises the real grid.
+    vi.stubGlobal("scrollTo", vi.fn());
+  });
+
+  async function editableGrid() {
+    const fixture = TestBed.createComponent(Host);
+    document.body.append(fixture.nativeElement as HTMLElement);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    return { fixture, grid: fixture.componentInstance.grid };
+  }
+
+  function key(value: string) {
+    const event = new KeyboardEvent("keydown", {
+      key: value,
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    document.querySelector("table")!.dispatchEvent(event);
+    return event;
+  }
+
+  it("pastes a rectangle through the batch host and records one gesture", async () => {
+    const onCellPaste = vi.fn();
+    const onCellEdit = vi.fn();
+    const record = vi.fn();
+    editHost = { onCellPaste, onCellEdit };
+    recordEdits = record;
+    vi.stubGlobal("navigator", {
+      clipboard: { readText: vi.fn().mockResolvedValue("x\ty\nz\tw") },
+    });
+    const { fixture, grid } = await editableGrid();
+    grid.focusCell({ row: 0, col: 0 });
+    expect(key("v").defaultPrevented).toBe(true);
+    await fixture.whenStable();
+    expect(onCellPaste).toHaveBeenCalledExactlyOnceWith([
+      { row: ROWS[0], columnKey: "a", value: "x" },
+      { row: ROWS[0], columnKey: "b", value: "y" },
+      { row: ROWS[1], columnKey: "a", value: "z" },
+      { row: ROWS[1], columnKey: "b", value: "w" },
+    ]);
+    expect(onCellEdit).not.toHaveBeenCalled();
+    expect(record).toHaveBeenCalledExactlyOnceWith(
+      onCellPaste.mock.calls[0]![0]
+    );
+    expect(grid.announcement()).toBe("4 cells pasted");
+  });
+
+  it("fills down through the original inline host as one history gesture", async () => {
+    const onCellEdit = vi.fn();
+    const record = vi.fn();
+    editHost = { onCellEdit };
+    recordEdits = record;
+    undo = vi.fn(() => 2);
+    redo = vi.fn(() => 2);
+    const { grid } = await editableGrid();
+    grid.selectRange({ anchor: { row: 0, col: 0 }, head: { row: 1, col: 1 } });
+    expect(grid.fillHandleCell()).toEqual({ row: 1, col: 1 });
+    key("d");
+    expect(onCellEdit.mock.calls).toEqual([
+      [ROWS[1], "a", "a1"],
+      [ROWS[1], "b", "b1"],
+    ]);
+    expect(record).toHaveBeenCalledTimes(1);
+    expect(record.mock.calls[0]![0]).toHaveLength(2);
+    key("z");
+    expect(undo).toHaveBeenCalledOnce();
+    key("y");
+    expect(redo).toHaveBeenCalledOnce();
+  });
+
+  it("previews drag fill and commits on a release outside the grid", async () => {
+    const onCellFill = vi.fn();
+    const record = vi.fn();
+    editHost = { onCellFill };
+    recordEdits = record;
+    const { fixture, grid } = await editableGrid();
+    grid.selectRange({ anchor: { row: 0, col: 0 }, head: { row: 0, col: 0 } });
+    const start = grid.getFillHandleProps().onMouseDown as (
+      event: MouseEvent
+    ) => void;
+    start(new MouseEvent("mousedown"));
+    document
+      .querySelectorAll("td")[2]!
+      .dispatchEvent(new MouseEvent("mouseenter"));
+    expect(grid.fillPreview()).toEqual({
+      anchor: { row: 0, col: 0 },
+      head: { row: 1, col: 0 },
+    });
+    window.dispatchEvent(new MouseEvent("mouseup"));
+    await fixture.whenStable();
+    expect(onCellFill).toHaveBeenCalledExactlyOnceWith([
+      { row: ROWS[1], columnKey: "a", value: "a1" },
+    ]);
+    expect(record).toHaveBeenCalledTimes(1);
+    expect(grid.fillPreview()).toBeNull();
+  });
+
+  it("leaves paste and fill untouched on a read-only grid", async () => {
+    const { grid } = await editableGrid();
+    grid.selectRange({ anchor: { row: 0, col: 0 }, head: { row: 1, col: 0 } });
+    expect(grid.fillHandleCell()).toBeNull();
+    expect(key("v").defaultPrevented).toBe(false);
+    expect(key("d").defaultPrevented).toBe(false);
+  });
+
+  it("copies the range and reports clipboard failures without an edit", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("navigator", { clipboard: { writeText } });
+    const { fixture, grid } = await editableGrid();
+    grid.selectRange({ anchor: { row: 0, col: 0 }, head: { row: 1, col: 1 } });
+    key("c");
+    await fixture.whenStable();
+    expect(writeText).toHaveBeenCalledWith("a1\tb1\na2\tb2");
+    // The Clipboard API promise chain is outside Angular's pending tasks.
+    await vi.waitFor(() => {
+      expect(grid.announcement()).toBe("4 cells copied");
+    });
+    writeText.mockRejectedValueOnce(new Error("denied"));
+    key("c");
+    await fixture.whenStable();
+    expect(writeText).toHaveBeenCalledTimes(2);
+    await vi.waitFor(() => {
+      expect(grid.announcement()).toBe("Copy failed");
+    });
   });
 });

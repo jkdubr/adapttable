@@ -344,6 +344,18 @@
                   } @else {
                     <ng-container [ngTemplateOutlet]="cellContent" />
                   }
+                  @if (!summary && v.grid && v.table.hasSlot(fillHandleSlot)) {
+                    <ng-container
+                      [adaptSlot]="fillHandleSlot"
+                      [adaptSlotProps]="{
+                        focus: v.grid,
+                        windowIndex: entry.index,
+                        col: v.columnIndex().get(column.key)!,
+                        firstRowIndex: v.table.windowStart(),
+                      }"
+                      [adaptSlotTable]="v.table"
+                    />
+                  }
                 </td>
               }
               @if (v.columnSpacers(); as spacers) {
