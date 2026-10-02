@@ -3314,7 +3314,10 @@ comes from a kit through a slot.
   row density kept in the URL, `injectFullscreen` the fullscreen toggle,
   `injectExportCsv` (`ExportCsvHandlerOptions`) the Export button's state,
   and `injectSavedViews` (`SavedViewsOptions`, returning `SavedViewsState`)
-  the saved views over the table's URL. `urlAdapterFor` resolves the one URL
+  the saved views over the table's URL. `AdaptSavedViewsPanelChrome`
+  (`SavedViewsPanelSlots`) is the management panel for that list — rename,
+  reorder, choose the default and delete — and `AdaptSavedViewGlyph` draws
+  each row's control. `urlAdapterFor` resolves the one URL
   adapter a table and its features share.
 - `fromStore(store, options)` turns any core store, an `ExternalStore`, into a
   read-only signal that ends with its injector (`FromStoreOptions`).
@@ -3375,7 +3378,7 @@ controls — `columnMenu` (`AdaptColumnMenu`), `AdaptColumnHeaderRename`
 `AdaptFilterHeaderControl`, `bulkActions` (`AdaptBulkBar`),
 `rowActions` (`RowActionsFeatureOptions`), `densityChooser`
 (`AdaptDensityButton`), `fullscreen` (`AdaptFullscreenButton`), `exportCsv`
-(`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`), `grouping`
+(`AdaptExportButton`), `savedViews` (`AdaptSavedViewsMenu`, `AdaptSavedViewsPanel`), `grouping`
 (`AdaptGroupHeaderRow` on desktop and `AdaptGroupHeaderCard` on phones draw
 group headers, footers and "show more" rows, the last with `AdaptGroupMore`),
 `groupingPanel`

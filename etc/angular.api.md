@@ -2057,6 +2057,110 @@ export class AdaptRowReorderHandleChrome<TRow> {
 }
 
 // @public
+export class AdaptSavedViewGlyph {
+    protected readonly fill: Signal<"currentColor" | "none">;
+    readonly glyph: InputSignal<    {
+    readonly paths: readonly string[];
+    readonly filled: boolean;
+    }>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSavedViewGlyph, "adapt-saved-view-glyph", never, {
+        "glyph": {
+            "alias": "glyph";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSavedViewGlyph, never>;
+}
+
+// @public
+export class AdaptSavedViewsPanelChrome {
+    constructor();
+    protected cancelRename(): void;
+    readonly className: InputSignal<string | undefined>;
+    protected commitRename(): void;
+    protected readonly emptyProps: Signal<    {
+    message: string;
+    }>;
+    readonly footer: InputSignal<string | TemplateRef<unknown> | undefined>;
+    protected readonly footerNode: Signal<TemplateRef<unknown> | undefined>;
+    protected readonly footerText: Signal<string>;
+    readonly labels: InputSignal<Partial<TableLabels> | undefined>;
+    readonly onApply: InputSignal<(name: string) => void>;
+    readonly onMove: InputSignal<(name: string, delta: number) => void>;
+    readonly onRemove: InputSignal<(name: string) => void>;
+    readonly onRename: InputSignal<(from: string, to: string) => void>;
+    readonly onSetDefault: InputSignal<(name: string) => void>;
+    protected setDraft(next: string): void;
+    readonly slots: InputSignal<SavedViewsPanelSlots>;
+    protected readonly surfaceProps: Signal<    {
+    title: string;
+    className: string | undefined;
+    children: TemplateRef<unknown> | undefined;
+    footer: TemplateRef<unknown> | undefined;
+    "data-adapttable-part": string;
+    }>;
+    readonly views: InputSignal<readonly SavedView[]>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSavedViewsPanelChrome, "adapt-saved-views-panel-chrome", never, {
+        "views": {
+            "alias": "views";
+            "required": true;
+            "isSignal": true;
+        };
+        "onApply": {
+            "alias": "onApply";
+            "required": true;
+            "isSignal": true;
+        };
+        "onRename": {
+            "alias": "onRename";
+            "required": true;
+            "isSignal": true;
+        };
+        "onMove": {
+            "alias": "onMove";
+            "required": true;
+            "isSignal": true;
+        };
+        "onSetDefault": {
+            "alias": "onSetDefault";
+            "required": true;
+            "isSignal": true;
+        };
+        "onRemove": {
+            "alias": "onRemove";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "footer": {
+            "alias": "footer";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSavedViewsPanelChrome, never>;
+}
+
+// @public
 export class AdaptSelectionStatsChrome {
     readonly className: InputSignal<string | undefined>;
     readonly labels: InputSignal<TableLabels | undefined>;
@@ -4385,6 +4489,14 @@ export { SavedViewsControllerOptions }
 // @public
 export interface SavedViewsOptions extends SavedViewsControllerOptions {
     readonly injector?: Injector;
+}
+
+// @public
+export interface SavedViewsPanelSlots {
+    readonly Empty: Type<unknown>;
+    readonly Input: Type<unknown>;
+    readonly Row: Type<unknown>;
+    readonly Surface: Type<unknown>;
 }
 
 export { SavedViewsSlotProps }

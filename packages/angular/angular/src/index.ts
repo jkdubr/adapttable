@@ -494,6 +494,11 @@ export {
   type SavedViewsState,
 } from "./url/savedViews";
 export {
+  AdaptSavedViewGlyph,
+  AdaptSavedViewsPanelChrome,
+  type SavedViewsPanelSlots,
+} from "./url/savedViewsPanelChrome";
+export {
   ADAPTTABLE_URL_ADAPTER,
   injectTableUrlState,
   type TableUrlState,

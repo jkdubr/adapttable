@@ -45,6 +45,7 @@ export { AdaptPaginationFooter } from "./components/paginationFooter";
 export { AdaptPivotPanel } from "./components/pivotPanel";
 export { AdaptPivotRowHeader } from "./components/pivotRowHeader";
 export { AdaptSavedViewsMenu } from "./components/savedViewsMenu";
+export { AdaptSavedViewsPanel } from "./components/savedViewsPanel";
 export { AdaptTableRegion } from "./components/tableRegion";
 export { AdaptTableSkeleton } from "./components/tableSkeleton";
 export {

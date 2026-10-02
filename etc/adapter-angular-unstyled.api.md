@@ -100,7 +100,9 @@ import { RowReorderHandleProps } from '@adapttable/core/binding';
 import { RowReorderHandleProps as RowReorderHandleProps_2 } from '@adapttable/angular';
 import { RowReorderState } from '@adapttable/angular';
 import { RowSelection } from '@adapttable/angular';
+import { SavedView } from '@adapttable/angular';
 import { SavedViewsControllerOptions } from '@adapttable/angular';
+import { SavedViewsPanelSlots } from '@adapttable/angular';
 import { SavedViewsSlotProps } from '@adapttable/angular';
 import { SavedViewsState } from '@adapttable/angular';
 import { SelectionState } from '@adapttable/angular';
@@ -1360,6 +1362,70 @@ export class AdaptSavedViewsMenu implements OnInit {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSavedViewsMenu, never>;
+}
+
+// @public
+export class AdaptSavedViewsPanel {
+    readonly className: InputSignal<string | undefined>;
+    readonly footer: InputSignal<string | TemplateRef<unknown> | undefined>;
+    readonly labels: InputSignal<Partial<TableLabels> | undefined>;
+    readonly onApply: InputSignal<(name: string) => void>;
+    readonly onMove: InputSignal<(name: string, delta: number) => void>;
+    readonly onRemove: InputSignal<(name: string) => void>;
+    readonly onRename: InputSignal<(from: string, to: string) => void>;
+    readonly onSetDefault: InputSignal<(name: string) => void>;
+    protected readonly slots: SavedViewsPanelSlots;
+    readonly views: InputSignal<readonly SavedView[]>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptSavedViewsPanel, "adapt-saved-views-panel", never, {
+        "views": {
+            "alias": "views";
+            "required": true;
+            "isSignal": true;
+        };
+        "onApply": {
+            "alias": "onApply";
+            "required": true;
+            "isSignal": true;
+        };
+        "onRename": {
+            "alias": "onRename";
+            "required": true;
+            "isSignal": true;
+        };
+        "onMove": {
+            "alias": "onMove";
+            "required": true;
+            "isSignal": true;
+        };
+        "onSetDefault": {
+            "alias": "onSetDefault";
+            "required": true;
+            "isSignal": true;
+        };
+        "onRemove": {
+            "alias": "onRemove";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "footer": {
+            "alias": "footer";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptSavedViewsPanel, never>;
 }
 
 // @public
