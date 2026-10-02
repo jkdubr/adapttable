@@ -3,6 +3,7 @@
  */
 import {
   AdaptEditableCellGate,
+  AdaptMultiSelectEditorChrome,
   type ColumnDef,
   commitBooleanDraft,
   type EditableCellActivateProps,
@@ -18,6 +19,8 @@ import {
   isMultiSelectEditor,
   isSelectEditor,
   multiDraftFromSelect,
+  type MultiSelectEditorCheckboxProps,
+  type MultiSelectEditorSlots,
   readMultiDraft,
   resolveEditableCellDisplay,
   stopCellEditKeyboard,
@@ -29,6 +32,7 @@ import {
   Component,
   type ElementRef,
   input,
+  type Type,
   viewChild,
 } from "@angular/core";
 
@@ -203,6 +207,76 @@ export class AdaptNativeCellEditor implements AfterViewInit {
   }
 }
 
+@Component({
+  selector: "adapt-edit-cell-option",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    @let p = props();
+    <label>
+      <input
+        #el
+        type="checkbox"
+        [value]="p.value"
+        [checked]="p.checked"
+        (change)="p.onToggle()"
+        (keydown)="p.onKeyDown($event)"
+      />
+      {{ p.label }}
+    </label>
+  `,
+})
+class AdaptEditCellOption implements AfterViewInit {
+  readonly props = input.required<MultiSelectEditorCheckboxProps>();
+  private readonly el = viewChild.required<ElementRef<HTMLInputElement>>("el");
+
+  ngAfterViewInit(): void {
+    this.props().focusRef?.(this.el().nativeElement);
+  }
+}
+
+const MULTI_SELECT_SLOTS: MultiSelectEditorSlots = {
+  Checkbox: AdaptEditCellOption,
+};
+
+/**
+ * Opt-in checkbox-list editor for multi-select columns. Other editor kinds
+ * keep their native controls. Pass it to {@link AdaptEditableCell}'s editor.
+ *
+ * @public
+ */
+@Component({
+  selector: "adapt-checkbox-cell-editor",
+  imports: [AdaptMultiSelectEditorChrome, AdaptNativeCellEditor],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: "display: contents" },
+  template: `
+    @let p = props();
+    @if (isMultiSelectEditor(p.editor)) {
+      <adapt-multi-select-editor-chrome
+        [ctrl]="p"
+        [label]="p.label"
+        [onKeyDown]="onKeyDown"
+        [slots]="slots"
+      />
+    } @else {
+      <adapt-native-cell-editor [props]="p" />
+    }
+  `,
+})
+export class AdaptCheckboxCellEditor {
+  /** The active cell's controller, supplied by the editable-cell gate. */
+  readonly props = input.required<EditableCellEditorCtrl>();
+  protected readonly isMultiSelectEditor = isMultiSelectEditor;
+  protected readonly slots = MULTI_SELECT_SLOTS;
+
+  protected readonly onKeyDown = (event: KeyboardEvent): void => {
+    this.props().onEditorKeyDown(event);
+    stopCellEditKeyboard(event);
+    stopEditKeys(event);
+  };
+}
+
 const SLOTS: EditableCellSlots = {
   Activate: AdaptEditCellActivate,
   Button: AdaptEditCellButton,
@@ -232,7 +306,7 @@ const SLOTS: EditableCellSlots = {
       [editLabel]="p.editLabel"
       [undoLabel]="p.undoLabel"
       [display]="resolvedDisplay()"
-      [editor]="editor"
+      [editor]="editor()"
       [slots]="slots"
     />
   `,
@@ -241,7 +315,8 @@ export class AdaptEditableCell<TRow> {
   /** Slot props from the table's editable-cell fill. */
   readonly props = input.required<EditableCellSlotProps<TRow>>();
 
-  protected readonly editor = AdaptNativeCellEditor;
+  /** Editor component override; native controls remain the default. */
+  readonly editor = input<Type<unknown>>(AdaptNativeCellEditor);
   protected readonly slots = SLOTS;
 
   /**

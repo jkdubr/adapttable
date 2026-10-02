@@ -101,3 +101,102 @@ test("undoes and redoes an edit with toolbar controls and grid shortcuts", async
   await part(page, "edit-cell-editor").press("Escape");
   await expect(cell(page, 0, 0)).toHaveText("Ada Updated");
 });
+
+test("asks about a live value and keeps the draft when requested", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+  await cell(page, 0, 0).dblclick();
+  await part(page, "edit-cell-editor").fill("Ada Local");
+  await page.getByRole("button", { name: "Receive live name update" }).click();
+  await expect(part(page, "edit-cell-conflict")).toBeVisible();
+  await expect(part(page, "edit-cell-incoming")).toContainText("Ada Live");
+  await part(page, "edit-cell-keep-mine").click();
+  await expect(part(page, "edit-cell-conflict")).toHaveCount(0);
+  await expect(part(page, "edit-cell-editor")).toHaveValue("Ada Local");
+  await part(page, "edit-cell-editor").press("Enter");
+  await expect(cell(page, 0, 0)).toHaveText("Ada Local");
+});
+
+test("takes the incoming live value without saving the abandoned draft", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+  await cell(page, 0, 0).dblclick();
+  await part(page, "edit-cell-editor").fill("Discard this draft");
+  await page.getByRole("button", { name: "Receive live name update" }).click();
+  await expect(part(page, "edit-cell-conflict")).toBeVisible();
+  await part(page, "edit-cell-take-theirs").click();
+  await expect(part(page, "edit-cell-editor")).toHaveCount(0);
+  await expect(part(page, "edit-cell-conflict")).toHaveCount(0);
+  await expect(cell(page, 0, 0)).toHaveText("Ada Live");
+  await expect(log(page)).toHaveText("Received live name update: Ada Live");
+});
+
+test("shows the host's save failure and rolls its optimistic change back", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+  await page.getByRole("button", { name: "Reject next save" }).click();
+  await cell(page, 0, 0).dblclick();
+  await part(page, "edit-cell-editor").fill("Rejected name");
+  await part(page, "edit-cell-editor").press("Enter");
+  await expect(part(page, "edit-cell-save-error")).toContainText(
+    "The demo server rejected this change"
+  );
+  await part(page, "edit-cell-rollback").click();
+  await expect(part(page, "edit-cell-save-error")).toHaveCount(0);
+  await expect(cell(page, 0, 0)).toHaveText("Ada Lovelace");
+  await expect(log(page)).toHaveText(
+    "Restored Ada Lovelace after the rejected save."
+  );
+});
+
+test("pastes browser clipboard rows and undoes the rectangle in one gesture", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto(PAGE);
+  const before = [
+    await cell(page, 0, 0).textContent(),
+    await cell(page, 1, 0).textContent(),
+  ];
+  await page.evaluate(async () => {
+    await navigator.clipboard.writeText("Pasted Ada\nPasted Grace");
+  });
+  await cell(page, 0, 0).focus();
+  await page.keyboard.press("Control+v");
+  await expect(cell(page, 0, 0)).toHaveText("Pasted Ada");
+  await expect(cell(page, 1, 0)).toHaveText("Pasted Grace");
+  await part(page, "undo-button").click();
+  await expect(cell(page, 0, 0)).toHaveText(before[0]!);
+  await expect(cell(page, 1, 0)).toHaveText(before[1]!);
+  await expect(part(page, "undo-button")).toBeDisabled();
+  await part(page, "redo-button").click();
+  await expect(cell(page, 0, 0)).toHaveText("Pasted Ada");
+  await expect(cell(page, 1, 0)).toHaveText("Pasted Grace");
+});
+
+test("drags the native fill handle across rows and undoes one fill gesture", async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+  const before = [
+    await cell(page, 1, 0).textContent(),
+    await cell(page, 2, 0).textContent(),
+  ];
+  await cell(page, 0, 0).click();
+  const handle = part(page, "fill-handle");
+  await expect(handle).toHaveCount(1);
+  await handle.hover();
+  await page.mouse.down();
+  await cell(page, 2, 0).hover();
+  await page.mouse.up();
+  await expect(cell(page, 1, 0)).toHaveText("Ada Lovelace");
+  await expect(cell(page, 2, 0)).toHaveText("Ada Lovelace");
+  await part(page, "undo-button").click();
+  await expect(cell(page, 1, 0)).toHaveText(before[0]!);
+  await expect(cell(page, 2, 0)).toHaveText(before[1]!);
+  await expect(part(page, "undo-button")).toBeDisabled();
+});

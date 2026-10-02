@@ -236,10 +236,27 @@ class RowReorderingBody {
       <div class="hint-row">
         <span class="hint">Double-click a cell to edit it</span>
         <span class="hint">Enter commits, Escape cancels</span>
+        <button
+          type="button"
+          class="seg__btn"
+          (mousedown)="$event.preventDefault()"
+          (click)="receiveLiveUpdate()"
+        >
+          Receive live name update
+        </button>
+        <button
+          type="button"
+          class="seg__btn"
+          [attr.aria-pressed]="rejectNext()"
+          (click)="rejectNext.set(!rejectNext())"
+        >
+          Reject next save
+        </button>
       </div>
       <div class="mx-demo__body">
         <adapt-data-table
           tableLabel="People"
+          editConflictPolicy="ask"
           [urlSync]="false"
           [data]="rows()"
           [columns]="columns"
@@ -257,11 +274,45 @@ class EditingBody {
   readonly columns = peopleColumns({ editable: true });
   readonly rowKey = rowKey;
   readonly log = signal("Every change goes through the host.");
+  readonly rejectNext = signal(false);
+
+  /** Simulate a remote write while a local draft remains open. */
+  receiveLiveUpdate(): void {
+    const row = this.rows()[0];
+    if (!row) return;
+    this.rows.update((rows) =>
+      applyPersonEdit(rows, row, "person", "Ada Live")
+    );
+    this.log.set("Received live name update: Ada Live");
+  }
+
   readonly features: readonly AdaptTableFeature[] = [
-    editing<Person>((row, key, value) => {
-      this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
-      this.log.set(`Saved ${key} for ${row.name}: ${String(value)}`);
-    }),
+    editing<Person>(
+      (row, key, value) => {
+        this.rows.update((rows) => applyPersonEdit(rows, row, key, value));
+        if (this.rejectNext()) {
+          this.rejectNext.set(false);
+          this.log.set(
+            `Save rejected for ${row.name}; undo the optimistic change.`
+          );
+          return Promise.reject(
+            new Error("The demo server rejected this change")
+          );
+        }
+        this.log.set(`Saved ${key} for ${row.name}: ${String(value)}`);
+        return undefined;
+      },
+      {
+        formatEditError: (error: unknown) =>
+          error instanceof Error ? error.message : "The demo save failed",
+        onEditRollback: (previous: Person) => {
+          this.rows.update((rows) =>
+            rows.map((row) => (row.id === previous.id ? previous : row))
+          );
+          this.log.set(`Restored ${previous.name} after the rejected save.`);
+        },
+      }
+    ),
     editHistory(),
     undoRedoButtons(),
     cellNavigation(),

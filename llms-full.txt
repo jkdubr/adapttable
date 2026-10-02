@@ -19829,6 +19829,35 @@ comes from a kit through a slot.
   kit's `/editing` entry renders `AdaptUndoRedoButtons`; grid navigation
   forwards Ctrl/Cmd+Z and redo shortcuts. Kit plumbing includes
   `asBatchGesture`, `undoRedoToolbarProps` and `withRowMutationActions`.
+- `injectEditConflict` exposes core's `EditConflictState` as a signal;
+  `injectLiveEditConflict` connects it to cell, row and batch sessions through
+  `LiveEditConflictInput` and `LiveEditConflictOptions`. `EditConflict`,
+  `EditConflictChange`, `EditConflictChoice`, `EditConflictHandler` and
+  `EditConflictPolicy` describe incoming changes and host decisions;
+  `ReconcileLiveEdit`, `ReconcileLiveRowEdit` and `ReconcileLiveBatchEdit`
+  describe explicit reconciliation. The native table wires live rows itself,
+  with reactive `rowVersion`, `editConflictPolicy` and `onEditConflict` inputs.
+  Untouched fields take incoming values; contested drafts ask before saving.
+  Kit plumbing uses `renderedRowsOf` to exclude structural group headers.
+- Editing extras accept `formatEditError`, `onEditError` and `onEditRollback`:
+  a rejected host promise shows its message, reports the exact edit and offers
+  rollback only when the host supplied it. `validateRow`, `applyEdit` and
+  `onValidationFail` support whole-row validation without mutating host data.
+- `injectGridFocus` connects range paste and fill to the original host callbacks
+  through `CellNavigationChannelsOptions`. `editHistory()` records each range
+  write as one gesture. `AdaptFillHandleChrome`, `FillHandleChromeProps`,
+  `FillHandleFocus`, `FillHandleSlots` and `FillHandleSlotProps` draw a localized
+  corner handle using a required kit control. The native `cellNavigation()`
+  feature fills `FILL_HANDLE` with `AdaptFillHandle` and
+  `AdaptFillHandleControl`; phone cards retain their inline editors.
+- `AdaptMultiSelectEditorChrome` draws a group of required kit checkboxes,
+  described by `MultiSelectEditorSlots` and `MultiSelectEditorCheckboxProps`.
+  It keeps option order, focuses the first control and commits only when focus
+  leaves the group. Native-capable editors retain the browser's multiple select.
+  The native kit also exports `AdaptCheckboxCellEditor`: pass it to
+  `AdaptEditableCell`'s `editor` input to choose checkboxes for multi-selects,
+  with native controls for other editor kinds. The default remains
+  `AdaptNativeCellEditor`.
 - `injectRowSelection(options)` is row selection as signals, configured by
   `RowSelectionOptions` and returning `RowSelection`: the selected ids, the
   select-all tri-state, the toggles, and the attributes of the row and

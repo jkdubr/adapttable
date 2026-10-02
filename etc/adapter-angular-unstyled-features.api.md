@@ -12,6 +12,7 @@ import { CellNavigationOptions } from '@adapttable/angular';
 import { CommandPaletteOptions } from '@adapttable/angular';
 import { ContextMenuOptions } from '@adapttable/angular';
 import { editHistory } from '@adapttable/angular';
+import { EditingLifecycleExtras } from '@adapttable/angular';
 import { ExportCsvOptions } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
 import { GroupingExtras } from '@adapttable/angular';
@@ -49,7 +50,7 @@ export function densityChooser(): AdaptTableFeature;
 export { editHistory }
 
 // @public
-export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
 
 // @public
 export function exportCsv<TRow>(options?: boolean | ExportCsvOptions<TRow>): AdaptTableFeature;
@@ -97,7 +98,7 @@ export interface RowActionsFeatureOptions<TRow> {
 }
 
 // @public
-export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
 
 // @public
 export function rowReorder<TRow>(onRowReorder: RowReorderHandler<TRow>, options?: RowReorderOptions<TRow>): AdaptTableFeature;

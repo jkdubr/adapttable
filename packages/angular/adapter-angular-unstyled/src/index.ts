@@ -22,6 +22,7 @@ export {
 } from "./components/columnSelectCheckbox";
 export { AdaptDesktopTable } from "./components/desktopTable";
 export {
+  AdaptCheckboxCellEditor,
   AdaptEditableCell,
   AdaptNativeCellEditor,
 } from "./components/editableCell";

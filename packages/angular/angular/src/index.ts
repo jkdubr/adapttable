@@ -161,6 +161,11 @@ export {
   type RowEditingInjectOptions,
 } from "./editing/editing";
 export {
+  AdaptMultiSelectEditorChrome,
+  type MultiSelectEditorCheckboxProps,
+  type MultiSelectEditorSlots,
+} from "./editing/multiSelectEditorChrome";
+export {
   AdaptBatchEditBarChrome,
   AdaptBatchEditCell,
   AdaptRowEditActionsChrome,

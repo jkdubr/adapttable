@@ -45,6 +45,8 @@ import { EditableCellEditing } from '@adapttable/angular';
 import { EditableCellEditorCtrl } from '@adapttable/angular';
 import { EditableCellSlotProps } from '@adapttable/angular';
 import { EditableCellSlots } from '@adapttable/angular';
+import { EditConflictHandler } from '@adapttable/angular';
+import { EditConflictPolicy } from '@adapttable/angular';
 import { editorInputType } from '@adapttable/angular';
 import { editorValidationProps } from '@adapttable/angular';
 import { ElementRef } from '@angular/core';
@@ -54,6 +56,10 @@ import { ExtraFilters } from '@adapttable/angular';
 import { FacetCounts } from '@adapttable/core';
 import { FeatureNotice } from '@adapttable/core';
 import { FeatureSlotKey } from '@adapttable/angular';
+import { FillHandleCellSlotProps } from '@adapttable/core/binding';
+import { FillHandleChromeProps } from '@adapttable/angular';
+import { FillHandleSlotProps } from '@adapttable/angular';
+import { FillHandleSlots } from '@adapttable/angular';
 import { FilterDef } from '@adapttable/angular';
 import { FilterHeaderControlProps } from '@adapttable/angular';
 import { FilterOverlaySlotProps } from '@adapttable/angular';
@@ -81,6 +87,7 @@ import { isDraftChecked } from '@adapttable/angular';
 import { isMultiSelectEditor } from '@adapttable/angular';
 import { isSelectEditor } from '@adapttable/angular';
 import { multiDraftFromSelect } from '@adapttable/angular';
+import { MultiSelectEditorSlots } from '@adapttable/angular';
 import { NestedTableParent } from '@adapttable/angular';
 import { OnInit } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
@@ -131,6 +138,7 @@ import { TreeCellProps } from '@adapttable/angular';
 import { TreeToggleButtonProps } from '@adapttable/angular';
 import { TreeToggleProps } from '@adapttable/angular';
 import { TreeToggleSlots } from '@adapttable/angular';
+import { Type } from '@angular/core';
 import { WritableSignal } from '@angular/core';
 
 // @public
@@ -197,6 +205,27 @@ export class AdaptBulkBar {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptBulkBar, never>;
+}
+
+// @public
+export class AdaptCheckboxCellEditor {
+    // (undocumented)
+    protected readonly isMultiSelectEditor: typeof isMultiSelectEditor;
+    // (undocumented)
+    protected readonly onKeyDown: (event: KeyboardEvent) => void;
+    readonly props: InputSignal<EditableCellEditorCtrl>;
+    // (undocumented)
+    protected readonly slots: MultiSelectEditorSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptCheckboxCellEditor, "adapt-checkbox-cell-editor", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptCheckboxCellEditor, never>;
 }
 
 // @public
@@ -369,6 +398,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     readonly dir: InputSignal<Direction>;
     protected readonly dockedPanel: Signal<TemplateRef<unknown> | undefined>;
     protected readonly dockedSide: Signal<"start" | "end">;
+    readonly editConflictPolicy: InputSignal<EditConflictPolicy | undefined>;
     readonly error: InputSignal<Error | null | undefined>;
     readonly extraChips: InputSignal<readonly ActiveFilterChip[]>;
     readonly facetKeys: InputSignal<readonly string[] | undefined>;
@@ -402,6 +432,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     protected readonly noResults: Signal<boolean>;
     readonly onCellCut: InputSignal<((range: CellRange) => void) | undefined>;
     readonly onColumnRename: InputSignal<((key: string, name: string) => void) | undefined>;
+    readonly onEditConflict: InputSignal<EditConflictHandler<TRow> | undefined>;
     protected onMenuContext(event: MouseEvent): void;
     protected onMenuKey(event: KeyboardEvent): void;
     protected onMenuPointerCancel(): void;
@@ -416,6 +447,7 @@ export class AdaptDataTable<TRow> implements OnInit {
     }>;
     readonly responseKey: InputSignal<string | undefined>;
     readonly rowKey: InputSignal<(row: TRow) => string>;
+    readonly rowVersion: InputSignal<((row: TRow) => string | number) | undefined>;
     // @internal
     protected readonly savedViewsSlot: FeatureSlotKey<SavedViewsSlotProps<unknown>>;
     readonly searchable: InputSignal<boolean>;
@@ -631,6 +663,21 @@ export class AdaptDataTable<TRow> implements OnInit {
             "required": false;
             "isSignal": true;
         };
+        "rowVersion": {
+            "alias": "rowVersion";
+            "required": false;
+            "isSignal": true;
+        };
+        "editConflictPolicy": {
+            "alias": "editConflictPolicy";
+            "required": false;
+            "isSignal": true;
+        };
+        "onEditConflict": {
+            "alias": "onEditConflict";
+            "required": false;
+            "isSignal": true;
+        };
         "columnLayout": {
             "alias": "columnLayout";
             "required": false;
@@ -717,6 +764,7 @@ export class AdaptDesktopTable<TRow> {
         };
     };
     protected readonly extraRowStyle: CssProperties;
+    protected readonly fillHandleSlot: FeatureSlotKey<FillHandleCellSlotProps<unknown>>;
     protected readonly filterSlots: {
         header: FeatureSlotKey<FilterHeaderControlProps<never>>;
     };
@@ -783,8 +831,7 @@ export class AdaptEditableCell<TRow> {
     protected columns(): readonly ColumnDef<TRow>[];
     // @internal
     protected editing(): EditableCellEditing<TRow> | undefined;
-    // (undocumented)
-    protected readonly editor: typeof AdaptNativeCellEditor;
+    readonly editor: InputSignal<Type<unknown>>;
     readonly props: InputSignal<EditableCellSlotProps<TRow, unknown, ColumnModel<TRow>, unknown>>;
     // @internal
     protected resolvedDisplay(): unknown;
@@ -795,6 +842,11 @@ export class AdaptEditableCell<TRow> {
         "props": {
             "alias": "props";
             "required": true;
+            "isSignal": true;
+        };
+        "editor": {
+            "alias": "editor";
+            "required": false;
             "isSignal": true;
         };
     }, {}, never, never, true, never>;
@@ -860,6 +912,38 @@ export class AdaptExportButton {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptExportButton, never>;
+}
+
+// @public
+export class AdaptFillHandle {
+    readonly props: InputSignal<FillHandleChromeProps>;
+    // @internal (undocumented)
+    protected readonly slots: FillHandleSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFillHandle, "adapt-fill-handle", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFillHandle, never>;
+}
+
+// @public
+export class AdaptFillHandleControl {
+    readonly props: InputSignal<FillHandleSlotProps>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFillHandleControl, "adapt-fill-handle-control", never, {
+        "props": {
+            "alias": "props";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFillHandleControl, never>;
 }
 
 // @internal

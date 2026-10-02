@@ -29,8 +29,10 @@ import { BulkActionOutcome } from '@adapttable/core';
 import { BulkBarSlotProps } from '@adapttable/core/binding';
 import { CellConflictAsk } from '@adapttable/core';
 import { cellConflictAsk } from '@adapttable/core';
+import { CellEdit } from '@adapttable/core';
 import { CellEditingState } from '@adapttable/core';
 import { CellEditor } from '@adapttable/core';
+import { CellNavigationChannelsOptions } from '@adapttable/core';
 import { CellRange } from '@adapttable/core';
 import { CellSaveState } from '@adapttable/core';
 import { CellSpanAppearance } from '@adapttable/core';
@@ -106,7 +108,13 @@ import { EditableCellMode } from '@adapttable/core';
 import { EditableCellPresentation } from '@adapttable/core';
 import { EditableCellSlotProps } from '@adapttable/core/binding';
 import { EditableColumnLike } from '@adapttable/core';
+import { EditConflict } from '@adapttable/core';
+import { EditConflictChange } from '@adapttable/core';
+import { EditConflictChoice } from '@adapttable/core';
+import { EditConflictHandler } from '@adapttable/core';
 import { EditConflictLabels } from '@adapttable/core';
+import { EditConflictPolicy } from '@adapttable/core';
+import { EditConflictState } from '@adapttable/core';
 import { EditEvent } from '@adapttable/core';
 import { EditEventHandler } from '@adapttable/core';
 import { EditHistoryState } from '@adapttable/core';
@@ -145,6 +153,8 @@ import { FeaturePatch } from '@adapttable/core/binding';
 import { FeatureRender } from '@adapttable/core/binding';
 import { FeatureSetup } from '@adapttable/core/binding';
 import { FeatureSlotKey } from '@adapttable/core/binding';
+import { FILL_HANDLE } from '@adapttable/core/binding';
+import { FillHandleSlotProps } from '@adapttable/core/binding';
 import { FILTER_DRAWER } from '@adapttable/core/binding';
 import { FILTER_ENGINE_IMPL } from '@adapttable/core';
 import { FILTER_HEADER } from '@adapttable/core/binding';
@@ -258,6 +268,7 @@ import { listFilterValues } from '@adapttable/core';
 import { MergedCellStyle } from '@adapttable/core/binding';
 import { mergedCellStyle } from '@adapttable/core/binding';
 import { mobileCardListStyle } from '@adapttable/core';
+import { MultiSelectEditorCheckboxProps as MultiSelectEditorCheckboxProps_2 } from '@adapttable/core/binding';
 import { NestedTableDefaults } from '@adapttable/core';
 import { NestedTableParent } from '@adapttable/core';
 import { nextPinSide } from '@adapttable/core';
@@ -286,9 +297,13 @@ import { QuerySupport } from '@adapttable/core';
 import { RangeFieldWidget } from '@adapttable/core';
 import { RangeOp } from '@adapttable/core';
 import { readMultiDraft } from '@adapttable/core';
+import { ReconcileLiveBatchEdit } from '@adapttable/core';
+import { ReconcileLiveEdit } from '@adapttable/core';
+import { ReconcileLiveRowEdit } from '@adapttable/core';
 import { RELATIVE_PRESET_LABEL_KEYS } from '@adapttable/core';
 import { RELATIVE_PRESETS } from '@adapttable/core';
 import { RelativePreset } from '@adapttable/core';
+import { renderedRowsOf } from '@adapttable/core/binding';
 import { REORDER_COLUMN_KEY } from '@adapttable/core';
 import { resolveBodyVirtualization } from '@adapttable/core/binding';
 import { resolveCellEditor } from '@adapttable/core';
@@ -1229,6 +1244,53 @@ export class AdaptExtraRowContent {
 }
 
 // @public
+export class AdaptFillHandleChrome {
+    readonly className: InputSignal<string | undefined>;
+    readonly col: InputSignal<number>;
+    readonly firstRowIndex: InputSignal<number>;
+    readonly focus: InputSignal<FillHandleFocus | undefined>;
+    // @internal
+    protected readonly handleProps: Signal<FillHandleSlotProps | null>;
+    readonly slots: InputSignal<FillHandleSlots>;
+    readonly windowIndex: InputSignal<number>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptFillHandleChrome, "adapt-fill-handle-chrome", never, {
+        "focus": {
+            "alias": "focus";
+            "required": false;
+            "isSignal": true;
+        };
+        "windowIndex": {
+            "alias": "windowIndex";
+            "required": true;
+            "isSignal": true;
+        };
+        "col": {
+            "alias": "col";
+            "required": true;
+            "isSignal": true;
+        };
+        "firstRowIndex": {
+            "alias": "firstRowIndex";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptFillHandleChrome, never>;
+}
+
+// @public
 export class AdaptFilterHeaderChrome<TRow> {
     protected cellClass(): string | undefined;
     readonly cellStyle: InputSignal<((column: {
@@ -1594,7 +1656,7 @@ export class AdaptGroupMoreButtonChrome {
     groupKey?: string;
     }) => void>;
     readonly remaining: InputSignal<number>;
-    readonly scope: InputSignal<"groups" | "rows">;
+    readonly scope: InputSignal<"rows" | "groups">;
     readonly slots: InputSignal<GroupMoreButtonSlots>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMoreButtonChrome, "adapt-group-more-button-chrome", never, {
@@ -1692,6 +1754,50 @@ export class AdaptLiveRegion {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptLiveRegion, never>;
+}
+
+// @public
+export class AdaptMultiSelectEditorChrome {
+    readonly ctrl: InputSignal<EditableCellEditorCtrl>;
+    readonly label: InputSignal<string>;
+    // (undocumented)
+    protected onBlur(event: FocusEvent, group: HTMLElement): void;
+    readonly onKeyDown: InputSignal<(event: KeyboardEvent) => void>;
+    // (undocumented)
+    protected readonly options: Signal<readonly MultiSelectEditorCheckboxProps[]>;
+    readonly slots: InputSignal<MultiSelectEditorSlots>;
+    // (undocumented)
+    protected readonly validation: Signal<    {
+    "aria-invalid"?: true;
+    "aria-describedby"?: string;
+    "aria-busy"?: true;
+    "data-conflict"?: "";
+    }>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptMultiSelectEditorChrome, "adapt-multi-select-editor-chrome", never, {
+        "ctrl": {
+            "alias": "ctrl";
+            "required": true;
+            "isSignal": true;
+        };
+        "label": {
+            "alias": "label";
+            "required": true;
+            "isSignal": true;
+        };
+        "onKeyDown": {
+            "alias": "onKeyDown";
+            "required": true;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptMultiSelectEditorChrome, never>;
 }
 
 // @public
@@ -2741,6 +2847,8 @@ export { CellEditingState }
 // @public
 export function cellNavigation(options?: CellNavigationOptions): AdaptTableFeature;
 
+export { CellNavigationChannelsOptions }
+
 // @public
 export interface CellNavigationOptions {
     readonly onRangeChange?: (range: CellRange | null) => void;
@@ -3243,6 +3351,18 @@ export interface EditableCellSlots {
     readonly Button: Type<unknown>;
 }
 
+export { EditConflict }
+
+export { EditConflictChange }
+
+export { EditConflictChoice }
+
+export { EditConflictHandler }
+
+export { EditConflictPolicy }
+
+export { EditConflictState }
+
 export { EditEvent }
 
 export { EditEventHandler }
@@ -3275,9 +3395,18 @@ export { EditingBundle }
 // @public
 export interface EditingLifecycleExtras<TRow = unknown> {
     readonly [key: string]: unknown;
+    readonly applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
+    readonly editConflictPolicy?: EditConflictPolicy;
+    readonly formatEditError?: (error: unknown) => string;
     readonly onEditCancel?: EditEventHandler<TRow>;
     readonly onEditCommit?: EditEventHandler<TRow>;
+    readonly onEditConflict?: EditConflictHandler<TRow>;
+    readonly onEditError?: EditEventHandler<TRow>;
+    readonly onEditRollback?: (previous: TRow, columnKey: string) => void;
     readonly onEditStart?: EditEventHandler<TRow>;
+    readonly onValidationFail?: EditEventHandler<TRow>;
+    readonly rowVersion?: (row: TRow) => string | number;
+    readonly validateRow?: RowValidator<TRow>;
 }
 
 export { EditLifecycle }
@@ -3380,6 +3509,27 @@ export { FeaturePatch }
 export { FeatureRender }
 
 export { FeatureSlotKey }
+
+export { FILL_HANDLE }
+
+// @public
+export interface FillHandleChromeProps {
+    readonly className?: string;
+    readonly col: number;
+    readonly firstRowIndex?: number;
+    readonly focus: FillHandleFocus | undefined;
+    readonly windowIndex: number;
+}
+
+// @public
+export type FillHandleFocus = Pick<GridFocus<unknown>, "fillHandleCell" | "fillHandleLabel" | "getFillHandleProps">;
+
+export { FillHandleSlotProps }
+
+// @public
+export interface FillHandleSlots {
+    readonly Handle: Type<unknown>;
+}
 
 export { FILTER_DRAWER }
 
@@ -3587,7 +3737,11 @@ export interface GridFocus<TRow> {
     readonly cellAttrs: (column: ColumnDef<TRow>, index: number, col: number) => Attrs;
     readonly copyCells: (cell?: GridCell, cut?: boolean) => void;
     readonly enabled: Signal<boolean>;
+    readonly fillHandleCell: Signal<GridCell | null>;
+    readonly fillHandleLabel: Signal<string>;
+    readonly fillPreview: Signal<CellRange | null>;
     readonly focusCell: (cell: GridCell) => void;
+    readonly getFillHandleProps: () => Attrs;
     readonly headerCellAttrs: (column: ColumnDef<TRow>, col: number) => Attrs;
     readonly isColumnSelected: (col: number) => boolean;
     readonly range: Signal<CellRange | null>;
@@ -3607,12 +3761,14 @@ export interface GridFocusAnnouncement {
 export interface GridFocusOptions<TRow> {
     readonly enabled: MaybeSignal<boolean>;
     readonly find?: Signal<FindInTableState>;
+    readonly host?: MaybeSignal<CellNavigationChannelsOptions<TRow>["host"]>;
     readonly injector?: Injector;
     readonly onActivate?: (cell: GridCell) => void;
     readonly onCut?: (range: CellRange) => void;
     readonly onRangeChange?: (range: CellRange | null) => void;
     readonly onRedo?: () => number;
     readonly onUndo?: () => number;
+    readonly recordEdits?: (edits: readonly CellEdit<TRow>[]) => void;
     readonly table: DataTable<TRow>;
 }
 
@@ -3856,6 +4012,9 @@ export function injectDensity(options?: DensityOptions): DensityState;
 export function injectDensityUrlState(options?: DensityUrlStateOptions): DensityUrlState;
 
 // @public
+export function injectEditConflict<TRow>(options?: FromStoreOptions): Signal<EditConflictState<TRow>>;
+
+// @public
 export function injectEditValidation<TRow>(options?: EditValidationInjectOptions<TRow>): Signal<EditValidationState<TRow>>;
 
 // @public
@@ -3960,6 +4119,9 @@ export function injectKeyedVirtualizer(options: KeyedVirtualizationOptions): {
 
 // @public
 export function injectLazyChildren<TRow>(options: LazyChildrenInjectOptions<TRow>): Signal<LazyChildrenState<TRow>>;
+
+// @public
+export function injectLiveEditConflict<TRow>(options: LiveEditConflictOptions<TRow>): Signal<EditConflictState<TRow>>;
 
 // @public
 export function injectMeasuredWindowScrollMargin(options: MeasuredWindowScrollMarginOptions): Signal<number>;
@@ -4099,6 +4261,24 @@ export { LazyChildrenState }
 export { listFilterValues }
 
 // @public
+export interface LiveEditConflictInput<TRow> {
+    readonly columns: readonly EditableColumnLike<TRow>[];
+    readonly editConflictPolicy?: EditConflictPolicy;
+    readonly onEditConflict?: EditConflictHandler<TRow>;
+    readonly rowKey: (row: TRow) => string;
+    readonly rows: readonly TRow[];
+    readonly rowVersion?: (row: TRow) => string | number;
+}
+
+// @public
+export interface LiveEditConflictOptions<TRow> extends FromStoreOptions {
+    readonly batch?: Signal<BatchEditingState<TRow>>;
+    readonly cell: Signal<CellEditingState>;
+    readonly input: MaybeSignal<LiveEditConflictInput<TRow>>;
+    readonly row?: Signal<RowEditingState<TRow>>;
+}
+
+// @public
 export type MaybeSignal<T> = T | Signal<T>;
 
 // @public
@@ -4119,6 +4299,14 @@ export { mobileCardListStyle }
 
 // @public
 export function multiDraftFromSelect(select: HTMLSelectElement): string;
+
+// @public
+export type MultiSelectEditorCheckboxProps = MultiSelectEditorCheckboxProps_2<unknown, KeyboardEvent>;
+
+// @public
+export interface MultiSelectEditorSlots {
+    readonly Checkbox: Type<unknown>;
+}
 
 // @public
 export function multiSort(): AdaptTableFeature;
@@ -4240,11 +4428,19 @@ export function readMaybe<T>(value: MaybeSignal<T>): T;
 
 export { readMultiDraft }
 
+export { ReconcileLiveBatchEdit }
+
+export { ReconcileLiveEdit }
+
+export { ReconcileLiveRowEdit }
+
 export { RELATIVE_PRESET_LABEL_KEYS }
 
 export { RELATIVE_PRESETS }
 
 export { RelativePreset }
+
+export { renderedRowsOf }
 
 // @public
 export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;

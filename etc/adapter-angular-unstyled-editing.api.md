@@ -9,6 +9,7 @@ import { CellEditHandler } from '@adapttable/angular';
 import { editHistory } from '@adapttable/angular';
 import { EditHistoryHandle } from '@adapttable/angular';
 import { EditHistoryOptions } from '@adapttable/angular';
+import { EditingLifecycleExtras } from '@adapttable/angular';
 import * as i0 from '@angular/core';
 import { InputSignal } from '@angular/core';
 import { RowEditActionsProps } from '@adapttable/angular';
@@ -38,10 +39,10 @@ export { EditHistoryHandle }
 export { EditHistoryOptions }
 
 // @public
-export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+export function editing<TRow>(onCellEdit: CellEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
 
 // @public
-export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: Record<string, unknown>): AdaptTableFeature;
+export function rowEditing<TRow>(onRowEdit: RowEditHandler<TRow>, extras?: EditingLifecycleExtras<TRow>): AdaptTableFeature;
 
 // @public
 export function undoRedoButtons(): AdaptTableFeature;
