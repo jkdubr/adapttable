@@ -8,6 +8,7 @@ import {
   type CellEditHandler,
   EDITABLE_CELL,
   editing as coreAngularEditing,
+  type EditingLifecycleExtras,
   extendFeature,
   ROW_EDIT_ACTIONS,
   type RowEditHandler,
@@ -40,7 +41,7 @@ const cellChrome = [
  */
 export function editing<TRow>(
   onCellEdit: CellEditHandler<TRow>,
-  extras: Record<string, unknown> = {}
+  extras: EditingLifecycleExtras<TRow> = {}
 ): AdaptTableFeature {
   return extendFeature(coreAngularEditing(onCellEdit, extras), cellChrome);
 }
@@ -55,7 +56,7 @@ export function editing<TRow>(
  */
 export function rowEditing<TRow>(
   onRowEdit: RowEditHandler<TRow>,
-  extras: Record<string, unknown> = {}
+  extras: EditingLifecycleExtras<TRow> = {}
 ): AdaptTableFeature {
   return extendFeature(coreAngularRowEditing(onRowEdit, extras), cellChrome);
 }

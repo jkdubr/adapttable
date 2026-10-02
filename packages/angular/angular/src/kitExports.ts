@@ -302,3 +302,4 @@ export {
   type RowMutationsState,
   undoRedoToolbarProps,
 } from "@adapttable/core/binding";
+export { renderedRowsOf } from "@adapttable/core/binding";

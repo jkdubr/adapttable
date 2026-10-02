@@ -2,7 +2,12 @@
  * Editing feature factories for Angular: cell, row and batch editing, and
  * the marks on unsaved edits, over core's binding factories.
  */
-import type { EditEventHandler } from "@adapttable/core";
+import type {
+  EditConflictHandler,
+  EditConflictPolicy,
+  EditEventHandler,
+  RowValidator,
+} from "@adapttable/core";
 import {
   coreBatchEditing,
   coreDirtyIndicators,
@@ -29,6 +34,24 @@ export interface EditingLifecycleExtras<TRow = unknown> {
   readonly onEditCommit?: EditEventHandler<TRow>;
   /** The reader threw the draft away. */
   readonly onEditCancel?: EditEventHandler<TRow>;
+  /** A validator refused a commit, leaving the editor open. */
+  readonly onValidationFail?: EditEventHandler<TRow>;
+  /** A host save promise rejected. */
+  readonly onEditError?: EditEventHandler<TRow>;
+  /** Localized explanation of a rejected save. */
+  readonly formatEditError?: (error: unknown) => string;
+  /** Restore the previous row value after a rejected save. */
+  readonly onEditRollback?: (previous: TRow, columnKey: string) => void;
+  /** Validate the proposed whole row before committing a cell. */
+  readonly validateRow?: RowValidator<TRow>;
+  /** Build a proposed row for whole-row validation without mutating it. */
+  readonly applyEdit?: (row: TRow, columnKey: string, value: unknown) => TRow;
+  /** Optional whole-row version used to detect incoming changes. */
+  readonly rowVersion?: (row: TRow) => string | number;
+  /** Default resolution for incoming changes under a draft. */
+  readonly editConflictPolicy?: EditConflictPolicy;
+  /** Host resolution, taking precedence over the default policy. */
+  readonly onEditConflict?: EditConflictHandler<TRow>;
   /** Extra patch fields merged into the feature. */
   readonly [key: string]: unknown;
 }

@@ -56,8 +56,11 @@ import {
   type Direction,
   type EditableCellEditing,
   type EditableCellSlotProps,
+  type EditConflictHandler,
+  type EditConflictPolicy,
   type EditEventHandler,
   type EditHistoryOptions,
+  type EditValidationInjectOptions,
   estimateBodyItemSize,
   type ExpandToggleSlotProps,
   type ExportCsvOptions,
@@ -106,6 +109,7 @@ import {
   injectGroupingPanelState,
   injectIsMobile,
   injectKeyedVirtualization,
+  injectLiveEditConflict,
   injectMeasuredWindowScrollMargin,
   injectRowDetail,
   injectRowEditing,
@@ -119,6 +123,7 @@ import {
   injectTree,
   insertExtraRows,
   insertExtrasBeforeRows,
+  type LiveEditConflictInput,
   type NestedTableParent,
   type PaginationMode,
   type PaletteOpenState,
@@ -130,6 +135,7 @@ import {
   printToolbarProps,
   type QueryAggregate,
   type QuerySupport,
+  renderedRowsOf,
   resolveBodyVirtualization,
   resolveEditingArming,
   resolveRowEditTrigger,
@@ -250,6 +256,7 @@ function editingOptionsFor<TRow>(
  * The editing bundle for composed editing features, or absent.
  */
 function editingBundleFor<TRow>(options: {
+  readonly live: Signal<LiveEditConflictInput<TRow>>;
   readonly featureOptions: Readonly<Record<string, unknown>>;
   readonly columns: Signal<readonly ColumnDef<TRow>[]>;
   readonly featureHost: DataTable<TRow>["featureHost"];
@@ -277,6 +284,10 @@ function editingBundleFor<TRow>(options: {
     injector: options.injector,
   });
   const validation = injectEditValidation<TRow>({
+    validateRow: options.featureOptions
+      .validateRow as EditValidationInjectOptions<TRow>["validateRow"],
+    applyEdit: options.featureOptions
+      .applyEdit as EditValidationInjectOptions<TRow>["applyEdit"],
     injector: options.injector,
   });
   const saving = injectCellSaveState<TRow>({ injector: options.injector });
@@ -286,6 +297,8 @@ function editingBundleFor<TRow>(options: {
     onEditStart,
     onEditCancel,
     onEditCommit,
+    onValidationFail: options.featureOptions.onValidationFail as
+      EditEventHandler<TRow> | undefined,
   };
   const rowEditing = armed.row
     ? injectRowEditing<TRow>({
@@ -311,6 +324,13 @@ function editingBundleFor<TRow>(options: {
         injector: options.injector,
       })
     : undefined;
+  const conflict = injectLiveEditConflict({
+    input: options.live,
+    cell: cellState,
+    row: rowEditing,
+    batch,
+    injector: options.injector,
+  });
   return computed((): EditableCellEditing<TRow> => {
     const labels = options.labels();
     return {
@@ -322,6 +342,7 @@ function editingBundleFor<TRow>(options: {
       rowEditIcons,
       batch: batch?.(),
       lifecycle,
+      conflict: conflict(),
       conflictLabels: {
         message: labels.editConflict,
         keepMine: labels.keepMine,
@@ -1202,6 +1223,12 @@ export class AdaptDataTable<TRow> implements OnInit {
    * when the table starts.
    */
   readonly features = input<readonly AdaptTableFeature[]>([]);
+  /** Optional whole-row version used to detect a live cell edit conflict. */
+  readonly rowVersion = input<(row: TRow) => string | number>();
+  /** How to resolve incoming changes while a draft is open. Defaults to asking. */
+  readonly editConflictPolicy = input<EditConflictPolicy>();
+  /** Host conflict decision; takes precedence over the policy. */
+  readonly onEditConflict = input<EditConflictHandler<TRow>>();
   /** The column layout, to control it. */
   readonly columnLayout = input<ColumnLayoutState>();
   /** The layout an uncontrolled table starts from. Read once. */
@@ -1741,6 +1768,21 @@ export class AdaptDataTable<TRow> implements OnInit {
       injector,
     });
     const editing = editingBundleFor<TRow>({
+      live: computed(() => ({
+        rows: renderedRowsOf({ source: viewSource(), grouping: grouping?.() }),
+        columns: table.allColumns(),
+        rowKey: this.rowKey(),
+        rowVersion:
+          this.rowVersion() ??
+          (featureOptions.rowVersion as LiveEditConflictInput<TRow>["rowVersion"]),
+        editConflictPolicy:
+          this.editConflictPolicy() ??
+          (featureOptions.editConflictPolicy as EditConflictPolicy | undefined),
+        onEditConflict:
+          this.onEditConflict() ??
+          (featureOptions.onEditConflict as
+            EditConflictHandler<TRow> | undefined),
+      })),
       featureOptions: editingOptionsFor(featureOptions, history),
       columns: computed(() => table.allColumns()),
       featureHost: table.featureHost,

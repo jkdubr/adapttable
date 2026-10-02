@@ -129,6 +129,21 @@ export {
   stopEditKeys,
 } from "./editing/editableCellGate";
 export {
+  type EditConflict,
+  type EditConflictChange,
+  type EditConflictChoice,
+  type EditConflictHandler,
+  type EditConflictPolicy,
+  type EditConflictState,
+  injectEditConflict,
+  injectLiveEditConflict,
+  type LiveEditConflictInput,
+  type LiveEditConflictOptions,
+  type ReconcileLiveBatchEdit,
+  type ReconcileLiveEdit,
+  type ReconcileLiveRowEdit,
+} from "./editing/editConflict";
+export {
   type EditHistoryHandle,
   type EditHistoryOptions,
   injectTableEditHistory,
