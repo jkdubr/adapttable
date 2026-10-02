@@ -1,16 +1,28 @@
 /**
  * The export progress surface and the print button, through the toolbar slot.
  */
-import type { ToolbarExtrasSlotProps } from "@adapttable/angular";
-import type { ExportProgressState } from "@adapttable/core";
+import type {
+  AdaptTableFeature,
+  ColumnDef,
+  ExportCsvOptions,
+  ToolbarExtrasSlotProps,
+} from "@adapttable/angular";
+import { bulkActions } from "@adapttable/angular-unstyled/bulk-actions";
+import { cellNavigation } from "@adapttable/angular-unstyled/cell-navigation";
+import { columnMenu } from "@adapttable/angular-unstyled/column-menu";
+import { exportCsv } from "@adapttable/angular-unstyled/export";
+import { grouping } from "@adapttable/angular-unstyled/grouping";
+import { tree } from "@adapttable/angular-unstyled/tree";
+import { type ExportProgressState, type ExportTable } from "@adapttable/core";
 import { Component, input } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   AdaptExportButton,
   AdaptPrintButton,
 } from "./components/toolbarExtras";
+import { AdaptDataTable } from "./dataTable";
 
 const part = (name: string) =>
   document.querySelector<HTMLElement>(`[data-adapttable-part="${name}"]`);
@@ -126,4 +138,220 @@ describe("AdaptPrintButton", () => {
     shown.detectChanges();
     expect(part("print-button")?.textContent?.trim()).toBe("Print");
   });
+});
+
+interface ExportCity {
+  id: string;
+  name: string;
+  country: string;
+  parentId?: string;
+}
+const EXPORT_CITIES: ExportCity[] = [
+  { id: "1", name: "Dubai", country: "UAE" },
+  { id: "2", name: "Amman", country: "Jordan" },
+  { id: "3", name: "Cairo", country: "Egypt" },
+  { id: "4", name: "Doha", country: "Qatar" },
+];
+const EXPORT_COLUMNS: ColumnDef<ExportCity>[] = [
+  { key: "name", header: "Name", accessor: (row) => row.name },
+  { key: "country", header: "Country", accessor: (row) => row.country },
+];
+
+@Component({
+  imports: [AdaptDataTable],
+  template: `<adapt-data-table
+    [data]="rows()"
+    [columns]="columns"
+    [rowKey]="rowKey"
+    [features]="features()"
+    [defaults]="{ limit: 2, page: page() }"
+    [defaultColumnLayout]="{ hidden: hidden() }"
+    [summaryRow]="summary()"
+    [urlSync]="false"
+    [forceMobile]="false"
+  />`,
+})
+class ExportTableHost {
+  readonly rows = input<readonly ExportCity[]>(EXPORT_CITIES);
+  readonly features = input<readonly AdaptTableFeature[]>([]);
+  readonly hidden = input<readonly string[]>([]);
+  readonly page = input(1);
+  readonly summary = input<
+    | ((
+        rows: readonly ExportCity[]
+      ) => Partial<Record<string, string | number>>)
+    | undefined
+  >();
+  readonly columns = EXPORT_COLUMNS;
+  readonly rowKey = (row: ExportCity) => row.id;
+}
+
+async function mountExport(
+  options: ExportCsvOptions<ExportCity>,
+  extra: readonly AdaptTableFeature[] = [],
+  inputs: {
+    rows?: readonly ExportCity[];
+    hidden?: readonly string[];
+    page?: number;
+    summary?: (
+      rows: readonly ExportCity[]
+    ) => Partial<Record<string, string | number>>;
+  } = {}
+) {
+  const tables: ExportTable[] = [];
+  const fixture = TestBed.createComponent(ExportTableHost);
+  fixture.componentRef.setInput("features", [
+    ...extra,
+    exportCsv<ExportCity>({
+      ...options,
+      writer: {
+        extension: "csv",
+        build: ({ table }) => {
+          tables.push(table);
+          return { text: "export", parts: ["export"], mimeType: "text/plain" };
+        },
+      },
+    }),
+  ]);
+  for (const [key, value] of Object.entries(inputs))
+    fixture.componentRef.setInput(key, value);
+  vi.stubGlobal("URL", {
+    ...URL,
+    createObjectURL: () => "blob:export",
+    revokeObjectURL: () => undefined,
+  });
+  vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(
+    () => undefined
+  );
+  document.body.append(fixture.nativeElement);
+  fixture.autoDetectChanges();
+  await fixture.whenStable();
+  const element = fixture.nativeElement as HTMLElement;
+  const one = <T extends HTMLElement>(name: string): T => {
+    const found = element.querySelector<T>(`[data-adapttable-part="${name}"]`);
+    expect(found, name).not.toBeNull();
+    return found!;
+  };
+  return {
+    fixture,
+    element,
+    tables,
+    one,
+    settle: () => fixture.whenStable(),
+    download: async () => {
+      one<HTMLButtonElement>("export-csv-button").click();
+      await fixture.whenStable();
+      await vi.waitFor(() => expect(tables).toHaveLength(1));
+      return tables[0]!;
+    },
+  };
+}
+
+describe("the table export context", () => {
+  it("exports only the checked row from the actual table", async () => {
+    const mounted = await mountExport({ scope: "selected" }, [
+      bulkActions([
+        { key: "inspect", label: "Inspect", onClick: () => undefined },
+      ]),
+    ]);
+    const box = mounted.element.querySelector<HTMLInputElement>(
+      '[data-row-id="2"] [data-adapttable-part="checkbox"]'
+    );
+    expect(box).not.toBeNull();
+    box!.click();
+    await mounted.settle();
+    const table = await mounted.download();
+    expect(table.rows).toEqual([["Amman", "Jordan"]]);
+  });
+
+  it("includes hidden columns in an explicitly all-column file", async () => {
+    const mounted = await mountExport({ columns: "all" }, [columnMenu()], {
+      hidden: ["country"],
+    });
+    expect(
+      [
+        ...mounted.element.querySelectorAll(
+          '[data-adapttable-part="header-cell"]'
+        ),
+      ].map((node) => node.getAttribute("data-column-key"))
+    ).toEqual(["name"]);
+    const table = await mounted.download();
+    expect(table.headers).toEqual(["Name", "Country"]);
+    expect(table.rows).toEqual([
+      ["Dubai", "UAE"],
+      ["Amman", "Jordan"],
+    ]);
+  });
+
+  it("exports a keyboard range from a nonzero page", async () => {
+    const mounted = await mountExport({ scope: "range" }, [cellNavigation()], {
+      page: 2,
+    });
+    const first = mounted.one<HTMLElement>("cell");
+    first.focus();
+    await mounted.settle();
+    first.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "ArrowDown",
+        shiftKey: true,
+        bubbles: true,
+      })
+    );
+    await mounted.settle();
+    const table = await mounted.download();
+    expect(table.headers).toEqual(["Name"]);
+    expect(table.rows).toEqual([["Cairo"], ["Doha"]]);
+  });
+
+  it("carries group rows and the scoped summary into the writer", async () => {
+    const mounted = await mountExport({}, [grouping("country")], {
+      rows: EXPORT_CITIES.slice(0, 2).map((row) => ({
+        ...row,
+        country: "UAE",
+      })),
+      summary: (rows) => ({ name: "Total", country: rows.length }),
+    });
+    const table = await mounted.download();
+    expect(table.rows).toEqual([
+      ["", "UAE"],
+      ["Dubai", "UAE"],
+      ["Amman", "UAE"],
+      ["Total", 2],
+    ]);
+    expect(table.rowMeta?.map((row) => row.role)).toEqual([
+      "group",
+      "data",
+      "data",
+      "aggregate",
+    ]);
+  });
+
+  it("exports collapsed descendants and hierarchy levels for the full tree", async () => {
+    const mounted = await mountExport(
+      { scope: "all" },
+      [
+        tree<ExportCity>({
+          getParentId: (row) => row.parentId,
+          expandedIds: [],
+        }),
+      ],
+      {
+        rows: [EXPORT_CITIES[0]!, { ...EXPORT_CITIES[1]!, parentId: "1" }],
+      }
+    );
+    expect(
+      mounted.element.querySelectorAll('[data-adapttable-part="row"]')
+    ).toHaveLength(1);
+    const table = await mounted.download();
+    expect(table.rows).toEqual([
+      ["Dubai", "UAE"],
+      ["Amman", "Jordan"],
+    ]);
+    expect(table.rowMeta?.map((row) => row.level)).toEqual([0, 1]);
+  });
+});
+
+afterEach(() => {
+  document.body.replaceChildren();
+  vi.unstubAllGlobals();
 });

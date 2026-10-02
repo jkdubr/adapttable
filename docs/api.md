@@ -3041,6 +3041,11 @@ comes from a kit through a slot.
   attributes for an infinite list, and `statusAnnouncement`, the sentence a
   sort or a page speaks. `injectIsMobile` (with `IsMobileOptions`) is the
   viewport breakpoint as a signal.
+- `injectExportHandler` accepts a signal of `ExportContext` for selected rows,
+  cell ranges, hidden columns, grouped or tree views, spans and summary values.
+  It checks full-export capabilities at click time and disables unsupported
+  all-row exports with the table's localized reason. The native kit supplies
+  the current context automatically.
 - `injectRowMutations(options, injector?)` exposes host-owned add, duplicate and delete
   actions as a signal. `RowMutationHandlers`, `RowMutationsOptions` and
   `RowMutationsState` describe the callbacks, localized labels and result.

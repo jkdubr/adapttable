@@ -8,7 +8,9 @@
 import {
   type ColumnMetadata,
   createExportController,
+  type DisplayValue,
   exportButtonLabel,
+  type ExportContext as CoreExportContext,
   type ExportCsvOptions,
   type ExportRunHandler,
   type ExportWriter,
@@ -17,12 +19,16 @@ import {
   resolveExportCsv,
   resolveExportDisabledReason,
   resolveExportProgressState,
+  summaryExportValues,
+  type SummaryRowFn,
   type TableLabels,
   type TableSource,
 } from "@adapttable/core";
 import {
+  chromeFeatureNotices,
   coreExportCsv,
   type ExportHandlerState,
+  exportPageOnly,
   type FeatureHostState,
 } from "@adapttable/core/binding";
 import { pdfWriter } from "@adapttable/core/pdf";
@@ -39,6 +45,35 @@ import {
 import type { AdaptTableFeature } from "../featureHost";
 import { fromStore } from "../store";
 
+/** The export view, accepting the same summary mapper as an Angular table. @public */
+export type ExportContext<TRow> = Omit<
+  CoreExportContext<TRow>,
+  "summaryRow"
+> & {
+  /** The host's summary; core drops values that a file cannot represent. */
+  readonly summaryRow?: SummaryRowFn<TRow>;
+};
+
+/** Normalize the binding's renderable summaries through core's export policy. */
+function coreContext<TRow>(
+  context: ExportContext<TRow> | undefined
+): CoreExportContext<TRow> | undefined {
+  if (!context) return undefined;
+  const { summaryRow, ...view } = context;
+  return {
+    ...view,
+    summaryRow: summaryRow
+      ? (rows) => {
+          // Core has removed functions, symbols and non-value objects. Every remaining
+          // value is a primitive or valid Date, both members of DisplayValue.
+          return (summaryExportValues(summaryRow(rows)) ?? {}) as Partial<
+            Record<string, DisplayValue>
+          >;
+        }
+      : undefined,
+  };
+}
+
 /**
  * Options for {@link injectExportHandler}.
  *
@@ -51,6 +86,8 @@ export interface ExportCsvHandlerOptions<TRow> {
   readonly source: Signal<TableSource<TRow>>;
   /** The columns the export writes, in order. */
   readonly columns: Signal<readonly ColumnMetadata<TRow>[]>;
+  /** Current selection, range, hidden columns and structured view. Read when an export starts. */
+  readonly context?: Signal<ExportContext<TRow> | undefined>;
   /** Resolved labels. */
   readonly labels: Signal<Required<TableLabels>>;
   /** The table's feature host, for writers features register. */
@@ -85,21 +122,42 @@ export function injectExportHandler<TRow>(
       options.exportCsv,
       options.source(),
       options.columns(),
-      undefined,
+      coreContext(options.context?.()),
       options.featureHost
     )?.(controls);
+  const pageOnly = computed(() =>
+    exportPageOnly(
+      chromeFeatureNotices({
+        options: { exportCsv: options.exportCsv },
+        source: options.source(),
+        groupByKeys: [],
+        rowReorderRequested: false,
+        nestedArmed: false,
+        hasEditableColumn: false,
+        labels: options.labels(),
+      })
+    )
+  );
   const controller = createExportController({
     handler: resolved ? handler : undefined,
-    pageOnly: false,
+    pageOnly: pageOnly(),
     serverBuilt,
   });
   injector.get(DestroyRef).onDestroy(controller.connect());
   const snapshot = fromStore(controller, { injector });
+  const start = (): void => {
+    controller.configure({
+      handler: resolved ? handler : undefined,
+      pageOnly: pageOnly(),
+      serverBuilt,
+    });
+    controller.start();
+  };
   return computed(() => {
     const { status, progress, message, error, downloadUrl, run } = snapshot();
     const labels = options.labels();
     return {
-      onExportCsv: resolved ? controller.start : undefined,
+      onExportCsv: resolved ? start : undefined,
       exportBusy: status === "busy",
       exportStatus: status,
       exportAnnouncement: resolveExportAnnouncement({
@@ -117,12 +175,12 @@ export function injectExportHandler<TRow>(
         error,
         downloadUrl,
         cancel: controller.cancel,
-        retry: controller.start,
+        retry: start,
         dismiss: controller.dismiss,
       }),
       exportLabel: exportButtonLabel(labels, format),
-      exportDisabled: false,
-      exportDisabledReason: resolveExportDisabledReason(labels, false),
+      exportDisabled: pageOnly(),
+      exportDisabledReason: resolveExportDisabledReason(labels, pageOnly()),
     };
   });
 }

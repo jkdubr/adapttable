@@ -1589,19 +1589,6 @@ export class AdaptDataTable<TRow> implements OnInit {
             injector
           )
         : undefined;
-    const exportOption = featureOptions.exportCsv as
-      boolean | ExportCsvOptions<TRow> | undefined;
-    const exporter =
-      exportOption === undefined || exportOption === false
-        ? undefined
-        : injectExportCsv<TRow>({
-            exportCsv: exportOption,
-            source,
-            columns: table.columns,
-            labels: table.labels,
-            featureHost: table.featureHost,
-            injector,
-          });
     const savedViewsOption = featureOptions.savedViews as
       SavedViewsControllerOptions | undefined;
     const savedViews = savedViewsOption
@@ -1616,30 +1603,6 @@ export class AdaptDataTable<TRow> implements OnInit {
           labels: table.labels(),
         }))
       : undefined;
-    const toolbarExtras = computed((): ToolbarExtrasSlotProps => ({
-      density: density(),
-      onDensityChange: (next) => {
-        densityState?.setDensity(next);
-      },
-      onToggleFullscreen: fullscreen?.().supported
-        ? fullscreen().toggle
-        : undefined,
-      isFullscreen: fullscreen?.().active,
-      ...exporter?.(),
-      ...(history
-        ? undoRedoToolbarProps(
-            featureOptions.undoRedoButtons === true,
-            history().history,
-            table.labels()
-          )
-        : {}),
-      ...printToolbarProps(
-        featureOptions.printButton === true,
-        featureOptions.onPrint as (() => void) | undefined,
-        table.labels()
-      ),
-      labels: table.labels(),
-    }));
     const columnMenuProps = computed((): ColumnMenuSlotProps<never> => ({
       allColumns: table.allColumns() as never,
       layout: table.layout(),
@@ -1698,6 +1661,55 @@ export class AdaptDataTable<TRow> implements OnInit {
       readonly ExtraRow[] | undefined;
     const getCellSpan = featureOptions.getCellSpan as
       GetCellSpan<TRow> | undefined;
+    const exportOption = featureOptions.exportCsv as
+      boolean | ExportCsvOptions<TRow> | undefined;
+    const exporter =
+      exportOption === undefined || exportOption === false
+        ? undefined
+        : injectExportCsv<TRow>({
+            exportCsv: exportOption,
+            source: table.source,
+            columns: table.columns,
+            context: computed(() => ({
+              selectedIds: selection?.selectedIds(),
+              getRowId: (row: TRow) => this.rowKey()(row),
+              allColumns: table.allColumns(),
+              range: grid?.range(),
+              firstRowIndex: table.windowStart(),
+              getCellSpan,
+              grouping: grouping?.(),
+              tree: tree?.(),
+              groupTotal: table.labels().groupTotal,
+              summaryRow: this.summaryRow(),
+            })),
+            labels: table.labels,
+            featureHost: table.featureHost,
+            injector,
+          });
+    const toolbarExtras = computed((): ToolbarExtrasSlotProps => ({
+      density: density(),
+      onDensityChange: (next) => {
+        densityState?.setDensity(next);
+      },
+      onToggleFullscreen: fullscreen?.().supported
+        ? fullscreen().toggle
+        : undefined,
+      isFullscreen: fullscreen?.().active,
+      ...exporter?.(),
+      ...(history
+        ? undoRedoToolbarProps(
+            featureOptions.undoRedoButtons === true,
+            history().history,
+            table.labels()
+          )
+        : {}),
+      ...printToolbarProps(
+        featureOptions.printButton === true,
+        featureOptions.onPrint as (() => void) | undefined,
+        table.labels()
+      ),
+      labels: table.labels(),
+    }));
     const assembly = featureOptions.assembly as
       Partial<AssemblyFns<TRow>> | undefined;
     const rowClassName = featureOptions.rowClassName as

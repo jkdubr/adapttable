@@ -122,6 +122,7 @@ import { estimateBodyItemSize } from '@adapttable/core/binding';
 import { EXPAND_TOGGLE } from '@adapttable/core/binding';
 import { expandChevronIcon } from '@adapttable/core/binding';
 import { ExpandToggleSlotProps } from '@adapttable/core/binding';
+import { ExportContext as ExportContext_2 } from '@adapttable/core';
 import { ExportCsvOptions } from '@adapttable/core';
 import { ExportHandlerState } from '@adapttable/core/binding';
 import { ExportProgressState } from '@adapttable/core';
@@ -1593,7 +1594,7 @@ export class AdaptGroupMoreButtonChrome {
     groupKey?: string;
     }) => void>;
     readonly remaining: InputSignal<number>;
-    readonly scope: InputSignal<"rows" | "groups">;
+    readonly scope: InputSignal<"groups" | "rows">;
     readonly slots: InputSignal<GroupMoreButtonSlots>;
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupMoreButtonChrome, "adapt-group-more-button-chrome", never, {
@@ -3306,8 +3307,14 @@ export { expandChevronIcon }
 export { ExpandToggleSlotProps }
 
 // @public
+export type ExportContext<TRow> = Omit<ExportContext_2<TRow>, "summaryRow"> & {
+    readonly summaryRow?: SummaryRowFn<TRow>;
+};
+
+// @public
 export interface ExportCsvHandlerOptions<TRow> {
     readonly columns: Signal<readonly ColumnMetadata<TRow>[]>;
+    readonly context?: Signal<ExportContext<TRow> | undefined>;
     readonly exportCsv: boolean | ExportCsvOptions<TRow>;
     readonly featureHost?: FeatureHostState_2;
     readonly injector?: Injector;

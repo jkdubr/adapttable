@@ -3,6 +3,7 @@
  * `@adapttable/angular`. A kit never imports `@adapttable/core`: the binding
  * decides how its framework sees each name.
  */
+export type { ExportContext } from "./export/exportHandler";
 export type {
   ColumnLayoutState,
   ColumnMenuChoice,

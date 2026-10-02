@@ -29,3 +29,43 @@ test("downloads a CSV of the searched rows with plain dates and numbers", async 
   expect(lines).toHaveLength(7);
   expect(lines[1]).toBe("Grace Hopper,Data,Archived,2026-07-22,39900,78%");
 });
+
+test("a selected export contains no unchecked rows", async ({ page }) => {
+  await page.goto(`${PAGE}?scope=selected`);
+  await part(page, "row")
+    .first()
+    .locator('[data-adapttable-part="checkbox"]')
+    .check();
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    part(page, "export-csv-button").click(),
+  ]);
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(chunk as Buffer);
+  const lines = Buffer.concat(chunks).toString("utf8").trim().split(/\r?\n/);
+  expect(lines).toHaveLength(2);
+  expect(lines[1]?.split(",")[0]).toBe("Ada Lovelace");
+});
+
+test("a range export writes only the selected cells", async ({ page }) => {
+  await page.goto(`${PAGE}?scope=range`);
+  await part(page, "row")
+    .first()
+    .locator('[data-adapttable-part="cell"]')
+    .first()
+    .focus();
+  await page.keyboard.press("Shift+ArrowDown");
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    part(page, "export-csv-button").click(),
+  ]);
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(chunk as Buffer);
+  expect(Buffer.concat(chunks).toString("utf8").trim().split(/\r?\n/)).toEqual([
+    "Person",
+    "Ada Lovelace",
+    "Alan Turing",
+  ]);
+});

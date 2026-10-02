@@ -310,6 +310,7 @@ class GroupingBody {
           [columns]="columns"
           [rowKey]="rowKey"
           [features]="features"
+          [selectable]="scope === 'selected'"
         />
       </div>
     </div>
@@ -319,7 +320,17 @@ class ExportBody {
   readonly rows = PEOPLE;
   readonly columns = COLUMNS;
   readonly rowKey = rowKey;
-  readonly features: readonly AdaptTableFeature[] = [exportCsv()];
+  readonly scope = (() => {
+    const scope =
+      typeof location === "undefined"
+        ? null
+        : new URLSearchParams(location.search).get("scope");
+    return scope === "selected" || scope === "range" ? scope : "page";
+  })();
+  readonly features: readonly AdaptTableFeature[] = [
+    exportCsv({ scope: this.scope }),
+    ...(this.scope === "range" ? [cellNavigation()] : []),
+  ];
 }
 
 /** How many rows the scale page windows. */
