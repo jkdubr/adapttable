@@ -1,5 +1,11 @@
 # @adapttable/angular
 
+## 0.3.0
+
+### Minor Changes
+
+- 6fd7108: Add Angular virtualization, navigation, reorder and editing features, plus the grouping-panel Chrome/mount: `virtualize()`, `cellNavigation()`, `rowReorder()`, `editing()` / `rowEditing()` / `batchEditing()` with inject hooks; the panel owns group-by state with native unstyled controls.
+
 ## 0.2.0
 
 ### Minor Changes
