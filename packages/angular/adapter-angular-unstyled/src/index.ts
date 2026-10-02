@@ -42,6 +42,8 @@ export {
   placeOverlayBelowTrigger,
 } from "./components/overlayPlacement";
 export { AdaptPaginationFooter } from "./components/paginationFooter";
+export { AdaptPivotPanel } from "./components/pivotPanel";
+export { AdaptPivotRowHeader } from "./components/pivotRowHeader";
 export { AdaptSavedViewsMenu } from "./components/savedViewsMenu";
 export { AdaptTableRegion } from "./components/tableRegion";
 export { AdaptTableSkeleton } from "./components/tableSkeleton";

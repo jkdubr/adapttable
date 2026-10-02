@@ -6271,7 +6271,27 @@
       "buildFormulaColumns",
       "injectFormulaUrlState"
     ],
-    "angular-pivot": [],
+    "angular-pivot": [
+      "AdaptPivotPanelChrome",
+      "AdaptPivotRowHeader",
+      "CellContext",
+      "ColumnDef",
+      "FooterContext",
+      "HeaderContext",
+      "MaybeSignalOptional",
+      "PIVOT_ROW_COLUMN_KEY",
+      "PIVOT_URL_WRITE_DEBOUNCE_MS",
+      "PivotPanelSlots",
+      "PivotTableModel",
+      "PivotTableModelOptions",
+      "PivotUrlBinding",
+      "PivotUrlStateOptions",
+      "Renderer",
+      "TableUrlStateOptions",
+      "UrlSliceOptions",
+      "injectPivotUrlState",
+      "pivotTableModel"
+    ],
     "angular-router": ["angularRouterAdapter", "provideAdaptTableRouterUrl"],
     "angular-sparkline": [
       "AdaptSparkline",

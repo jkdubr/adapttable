@@ -3190,6 +3190,16 @@ comes from a kit through a slot.
   lays out a server export's progress; `ExportProgressSlots` names the kit's
   surface. `AdaptExportAnnouncer` says how the file ended. `print(onPrint, true)`
   adds the toolbar's print button.
+- Pivot: `pivot` and `pivotTableModel` (`@adapttable/angular/pivot`) turn rows
+  into table props — a row-header column, one column per leaf, and the grand
+  total as `summaryRow`. `AdaptPivotRowHeader` draws that row header.
+  `AdaptPivotPanelChrome` lays out the three zones; `PivotPanelSlots` names
+  the kit's surface, zone, field, add control and aggregation chooser.
+  `injectPivotUrlState` (`PivotUrlStateOptions`) keeps the configuration and
+  the folded lines in the URL and returns a `PivotUrlBinding`.
+  `PIVOT_ROW_COLUMN_KEY` is the row-header column.
+  `PIVOT_URL_WRITE_DEBOUNCE_MS` is how long a change waits before the URL
+  follows.
 - Grouping: `grouping` (with `GroupingExtras`) groups rows under collapsible
   headers, with per-group subtotals, optional footers and paged groups.
   `injectGrouping` (`GroupingOptions`) is its live model, a `TableGrouping`
@@ -3388,6 +3398,8 @@ the card), `virtualize`, `cellNavigation`, `findInTable` (`AdaptFindBar`,
 `AdaptSidePanelFrame`, `AdaptSidePanelTab`, `AdaptSidePanelClose`), `statusBar` (`AdaptStatusBarLive`,
 `AdaptStatusBar`, `AdaptSelectionStatsBar`), `selectionStats`,
 `exportXlsx`, `exportPdf`, `print` (`AdaptPrintButton`),
+`AdaptPivotPanel` and `pivotTableModel` (`@adapttable/angular-unstyled/pivot`;
+`AdaptPivotRowHeader` fills the row-header cell),
 `rowReorder`,
 `editing` / `rowEditing` (`AdaptEditableCell` fills `EDITABLE_CELL` and
 opens `AdaptNativeCellEditor`,

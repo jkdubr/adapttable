@@ -4,7 +4,205 @@
 
 ```ts
 
-// @internal
-export const __angularPivotReserved: true;
+import { ColumnMetadata } from '@adapttable/core';
+import { ExtraFilters } from '@adapttable/core';
+import * as i0 from '@angular/core';
+import { Injector } from '@angular/core';
+import { InputSignal } from '@angular/core';
+import { PIVOT_ROW_COLUMN_KEY } from '@adapttable/core';
+import { URL_SLICE_WRITE_DEBOUNCE_MS as PIVOT_URL_WRITE_DEBOUNCE_MS } from '@adapttable/core';
+import { PivotConfig } from '@adapttable/core';
+import { PivotField } from '@adapttable/core';
+import { PivotResult } from '@adapttable/core';
+import { PivotRow } from '@adapttable/core';
+import { PivotZoneModel } from '@adapttable/core/pivot';
+import { Signal } from '@angular/core';
+import { TableLabels } from '@adapttable/core';
+import { TableQueryParams } from '@adapttable/core';
+import { TemplateRef } from '@angular/core';
+import { Type } from '@angular/core';
+import { UrlStateAdapter } from '@adapttable/core';
+
+// @public
+export class AdaptPivotPanelChrome {
+    readonly className: InputSignal<string | undefined>;
+    readonly config: InputSignal<PivotConfig>;
+    readonly fields: InputSignal<readonly PivotField[]>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    readonly onChange: InputSignal<(next: PivotConfig) => void>;
+    protected readonly resolved: Signal<Required<TableLabels>>;
+    readonly slots: InputSignal<PivotPanelSlots>;
+    protected readonly surfaceProps: Signal<    {
+    className: string | undefined;
+    "data-adapttable-part": "pivot-panel";
+    children: TemplateRef<unknown> | undefined;
+    }>;
+    protected readonly zones: Signal<PivotZoneModel[]>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPivotPanelChrome, "adapt-pivot-panel-chrome", never, {
+        "fields": {
+            "alias": "fields";
+            "required": true;
+            "isSignal": true;
+        };
+        "config": {
+            "alias": "config";
+            "required": true;
+            "isSignal": true;
+        };
+        "onChange": {
+            "alias": "onChange";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "slots": {
+            "alias": "slots";
+            "required": true;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPivotPanelChrome, never>;
+}
+
+// @public
+export class AdaptPivotRowHeader {
+    readonly column: InputSignal<ColumnDef<PivotRow>>;
+    protected readonly pad: Signal<string | null>;
+    readonly row: InputSignal<PivotRow>;
+    protected readonly text: Signal<string>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPivotRowHeader, "adapt-pivot-row-header", never, {
+        "row": {
+            "alias": "row";
+            "required": true;
+            "isSignal": true;
+        };
+        "column": {
+            "alias": "column";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPivotRowHeader, never>;
+}
+
+// @public
+export interface CellContext<TRow> {
+    readonly $implicit: TRow;
+    readonly column: ColumnDef<TRow>;
+    readonly row: TRow;
+    readonly rowIndex: number;
+    readonly value: unknown;
+}
+
+// @public
+export interface ColumnDef<TRow> extends Omit<ColumnMetadata<TRow>, "header"> {
+    cell?: Renderer<CellContext<TRow>>;
+    footer?: Renderer<FooterContext<TRow>>;
+    header?: string;
+    headerActions?: string;
+    headerCell?: Renderer<HeaderContext<TRow>>;
+}
+
+// @public
+export interface FooterContext<TRow> extends HeaderContext<TRow> {
+    readonly value: unknown;
+}
+
+// @public
+export interface HeaderContext<TRow> {
+    readonly $implicit: ColumnDef<TRow>;
+    readonly column: ColumnDef<TRow>;
+}
+
+// @public
+export function injectPivotUrlState(options?: PivotUrlStateOptions): PivotUrlBinding;
+
+// @public
+export type MaybeSignalOptional<T> = T | Signal<T | undefined>;
+
+export { PIVOT_ROW_COLUMN_KEY }
+
+export { PIVOT_URL_WRITE_DEBOUNCE_MS }
+
+// @public
+export interface PivotPanelSlots {
+    readonly Add: Type<unknown>;
+    readonly Agg: Type<unknown>;
+    readonly Field: Type<unknown>;
+    readonly Surface: Type<unknown>;
+    readonly Zone: Type<unknown>;
+}
+
+// @public
+export interface PivotTableModel {
+    columns: ColumnDef<PivotRow>[];
+    rowKey: (row: PivotRow) => string;
+    rows: readonly PivotRow[];
+    summaryRow?: (rows: readonly PivotRow[]) => Partial<Record<string, unknown>>;
+}
+
+// @public
+export function pivotTableModel(result: PivotResult, options?: PivotTableModelOptions): PivotTableModel;
+
+// @public
+export interface PivotTableModelOptions {
+    fields?: readonly PivotField[];
+    indent?: number;
+    labels?: TableLabels;
+    renderRowHeader?: (row: PivotRow) => string;
+    rowHeader?: string;
+}
+
+// @public
+export interface PivotUrlBinding {
+    readonly collapsed: Signal<ReadonlySet<string>>;
+    readonly config: Signal<PivotConfig>;
+    readonly onCollapsedChange: (next: ReadonlySet<string>) => void;
+    readonly onConfigChange: (next: PivotConfig) => void;
+}
+
+// @public
+export interface PivotUrlStateOptions extends UrlSliceOptions {
+    readonly defaultConfig?: MaybeSignalOptional<PivotConfig>;
+}
+
+// @public
+export type Renderer<TContext> = TemplateRef<TContext> | Type<unknown>;
+
+// @public
+export interface TableUrlStateOptions {
+    readonly arrayExtraKeys?: MaybeSignalOptional<readonly string[]>;
+    readonly defaults?: MaybeSignalOptional<Partial<TableQueryParams> & {
+        extra?: ExtraFilters;
+    }>;
+    readonly injector?: Injector;
+    readonly numberExtraKeys?: MaybeSignalOptional<readonly string[]>;
+    readonly urlAdapter?: UrlStateAdapter;
+    readonly urlKey?: string;
+    readonly urlSync?: boolean;
+}
+
+// @public
+export interface UrlSliceOptions extends Pick<TableUrlStateOptions, "urlAdapter" | "urlSync" | "urlKey"> {
+    readonly injector?: Injector;
+}
+
+
+export * from "@adapttable/core/pivot";
+
+// (No @packageDocumentation comment for this package)
 
 ```

@@ -77,6 +77,7 @@ export default defineConfig({
         "multi-sort/**/*.ts",
         "nested-table/**/*.ts",
         "pinned-summary-rows/**/*.ts",
+        "pivot/**/*.ts",
         "print/**/*.ts",
         "resizable-columns/**/*.ts",
         "row-actions/**/*.ts",

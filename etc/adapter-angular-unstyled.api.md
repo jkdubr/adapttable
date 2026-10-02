@@ -84,6 +84,9 @@ import { NestedTableParent } from '@adapttable/angular';
 import { OnInit } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
 import { PaginationMode } from '@adapttable/angular';
+import { PivotConfig } from '@adapttable/angular/pivot';
+import { PivotField } from '@adapttable/angular/pivot';
+import { PivotPanelSlots } from '@adapttable/angular/pivot';
 import { QueryAggregate } from '@adapttable/angular';
 import { QuerySupport } from '@adapttable/angular';
 import { readMultiDraft } from '@adapttable/angular';
@@ -1001,7 +1004,7 @@ export class AdaptGroupHeaderCard {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderCard, "adapt-group-header-card", never, {
@@ -1084,7 +1087,7 @@ export class AdaptGroupHeaderRow {
         selectState: Signal<HeaderSelectionState | undefined>;
         count: Signal<number>;
         aggregateCells: Signal<Partial<Record<string, DisplayValue>> | undefined>;
-        aggregateOps: Signal<Readonly<Partial<Record<string, AggregateOperationId | "none">>> | undefined>;
+        aggregateOps: Signal<Readonly<Partial<Record<string, "none" | AggregateOperationId>>> | undefined>;
     };
     // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<AdaptGroupHeaderRow, "tr[adaptGroupHeaderRow]", never, {
@@ -1238,6 +1241,75 @@ export class AdaptPaginationFooter<TRow> {
     }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPaginationFooter<any>, never>;
+}
+
+// @public
+export class AdaptPivotPanel {
+    readonly className: InputSignal<string | undefined>;
+    readonly config: InputSignal<PivotConfig>;
+    readonly fields: InputSignal<readonly PivotField[]>;
+    readonly labels: InputSignal<TableLabels | undefined>;
+    readonly onChange: InputSignal<(next: PivotConfig) => void>;
+    protected readonly slots: PivotPanelSlots;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPivotPanel, "adapt-pivot-panel", never, {
+        "fields": {
+            "alias": "fields";
+            "required": true;
+            "isSignal": true;
+        };
+        "config": {
+            "alias": "config";
+            "required": true;
+            "isSignal": true;
+        };
+        "onChange": {
+            "alias": "onChange";
+            "required": true;
+            "isSignal": true;
+        };
+        "labels": {
+            "alias": "labels";
+            "required": false;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPivotPanel, never>;
+}
+
+// @public
+export class AdaptPivotRowHeader {
+    readonly column: InputSignal<    {
+    meta?: Record<string, unknown>;
+    }>;
+    protected readonly pad: Signal<string | null>;
+    readonly row: InputSignal<    {
+    readonly kind: string;
+    readonly label: string;
+    readonly depth: number;
+    }>;
+    protected readonly text: Signal<string>;
+    // (undocumented)
+    static ɵcmp: i0.ɵɵComponentDeclaration<AdaptPivotRowHeader, "adapt-pivot-row-header", never, {
+        "row": {
+            "alias": "row";
+            "required": true;
+            "isSignal": true;
+        };
+        "column": {
+            "alias": "column";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<AdaptPivotRowHeader, never>;
 }
 
 // @internal
